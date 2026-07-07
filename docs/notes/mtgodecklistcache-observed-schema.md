@@ -111,6 +111,12 @@ id, is the unique event key.
 4. **Zero-card and tiny mainboards.** 48 Modern decks have an empty Mainboard, 104
    have <10 mainboard cards (melee no-submit artifacts).
    Fixture: `modern-20k-trial-scg-con-charlotte-friday-100-pm-silver-14033…` (melee).
+   Related: melee.gg files can carry literal `{"Count": 0, ...}` card entries
+   (3 entries across all Modern decks, 2 files, both melee.gg 2022; e.g. player
+   `Hudson Tinch` in fixture `modern-30k-scg-con-dallas-…-2022-10-08.json` has
+   Count 0 lines for two cards). Zero-count entries are dropped at
+   normalization (a card with count 0 is not in the deck), counted in the DQ
+   stats, and `count < 1` deck_cards rows fail the post-import gate.
 5. **80+ card mainboards are real** (9,606 decks in the 80–89 bucket, Yorion-era),
    and a small number ≥100. Deck-size checks must be distribution reports, not hard
    ceilings.

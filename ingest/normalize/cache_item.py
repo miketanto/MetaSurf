@@ -64,6 +64,9 @@ class NormalizedEvent:
     # data-quality counters (observed: decks and standings routinely disagree)
     standings_only_players: int = 0
     decks_without_standing: int = 0
+    # observed on melee.gg: literal {"Count": 0, ...} card entries (no-submit
+    # artifacts); dropped at normalization, never written as deck_cards rows
+    zero_count_card_lines: int = 0
 
 
 def detect_format(filename: str, tokens_by_format: dict[str, tuple[str, ...]]) -> str | None:
@@ -118,15 +121,21 @@ def _parse_event_date(tournament: dict[str, Any], fallback: str) -> date:
     return datetime.strptime(fallback, "%Y/%m/%d").date()
 
 
-def _aggregate_cards(deck: dict[str, Any], zone_map: dict[str, str]) -> list[CardLine]:
+def _aggregate_cards(
+    deck: dict[str, Any], zone_map: dict[str, str]
+) -> tuple[list[CardLine], int]:
     """Aggregate counts per (name, board); duplicate CardName lines within a
-    zone are summed rather than dropped."""
+    zone are summed rather than dropped. Entries whose aggregate count is < 1
+    (observed: literal Count 0 lines in melee.gg files) are dropped and
+    counted — a zero-count entry is a card that is not in the deck."""
     agg: dict[tuple[str, str], int] = {}
     for json_key, board in zone_map.items():
         for entry in deck.get(json_key) or []:
             key = (entry["CardName"], board)
             agg[key] = agg.get(key, 0) + int(entry["Count"])
-    return [CardLine(name=n, count=c, board=b) for (n, b), c in sorted(agg.items())]
+    dropped = sum(1 for c in agg.values() if c < 1)
+    lines = [CardLine(name=n, count=c, board=b) for (n, b), c in sorted(agg.items()) if c >= 1]
+    return lines, dropped
 
 
 def normalize_file(
@@ -154,6 +163,7 @@ def normalize_file(
     zone_map = {"Mainboard": "main", "Sideboard": "side"}
     decks: list[NormalizedDeck] = []
     deck_players: set[str] = set()
+    zero_count_lines = 0
     for deck in raw.get("Decks") or []:
         player = deck.get("Player")
         result_raw = deck.get("Result") or None
@@ -167,6 +177,8 @@ def normalize_file(
             draws = standing.get("Draws", draws)
         if player is not None:
             deck_players.add(player)
+        cards, dropped = _aggregate_cards(deck, zone_map)
+        zero_count_lines += dropped
         decks.append(
             NormalizedDeck(
                 player=player,
@@ -175,7 +187,7 @@ def normalize_file(
                 wins=wins,
                 losses=losses,
                 draws=draws,
-                cards=_aggregate_cards(deck, zone_map),
+                cards=cards,
             )
         )
 
@@ -198,4 +210,5 @@ def normalize_file(
         decks=decks,
         standings_only_players=standings_only,
         decks_without_standing=decks_without_standing,
+        zero_count_card_lines=zero_count_lines,
     )

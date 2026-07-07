@@ -168,3 +168,19 @@ class TestCardAggregation:
         mains = [c for c in deck.cards if c.board == "main"]
         assert sum(c.count for c in mains) == 60
         assert mains == sorted(mains, key=lambda c: (c.name, c.board))
+
+
+class TestZeroCountCardLines:
+    # melee.gg file observed with literal {"Count": 0, ...} entries: player
+    # 'Hudson Tinch' has Count 0 lines for 'Flooded Strand' and
+    # 'Snow-Covered Island' (the only such entries in the file)
+    REL = "melee.gg/2022/10/08/modern-30k-scg-con-dallas-saturday-1000-am-11807-2022-10-08.json"
+
+    def test_zero_count_entries_dropped_and_counted(self):
+        ev = _norm(self.REL)
+        assert ev.zero_count_card_lines == 2
+        deck = next(d for d in ev.decks if d.player == "Hudson Tinch")
+        names = {c.name for c in deck.cards}
+        assert "Flooded Strand" not in names
+        assert "Snow-Covered Island" not in names
+        assert all(c.count >= 1 for d in ev.decks for c in d.cards)

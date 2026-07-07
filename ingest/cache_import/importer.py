@@ -36,6 +36,7 @@ class ImportStats:
     unresolved_occurrences: int = 0
     decks_with_unresolved: int = 0
     standings_only_players: int = 0
+    zero_count_card_lines: int = 0
     by_source: Counter = field(default_factory=Counter)
 
     def summary(self) -> str:
@@ -52,6 +53,7 @@ class ImportStats:
             f" ({self.unresolved_occurrences} occurrences,"
             f" {self.decks_with_unresolved} decks affected)",
             f"standings-only players:     {self.standings_only_players}",
+            f"zero-count card lines:      {self.zero_count_card_lines} (dropped)",
             "imported files by source:   "
             + ", ".join(f"{s}={n}" for s, n in sorted(self.by_source.items())),
         ]
@@ -157,6 +159,7 @@ def _insert_batch(
         i = 0
         for eid, (ev, fmt) in zip(event_ids, batch, strict=True):
             stats.standings_only_players += ev.standings_only_players
+            stats.zero_count_card_lines += ev.zero_count_card_lines
             for deck in ev.decks:
                 did = deck_ids[i]
                 i += 1
@@ -299,5 +302,9 @@ def run_post_import_checks(conn: psycopg.Connection, stats: ImportStats) -> None
         (n_orphan,) = cur.fetchone()  # type: ignore[misc]
         if n_orphan:
             problems.append(f"{n_orphan} orphaned decks")
+        cur.execute("SELECT count(*) FROM deck_cards WHERE count < 1")
+        (n_zero,) = cur.fetchone()  # type: ignore[misc]
+        if n_zero:
+            problems.append(f"{n_zero} deck_cards rows with count < 1")
     if problems:
         raise RuntimeError("post-import data-quality checks FAILED:\n" + "\n".join(problems))
