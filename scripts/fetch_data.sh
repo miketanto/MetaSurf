@@ -15,6 +15,11 @@ fi
 
 if [ -f data/scryfall/oracle-cards.jsonl ] || [ -f data/scryfall/oracle-cards.json ]; then
     echo "== Scryfall oracle-cards bulk data already present"
+elif [ -f data/scryfall/oracle-cards.jsonl.gz ]; then
+    # committed snapshot (see .gitignore note): decompress, keep the .gz
+    echo "== decompressing committed Scryfall oracle-cards snapshot"
+    gunzip -kc data/scryfall/oracle-cards.jsonl.gz > data/scryfall/oracle-cards.jsonl
+    sha256sum data/scryfall/oracle-cards.jsonl
 else
     echo "== fetching Scryfall oracle-cards bulk data"
     UA="metagame-platform/0.1 (research; contact: repo owner)"

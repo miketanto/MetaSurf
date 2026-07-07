@@ -1,5 +1,12 @@
-# local data (raw archives, bulk files) — never committed
-data/
+# local data (raw archives, bulk files) — not committed, with one exception:
+# the Scryfall oracle-cards bulk snapshot is committed (gzipped, ~23MB) because
+# this environment's network policy blocks api.scryfall.com/data.scryfall.io,
+# so rebuilds must be reproducible from the repo alone (owner decision,
+# 2026-07-07; provenance in docs/notes/scryfall-oracle-cards-observed-schema.md)
+data/*
+!data/scryfall/
+data/scryfall/*
+!data/scryfall/oracle-cards.jsonl.gz
 
 __pycache__/
 *.pyc

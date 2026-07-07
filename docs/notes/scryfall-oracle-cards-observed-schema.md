@@ -16,6 +16,12 @@ downloaded by the owner from Scryfall and relayed into the session:
   SHA-256 `f24b6cf4555f1ca4e8d5066af2df52723e7e39f65289b02ab39be36cbd4b726e`.
 - Decompressed to `data/scryfall/oracle-cards.jsonl`, 179,283,541 bytes,
   SHA-256 `c01460e3e9d76b6d4e44a99e1cd8c2b3721d97c82203843cfef2c7e556672240`.
+- The exact relayed gzip is **committed** at `data/scryfall/oracle-cards.jsonl.gz`
+  (owner decision, 2026-07-07) so `make rebuild` is reproducible from the repo
+  alone while the network policy still blocks Scryfall;
+  `scripts/fetch_data.sh` decompresses it. Replace the snapshot (or delete it
+  and let the script fetch fresh) once the policy allows direct downloads —
+  note that a fresher bulk file will legitimately change card counts.
 - Format is **JSONL** (one card object per line, no enclosing array) — Scryfall's
   new bulk format. Per Scryfall's blog (July 2026, read via web search — not
   independently verified from this container), the old JSON-array framing is
