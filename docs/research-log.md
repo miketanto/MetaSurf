@@ -89,6 +89,8 @@ each card's own trend and shared seasonality), and a pre-registered backtest —
 week, on withheld data?* Needs no card tags.
 
 ### 4b. BACKLOG — function-first tech finder (owner design)
+**Full standing design: [`docs/notes/tech-finder-design.md`](notes/tech-finder-design.md).** Summary below.
+
 Goal: flag cards — including ones **few lists run yet** — that fit the
 historical functional profile of good tech vs an archetype, e.g. "Consign to
 Memory is good vs Eldrazi" inferred from *what the card does*, before the
@@ -243,7 +245,7 @@ out). Each has a designed path and a gating dependency.
 
 | Item | What | Design | Gated on | Priority |
 |---|---|---|---|---|
-| **BL-1 Function-first tech finder** | Understand what each card *does*, then correlate function (not raw card) with matchup history to find real + hidden tech | §4b | §4c within-archetype estimation + M4 live data + oracle-text role layer | high value / hard |
+| **BL-1 Function-first tech finder** | Understand what each card *does*, then correlate function (not raw card) with matchup history to find real + hidden tech. **Full design: `docs/notes/tech-finder-design.md`.** Buildable — the signal is real (Tron→land-destruction surfaces cleanly); phases 1–2 + validation B1–B2 doable on frozen data for distinctive archetypes, C1/full coverage want M4 | `docs/notes/tech-finder-design.md` (+ §4a–4d) | oracle-text role layer; within-archetype sample (M4 for full) | high value / high effort |
 | BL-2 Empirical tech-watch (descriptive) | Surface cards the field is teching into vs a rising deck | §4a | lead-lag hardening; still shows §4c confound — label as "co-moving", not "counters" | medium |
 | BL-3 Macro strategy navigation | card2vec + archetype clusters (validated M3.8); macro RPS is weak, frame as navigation | M3.8 done | ready to productize (in API) | done→product |
 | BL-4 Contrarian trend flag | "Overextended, likely to recede" | M3.6-3 | forward test (M4) | low, near-ready |
