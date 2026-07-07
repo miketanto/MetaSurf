@@ -22,7 +22,7 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 | M3.5 | Replicator share forecast | Does matchup-driven evolution predict share? | no — best η=0 (persistence); field too slow weekly | ❌ | `docs/notes/m35-replicator-proposal.md` |
 | M3.5b | Deck recommender | Does a best-positioned deck win more? | **0.580 realized winrate, p<1e-6** | 🔬 | same |
 | M3.6-1 | Macro structure (HodgeRank) | Is matchup "kind-beats-kind"? | **66.6% cyclic** vs 33.4% transitive | 🔬 | `docs/notes/m36-macrostrategy-tech-proposal.md` |
-| M3.6-2 | Empirical tech finder | Does the field tech identifiable cards? | yes, r up to 0.70, text-coherent | 🔬 | same |
+| M3.6-2 | Empirical tech finder | Does the field tech identifiable cards? | signal r≤0.70 but **CONFOUNDED** — see §4c | ⚠️ | same |
 | M3.6-3 | Multi-week share | More predictable at longer horizons? | level sticky (ac 0.79–0.93), direction mean-reverts (~40%) | 🔬 | same |
 | M6 | Content tech finder | Find *undiscovered* tech by function? | designed; feasibility strong (see §4) | 📋 | this doc |
 
@@ -39,9 +39,14 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
   only ~40% of the time.
 - **A best-positioned deck wins ~58% of its real matches** (p<1e-6), mostly
   from deck-strength persistence plus a small positioning bonus.
-- **Tech is real, strong, and auto-discoverable.** Opposing sideboard
-  inclusion correlates with a rising archetype's share at r up to 0.70, and
-  the cards' oracle text names the reason.
+- **Tech isolation is hard (correction — see §4c).** Share-correlation of
+  opposing sideboard cards (M3.6-2) conflates true anti-A tech with cards
+  that are merely good in the meta-state where A is popular (board wipes
+  topped the list because A was a creature deck, not because they answer A).
+  A matchup-conditioned difference-in-differences removes that confound but
+  introduces a second one (archetype-identity: a combo deck's signature cards
+  score high because the *deck* beats A). Clean tech isolation is an open
+  problem here, not a shipped signal.
 
 ## 3. Feature roadmap (mapped to plan §8 product screens)
 
@@ -53,8 +58,8 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 | Macro strategy-type view ("aggro-control favored now") | S2 | M3.6-1 + card2vec | prototype → milestone |
 | Archetype detail: share/winrate history | S3 | M2 ✅ | ready |
 | Trends: contrarian "overextended, likely to recede" | S5 | M3.6-3 🔬 | honest framing ready |
-| **Tech watch**: "field is teching {cards} vs X" | S5/S6 | M3.6-2 🔬 | needs lead-lag hardening |
-| **Hidden-tech finder** (undiscovered cards by function) | S5/S6 | M6 (content cards) 📋 | proposed, §4 |
+| **Tech watch**: "field is teching {cards} vs X" | S5/S6 | M3.6-2 ⚠️ | confounded — needs within-archetype design (§4c) |
+| **Hidden-tech finder** (undiscovered cards by function) | S5/S6 | M6 (content cards) 📋 | proposed but gated on §4c; hardest item |
 | Share *prediction* | — | — | ❌ do not ship; positioning is descriptive |
 
 The through-line: **descriptive/analytic, not predictive** — every green item
@@ -123,7 +128,34 @@ exact example sitting at #2. (Reproduce: the Eldrazi query in this session /
 mined from oracle text or learned; oracle-text mining is heuristic and needs
 a fixture-tested rule set (CLAUDE.md parser discipline). The profile learned
 from *adopted* tech may miss genuinely novel answers (survivorship) — the
-backtest measures exactly this.
+backtest measures exactly this. **And it inherits the §4c confound**: the
+"effective tech vs A" training labels must themselves be confound-free, so 4c
+is a hard prerequisite for 4b.
+
+### 4c. Why "tech" is genuinely hard to measure (owner correction, verified)
+The owner flagged that sideboards are built against the *whole* field with
+bias toward the top decks, so a card correlating with archetype A's *share*
+need not be anti-A tech. Verified on Eldrazi:
+- **Naive share-correlation** (M3.6-2) top hits were board wipes — Pyroclasm
+  (r=0.69), Whipflare, Wrath of the Skies — generic small-creature answers,
+  good because Eldrazi is *a* creature deck, not because they target Eldrazi.
+- **Matchup-conditioned difference-in-differences** (does C improve the A
+  matchup *more than* it improves other matchups; 9,551 vs-Eldrazi deck-match
+  rows, global WR vs Eldrazi 0.504) removes the board wipes entirely — but the
+  new top list is polluted by **archetype-identity** cards: Storm signatures
+  (Past in Flames, Galvanic Relay, Empty the Warrens, Exquisite Firecraft)
+  score high because Ruby Storm structurally beats Eldrazi, not because those
+  cards are tech. Plausible real tech does surface (Aether Spellbomb DiD
+  +0.224 WRvsA 0.717; Hurkyl's Recall; Bloodchief's Thirst) but mixed with the
+  identity noise.
+- **Conclusion:** neither method isolates tech cleanly. The honest design is
+  **within-archetype**: among decks of the *same* base archetype, does adding
+  C to the 75 improve their A matchup differentially? That controls both
+  confounds but is sample-hungry. The ideal data — which cards are *brought in*
+  for the A matchup — is sideboarding data the cache does not contain. Tech
+  isolation is therefore a real research milestone (needs within-archetype
+  design + more/live data, or a new sideboard-plan source), not a near-term
+  ship. Reproduce: matchup-DiD probe in this session's transcript.
 
 ## 5. How this maps to the plan's milestones
 
