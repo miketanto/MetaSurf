@@ -13,7 +13,8 @@ winrate model) is complete: `validation/reports/m2-v2-winrates.md`.
 **Research log & feature roadmap:** [`docs/research-log.md`](docs/research-log.md)
 is the running record of every model investigation (validated, rejected, and
 proposed), the established empirical facts, and the feature roadmap mapped to
-the product screens. Read it for the state of the modeling beyond M3.
+the product screens. Read it for the state of the modeling beyond M3. The next milestone,
+the Read API, has a pick-up doc: [`docs/notes/m5-read-api-handoff.md`](docs/notes/m5-read-api-handoff.md).
 
 ## Layout
 
