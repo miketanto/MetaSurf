@@ -141,6 +141,56 @@ id, is the unique event key.
    `' && '`→`' // '` mapping as a last-resort lookup; unknown names still
    resolve to nothing.
 
+## Rounds/Matches deep-dive (M2 inspection, executed 2026-07-07)
+
+Full scan over all 8,019 Modern-token files in the frozen clone (same commit as
+above), inspecting every `Rounds` entry. New fixture saved:
+`melee.gg/2024/03/02/the-gathering-showdown-series-modern-52606-2024-03-02.json`
+(duplicate `Player` among decks). All numbers below are printed output of the
+scan scripts run in this session.
+
+- **Presence.** Non-empty `Rounds` in 2,135 files: mtgo.com 926,
+  mtgo.com_limited_data 543, melee.gg 635, manatraders.com 15, topdeck.gg 16.
+  Rounds-bearing mtgo files are all challenge-family/qualifier events
+  (`challenge` 531, `challenge-64` 361, `challenge-32` 343, `super-qualifier` 52,
+  `showcase-challenge` 49, `ptq-finals` 31, …); **no league/preliminary/daily
+  file carries Rounds** (confirms anomaly 6/7).
+- **Shape.** All 9,466 round objects are exactly `{RoundName, Matches}`; all
+  218,049 match objects are exactly `{Player1, Player2, Result}`. Every
+  `Result` matches `N-N-N`.
+- **Round names.** mtgo: `Quarterfinals`/`Semifinals`/`Finals` only (Top-8
+  bracket; one anomaly, `modern-challenge-64-2024-02-1112611481.json`, has
+  `[Quarterfinals, Quarterfinals, Semifinals]`). melee: `Round 1`…`Round 17`
+  plus `Quarterfinals`/`Semifinals`/`Finals`/`Top 16`. manatraders:
+  `Round 1`…`Round 10` + bracket names. topdeck: bare numerals `1`…`6` plus
+  `Top 8`/`Top 4`/`Top 2`/`Top Power`/`Top Random`.
+- **Result orientation is Player1's perspective** (`wins-losses-draws`).
+  Verified via bracket advancement: in 10,175 bracket matches with a next
+  round, the side with more wins in the result is the one appearing in the
+  next round (0 opposite cases, 10 ambiguous on melee). Swiss cross-check:
+  per-player match-win counts derived this way equal `Standings.Wins` exactly
+  for 3,039/3,043 manatraders, 62,583/66,840 melee, and 352/432 topdeck player
+  rows (melee diffs are dominated by events publishing zeroed standings, e.g.
+  `lotus-box-patreon-championship-modern-1k-216-2020-04-05.json`).
+- **Game counts vs match-level.** mtgo/melee/manatraders results are game
+  counts (`2-0-0`, `2-1-0`, `0-2-0`, …; melee also `0-0-3` ×2,549 —
+  intentional draws — `1-1-0` ×3,413, `0-0-0` ×193, `1-1-1` ×441).
+  topdeck.gg uses **match-level** results only: `1-0-0` ×1,038, `0-0-1` ×129.
+  Comparing wins vs losses gives the match outcome uniformly in both
+  encodings; `wins == losses` ⇒ draw.
+- **Byes.** `Player2` is `null` on manatraders (×52, result `2-0-0`) and `""`
+  on topdeck (×34, result `0-0-1`). No other source has missing players.
+- **Player→deck resolution.** Match-player slots without a same-`Player` deck
+  row: melee.gg 19,081 (of 2×197,426 slots; 14,475 of them appear in
+  Standings), manatraders 940, topdeck 427, mtgo.com/_limited_data **0**.
+  Exactly 2 rounds-bearing events have a duplicate `Player` among decks
+  (`the-gathering-showdown-series-modern-52606-2024-03-02.json`:
+  `Cesar Hernandez` ×2; `special-10-entry-10k-rcq-…-14036-2023-03-05.json`:
+  `removed removed` ×2) — resolution there is ambiguous, never guessed.
+- **Duplicate match rows.** 2 corpus-wide, both melee, both a drawn match
+  recorded once per orientation (`0-0-1` A-vs-B and B-vs-A in the same round).
+  No `Player1 == Player2` self-matches anywhere.
+
 ## M0 normalization decisions driven by the above
 
 - Event key: `(source, filename-stem)`; duplicates skipped deterministically + counted.
