@@ -192,6 +192,38 @@ need not be anti-A tech. Verified on Eldrazi:
   design + more/live data, or a new sideboard-plan source), not a near-term
   ship. Reproduce: matchup-DiD probe in this session's transcript.
 
+### 4d. Can embeddings + data isolate tech? (tested — data > embeddings)
+Tested whether the M3.8 card2vec embedding can remove the archetype-identity
+confound of §4c, via card FLEXIBILITY (answer cards are cross-deck; engine
+cards sit on their archetype's centroid). Two flexibility measures on the
+matchup-DiD ranking (`validation/embedding_tech_explore.py`):
+- **Embedding** `1 - max cosine(card, archetype centroid)` is a **weak
+  separator** — it kept Burn engine cards (Roiling Vortex, Exquisite Firecraft)
+  in the Eldrazi list; co-occurrence compresses every card toward its
+  archetype, so the score barely discriminates (all 0.05–0.39).
+- **Plain archetype-play entropy** (pure data, no embedding) separates
+  **better**: it correctly drops the low-entropy engine cards (Exquisite
+  Firecraft 0.01, Roiling Vortex 0.09, Empty the Warrens/Storm) and keeps
+  cross-deck answers.
+
+Two honest outcomes:
+1. **For structurally-distinctive archetypes it genuinely works.** vs
+   **GenericTron**, matchup-DiD top hits are land destruction — **Molten Rain**
+   ("Destroy target land… if nonbasic…", DiD +0.225, WRvsA 0.758) and **Ghost
+   Quarter** — the canonical anti-Tron tech, surfaced correctly and kept by the
+   entropy filter.
+2. **For creature decks it stays muddy.** vs **Eldrazi**, even after filtering,
+   survivors are generic-good (Duress, Bloodchief's Thirst) or false positives
+   (Burrenton Forge-Tender is *pro-red* = anti-Burn, not anti-Eldrazi) — because
+   answers to a creature deck overlap with generic creature hate.
+
+**Verdict:** embeddings help *less* than plain entropy; data does most of the
+work; the matchup-DiD + entropy is usable for archetypes with a distinctive
+weakness (attack their lands/mana) but not for generic creature decks. Full
+archetype-specific isolation still needs the **content/function layer (BL-1)** —
+this is additional evidence for building BL-1's oracle-text roles, not
+co-occurrence alone. Reproduce: `python -m validation.embedding_tech_explore`.
+
 ## 5. How this maps to the plan's milestones
 
 M0–M2 are the plan's committed milestones (schema, classifier, winrates), all
