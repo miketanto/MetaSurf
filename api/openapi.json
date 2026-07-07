@@ -140,6 +140,144 @@
         "title": "BestDecksResponse",
         "type": "object"
       },
+      "ClassifyCard": {
+        "properties": {
+          "board": {
+            "minLength": 1,
+            "title": "Board",
+            "type": "string"
+          },
+          "count": {
+            "maximum": 250.0,
+            "minimum": 1.0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "count",
+          "board"
+        ],
+        "title": "ClassifyCard",
+        "type": "object"
+      },
+      "ClassifyRequest": {
+        "properties": {
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/ClassifyCard"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Cards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cards"
+        ],
+        "title": "ClassifyRequest",
+        "type": "object"
+      },
+      "ClassifyResponse": {
+        "properties": {
+          "archetype_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archetype Id"
+          },
+          "as_of": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "exp_winrate_vs_field": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exp Winrate Vs Field"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "matchup_spread": {
+            "items": {
+              "$ref": "#/components/schemas/SpreadCell"
+            },
+            "title": "Matchup Spread",
+            "type": "array"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "unresolved_cards": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unresolved Cards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "archetype_id",
+          "name",
+          "method",
+          "confidence",
+          "unresolved_cards",
+          "as_of",
+          "matchup_spread",
+          "exp_winrate_vs_field"
+        ],
+        "title": "ClassifyResponse",
+        "type": "object"
+      },
       "EventEntry": {
         "properties": {
           "date": {
@@ -608,6 +746,44 @@
         "title": "SeriesPoint",
         "type": "object"
       },
+      "SpreadCell": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "ci_hi": {
+            "title": "Ci Hi",
+            "type": "number"
+          },
+          "ci_lo": {
+            "title": "Ci Lo",
+            "type": "number"
+          },
+          "n_matches": {
+            "title": "N Matches",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "p_win": {
+            "title": "P Win",
+            "type": "number"
+          }
+        },
+        "required": [
+          "archetype_id",
+          "name",
+          "p_win",
+          "ci_lo",
+          "ci_hi",
+          "n_matches"
+        ],
+        "title": "SpreadCell",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -830,6 +1006,81 @@
           }
         },
         "summary": "Best Decks"
+      }
+    },
+    "/v1/{game}/{format}/classify": {
+      "post": {
+        "description": "S6 (premium, live): classify a pasted list, then answer from rollups \u2014\nthe archetype's matchup spread vs the current universe and its\nbest-positioned score. Unresolvable card names are reported, never\nguessed.",
+        "operationId": "classify_deck_v1__game___format__classify_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-entitlements",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Entitlements"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassifyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Classify Deck"
       }
     },
     "/v1/{game}/{format}/events": {

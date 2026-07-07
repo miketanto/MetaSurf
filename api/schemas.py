@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class MetaArchetype(BaseModel):
@@ -116,6 +116,41 @@ class ArchetypeDetailResponse(BaseModel):
     # premium: weekly history, zero-filled over the window, oldest first
     series: list[SeriesPoint] | None
     series_locked: bool
+
+
+class ClassifyCard(BaseModel):
+    name: str = Field(min_length=1)
+    count: int = Field(ge=1, le=250)
+    board: str = Field(min_length=1)
+
+
+class ClassifyRequest(BaseModel):
+    cards: list[ClassifyCard] = Field(min_length=1, max_length=500)
+
+
+class SpreadCell(BaseModel):
+    archetype_id: int
+    name: str
+    p_win: float
+    ci_lo: float
+    ci_hi: float
+    n_matches: int
+
+
+class ClassifyResponse(BaseModel):
+    game: str
+    format: str
+    archetype_id: int | None  # null when the archetype has no stored decks yet
+    name: str
+    method: str
+    confidence: float | None
+    # names that did not resolve to known cards — reported, never guessed
+    unresolved_cards: list[str]
+    # matchup spread vs the current snapshot's universe (empty if the
+    # archetype is not in it); as_of is the backing snapshot
+    as_of: dt.date | None
+    matchup_spread: list[SpreadCell]
+    exp_winrate_vs_field: float | None
 
 
 class EventEntry(BaseModel):

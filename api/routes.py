@@ -12,15 +12,18 @@ import datetime as dt
 from dataclasses import dataclass
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from api import queries
+from api.classifier import CardLine, ClassifierService
 from api.db import Conn
 from api.entitlements import PREMIUM, Entitled
 from api.schemas import (
     ArchetypeDetailResponse,
     BestDeck,
     BestDecksResponse,
+    ClassifyRequest,
+    ClassifyResponse,
     EventEntry,
     EventsResponse,
     MatchupAxis,
@@ -31,6 +34,7 @@ from api.schemas import (
     MetaArchetype,
     MetaResponse,
     SeriesPoint,
+    SpreadCell,
 )
 
 SPARKLINE_WEEKS = 8
@@ -234,6 +238,68 @@ def archetype_detail(
         n_decks=n,
         series=series,
         series_locked=not ent.has(PREMIUM),
+    )
+
+
+def get_classifier(ctx: Ctx, request: Request) -> ClassifierService:
+    """The game's injected ClassifierService (see api/classifier.py)."""
+    service: ClassifierService | None = request.app.state.classifiers.get(ctx.game)
+    if service is None:
+        raise HTTPException(
+            status_code=501, detail="classification not available for this game"
+        )
+    return service
+
+
+@router.post("/classify", response_model=ClassifyResponse)
+def classify_deck(
+    ctx: Ctx,
+    conn: Conn,
+    ent: Entitled,
+    body: ClassifyRequest,
+    service: Annotated[ClassifierService, Depends(get_classifier)],
+) -> ClassifyResponse:
+    """S6 (premium, live): classify a pasted list, then answer from rollups —
+    the archetype's matchup spread vs the current universe and its
+    best-positioned score. Unresolvable card names are reported, never
+    guessed."""
+    if not ent.has(PREMIUM):
+        raise HTTPException(status_code=403, detail="premium entitlement required")
+    try:
+        result = service.classify_deck(
+            conn,
+            ctx.format_name,
+            [CardLine(name=c.name, count=c.count, board=c.board) for c in body.cards],
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    archetype_id = queries.archetype_id_by_name(conn, ctx.format_id, result.archetype_name)
+    snap = queries.latest_snapshot(conn, "rollup_matchups", ctx.format_id)
+    spread: list[SpreadCell] = []
+    score: float | None = None
+    if archetype_id is not None and snap is not None:
+        names = queries.archetype_names(conn, ctx.format_id)
+        spread = [
+            SpreadCell(
+                archetype_id=b, name=names[b], p_win=p, ci_lo=lo, ci_hi=hi, n_matches=n
+            )
+            for b, p, lo, hi, n in queries.matchup_spread_row(
+                conn, ctx.format_id, snap, archetype_id
+            )
+        ]
+        score = queries.best_deck_score(conn, ctx.format_id, snap, archetype_id)
+    return ClassifyResponse(
+        game=ctx.game,
+        format=ctx.format_name,
+        archetype_id=archetype_id,
+        name=result.archetype_name,
+        method=result.method,
+        confidence=result.confidence,
+        unresolved_cards=list(result.unresolved_cards),
+        as_of=snap,
+        matchup_spread=spread,
+        exp_winrate_vs_field=score,
     )
 
 

@@ -45,6 +45,17 @@ def archetype_names(conn: psycopg.Connection, format_id: int) -> dict[int, str]:
         return {int(a): str(n) for a, n in cur.fetchall()}
 
 
+def archetype_id_by_name(
+    conn: psycopg.Connection, format_id: int, name: str
+) -> int | None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM archetypes WHERE format_id = %s AND name = %s", (format_id, name)
+        )
+        row = cur.fetchone()
+    return int(row[0]) if row else None
+
+
 def meta_rows(conn: psycopg.Connection, format_id: int, as_of: dt.date) -> list[tuple]:
     with conn.cursor() as cur:
         cur.execute(
@@ -123,6 +134,33 @@ def matchup_cell_history(
             (format_id, arch_a, arch_b, until),
         )
         return cur.fetchall()
+
+
+def matchup_spread_row(
+    conn: psycopg.Connection, format_id: int, as_of: dt.date, arch_a: int
+) -> list[tuple]:
+    """One archetype's matrix row (its cells vs every universe member)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT arch_b, p_a_beats_b, ci_lo, ci_hi, n_matches"
+            " FROM rollup_matchups"
+            " WHERE format_id = %s AND as_of = %s AND arch_a = %s ORDER BY arch_b",
+            (format_id, as_of, arch_a),
+        )
+        return cur.fetchall()
+
+
+def best_deck_score(
+    conn: psycopg.Connection, format_id: int, as_of: dt.date, archetype_id: int
+) -> float | None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT exp_winrate_vs_field FROM rollup_best_decks"
+            " WHERE format_id = %s AND as_of = %s AND archetype_id = %s",
+            (format_id, as_of, archetype_id),
+        )
+        row = cur.fetchone()
+    return float(row[0]) if row else None
 
 
 def best_deck_rows(conn: psycopg.Connection, format_id: int, as_of: dt.date) -> list[tuple]:

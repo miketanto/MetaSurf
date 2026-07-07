@@ -203,6 +203,109 @@ def test_events_contract(client, seeded):
     assert len(client.get(f"{BASE}/events", params={"limit": 3}).json()["events"]) == 3
 
 
+@pytest.fixture(scope="module")
+def classify_client(seeded, test_db_url):
+    """Client with the MTG classifier adapter injected, as serve.py wires it."""
+    from archetypes.service import MtgClassifierService
+
+    app = create_app(
+        database_url_override=test_db_url, classifiers={GAME: MtgClassifierService()}
+    )
+    with TestClient(app) as c:
+        yield c
+
+
+def _deck_lines(conn, deck_id: int) -> list[dict]:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT c.name, dc.count, dc.board FROM deck_cards dc"
+            " JOIN cards c ON c.id = dc.card_id WHERE dc.deck_id = %s"
+            " ORDER BY dc.board, c.name",
+            (deck_id,),
+        )
+        return [{"name": n, "count": ct, "board": b} for n, ct, b in cur.fetchall()]
+
+
+def test_classify_requires_premium(classify_client):
+    r = classify_client.post(
+        f"{BASE}/classify", json={"cards": [{"name": "x", "count": 1, "board": "main"}]}
+    )
+    assert r.status_code == 403
+
+
+def test_classify_501_when_no_adapter_wired(client):
+    r = client.post(
+        f"{BASE}/classify",
+        json={"cards": [{"name": "x", "count": 1, "board": "main"}]},
+        headers=PREMIUM_HEADERS,
+    )
+    assert r.status_code == 501
+
+
+def test_classify_roundtrips_a_real_corpus_deck(classify_client, seeded):
+    conn, _ = seeded
+    top = classify_client.get(f"{BASE}/meta").json()["archetypes"][0]
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT d.id FROM decks d WHERE d.archetype_id = %s ORDER BY d.id LIMIT 1",
+            (top["archetype_id"],),
+        )
+        deck_id = cur.fetchone()[0]
+    body = classify_client.post(
+        f"{BASE}/classify", json={"cards": _deck_lines(conn, deck_id)}, headers=PREMIUM_HEADERS
+    ).json()
+    # the on-demand path must reproduce the batch label exactly
+    assert body["archetype_id"] == top["archetype_id"]
+    assert body["name"] == top["name"]
+    assert body["method"] in {"rules", "fallback"}
+    if body["method"] == "rules":
+        assert body["confidence"] == 1.0
+    else:
+        assert 0.0 < body["confidence"] <= 1.0
+    assert body["unresolved_cards"] == []
+    # the top archetype is in the universe: spread + positioning score present
+    assert body["as_of"] is not None
+    assert body["matchup_spread"]
+    for cell in body["matchup_spread"]:
+        assert cell["ci_lo"] <= cell["p_win"] <= cell["ci_hi"]
+        assert cell["name"]
+    assert body["exp_winrate_vs_field"] is not None
+
+
+def test_classify_reports_unresolved_never_guesses(classify_client, seeded):
+    conn, _ = seeded
+    with conn.cursor() as cur:
+        cur.execute("SELECT c.name FROM deck_cards dc JOIN cards c ON c.id = dc.card_id LIMIT 1")
+        real_name = cur.fetchone()[0]
+    fake = "Zzyzx Imaginary Test Card"
+    body = classify_client.post(
+        f"{BASE}/classify",
+        json={
+            "cards": [
+                {"name": fake, "count": 4, "board": "main"},
+                {"name": real_name, "count": 4, "board": "main"},
+            ]
+        },
+        headers=PREMIUM_HEADERS,
+    ).json()
+    assert body["unresolved_cards"] == [fake]
+
+
+def test_classify_rejects_unknown_board_zone(classify_client):
+    r = classify_client.post(
+        f"{BASE}/classify",
+        json={"cards": [{"name": "x", "count": 1, "board": "bench"}]},
+        headers=PREMIUM_HEADERS,
+    )
+    assert r.status_code == 422
+
+
+def test_serve_entrypoint_wires_classifier():
+    import serve
+
+    assert GAME in serve.app.state.classifiers
+
+
 def test_openapi_spec_committed_and_current(client):
     committed = json.loads(Path("api/openapi.json").read_text())
     live = client.get("/openapi.json").json()
