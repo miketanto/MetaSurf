@@ -35,7 +35,7 @@ from typing import Any
 import psycopg
 from sklearn.metrics import adjusted_rand_score
 
-from archetypes.classifier.clustering import NOISE, cluster_decks
+from archetypes.classifier.clustering import NOISE, cluster_and_attach
 from archetypes.classifier.engine import Classification
 from archetypes.classifier.vectorizer import vectorize
 from validation.v1_archetypes.common import (
@@ -89,7 +89,7 @@ def run_v11(conn: psycopg.Connection) -> dict[str, Any]:
 
     exclude = basic_land_ids(conn)
     vectors = vectorize([(d.deck_id, d.deck.main) for d in decks], exclude)
-    labels = cluster_decks(vectors.matrix)
+    labels = cluster_and_attach(vectors.matrix)
 
     by_label = Counter(truth.values())
     established = {a for a, n in by_label.items() if n >= ESTABLISHED_MIN_DECKS}
@@ -203,7 +203,7 @@ def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
             window = [d for d in remainder if d.event_date <= day]
             if len(window) >= EMERGENCE_MIN_APPEARANCES:
                 vectors = vectorize([(d.deck_id, d.deck.main) for d in window], exclude)
-                labels = cluster_decks(vectors.matrix)
+                labels = cluster_and_attach(vectors.matrix)
                 members: dict[int, list[int]] = defaultdict(list)
                 for deck_id, cl in zip(vectors.deck_ids, labels, strict=True):
                     if int(cl) != NOISE:

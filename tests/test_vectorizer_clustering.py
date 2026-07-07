@@ -69,3 +69,27 @@ def test_tiny_input_is_all_noise():
     decks, _, _ = _fixture_decks()
     vecs = vectorize(decks[:3])
     assert (cluster_decks(vecs.matrix, min_cluster_size=5) == NOISE).all()
+
+
+def test_attach_noise_thresholds():
+    from archetypes.classifier.clustering import attach_noise
+
+    decks, _, name_ids = _fixture_decks()
+    vecs = vectorize(decks, exclude_card_ids=frozenset({name_ids["Island"]}))
+    base = cluster_decks(vecs.matrix, min_cluster_size=2)
+    n_noise = int((base == NOISE).sum())
+    assert n_noise > 0  # observed: 6 noise decks in this real event
+
+    # impossible threshold: nothing attaches, labels unchanged
+    same = attach_noise(vecs.matrix, base, tau=1.01)
+    assert (same == base).all()
+
+    # zero threshold: every noise deck attaches to its nearest centroid
+    all_in = attach_noise(vecs.matrix, base, tau=0.0)
+    assert int((all_in == NOISE).sum()) == 0
+    # attachment never relabels clustered decks
+    assert (all_in[base != NOISE] == base[base != NOISE]).all()
+
+    # attachment is deterministic
+    assert (attach_noise(vecs.matrix, base, tau=0.3)
+            == attach_noise(vecs.matrix, base, tau=0.3)).all()
