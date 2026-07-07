@@ -5,9 +5,10 @@ Constructed TCG metagame research platform. **Read
 source of truth for scope, schema, model specs, acceptance criteria, and
 milestones. Engineering ground rules live in [`CLAUDE.md`](CLAUDE.md).
 
-Current milestone: **M2 — Layer 2 validated** (batch archetype labeling,
-match extraction from pairing-capable sources, hierarchical Bayesian winrate
-model; V2 report in `validation/reports/m2-v2-winrates.md`).
+Current milestone: **M3 — Layer 3 validated** (evolution model; verdict:
+**descriptive trends**, not prediction — persistence held, see
+`validation/reports/m3-v3-evolution.md`). M2 (labeling, match extraction,
+winrate model) is complete: `validation/reports/m2-v2-winrates.md`.
 
 ## Layout
 
@@ -20,10 +21,12 @@ ingest/scryfall/       Scryfall bulk data -> game-neutral cards table
 ingest/match_extract/  (M2) Rounds in cached files -> matches table
 archetypes/            (M1) rule files + classifier; (M2) batch labeler
 models/winrate/        (M2) hierarchical beta-binomial winrate + matchup model
+models/evolution/      (M3) Holt smoothing + lagged-winrate coupling
 models/  jobs/  api/   game-neutral by CI-enforced check
 validation/m0_corpus/  M0 data-quality report generator
 validation/v1_archetypes/  V1 suites (M1)
 validation/v2_winrates/    V2 suites + tuner (M2)
+validation/v3_evolution/   V3 suites + tuner (M3)
 validation/reports/    dated, committed validation reports (source of truth for go/no-go)
 tests/fixtures/        real saved source files; all parser tests run against these
 docs/notes/            observed-schema notes (what the data actually looks like)
