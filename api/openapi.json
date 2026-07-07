@@ -1,0 +1,1135 @@
+{
+  "components": {
+    "schemas": {
+      "ArchetypeDetailResponse": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "n_decks": {
+            "title": "N Decks",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "series": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SeriesPoint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series"
+          },
+          "series_locked": {
+            "title": "Series Locked",
+            "type": "boolean"
+          },
+          "share": {
+            "title": "Share",
+            "type": "number"
+          },
+          "winrate": {
+            "title": "Winrate",
+            "type": "number"
+          },
+          "wr_ci_hi": {
+            "title": "Wr Ci Hi",
+            "type": "number"
+          },
+          "wr_ci_lo": {
+            "title": "Wr Ci Lo",
+            "type": "number"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "archetype_id",
+          "name",
+          "share",
+          "winrate",
+          "wr_ci_lo",
+          "wr_ci_hi",
+          "n_decks",
+          "series",
+          "series_locked"
+        ],
+        "title": "ArchetypeDetailResponse",
+        "type": "object"
+      },
+      "BestDeck": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "exp_winrate_vs_field": {
+            "title": "Exp Winrate Vs Field",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rank": {
+            "title": "Rank",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rank",
+          "archetype_id",
+          "name",
+          "exp_winrate_vs_field"
+        ],
+        "title": "BestDeck",
+        "type": "object"
+      },
+      "BestDecksResponse": {
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "decks": {
+            "items": {
+              "$ref": "#/components/schemas/BestDeck"
+            },
+            "title": "Decks",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "decks"
+        ],
+        "title": "BestDecksResponse",
+        "type": "object"
+      },
+      "EventEntry": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "player_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Count"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "top_archetype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Archetype"
+          },
+          "top_archetype_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Archetype Id"
+          }
+        },
+        "required": [
+          "event_id",
+          "date",
+          "name",
+          "source",
+          "player_count",
+          "top_archetype_id",
+          "top_archetype"
+        ],
+        "title": "EventEntry",
+        "type": "object"
+      },
+      "EventsResponse": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EventEntry"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "events"
+        ],
+        "title": "EventsResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "MatchupAxis": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "archetype_id",
+          "name"
+        ],
+        "title": "MatchupAxis",
+        "type": "object"
+      },
+      "MatchupCell": {
+        "properties": {
+          "arch_a": {
+            "title": "Arch A",
+            "type": "integer"
+          },
+          "arch_b": {
+            "title": "Arch B",
+            "type": "integer"
+          },
+          "ci_hi": {
+            "title": "Ci Hi",
+            "type": "number"
+          },
+          "ci_lo": {
+            "title": "Ci Lo",
+            "type": "number"
+          },
+          "n_matches": {
+            "title": "N Matches",
+            "type": "integer"
+          },
+          "p_a_beats_b": {
+            "title": "P A Beats B",
+            "type": "number"
+          }
+        },
+        "required": [
+          "arch_a",
+          "arch_b",
+          "p_a_beats_b",
+          "ci_lo",
+          "ci_hi",
+          "n_matches"
+        ],
+        "title": "MatchupCell",
+        "type": "object"
+      },
+      "MatchupDetailResponse": {
+        "properties": {
+          "arch_a": {
+            "$ref": "#/components/schemas/MatchupAxis"
+          },
+          "arch_b": {
+            "$ref": "#/components/schemas/MatchupAxis"
+          },
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "ci_hi": {
+            "title": "Ci Hi",
+            "type": "number"
+          },
+          "ci_lo": {
+            "title": "Ci Lo",
+            "type": "number"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "history": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MatchupHistoryPoint"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History"
+          },
+          "history_locked": {
+            "title": "History Locked",
+            "type": "boolean"
+          },
+          "n_matches": {
+            "title": "N Matches",
+            "type": "integer"
+          },
+          "p_a_beats_b": {
+            "title": "P A Beats B",
+            "type": "number"
+          },
+          "trend": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trend"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "arch_a",
+          "arch_b",
+          "p_a_beats_b",
+          "ci_lo",
+          "ci_hi",
+          "n_matches",
+          "trend",
+          "history",
+          "history_locked"
+        ],
+        "title": "MatchupDetailResponse",
+        "type": "object"
+      },
+      "MatchupHistoryPoint": {
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "ci_hi": {
+            "title": "Ci Hi",
+            "type": "number"
+          },
+          "ci_lo": {
+            "title": "Ci Lo",
+            "type": "number"
+          },
+          "n_matches": {
+            "title": "N Matches",
+            "type": "integer"
+          },
+          "p_a_beats_b": {
+            "title": "P A Beats B",
+            "type": "number"
+          }
+        },
+        "required": [
+          "as_of",
+          "p_a_beats_b",
+          "ci_lo",
+          "ci_hi",
+          "n_matches"
+        ],
+        "title": "MatchupHistoryPoint",
+        "type": "object"
+      },
+      "MatchupsResponse": {
+        "properties": {
+          "archetypes": {
+            "items": {
+              "$ref": "#/components/schemas/MatchupAxis"
+            },
+            "title": "Archetypes",
+            "type": "array"
+          },
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/MatchupCell"
+            },
+            "title": "Cells",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "archetypes",
+          "cells"
+        ],
+        "title": "MatchupsResponse",
+        "type": "object"
+      },
+      "MetaArchetype": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "n_decks": {
+            "title": "N Decks",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "share": {
+            "title": "Share",
+            "type": "number"
+          },
+          "sparkline": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Sparkline",
+            "type": "array"
+          },
+          "winrate": {
+            "title": "Winrate",
+            "type": "number"
+          },
+          "wr_ci_hi": {
+            "title": "Wr Ci Hi",
+            "type": "number"
+          },
+          "wr_ci_lo": {
+            "title": "Wr Ci Lo",
+            "type": "number"
+          }
+        },
+        "required": [
+          "archetype_id",
+          "name",
+          "share",
+          "winrate",
+          "wr_ci_lo",
+          "wr_ci_hi",
+          "n_decks",
+          "sparkline"
+        ],
+        "title": "MetaArchetype",
+        "type": "object"
+      },
+      "MetaResponse": {
+        "properties": {
+          "archetypes": {
+            "items": {
+              "$ref": "#/components/schemas/MetaArchetype"
+            },
+            "title": "Archetypes",
+            "type": "array"
+          },
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "archetypes"
+        ],
+        "title": "MetaResponse",
+        "type": "object"
+      },
+      "SeriesPoint": {
+        "properties": {
+          "n_decks": {
+            "title": "N Decks",
+            "type": "integer"
+          },
+          "share": {
+            "title": "Share",
+            "type": "number"
+          },
+          "week": {
+            "format": "date",
+            "title": "Week",
+            "type": "string"
+          },
+          "winrate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winrate"
+          },
+          "wr_ci_hi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wr Ci Hi"
+          },
+          "wr_ci_lo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wr Ci Lo"
+          }
+        },
+        "required": [
+          "week",
+          "share",
+          "n_decks",
+          "winrate",
+          "wr_ci_lo",
+          "wr_ci_hi"
+        ],
+        "title": "SeriesPoint",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Read-only metagame data served from precomputed rollups. Premium fields are gated by entitlement flags (X-Entitlements header until real auth lands) and appear locked, never hidden.",
+    "title": "Metagame Read API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/{game}/{format}/archetypes/{archetype_id}": {
+      "get": {
+        "description": "S3 archetype detail: current share/winrate (free); weekly share +\nwinrate series over the requested window (premium).",
+        "operationId": "archetype_detail_v1__game___format__archetypes__archetype_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "archetype_id",
+            "required": true,
+            "schema": {
+              "title": "Archetype Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          },
+          {
+            "description": "series window",
+            "in": "query",
+            "name": "weeks",
+            "required": false,
+            "schema": {
+              "default": 13,
+              "description": "series window",
+              "maximum": 52,
+              "minimum": 1,
+              "title": "Weeks",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-entitlements",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Entitlements"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArchetypeDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Archetype Detail"
+      }
+    },
+    "/v1/{game}/{format}/best-decks": {
+      "get": {
+        "description": "S2/S6 ranked best-positioned archetypes vs the current field (free).",
+        "operationId": "best_decks_v1__game___format__best_decks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BestDecksResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Best Decks"
+      }
+    },
+    "/v1/{game}/{format}/events": {
+      "get": {
+        "description": "S4 recent-results feed (free), newest first.",
+        "operationId": "events_v1__game___format__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Events"
+      }
+    },
+    "/v1/{game}/{format}/matchups": {
+      "get": {
+        "description": "S2 matchup matrix (free): every cell over the snapshot's universe.",
+        "operationId": "matchups_v1__game___format__matchups_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchupsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Matchups"
+      }
+    },
+    "/v1/{game}/{format}/matchups/{arch_a}/{arch_b}": {
+      "get": {
+        "description": "S2 cell detail: winrate, CI, sample size, trend (free); the cell's\nhistory across snapshots (premium).",
+        "operationId": "matchup_detail_v1__game___format__matchups__arch_a___arch_b__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "arch_a",
+            "required": true,
+            "schema": {
+              "title": "Arch A",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "arch_b",
+            "required": true,
+            "schema": {
+              "title": "Arch B",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-entitlements",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Entitlements"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchupDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Matchup Detail"
+      }
+    },
+    "/v1/{game}/{format}/meta": {
+      "get": {
+        "description": "S1 meta snapshot (free): archetypes by share with winrate CI and a\nweekly share sparkline.",
+        "operationId": "meta_v1__game___format__meta_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetaResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Meta"
+      }
+    }
+  }
+}
