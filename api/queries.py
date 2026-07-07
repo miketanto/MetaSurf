@@ -110,6 +110,30 @@ def series_rows(
         return {row[0]: row[1:] for row in cur.fetchall()}
 
 
+def last_data_weeks(conn: psycopg.Connection, format_id: int, n: int) -> list[dt.date]:
+    """The format's most recent n data weeks, oldest first."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT DISTINCT week FROM rollup_archetype_ts"
+            " WHERE format_id = %s ORDER BY week DESC LIMIT %s",
+            (format_id, n),
+        )
+        return sorted(row[0] for row in cur.fetchall())
+
+
+def week_shares(
+    conn: psycopg.Connection, format_id: int, week: dt.date
+) -> dict[int, tuple[float, int]]:
+    """archetype -> (share, n_decks) for one data week."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT archetype_id, share, n_decks FROM rollup_archetype_ts"
+            " WHERE format_id = %s AND week = %s",
+            (format_id, week),
+        )
+        return {int(a): (float(s), int(n)) for a, s, n in cur.fetchall()}
+
+
 def matchup_rows(conn: psycopg.Connection, format_id: int, as_of: dt.date) -> list[tuple]:
     with conn.cursor() as cur:
         cur.execute(

@@ -300,6 +300,32 @@ def test_classify_rejects_unknown_board_zone(classify_client):
     assert r.status_code == 422
 
 
+def test_trends_premium_gated_and_recomputable(client, seeded):
+    conn, _ = seeded
+    assert client.get(f"{BASE}/trends").status_code == 403
+
+    body = client.get(f"{BASE}/trends", headers=PREMIUM_HEADERS).json()
+    assert body["prev_week"] < body["week"]
+    movers = body["movers"]
+    assert movers
+    deltas = [m["delta"] for m in movers]
+    assert deltas == sorted(deltas, reverse=True)
+    # recompute each delta from the stored weekly series
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT archetype_id, week, share FROM rollup_archetype_ts rt"
+            " JOIN formats f ON f.id = rt.format_id AND f.name = %s"
+            " WHERE week IN (%s, %s)",
+            (FORMAT, body["week"], body["prev_week"]),
+        )
+        stored = {(a, w.isoformat()): s for a, w, s in cur.fetchall()}
+    for m in movers:
+        cur_share = stored.get((m["archetype_id"], body["week"]), 0.0)
+        prev_share = stored.get((m["archetype_id"], body["prev_week"]), 0.0)
+        assert m["share"] == pytest.approx(cur_share)
+        assert m["delta"] == pytest.approx(cur_share - prev_share)
+
+
 def test_serve_entrypoint_wires_classifier():
     import serve
 

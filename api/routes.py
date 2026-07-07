@@ -33,8 +33,10 @@ from api.schemas import (
     MatchupsResponse,
     MetaArchetype,
     MetaResponse,
+    Mover,
     SeriesPoint,
     SpreadCell,
+    TrendsResponse,
 )
 
 SPARKLINE_WEEKS = 8
@@ -238,6 +240,37 @@ def archetype_detail(
         n_decks=n,
         series=series,
         series_locked=not ent.has(PREMIUM),
+    )
+
+
+@router.get("/trends", response_model=TrendsResponse)
+def trends(ctx: Ctx, conn: Conn, ent: Entitled) -> TrendsResponse:
+    """S5 movers (premium): share change between the last two data weeks.
+    Descriptive only — the M3 verdict rules out share forecasts. The
+    contrarian 'overextended' flag (BL-4) ships after its forward test."""
+    if not ent.has(PREMIUM):
+        raise HTTPException(status_code=403, detail="premium entitlement required")
+    weeks = queries.last_data_weeks(conn, ctx.format_id, 2)
+    if len(weeks) < 2:
+        raise HTTPException(status_code=404, detail="not enough weekly data for trends")
+    prev_week, week = weeks
+    prev = queries.week_shares(conn, ctx.format_id, prev_week)
+    cur = queries.week_shares(conn, ctx.format_id, week)
+    names = queries.archetype_names(conn, ctx.format_id)
+    movers = [
+        Mover(
+            archetype_id=arch,
+            name=names[arch],
+            share=cur.get(arch, (0.0, 0))[0],
+            prev_share=prev.get(arch, (0.0, 0))[0],
+            delta=cur.get(arch, (0.0, 0))[0] - prev.get(arch, (0.0, 0))[0],
+            n_decks=cur.get(arch, (0.0, 0))[1],
+        )
+        for arch in sorted(set(prev) | set(cur))
+    ]
+    movers.sort(key=lambda m: (-m.delta, m.archetype_id))
+    return TrendsResponse(
+        game=ctx.game, format=ctx.format_name, week=week, prev_week=prev_week, movers=movers
     )
 
 

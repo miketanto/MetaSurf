@@ -686,6 +686,44 @@
         "title": "MetaResponse",
         "type": "object"
       },
+      "Mover": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "number"
+          },
+          "n_decks": {
+            "title": "N Decks",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "prev_share": {
+            "title": "Prev Share",
+            "type": "number"
+          },
+          "share": {
+            "title": "Share",
+            "type": "number"
+          }
+        },
+        "required": [
+          "archetype_id",
+          "name",
+          "share",
+          "prev_share",
+          "delta",
+          "n_decks"
+        ],
+        "title": "Mover",
+        "type": "object"
+      },
       "SeriesPoint": {
         "properties": {
           "n_decks": {
@@ -782,6 +820,44 @@
           "n_matches"
         ],
         "title": "SpreadCell",
+        "type": "object"
+      },
+      "TrendsResponse": {
+        "properties": {
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "movers": {
+            "items": {
+              "$ref": "#/components/schemas/Mover"
+            },
+            "title": "Movers",
+            "type": "array"
+          },
+          "prev_week": {
+            "format": "date",
+            "title": "Prev Week",
+            "type": "string"
+          },
+          "week": {
+            "format": "date",
+            "title": "Week",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "week",
+          "prev_week",
+          "movers"
+        ],
+        "title": "TrendsResponse",
         "type": "object"
       },
       "ValidationError": {
@@ -1380,6 +1456,71 @@
           }
         },
         "summary": "Meta"
+      }
+    },
+    "/v1/{game}/{format}/trends": {
+      "get": {
+        "description": "S5 movers (premium): share change between the last two data weeks.\nDescriptive only \u2014 the M3 verdict rules out share forecasts. The\ncontrarian 'overextended' flag (BL-4) ships after its forward test.",
+        "operationId": "trends_v1__game___format__trends_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-entitlements",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Entitlements"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrendsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Trends"
       }
     }
   }

@@ -118,6 +118,26 @@ class ArchetypeDetailResponse(BaseModel):
     series_locked: bool
 
 
+class Mover(BaseModel):
+    archetype_id: int
+    name: str
+    share: float
+    prev_share: float
+    delta: float
+    n_decks: int
+
+
+class TrendsResponse(BaseModel):
+    game: str
+    format: str
+    week: dt.date
+    prev_week: dt.date
+    # every archetype present in either week, biggest risers first.
+    # Descriptive movement between the last two data weeks — not a forecast
+    # (the M3 verdict: share prediction does not ship).
+    movers: list[Mover]
+
+
 class ClassifyCard(BaseModel):
     name: str = Field(min_length=1)
     count: int = Field(ge=1, le=250)

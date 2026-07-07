@@ -158,6 +158,45 @@ patterns from `validation/v3_evolution/data.py`, `v_recommender/run.py`, and
 ## 9. Dependencies to add (`pyproject.toml`)
 `fastapi`, `uvicorn[standard]`, `httpx` (TestClient). None are game-specific.
 
+## 10a. Build-out addendum (2026-07-07, M5 session)
+
+Build order items 1–5 are implemented on this branch:
+
+- `0002_rollups.py` — five additive tables (`rollup_meta`, `rollup_matchups`,
+  `rollup_archetype_ts`, `rollup_best_decks`, `rollup_events`).
+  `rollup_card_similarity` was NOT created yet — add it with the
+  "lists like yours" feature (see below).
+- `jobs/rollups/` — one builder per table + `python -m jobs.rollups` CLI.
+  Definitions reuse the validated protocols (Sat-keyed weekend buckets,
+  trailing-8-week pooled share, >= 1% universe, V-REC best-response scoring).
+- `api/` — all §3 read endpoints except `/emerging`; entitlements module;
+  committed `api/openapi.json` + freshness test. Measured worst p95 =
+  17.0 ms over 200 reqs/endpoint on a real uvicorn with fixture-corpus
+  rollups (DoD < 200 ms; PK-indexed reads, result sizes scale with
+  archetypes × weeks, not deck count).
+- `POST /classify` — done via `api/classifier.py` (Protocol + DTOs),
+  `archetypes/service.py` (adapter over the labeler's exact stack), and
+  `serve.py` (composition root; `uvicorn serve:app`). A contract test
+  asserts the on-demand path reproduces the batch label on a real corpus
+  deck. The "lists like yours" half is NOT built: it needs the embedding
+  rollup (`rollup_card_similarity`) and a recent-deck-vector story — design
+  it with the S6 feature.
+- `GET /trends` — movers only (share delta between the last two data weeks,
+  descriptive). The contrarian "overextended" flag is deliberately NOT
+  shipped: BL-4 in the research log requires a forward test on live (M4)
+  data first.
+
+Deliberately not built, for the owner to sequence:
+
+- `/emerging` — the M1 clustering stage is not part of batch labeling and
+  lives in `archetypes/` (game-specific), so the feed needs either a second
+  Protocol seam like classify or a game-specific rollup writer outside
+  `jobs/`. Design decision required.
+- Alert subscriptions (plan §8 "add to M5 scope") — the first user *write*
+  path; belongs with auth (Phase 2 seam §4.2), not in the read layer.
+- "Projected weekend meta" — ruled out by the M3 verdict (do not ship share
+  prediction).
+
 ## 10. State at handoff
 Branch `claude/metagame-m2-layer-2-tulgzm`, 18 commits, all gates green (98
 tests, ruff, mypy, game-neutrality, determinism). `make rebuild` reproduces

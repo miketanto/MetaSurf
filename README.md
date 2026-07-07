@@ -5,16 +5,38 @@ Constructed TCG metagame research platform. **Read
 source of truth for scope, schema, model specs, acceptance criteria, and
 milestones. Engineering ground rules live in [`CLAUDE.md`](CLAUDE.md).
 
-Current milestone: **M3 — Layer 3 validated** (evolution model; verdict:
-**descriptive trends**, not prediction — persistence held, see
-`validation/reports/m3-v3-evolution.md`). M2 (labeling, match extraction,
-winrate model) is complete: `validation/reports/m2-v2-winrates.md`.
+Current milestone: **M5 — Read API** (built on the frozen corpus; see below).
+M3's verdict stands: **descriptive trends**, not prediction — persistence
+held, see `validation/reports/m3-v3-evolution.md`. M2 (labeling, match
+extraction, winrate model) is complete: `validation/reports/m2-v2-winrates.md`.
 
 **Research log & feature roadmap:** [`docs/research-log.md`](docs/research-log.md)
 is the running record of every model investigation (validated, rejected, and
 proposed), the established empirical facts, and the feature roadmap mapped to
-the product screens. Read it for the state of the modeling beyond M3. The next milestone,
-the Read API, has a pick-up doc: [`docs/notes/m5-read-api-handoff.md`](docs/notes/m5-read-api-handoff.md).
+the product screens. The Read API's pick-up doc (architecture, endpoint/tier
+table, build order): [`docs/notes/m5-read-api-handoff.md`](docs/notes/m5-read-api-handoff.md).
+
+## Read API (M5)
+
+Nightly rollups + FastAPI reading only rollup and reference tables:
+
+```bash
+python -m jobs.rollups --game <game> --format <format>   # rebuild all rollup_* tables
+uvicorn serve:app                                        # composition root (injects game adapters)
+```
+
+Endpoints under `/v1/{game}/{format}/`: `meta`, `matchups`,
+`matchups/{a}/{b}`, `best-decks`, `archetypes/{id}`, `events`, `trends`
+(premium), and `POST classify` (premium, live — runs the game's classifier
+behind the `ClassifierService` Protocol; `api/` stays game-neutral).
+Premium gating goes through `api/entitlements.py` only. The committed
+OpenAPI contract is [`api/openapi.json`](api/openapi.json) (regenerate with
+`python -m scripts.export_openapi`; a test asserts freshness).
+
+Not shipped, deliberately: share *prediction* (M3 verdict), the contrarian
+"overextended" flag (BL-4, needs its forward test on live data), and the
+emerging-deck feed (needs the M1 clustering stage productized behind a
+game-neutral seam) — see the handoff doc §10 addendum.
 
 ## Layout
 
