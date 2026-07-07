@@ -10,6 +10,11 @@ Current milestone: **M3 — Layer 3 validated** (evolution model; verdict:
 `validation/reports/m3-v3-evolution.md`). M2 (labeling, match extraction,
 winrate model) is complete: `validation/reports/m2-v2-winrates.md`.
 
+**Research log & feature roadmap:** [`docs/research-log.md`](docs/research-log.md)
+is the running record of every model investigation (validated, rejected, and
+proposed), the established empirical facts, and the feature roadmap mapped to
+the product screens. Read it for the state of the modeling beyond M3.
+
 ## Layout
 
 ```
