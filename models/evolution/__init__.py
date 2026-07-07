@@ -11,6 +11,7 @@ from models.evolution.model import (
     holt_forecast_panel,
     holt_forecast_path,
 )
+from models.evolution.replicator import field_fitness, replicator_step
 
 __all__ = [
     "DEFAULT_CARD_ALPHA",
@@ -20,8 +21,10 @@ __all__ = [
     "CouplingFit",
     "coupled_forecast",
     "coupling_regressor",
+    "field_fitness",
     "fit_coupling",
     "holt_forecast",
     "holt_forecast_panel",
     "holt_forecast_path",
+    "replicator_step",
 ]
