@@ -51,20 +51,20 @@ def seeded_conn(db_conn):
 def test_full_fixture_import(seeded_conn):
     stats = run_import(seeded_conn, FIXTURES)
 
-    # fixture corpus: 13 files; 1 has no format token (2019 MOCS open),
-    # 1 is a duplicate league re-publication -> 11 imported
-    assert stats.files_seen == 13
+    # fixture corpus: 14 files; 1 has no format token (2019 MOCS open),
+    # 1 is a duplicate league re-publication -> 12 imported
+    assert stats.files_seen == 14
     assert stats.files_skipped_format_unknown == 1
     assert stats.files_skipped_duplicate == 1
     assert stats.files_skipped_other_format == 0
-    assert stats.files_imported == 11
-    assert stats.events == 11
+    assert stats.files_imported == 12
+    assert stats.events == 12
     # the 2022 melee Dallas fixture carries 2 literal Count:0 card entries
     assert stats.zero_count_card_lines == 2
 
     with seeded_conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM events")
-        assert cur.fetchone()[0] == 11
+        assert cur.fetchone()[0] == 12
         cur.execute("SELECT count(*) FROM deck_cards WHERE count < 1")
         assert cur.fetchone()[0] == 0
         cur.execute("SELECT count(*) FROM decks")
