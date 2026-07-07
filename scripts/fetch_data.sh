@@ -13,15 +13,22 @@ else
     echo "== data/MTGODecklistCache already present (frozen; not pulling)"
 fi
 
-if [ ! -f data/scryfall/oracle-cards.json ]; then
+if [ -f data/scryfall/oracle-cards.jsonl ] || [ -f data/scryfall/oracle-cards.json ]; then
+    echo "== Scryfall oracle-cards bulk data already present"
+else
     echo "== fetching Scryfall oracle-cards bulk data"
     UA="metagame-platform/0.1 (research; contact: repo owner)"
+    # Prefer the JSONL framing (per Scryfall's July 2026 API notes the array
+    # framing retires 2026-07-20); fall back to download_uri for older mirrors.
     URI=$(curl -fsS -A "$UA" https://api.scryfall.com/bulk-data \
         | python3 -c "import json,sys; d=json.load(sys.stdin); \
-print(next(x['download_uri'] for x in d['data'] if x['type']=='oracle_cards'))")
+o=next(x for x in d['data'] if x['type']=='oracle_cards'); \
+print(o.get('jsonl_download_uri') or o['download_uri'])")
     echo "   $URI"
-    curl -fsS -A "$UA" -o data/scryfall/oracle-cards.json "$URI"
-    ls -la data/scryfall/oracle-cards.json
-else
-    echo "== data/scryfall/oracle-cards.json already present"
+    case "$URI" in
+        *.jsonl*) OUT=data/scryfall/oracle-cards.jsonl ;;
+        *)        OUT=data/scryfall/oracle-cards.json ;;
+    esac
+    curl -fsS -A "$UA" -o "$OUT" "$URI"
+    ls -la "$OUT"
 fi

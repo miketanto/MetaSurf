@@ -37,7 +37,7 @@ Data prerequisites (both gitignored under `data/`):
 
 ```bash
 git clone --depth 1 https://github.com/Badaro/MTGODecklistCache data/MTGODecklistCache
-# Scryfall bulk data (oracle cards) -> data/scryfall/oracle-cards.json
+# Scryfall bulk data (oracle cards, JSONL) -> data/scryfall/oracle-cards.jsonl
 ```
 
 ## One-command rebuild (M0 definition of done)

@@ -5,8 +5,9 @@
 # Requires:
 #   - DATABASE_URL (default postgresql://metagame:metagame@localhost:5432/metagame);
 #     the role must be allowed to create/drop the target database
-#   - data/MTGODecklistCache          (frozen clone; scripts/fetch_data.sh)
-#   - data/scryfall/oracle-cards.json (Scryfall bulk data; scripts/fetch_data.sh)
+#   - data/MTGODecklistCache           (frozen clone; scripts/fetch_data.sh)
+#   - data/scryfall/oracle-cards.jsonl (Scryfall bulk data; scripts/fetch_data.sh;
+#     the legacy .json array framing is accepted as a fallback)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -24,7 +25,11 @@ echo "== [2/5] apply migrations"
 alembic upgrade head
 
 echo "== [3/5] ingest card data (Scryfall bulk -> cards)"
-python -m ingest.scryfall --file data/scryfall/oracle-cards.json
+if [ -f data/scryfall/oracle-cards.jsonl ]; then
+    python -m ingest.scryfall --file data/scryfall/oracle-cards.jsonl
+else
+    python -m ingest.scryfall --file data/scryfall/oracle-cards.json
+fi
 
 echo "== [4/5] import MTGODecklistCache (import-enabled formats per config/formats.json)"
 python -m ingest.cache_import --cache data/MTGODecklistCache
