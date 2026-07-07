@@ -125,6 +125,15 @@ id, is the unique event key.
    6 wins, Points 0) — Points is not a reliable cross-source signal.
 9. **Result values** normalize to: `N-N` (league/swiss records like `5-0`),
    `N-N-N` in round Match results, `Nst/Nnd/Nrd/Nth Place`, or empty string.
+10. **`&&` split-card separator in `mtgo.com_limited_data`.** Files from
+   2024-10 onward write some split-card names as `A && B` (18 distinct names,
+   4,752 occurrences corpus-wide, 4 in Modern; e.g.
+   `Unholy Annex && Ritual Chamber` in
+   `mtgo.com_limited_data/2024/11/…`). Each of the 18 matches a split card
+   whose Scryfall name is `A // B` (verified against the 2026-07-07 bulk
+   file, all `layout: split`). The resolver applies the mechanical
+   `' && '`→`' // '` mapping as a last-resort lookup; unknown names still
+   resolve to nothing.
 
 ## M0 normalization decisions driven by the above
 

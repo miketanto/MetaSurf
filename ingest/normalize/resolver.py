@@ -51,7 +51,17 @@ class CardResolver:
         cid = self._by_name.get(name)
         if cid is not None:
             return cid
-        return self._by_casefold.get(name.casefold())
+        cid = self._by_casefold.get(name.casefold())
+        if cid is not None:
+            return cid
+        # Observed corpus variant (mtgo.com_limited_data, 2024-10 onward):
+        # split-card names written 'A && B' where the canonical name is
+        # 'A // B' — 18 distinct corpus names, every one matching a split
+        # card in the bulk file (see the observed-schema notes). A purely
+        # mechanical separator mapping; spellings are still never guessed.
+        if " && " in name:
+            return self.resolve(name.replace(" && ", " // "))
+        return None
 
     def __len__(self) -> int:
         return len(self._by_name)

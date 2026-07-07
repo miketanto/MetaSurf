@@ -41,10 +41,10 @@ def test_parse_filters_nonplayable_layouts_and_extracts_faces():
     stats = ScryfallStats()
     rows = parse_cards(SAMPLE, stats)
 
-    assert stats.objects_seen == 10
+    assert stats.objects_seen == 12
     # exactly one fixture object is non-playable: the Adorned Pouncer token
     assert dict(stats.skipped_by_layout) == {"token": 1}
-    assert stats.cards_imported == len(rows) == 9
+    assert stats.cards_imported == len(rows) == 11
 
     by_ref = {r.oracle_id: r for r in rows}
     split = by_ref[ORACLE["Alive // Well"]]
@@ -138,8 +138,21 @@ def test_load_and_resolve_end_to_end(db_conn):
         row = cur.fetchone()
         assert row is not None and row[0] == 1
 
+    # observed mtgo.com_limited_data variant: split-card names written with
+    # ' && ' (18 distinct names / 4,752 occurrences in the corpus, all
+    # matching ' // ' split cards in the bulk file — see the schema notes)
+    assert (
+        ref("Unholy Annex && Ritual Chamber")
+        == "bd388ad9-a47b-4b0b-b94a-8e4343cd3de5"
+    )
+    assert (
+        ref("Roaring Furnace && Steaming Sauna")
+        == "d5f31713-d380-42ba-8052-4b8d9beb3958"
+    )
+
     # unknown names stay unresolved — never guessed
     assert resolver.resolve("Not A Real Card Name") is None
+    assert resolver.resolve("Not A Real && Card Name") is None
 
 
 @pytest.mark.db
