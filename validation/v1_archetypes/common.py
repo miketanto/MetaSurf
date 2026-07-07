@@ -42,24 +42,14 @@ def load_definitions(
         fold_index = build_fold_index(cur.fetchall())
     report = LoadReport()
     defs = load_format(
-        "modern", resolver.resolve, fold_index, ENGINE_SEMANTICS, report=report
+        "modern",
+        resolver.resolve,
+        fold_index,
+        ENGINE_SEMANTICS,
+        report=report,
+        exclude_file_stems=exclude_archetype_files,
     )
-    if exclude_archetype_files:
-        mask = _keep_mask(defs, exclude_archetype_files)
-        kept = tuple(a for a, keep in zip(defs.archetypes, mask, strict=True) if keep)
-        defs = FormatDefinitions(
-            format_name=defs.format_name,
-            archetypes=kept,
-            fallbacks=defs.fallbacks,
-            land_colors=defs.land_colors,
-            nonland_colors=defs.nonland_colors,
-            classifier_version=defs.classifier_version + "-minus",
-        )
     return defs, report
-
-
-def _keep_mask(defs: FormatDefinitions, exclude_names: frozenset[str]) -> list[bool]:
-    return [a.name not in exclude_names for a in defs.archetypes]
 
 
 def load_decks(

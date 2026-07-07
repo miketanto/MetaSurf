@@ -52,9 +52,11 @@ ESTABLISHED_MIN_DECKS = 50
 MAJOR_F1_TARGET = 0.90
 AGREEMENT_TARGET = 0.95
 
-# Emergence events: (label, archetype rule Name, key card, window start).
+# Emergence events: (label, archetype rule FILE stem, key card, window start).
 # Both chosen from executed corpus queries (see the report): the key card's
-# daily deck counts identify the deck's real arrival.
+# daily deck counts identify the deck's real arrival. Exclusion is by file
+# stem because rule Names are not unique (BassimAffinit.json names itself
+# 'Affinity'); the target deck set is keyed by the new card itself.
 EMERGENCE_EVENTS = (
     ("MH3 release — Nadu", "Nadu", "Nadu, Winged Wisdom", dt.date(2024, 6, 1)),
     (
@@ -159,19 +161,23 @@ def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     full_defs, _ = load_definitions(conn)
     exclude = basic_land_ids(conn)
-    for label, archetype, key_card, window_start in EMERGENCE_EVENTS:
-        blind_defs, _ = load_definitions(conn, frozenset({archetype}))
+    for label, file_stem, key_card, window_start in EMERGENCE_EVENTS:
+        blind_defs, _ = load_definitions(conn, frozenset({file_stem}))
         assert len(blind_defs.archetypes) == len(full_defs.archetypes) - 1
 
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT c.id FROM cards c JOIN games g ON g.id = c.game_id"
+                " WHERE g.name = 'mtg' AND c.name = %s",
+                (key_card,),
+            )
+            row = cur.fetchone()
+            assert row is not None, key_card
+            key_id = row[0]
+
         decks = load_decks(conn, window_start, window_start + dt.timedelta(days=60))
-        classifications = rules_label(decks, full_defs)
-        target_ids = {
-            d.deck_id
-            for d, c in zip(decks, classifications, strict=True)
-            if c.match is not None
-            and c.match.method == "rules"
-            and c.match.archetype == archetype
-        }
+        # "the new deck" = decks playing the new key card in the mainboard
+        target_ids = {d.deck_id for d in decks if key_id in d.deck.main}
         # first date with cumulative >= EMERGENCE_MIN_APPEARANCES target decks
         dates = sorted(d.event_date for d in decks if d.deck_id in target_ids)
         if len(dates) < EMERGENCE_MIN_APPEARANCES:
@@ -216,7 +222,7 @@ def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
         results.append(
             {
                 "event": label,
-                "archetype": archetype,
+                "archetype": file_stem,
                 "key_card": key_card,
                 "target_decks_in_window": len(target_ids),
                 "first_5_appearances": first5.isoformat(),

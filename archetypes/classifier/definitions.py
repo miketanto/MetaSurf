@@ -191,12 +191,22 @@ def load_format(
     engine_semantics: str,
     root: Path = DEFINITIONS_ROOT,
     report: LoadReport | None = None,
+    exclude_file_stems: frozenset[str] = frozenset(),
 ) -> FormatDefinitions:
+    """exclude_file_stems drops archetype FILES by stem (used by the V1.2
+    emergence backtest to hide one definition). Exclusion is by file, not by
+    Name: several files share a Name (observed: BassimAffinit.json also names
+    itself 'Affinity'). The classifier_version hash covers only loaded files,
+    so an exclusion yields a distinct version string."""
     report = report if report is not None else LoadReport()
     resolver = _NameResolver(resolve, fold_index, report)
     fmt_root = root / format_name
 
-    archetype_files = sorted((fmt_root / "Archetypes").glob("*.json"))
+    archetype_files = [
+        p
+        for p in sorted((fmt_root / "Archetypes").glob("*.json"))
+        if p.stem not in exclude_file_stems
+    ]
     fallback_files = sorted((fmt_root / "Fallbacks").glob("*.json"))
     archetypes = tuple(_load_archetype(_read_json(p), resolver) for p in archetype_files)
     fallbacks = []
