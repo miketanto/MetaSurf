@@ -5,8 +5,9 @@ Constructed TCG metagame research platform. **Read
 source of truth for scope, schema, model specs, acceptance criteria, and
 milestones. Engineering ground rules live in [`CLAUDE.md`](CLAUDE.md).
 
-Current milestone: **M0 — Corpus online** (historical corpus in Postgres,
-reproducible one-command rebuild).
+Current milestone: **M2 — Layer 2 validated** (batch archetype labeling,
+match extraction from pairing-capable sources, hierarchical Bayesian winrate
+model; V2 report in `validation/reports/m2-v2-winrates.md`).
 
 ## Layout
 
@@ -16,9 +17,13 @@ db/migrations/         alembic migrations (additive-only)
 ingest/cache_import/   one-shot importer for the frozen MTGODecklistCache clone
 ingest/normalize/      source JSON -> canonical schema (pure functions) + card resolver
 ingest/scryfall/       Scryfall bulk data -> game-neutral cards table
-archetypes/            (M1) rule files + classifier
-models/  jobs/  api/   (M1+) game-neutral by CI-enforced check
+ingest/match_extract/  (M2) Rounds in cached files -> matches table
+archetypes/            (M1) rule files + classifier; (M2) batch labeler
+models/winrate/        (M2) hierarchical beta-binomial winrate + matchup model
+models/  jobs/  api/   game-neutral by CI-enforced check
 validation/m0_corpus/  M0 data-quality report generator
+validation/v1_archetypes/  V1 suites (M1)
+validation/v2_winrates/    V2 suites + tuner (M2)
 validation/reports/    dated, committed validation reports (source of truth for go/no-go)
 tests/fixtures/        real saved source files; all parser tests run against these
 docs/notes/            observed-schema notes (what the data actually looks like)
