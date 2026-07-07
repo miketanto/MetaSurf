@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: metagame
+          POSTGRES_PASSWORD: metagame
+          POSTGRES_DB: metagame
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U metagame"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://metagame:metagame@localhost:5432/metagame
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: ruff check .
+      - name: Types (mypy)
+        run: mypy models jobs api ingest db validation scripts
+      - name: Game-neutrality import check (plan §4.1)
+        run: python scripts/check_game_neutrality.py
+      - name: Determinism check
+        run: python scripts/check_determinism.py
+      - name: Tests (pytest, includes DB tests on fixtures)
+        run: pytest -q

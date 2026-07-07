@@ -1,0 +1,22 @@
+{
+  "games": [
+    {
+      "name": "mtg",
+      "formats": [
+        {
+          "name": "modern",
+          "import": true,
+          "slug_tokens": ["modern"],
+          "board_zones": ["main", "side"],
+          "expected_mainboard_min": 60,
+          "expected_sideboard_max": 15
+        },
+        {"name": "legacy", "import": false, "slug_tokens": ["legacy"], "board_zones": ["main", "side"], "expected_mainboard_min": 60, "expected_sideboard_max": 15},
+        {"name": "vintage", "import": false, "slug_tokens": ["vintage"], "board_zones": ["main", "side"], "expected_mainboard_min": 60, "expected_sideboard_max": 15},
+        {"name": "standard", "import": false, "slug_tokens": ["standard"], "board_zones": ["main", "side"], "expected_mainboard_min": 60, "expected_sideboard_max": 15},
+        {"name": "pioneer", "import": false, "slug_tokens": ["pioneer"], "board_zones": ["main", "side"], "expected_mainboard_min": 60, "expected_sideboard_max": 15},
+        {"name": "pauper", "import": false, "slug_tokens": ["pauper"], "board_zones": ["main", "side"], "expected_mainboard_min": 60, "expected_sideboard_max": 15}
+      ]
+    }
+  ]
+}

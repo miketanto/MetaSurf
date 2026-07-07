@@ -1,0 +1,12 @@
+# local data (raw archives, bulk files) — never committed
+data/
+
+__pycache__/
+*.pyc
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+.venv/
