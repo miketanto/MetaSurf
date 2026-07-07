@@ -104,10 +104,60 @@ rotation is invisible under the noise floor.
    archetypes. None should be iterated against the 2024-2025 window, which is
    now spent for share forecasting.
 
+## M3.5b follow-up — the recommendation reframing works (positive result)
+
+The owner's sharper idea: don't forecast exact shares, mine the *conditional*
+structure and turn it into an actionable pick — "when A is winning, the field
+adapts toward its counters, so bring the deck X positioned against the field
+that's about to exist." Tested directly by
+`python -m validation.v3_evolution.recommendation_explore`: each evaluation
+Saturday pick one universe archetype by four strategies (past data only), then
+score it by its **actual match winrate that weekend** (from the matches table
+— model-independent, so no circularity; the weekend is the future relative to
+the pick, so no leakage). Population mean is 0.500 by construction.
+
+| strategy | weeks | mean realized winrate | t vs .500 | p |
+|---|---|---|---|---|
+| POPULAR (biggest deck) | 54 | 0.5304 | 3.34 | 0.0015 |
+| PAST_WINNER (highest Layer-2 winrate) | 40 | 0.5717 | 5.31 | <1e-4 |
+| BR_CURRENT (best response to current field) | 39 | **0.5800** | 6.78 | <1e-6 |
+| BR_ANTICIP (best response to anticipated field) | 39 | 0.5800 | 6.78 | <1e-6 |
+
+**The recommendation is real and strong: a best-positioned deck wins ~58% of
+its matches, p < 1e-6.** Picks are diverse and track real history (Nadu 18
+weeks post-MH3, then GrindingBreach, Belcher, CoffersControl, LivingEnd …).
+The edge is genuine deck-strength persistence: correlation between as-of
+Layer-2 winrate and realized next-weekend winrate is **r = 0.37** over 774
+deck-weeks.
+
+Two findings that refine the owner's intuition:
+
+1. **Anticipation adds nothing here.** BR_ANTICIP made the *identical* pick to
+   BR_CURRENT in all 39 weeks — the field moves too slowly week-to-week
+   (M3.5's noise-floor result) for a one-step-ahead adaptation to change the
+   recommendation. Value comes from best-response to the *current* field
+   (α-Rank style), not from predicting adaptation.
+2. **"Winners get teched" is about share, not winrate.** V3.2's negative
+   coupling means popularity mean-reverts (winning decks don't gain
+   proportional *share*), but winrate persists strongly — PAST_WINNER still
+   wins 57%. So the product should recommend on winrate/positioning while
+   separately noting that a deck's *popularity* tends to revert.
+
+**Revised recommendation:** there IS a shippable, validated feature here — a
+**best-response deck recommender** (powers S2 "best positioned vs current
+meta" and S6 "My Deck vs the meta"), built entirely on M2's matchup matrix, no
+new milestone-gated model required. It does not need to beat persistence on
+share MAE; it beats the field on realized winrate, which is what the grinder
+persona actually cares about. Anticipating adaptation is not worth building at
+the weekly horizon; share point-prediction remains a no.
+
 ## Artifacts
 
 - `models/evolution/replicator.py` — game-neutral replicator step (7 property
   tests incl. RPS cycling, `tests/test_replicator.py`).
-- `validation/v3_evolution/replicator_explore.py` — exploratory runner
-  (clearly marked NOT a validated result).
+- `validation/v3_evolution/replicator_explore.py` — share-forecast prototype
+  (NOT a validated result; negative).
+- `validation/v3_evolution/recommendation_explore.py` — recommendation
+  backtest (NOT a validated gate result, but a strong positive signal;
+  measured in realized match winrate, no leakage/circularity).
 - No change to the committed M3 report or verdict.
