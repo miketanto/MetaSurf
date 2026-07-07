@@ -25,6 +25,7 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 | M3.6-1 | Macro structure (HodgeRank) | Is matchup "kind-beats-kind"? | **66.6% cyclic** vs 33.4% transitive | 🔬 | `docs/notes/m36-macrostrategy-tech-proposal.md` |
 | M3.6-2 | Empirical tech finder | Does the field tech identifiable cards? | signal r≤0.70 but **CONFOUNDED** — see §4c | ⚠️ | same |
 | M3.6-3 | Multi-week share | More predictable at longer horizons? | level sticky (ac 0.79–0.93), direction mean-reverts (~40%) | 🔬 | same |
+| M3.8 | card2vec + macro axes | Do co-occurrence embeddings recover structure? | **0.773 archetype recovery** (vs 0.124); macro RPS weak (12.6% cyclic) | 🔬 | `docs/notes/m38-card2vec-strategy-axes.md` |
 | M6 | Content tech finder | Find *undiscovered* tech by function? | designed; feasibility strong (see §4) | 📋 | this doc |
 
 ## 2. Established empirical facts (the load-bearing numbers)
@@ -62,7 +63,8 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 | Meta snapshot: share + shrunk winrate ± CI | S1 | M2 ✅ | ready |
 | **Matchup matrix** (calibrated, CI, sample size) | S2 | M2 ✅ | ready |
 | **Recommended decks** ("strongest / best vs current meta") | S2/S6 | M2 + V-REC ✅ | validated (0.564 WR, 12/12 quarters); ship as "strongest by calibrated winrate" |
-| Macro strategy-type view ("aggro-control favored now") | S2 | M3.6-1 + card2vec | prototype → milestone |
+| Macro strategy-family navigation (not prediction) | S2/S3 | M3.8 card2vec 🔬 | clusters validated; frame as navigation (macro RPS weak) |
+| Deck similarity / classify pasted list ("lists like yours") | S6 | M3.8 card2vec 🔬 | embedding validated (0.773 recovery); ready to productize |
 | Archetype detail: share/winrate history | S3 | M2 ✅ | ready |
 | Trends: contrarian "overextended, likely to recede" | S5 | M3.6-3 🔬 | honest framing ready |
 | **Tech watch**: "field is teching {cards} vs X" | S5/S6 | M3.6-2 ⚠️ | confounded — needs within-archetype design (§4c) |
@@ -211,7 +213,7 @@ out). Each has a designed path and a gating dependency.
 |---|---|---|---|---|
 | **BL-1 Function-first tech finder** | Understand what each card *does*, then correlate function (not raw card) with matchup history to find real + hidden tech | §4b | §4c within-archetype estimation + M4 live data + oracle-text role layer | high value / hard |
 | BL-2 Empirical tech-watch (descriptive) | Surface cards the field is teching into vs a rising deck | §4a | lead-lag hardening; still shows §4c confound — label as "co-moving", not "counters" | medium |
-| BL-3 Macro strategy-type view | Cluster archetypes to strategy axes; type-level RPS | §4 / M3.6-1 + card2vec | card2vec build | medium |
+| BL-3 Macro strategy navigation | card2vec + archetype clusters (validated M3.8); macro RPS is weak, frame as navigation | M3.8 done | ready to productize (in API) | done→product |
 | BL-4 Contrarian trend flag | "Overextended, likely to recede" | M3.6-3 | forward test (M4) | low, near-ready |
 
 BL-1 is the owner's function-first tech finder. Its correctness rests on doing
@@ -232,4 +234,5 @@ python -m validation.v3_evolution.replicator_explore      # M3.5
 python -m validation.v3_evolution.recommendation_explore  # M3.5b
 python -m validation.v3_evolution.macro_tech_explore      # M3.6 (all 3 experiments)
 python -m validation.v_recommender             # V-REC recommender report (validated)
+python -m validation.embeddings_explore        # M3.8 card2vec + macro axes
 ```
