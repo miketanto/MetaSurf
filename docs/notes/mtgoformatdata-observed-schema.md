@@ -25,8 +25,12 @@ Formats/<Format>/metas.json         # meta periods: [{StartDate, Name}], Modern:
 Formats/<Format>/color_overrides.json
 ```
 
-All 139 Modern rule files parse as JSON (no BOM in any rule file; the C#
-sources carry BOMs). `card_colors.json`: 8,527 Lands / 19,915 NonLands entries.
+All 139 Modern rule files parse as strict JSON (no BOM in any rule file; the
+C# sources carry BOMs). `Modern/color_overrides.json` is **relaxed JSON**: a
+trailing comma before `]` and `"NonLands": null` — the reference's
+Newtonsoft.Json accepts both, so our loader strips trailing commas on retry
+and treats null sections as empty. `card_colors.json`: 8,527 Lands / 19,915
+NonLands entries.
 
 ## Rule-file shape (Modern, full survey)
 

@@ -7,7 +7,7 @@ lint:
 	ruff check .
 
 typecheck:
-	mypy models jobs api ingest db validation scripts
+	mypy models jobs api ingest db validation scripts archetypes
 
 checks:
 	python scripts/check_game_neutrality.py
