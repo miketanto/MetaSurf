@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 from pathlib import Path
 
+from archetypes.classifier.clustering import ATTACH_TAU, MIN_CLUSTER_SIZE, MIN_SAMPLES
 from db.connection import connect
 from validation.v1_archetypes.run import (
     AGREEMENT_TARGET,
@@ -81,6 +82,23 @@ def main() -> None:
         f"\n**Agreement on established archetypes (>= {ESTABLISHED_MIN_DECKS} decks): "
         f"{v11['agreement']:.4f}** (target >= {AGREEMENT_TARGET}) | "
         f"**ARI: {v11['ari']:.4f}**"
+    )
+    s.append(
+        "\nARI is computed against raw cluster ids BEFORE majority-label mapping; "
+        "HDBSCAN deliberately splits archetypes into many fine-grained clusters "
+        "(builds/variants), so ARI is structurally low while mapped agreement is "
+        "high. The plan sets a target on agreement, not ARI; ARI is reported for "
+        "reference."
+    )
+    s.append(
+        "\nClustering-stage hyperparameters (frozen BEFORE this holdout run on the "
+        "disjoint tuning month 2023-03; grid + scores in the "
+        "`archetypes/classifier/clustering.py` docstring): "
+        f"min_cluster_size={MIN_CLUSTER_SIZE}, min_samples={MIN_SAMPLES}, "
+        f"selection=eom, noise-attachment tau={ATTACH_TAU} "
+        "(noise decks join the nearest cluster centroid at cosine >= tau; "
+        "below tau stays Rogue). Tuning-month score: agreement 0.9925, worst "
+        "established F1 0.933. The holdout month was not used for any tuning."
     )
     s.append("\n| archetype | decks | precision | recall | F1 |")
     s.append("|---|---|---|---|---|")
