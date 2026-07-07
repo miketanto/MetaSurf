@@ -79,49 +79,75 @@ each card's own trend and shared seasonality), and a pre-registered backtest —
 *when archetype A rises, does the flagged tech's inclusion rise the following
 week, on withheld data?* Needs no card tags.
 
-### 4b. Content-based hidden-tech finder (the owner's vision, harder)
-Goal: flag cards that **few lists run yet** but that fit the historical
-functional profile of good tech vs an archetype — e.g. "Consign to Memory is
-good vs Eldrazi" inferred from *what the card does*, before the field adopts
-it.
+### 4b. BACKLOG — function-first tech finder (owner design)
+Goal: flag cards — including ones **few lists run yet** — that fit the
+historical functional profile of good tech vs an archetype, e.g. "Consign to
+Memory is good vs Eldrazi" inferred from *what the card does*, before the
+field adopts it. Owner's key design refinement: **build a layer of
+"understanding" of what each card does FIRST, then correlate that
+understanding with historical matchup data** — correlate *functions*, not raw
+card presence. This is what makes the problem tractable and is the direct
+answer to the §4c confounds.
 
-**Why co-occurrence embeddings alone can't do this:** card2vec learns a card
-from the decks it appears in, so an *unplayed* card has no vector. To
-generalise to undiscovered cards you need a **content representation** — the
-card's function from `oracle_text` / `keywords` / `type_line` / `cmc` (we hold
-all of these in the committed snapshot). This is exactly the "generalised card
-representation" idea in the MTG ML literature (arXiv:2407.05879).
+**Why the function layer is the fix (not just a nicety).** §4c showed both
+raw-card methods fail: share-correlation confounds with meta-state (board
+wipes), matchup-DiD confounds with archetype identity (Storm signatures).
+Abstracting cards to functions attacks both:
+- **Pooling by function buys sample size** — one "counter target triggered
+  ability" role aggregates Consign to Memory + Disallow + Voidslime + Tale's
+  End + Tishana's Tidebinder + …, so the within-archetype / matchup-conditioned
+  estimate the per-card version couldn't support becomes feasible.
+- **Role-level A-specificity discounts generic answers** — a "board sweep"
+  role helps vs *every* creature deck, so its effect-vs-A minus average-effect-
+  vs-others is ~0; a "deny colorless / nonbasic mana" role helps specifically
+  vs Eldrazi. The function layer makes generic-vs-specific measurable.
+- **Restricting to interaction roles excludes identity noise** — Storm's
+  graveyard-recursion / ritual roles are not "interaction", so they never
+  enter the tech search; the archetype-identity confound is filtered by design.
 
-**Design:**
-1. **Content features per card** — interpretable oracle-text signals
-   (counters-spell, counters-ability, destroys-artifact, exiles-graveyard,
-   board-sweep, mana-denial, hexproof/protection, "can't"-stax), plus cmc,
-   colors, type, instant-speed. Optionally a learned text embedding later.
-2. **Learn a tech profile per archetype** from history: the effective tech
-   vs A is the M3.6-2 empirical set (cards whose opposing-sideboard inclusion
-   tracks A's share). Fit "is-good-tech-vs-A" as a function of content
-   features over those positives vs a staple-card baseline.
-3. **Score every card** (including unplayed ones) by profile fit × inverse
-   current play-rate → ranked **hidden-tech candidates**.
-4. **Validation (falsifiable, pre-registered):** temporal backtest — for cards
-   that were underplayed at time t and became established tech vs A by t+Δ,
-   did the profile rank them highly *at t*, before adoption? Precision@k of
-   early flags vs a play-count-momentum baseline. Report on withheld archetypes/
-   periods.
+**Pipeline:**
+1. **Card-understanding layer** — assign each card a set of functional roles
+   from `oracle_text` / `keywords` / `type_line` / `cmc` / `colors`
+   (creature-removal, sweeper, artifact/enchant removal, graveyard-hate,
+   counter-spell, counter-ability, hand-disruption, mana-denial, bounce,
+   protection, taxation/stax, lifegain, …). Three build options, in
+   increasing cost: (a) fixture-tested oracle-text rules (CLAUDE.md parser
+   discipline; start here); (b) a learned text embedding (generalised card
+   representation, arXiv:2407.05879); (c) licensed Scryfall Tagger `otag:`
+   (best coverage, but separate project — licensing/coverage must clear
+   first). Roles are game-neutral config, not code.
+2. **Correlate function ↔ matchup, confound-controlled** — for each (role,
+   archetype A) estimate the role's A-specific effect using the §4c
+   *within-archetype, matchup-conditioned* design (does adding a card of this
+   role to a deck of archetype X improve X's realized winrate vs A more than
+   vs the field?), pooled across all cards carrying the role. Output: a small,
+   interpretable "tech profile" per archetype = the roles that specifically
+   beat it.
+3. **Rank cards, including unplayed, by profile fit × inverse play-rate** →
+   hidden-tech candidates, filtered to legal/castable colors and costs for the
+   decks that face A. Card text explains each suggestion.
+4. **Validation (falsifiable, pre-registered):** (i) role-level effect
+   estimates hold out across archetypes/periods; (ii) temporal precision@k —
+   for cards underplayed at t that became established tech vs A by t+Δ, did the
+   profile rank them at t, beating a play-count-momentum baseline. Needs more
+   sample than the frozen corpus gives per (role,A) cell → pairs naturally
+   with **M4 live ingestion**.
 
 **Feasibility evidence (measured this session):** the "counter target
 activated or triggered ability" family — functionally near-identical cards —
-spans the entire play-count range in our corpus: Consign to Memory 22,531
-decks, Tishana's Tidebinder 9,025, Stern Scolding 16,514, Trickbind 168,
-`Consign // Oblivion` 207, **Disruption Protocol 0**. A content representation
-groups these by function where co-occurrence cannot; the underplayed members
-are exactly the hidden-tech output. And the profile is real: for **Eldrazi**,
-the top empirical tech (opposing-SB corr with Eldrazi share) is a coherent
-"sweep small creatures + deny colorless mana + counter triggers" cluster —
-Pyroclasm (r=0.69), **Consign to Memory (r=0.66)**, Harbinger of the Seas
-(0.64), Whipflare, Into the Flood Maw, The Meathook Massacre — the owner's
-exact example sitting at #2. (Reproduce: the Eldrazi query in this session /
-`macro_tech_explore.py` generalised per-archetype.)
+spans the entire play-count range: Consign to Memory 22,531 decks, Stern
+Scolding 16,514, Tishana's Tidebinder 9,025, Trickbind 168, `Consign //
+Oblivion` 207, **Disruption Protocol 0**. A function layer groups these where
+co-occurrence cannot; the underplayed members are exactly the hidden-tech
+output. Consign to Memory being real Eldrazi tech is independently plausible
+(it counters Eldrazi's ETB/cast triggers) — but note it is NOT proven by the
+§4c probe, which is confounded; the function-first + within-archetype design
+is what would prove it.
+
+**Prerequisites / risks:** gated on §4c (within-archetype estimation) and
+realistically on M4 (sample volume); the oracle-text role layer is itself a
+fixture-tested parser with its own accuracy bar; Scryfall Tagger licensing is
+unresolved. Highest-value but hardest and last of the tech items.
 
 **Caveats / risks:** functional tags are not in Scryfall bulk (the Tagger
 `otag:` project is separate, partial, licensing-unclear) — so features must be
@@ -169,7 +195,27 @@ exists to serve them. This document is the milestone record for that research;
 each new investigation appends a ledger row and, if it produces a shippable
 signal, a roadmap entry.
 
-## 6. Reproduce everything
+## 6. Backlog register
+
+Ideas parked deliberately (plan §2 style: don't build yet, don't architect
+out). Each has a designed path and a gating dependency.
+
+| Item | What | Design | Gated on | Priority |
+|---|---|---|---|---|
+| **BL-1 Function-first tech finder** | Understand what each card *does*, then correlate function (not raw card) with matchup history to find real + hidden tech | §4b | §4c within-archetype estimation + M4 live data + oracle-text role layer | high value / hard |
+| BL-2 Empirical tech-watch (descriptive) | Surface cards the field is teching into vs a rising deck | §4a | lead-lag hardening; still shows §4c confound — label as "co-moving", not "counters" | medium |
+| BL-3 Macro strategy-type view | Cluster archetypes to strategy axes; type-level RPS | §4 / M3.6-1 + card2vec | card2vec build | medium |
+| BL-4 Contrarian trend flag | "Overextended, likely to recede" | M3.6-3 | forward test (M4) | low, near-ready |
+
+BL-1 is the owner's function-first tech finder. Its correctness rests on doing
+the card-understanding layer *before* correlating — that is what turns the
+confounded raw-card signal (§4c) into a poolable, generic-vs-specific,
+identity-filtered function signal. Build order within BL-1: (1) oracle-text
+role layer with fixtures → (2) role×archetype within-archetype matchup effects
+→ (3) unplayed-card ranking → (4) pre-registered temporal precision@k, ideally
+on live data.
+
+## 7. Reproduce everything
 
 ```
 make rebuild                                   # corpus + labels + matches
