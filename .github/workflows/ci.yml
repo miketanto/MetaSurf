@@ -35,7 +35,7 @@ jobs:
       - name: Lint (ruff)
         run: ruff check .
       - name: Types (mypy)
-        run: mypy models jobs api ingest db validation scripts
+        run: mypy models jobs api ingest db validation scripts archetypes
       - name: Game-neutrality import check (plan §4.1)
         run: python scripts/check_game_neutrality.py
       - name: Determinism check
