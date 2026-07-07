@@ -20,7 +20,8 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 | M3.2 | Flocking hypothesis | Do players flock to winners? | γ significant but **negative** — field counter-adapts | ❌(hyp) | same |
 | M3.3 | Tech-card drift (Holt) | Predict card copies? | −1.77% vs persistence | ❌ | same |
 | M3.5 | Replicator share forecast | Does matchup-driven evolution predict share? | no — best η=0 (persistence); field too slow weekly | ❌ | `docs/notes/m35-replicator-proposal.md` |
-| M3.5b | Deck recommender | Does a best-positioned deck win more? | **0.580 realized winrate, p<1e-6** | 🔬 | same |
+| M3.5b | Deck recommender (single window) | Does a best-positioned deck win more? | 0.580 realized winrate, p<1e-6 | 🔬 | same |
+| V-REC | Deck recommender (full-span, pre-registered) | Does it hold across 2022–2025? | **0.564 WR, CI[0.550,0.579], 12/12 quarters; positioning ≈ strength** | ✅ | `validation/reports/m35b-recommender.md` |
 | M3.6-1 | Macro structure (HodgeRank) | Is matchup "kind-beats-kind"? | **66.6% cyclic** vs 33.4% transitive | 🔬 | `docs/notes/m36-macrostrategy-tech-proposal.md` |
 | M3.6-2 | Empirical tech finder | Does the field tech identifiable cards? | signal r≤0.70 but **CONFOUNDED** — see §4c | ⚠️ | same |
 | M3.6-3 | Multi-week share | More predictable at longer horizons? | level sticky (ac 0.79–0.93), direction mean-reverts (~40%) | 🔬 | same |
@@ -37,8 +38,14 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 - **Winrate persists; popularity mean-reverts.** As-of winrate ↔ realized
   next-weekend winrate r=0.37 (774 deck-weeks); a rising deck keeps rising
   only ~40% of the time.
-- **A best-positioned deck wins ~58% of its real matches** (p<1e-6), mostly
-  from deck-strength persistence plus a small positioning bonus.
+- **A recommended strong/well-positioned deck wins ~56% of its real matches**,
+  validated pre-registered across all 12 quarters 2022–2025 (V-REC: 0.564,
+  95% CI [0.550, 0.579]; not a winrate-model-tuning artifact — 0.550 in-window
+  vs 0.577 out). **Correction to M3.5b:** on the full span the field-
+  positioning bonus is ~0 (MODEL 0.5642 vs STRONGEST 0.5632, p=0.94) — the
+  entire edge is deck-strength persistence; the +0.8pt positioning in the
+  single M3.5b window was noise. Both robustly beat "bring the most popular
+  deck" (+5.6pt, 71/92 weeks, p=2e-8).
 - **Tech isolation is hard (correction — see §4c).** Share-correlation of
   opposing sideboard cards (M3.6-2) conflates true anti-A tech with cards
   that are merely good in the meta-state where A is popular (board wipes
@@ -54,7 +61,7 @@ not yet a pre-registered gate) · 📋 PROPOSED (designed, not built).
 |---|---|---|---|
 | Meta snapshot: share + shrunk winrate ± CI | S1 | M2 ✅ | ready |
 | **Matchup matrix** (calibrated, CI, sample size) | S2 | M2 ✅ | ready |
-| **Best-positioned deck** ("best vs current meta") | S2/S6 | M2 + M3.5b 🔬 | needs pre-registered backtest |
+| **Recommended decks** ("strongest / best vs current meta") | S2/S6 | M2 + V-REC ✅ | validated (0.564 WR, 12/12 quarters); ship as "strongest by calibrated winrate" |
 | Macro strategy-type view ("aggro-control favored now") | S2 | M3.6-1 + card2vec | prototype → milestone |
 | Archetype detail: share/winrate history | S3 | M2 ✅ | ready |
 | Trends: contrarian "overextended, likely to recede" | S5 | M3.6-3 🔬 | honest framing ready |
@@ -224,4 +231,5 @@ python -m validation.v3_evolution              # M3 report
 python -m validation.v3_evolution.replicator_explore      # M3.5
 python -m validation.v3_evolution.recommendation_explore  # M3.5b
 python -m validation.v3_evolution.macro_tech_explore      # M3.6 (all 3 experiments)
+python -m validation.v_recommender             # V-REC recommender report (validated)
 ```
