@@ -119,8 +119,33 @@ Targets are set once and not tuned to; a miss is reported, not lowered
 - Small-archetype sample: honestly gated on M4.
 
 ## 7. Status
-Backlog **BL-1**, high value / high effort. Phases 1–2 and validation B1–B2 are
-doable on the frozen corpus for the distinctive archetypes; C1 and full
-coverage want M4. Reproduce the evidence: `python -m
-validation.embedding_tech_explore` and `python -m
+Backlog **BL-1**, high value / high effort.
+
+**Phases 1–2 + validation B2/B1 are BUILT and produced first positive evidence
+(2026-07-08).** Report: `validation/reports/tech-finder-b1b2-2026-07-08.md`.
+- **Layer A** — `archetypes/roles` + `config/card_roles.json`: fixture-tested
+  oracle-text role parser (40 tests vs real Scryfall text; interaction roles
+  only). Materialize with `scripts/materialize_card_roles.py`.
+- **Layer B** — `validation/tech_finder/estimate.py`: the within-archetype,
+  matchup-conditioned DiD (card-agnostic → also the game-neutral seam).
+- **B2 recovery: 6/7 gated PASS (11/13 across all targets).** On the rebuilt
+  Modern corpus (347,438 decided non-mirror match rows) the within-archetype DiD
+  ranks the known tech role in the top-3 for 13 pre-registered archetypes, and
+  at a rank ≤ the naive prevalence baseline everywhere it passes — often far
+  better (Tron 1 vs 5, Titan 2 vs 5, Ruby Storm 2 vs 5, Aggro 2 vs 8). It also
+  surfaces correct nuance: vs Titan it ranks `mana_denial` above `land_destruction`
+  (Amulet floods lands, so Blood Moon bites but land destruction doesn't). Two
+  honest misses: HammerTime (artifact removal ranks last — Hammer is resilient
+  to removal / a-priori wisdom wrong) and Yawgmoth (graveyard hate not A-specific
+  — it's a battlefield engine, our label was likely wrong).
+- **B1 reproducibility: 2/7 gated.** Only graveyard_hate vs the graveyard decks
+  (LivingEnd, GoryoReanimator) is positive+top-k across two disjoint eras
+  (2022–23 / 2024–25). Every narrow tech (land destruction, mana denial, artifact
+  removal, counters, discard) shifts across eras → graveyard hate is a persistent
+  structural tech, most other tech is metagame-contingent. Reported, not lowered.
+- **Layer C** (rank *unplayed* hidden tech) and **C1** (temporal precision@k)
+  remain future work; want more live volume (§4b phase 4).
+
+Reproduce: `python -m validation.tech_finder` (this milestone). Earlier negative
+probes: `python -m validation.embedding_tech_explore` and `python -m
 validation.v3_evolution.macro_tech_explore`.

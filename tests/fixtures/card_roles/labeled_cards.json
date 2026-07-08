@@ -1,0 +1,323 @@
+[
+  {
+    "name": "Abrupt Decay",
+    "oracle_id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+    "type_line": "Instant",
+    "oracle_text": "This spell can't be countered.\nDestroy target nonland permanent with mana value 3 or less.",
+    "expected_roles": [
+      "artifact_enchant_removal",
+      "creature_removal"
+    ]
+  },
+  {
+    "name": "Alpine Moon",
+    "oracle_id": "8b46b50c-f824-4c4e-86de-38065c6f9a64",
+    "type_line": "Enchantment",
+    "oracle_text": "As this enchantment enters, choose a nonbasic land card name.\nLands your opponents control with the chosen name lose all land types and abilities, and they gain \"{T}: Add one mana of any color.\"",
+    "expected_roles": [
+      "mana_denial"
+    ]
+  },
+  {
+    "name": "Anger of the Gods",
+    "oracle_id": "3a7fe095-8278-4b1d-bec4-19b35bdcdd1b",
+    "type_line": "Sorcery",
+    "oracle_text": "Anger of the Gods deals 3 damage to each creature. If a creature dealt damage this way would die this turn, exile it instead.",
+    "expected_roles": [
+      "board_sweeper"
+    ]
+  },
+  {
+    "name": "Assassin's Trophy",
+    "oracle_id": "ac10d218-f9a6-4058-9cda-a15ca1b0b7b5",
+    "type_line": "Instant",
+    "oracle_text": "Destroy target permanent an opponent controls. Its controller may search their library for a basic land card, put it onto the battlefield, then shuffle.",
+    "expected_roles": [
+      "artifact_enchant_removal",
+      "creature_removal"
+    ]
+  },
+  {
+    "name": "Blood Moon",
+    "oracle_id": "94fac5fe-97d5-4c12-a80c-8efff9d853ae",
+    "type_line": "Enchantment",
+    "oracle_text": "Nonbasic lands are Mountains.",
+    "expected_roles": [
+      "mana_denial"
+    ]
+  },
+  {
+    "name": "Boil",
+    "oracle_id": "3a51485b-31b2-4fa5-824a-a919f9d28ca8",
+    "type_line": "Instant",
+    "oracle_text": "Destroy all Islands.",
+    "expected_roles": [
+      "land_destruction"
+    ]
+  },
+  {
+    "name": "Choke",
+    "oracle_id": "057fa60b-10b0-4612-be0d-157076c82241",
+    "type_line": "Enchantment",
+    "oracle_text": "Islands don't untap during their controllers' untap steps.",
+    "expected_roles": [
+      "mana_denial"
+    ]
+  },
+  {
+    "name": "Consign to Memory",
+    "oracle_id": "16c39265-72d9-4c86-a961-8dd38ff9adcd",
+    "type_line": "Instant",
+    "oracle_text": "Replicate {1} (When you cast this spell, copy it for each time you paid its replicate cost. You may choose new targets for the copies.)\nCounter target triggered ability or colorless spell.",
+    "expected_roles": [
+      "counter_ability",
+      "counter_spell"
+    ]
+  },
+  {
+    "name": "Counterspell",
+    "oracle_id": "cc187110-1148-4090-bbb8-e205694a39f5",
+    "type_line": "Instant",
+    "oracle_text": "Counter target spell.",
+    "expected_roles": [
+      "counter_spell"
+    ]
+  },
+  {
+    "name": "Damping Sphere",
+    "oracle_id": "fd50d76c-7654-47b9-a5b6-d075874e4357",
+    "type_line": "Artifact",
+    "oracle_text": "If a land is tapped for two or more mana, it produces {C} instead of any other type and amount.\nEach spell a player casts costs {1} more to cast for each other spell that player has cast this turn.",
+    "expected_roles": [
+      "mana_denial"
+    ]
+  },
+  {
+    "name": "Duress",
+    "oracle_id": "33d405ea-7a9a-4970-b70f-9c05d90dd6f0",
+    "type_line": "Sorcery",
+    "oracle_text": "Target opponent reveals their hand. You choose a noncreature, nonland card from it. That player discards that card.",
+    "expected_roles": [
+      "hand_disruption"
+    ]
+  },
+  {
+    "name": "Endurance",
+    "oracle_id": "c85d824b-c190-4d04-ab99-918ad0e6516c",
+    "type_line": "Creature — Elemental Incarnation",
+    "oracle_text": "Flash\nReach\nWhen this creature enters, up to one target player puts all the cards from their graveyard on the bottom of their library in a random order.\nEvoke—Exile a green card from your hand.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Fatal Push",
+    "oracle_id": "16437a83-be52-44cd-a768-a767c9347eb2",
+    "type_line": "Instant",
+    "oracle_text": "Destroy target creature if it has mana value 2 or less.\nRevolt — Destroy that creature if it has mana value 4 or less instead if a permanent left the battlefield under your control this turn.",
+    "expected_roles": [
+      "creature_removal"
+    ]
+  },
+  {
+    "name": "Field of Ruin",
+    "oracle_id": "f825c98f-a327-440b-8c0d-ebe02e23bfb7",
+    "type_line": "Land",
+    "oracle_text": "{T}: Add {C}.\n{2}, {T}, Sacrifice this land: Destroy target nonbasic land an opponent controls. Each player searches their library for a basic land card, puts it onto the battlefield, then shuffles.",
+    "expected_roles": [
+      "land_destruction"
+    ]
+  },
+  {
+    "name": "Fulminator Mage",
+    "oracle_id": "bd4c46a3-b723-4b35-9061-9a1dee7cc9d8",
+    "type_line": "Creature — Elemental Shaman",
+    "oracle_text": "Sacrifice this creature: Destroy target nonbasic land.",
+    "expected_roles": [
+      "land_destruction"
+    ]
+  },
+  {
+    "name": "Ghost Quarter",
+    "oracle_id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+    "type_line": "Land",
+    "oracle_text": "{T}: Add {C}.\n{T}, Sacrifice this land: Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield, then shuffle.",
+    "expected_roles": [
+      "land_destruction"
+    ]
+  },
+  {
+    "name": "Grafdigger's Cage",
+    "oracle_id": "753cb2b2-24ce-484f-a2d0-be6fd2c67ebd",
+    "type_line": "Artifact",
+    "oracle_text": "Creature cards in graveyards and libraries can't enter the battlefield.\nPlayers can't cast spells from graveyards or libraries.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Gurmag Angler",
+    "oracle_id": "315772f2-abd2-4681-b8c8-1db4b0ccbbcd",
+    "type_line": "Creature — Zombie Fish",
+    "oracle_text": "Delve (Each card you exile from your graveyard while casting this spell pays for {1}.)",
+    "expected_roles": []
+  },
+  {
+    "name": "Kolaghan's Command",
+    "oracle_id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+    "type_line": "Instant",
+    "oracle_text": "Choose two —\n• Return target creature card from your graveyard to your hand.\n• Target player discards a card.\n• Destroy target artifact.\n• Kolaghan's Command deals 2 damage to any target.",
+    "expected_roles": [
+      "artifact_enchant_removal",
+      "creature_removal",
+      "hand_disruption"
+    ]
+  },
+  {
+    "name": "Leyline of the Void",
+    "oracle_id": "f4e32fc1-1b8d-441e-8e76-71f19f98e925",
+    "type_line": "Enchantment",
+    "oracle_text": "If this card is in your opening hand, you may begin the game with it on the battlefield.\nIf a card would be put into an opponent's graveyard from anywhere, exile it instead.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Lightning Bolt",
+    "oracle_id": "4457ed35-7c10-48c8-9776-456485fdf070",
+    "type_line": "Instant",
+    "oracle_text": "Lightning Bolt deals 3 damage to any target.",
+    "expected_roles": [
+      "creature_removal"
+    ]
+  },
+  {
+    "name": "Molten Rain",
+    "oracle_id": "e9774695-b2f1-4014-8504-04b2339be568",
+    "type_line": "Sorcery",
+    "oracle_text": "Destroy target land. If that land was nonbasic, Molten Rain deals 2 damage to the land's controller.",
+    "expected_roles": [
+      "land_destruction"
+    ]
+  },
+  {
+    "name": "Nethergoyf",
+    "oracle_id": "040cbd8a-a9e5-454b-a5ae-9b66bb66b8e9",
+    "type_line": "Creature — Lhurgoyf",
+    "oracle_text": "Nethergoyf's power is equal to the number of card types among cards in your graveyard and its toughness is equal to that number plus 1.\nEscape—{2}{B}, Exile any number of other cards from your graveyard with four or more card types among them. (You may cast this card from your graveyard for its escape cost.)",
+    "expected_roles": []
+  },
+  {
+    "name": "Nihil Spellbomb",
+    "oracle_id": "b713e49f-1b13-42d1-91f2-cc7a579e7614",
+    "type_line": "Artifact",
+    "oracle_text": "{T}, Sacrifice this artifact: Exile target player's graveyard.\nWhen this artifact is put into a graveyard from the battlefield, you may pay {B}. If you do, draw a card.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Phoenix of Ash",
+    "oracle_id": "0ad557fc-6b7e-4f7e-b060-e3c8ec8acf6d",
+    "type_line": "Creature — Phoenix",
+    "oracle_text": "Flying, haste\n{2}{R}: This creature gets +2/+0 until end of turn.\nEscape—{2}{R}{R}, Exile three other cards from your graveyard. (You may cast this card from your graveyard for its escape cost.)\nThis creature escapes with a +1/+1 counter on it.",
+    "expected_roles": []
+  },
+  {
+    "name": "Pyroclasm",
+    "oracle_id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+    "type_line": "Sorcery",
+    "oracle_text": "Pyroclasm deals 2 damage to each creature.",
+    "expected_roles": [
+      "board_sweeper"
+    ]
+  },
+  {
+    "name": "Relic of Progenitus",
+    "oracle_id": "6a9c3401-570c-41cb-a605-75dfa57d6ab7",
+    "type_line": "Artifact",
+    "oracle_text": "{T}: Target player exiles a card from their graveyard.\n{1}, Exile this artifact: Exile all graveyards. Draw a card.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Rest in Peace",
+    "oracle_id": "087f9ad7-e74f-40e2-8102-1ed2925d0418",
+    "type_line": "Enchantment",
+    "oracle_text": "When this enchantment enters, exile all graveyards.\nIf a card or token would be put into a graveyard from anywhere, exile it instead.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Soul-Guide Lantern",
+    "oracle_id": "1b5e6560-ff2e-4475-96cb-63f64c8a86db",
+    "type_line": "Artifact",
+    "oracle_text": "When this artifact enters, exile target card from a graveyard.\n{T}, Sacrifice this artifact: Exile each opponent's graveyard.\n{1}, {T}, Sacrifice this artifact: Draw a card.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Stern Scolding",
+    "oracle_id": "3bc8a406-3ae7-4f56-a33c-b4a2c115b917",
+    "type_line": "Instant",
+    "oracle_text": "Counter target creature spell with power or toughness 2 or less.",
+    "expected_roles": [
+      "counter_spell"
+    ]
+  },
+  {
+    "name": "Supreme Verdict",
+    "oracle_id": "0230de18-8d15-4cfa-9d42-7ccddd9f9570",
+    "type_line": "Sorcery",
+    "oracle_text": "This spell can't be countered.\nDestroy all creatures.",
+    "expected_roles": [
+      "board_sweeper"
+    ]
+  },
+  {
+    "name": "Surgical Extraction",
+    "oracle_id": "3bfa088c-9a47-4123-aee5-4de44e355bef",
+    "type_line": "Instant",
+    "oracle_text": "({B/P} can be paid with either {B} or 2 life.)\nChoose target card in a graveyard other than a basic land card. Search its owner's graveyard, hand, and library for any number of cards with the same name as that card and exile them. Then that player shuffles.",
+    "expected_roles": [
+      "graveyard_hate"
+    ]
+  },
+  {
+    "name": "Thoughtseize",
+    "oracle_id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+    "type_line": "Sorcery",
+    "oracle_text": "Target player reveals their hand. You choose a nonland card from it. That player discards that card. You lose 2 life.",
+    "expected_roles": [
+      "hand_disruption"
+    ]
+  },
+  {
+    "name": "Tishana's Tidebinder",
+    "oracle_id": "2993dc7d-723d-4a9b-94bd-4bb02a9f7243",
+    "type_line": "Creature — Merfolk Wizard",
+    "oracle_text": "Flash\nWhen this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.)",
+    "expected_roles": [
+      "counter_ability"
+    ]
+  },
+  {
+    "name": "Wrath of God",
+    "oracle_id": "34515b16-c9a4-4f98-8c77-416a7a523407",
+    "type_line": "Sorcery",
+    "oracle_text": "Destroy all creatures. They can't be regenerated.",
+    "expected_roles": [
+      "board_sweeper"
+    ]
+  },
+  {
+    "name": "__edge_null_text__",
+    "oracle_id": "00000000-0000-0000-0000-000000000000",
+    "type_line": "Land",
+    "oracle_text": null,
+    "expected_roles": []
+  }
+]

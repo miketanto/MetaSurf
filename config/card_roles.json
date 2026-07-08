@@ -1,0 +1,92 @@
+{
+  "_doc": "Functional-role rules for the tech finder (BL-1, research-log 4b). Each role fires if ANY of its regexes matches the card's lowercased oracle_text. Patterns are written against REAL Scryfall oracle text (tests/fixtures/card_roles/labeled_cards.json), never from memory of a card. Interaction roles only: engine/identity text (ramp, recursion, card draw) is deliberately NOT a role, so archetype-identity cards do not enter the tech search (research-log 4b, 4c). '[^.]*' stays within a sentence for the co-mention patterns. Add rules only with a real fixture + expected label.",
+  "roles": [
+    {
+      "role": "land_destruction",
+      "doc": "destroys/blows up lands (anti-Tron / anti-greedy-mana)",
+      "any": [
+        "destroy (target|all)[^.]*\\bland",
+        "destroy (target|all)[^.]*\\b(island|mountain|swamp|forest|plains)s?\\b"
+      ]
+    },
+    {
+      "role": "mana_denial",
+      "doc": "denies/taxes mana without destroying the land (Blood Moon / Choke / Damping Sphere)",
+      "any": [
+        "nonbasic lands are",
+        "lose all land types",
+        "don't untap",
+        "costs \\{1\\} more",
+        "spells cost \\{\\d+\\} more"
+      ]
+    },
+    {
+      "role": "graveyard_hate",
+      "doc": "disrupts graveyards (anti-Dredge / anti-reanimator). Opponent-facing ONLY: must NOT fire on self-graveyard costs (delve, escape, 'exile from your graveyard'), which are engine/identity, not hate.",
+      "any": [
+        "exile all graveyards?",
+        "exile target player'?s? graveyard",
+        "exile each opponent'?s? graveyard",
+        "exiles?[^.]*cards?[^.]*from (a|an opponent's|their) graveyard",
+        "(owner's|opponent's|their) graveyard[^.]*\\bexile",
+        "put into[^.]*graveyard from anywhere, exile it instead",
+        "can't cast spells from (their )?graveyards",
+        "cards in graveyards and libraries can't",
+        "graveyard on the bottom of their library"
+      ]
+    },
+    {
+      "role": "creature_removal",
+      "doc": "single-target creature/permanent removal",
+      "any": [
+        "destroy target creature",
+        "destroy target (nonland )?permanent",
+        "deals \\d+ damage to (any target|target creature)",
+        "exile target creature"
+      ]
+    },
+    {
+      "role": "board_sweeper",
+      "doc": "mass creature removal",
+      "any": [
+        "destroy all creatures",
+        "deals \\d+ damage to each creature",
+        "each creature gets -\\d+/-\\d+"
+      ]
+    },
+    {
+      "role": "counter_spell",
+      "doc": "counters spells on the stack",
+      "any": [
+        "counter target[^.]*spell"
+      ]
+    },
+    {
+      "role": "counter_ability",
+      "doc": "counters activated/triggered abilities (anti-ETB / anti-trigger)",
+      "any": [
+        "counter[^.]*(activated|triggered) ability"
+      ]
+    },
+    {
+      "role": "artifact_enchant_removal",
+      "doc": "destroys/exiles artifacts or enchantments",
+      "any": [
+        "destroy target artifact",
+        "destroy target enchantment",
+        "destroy target[^.]*artifact or enchantment",
+        "destroy target (nonland )?permanent",
+        "exile target artifact or enchantment"
+      ]
+    },
+    {
+      "role": "hand_disruption",
+      "doc": "discard / hand attack",
+      "any": [
+        "reveals their hand",
+        "target (player|opponent) discards",
+        "each opponent discards"
+      ]
+    }
+  ]
+}
