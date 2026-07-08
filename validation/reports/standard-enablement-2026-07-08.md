@@ -49,17 +49,24 @@ to `ingest_unresolved_cards`, never guessed. **Fix: refresh the Scryfall bulk**
 (`data/scryfall/oracle-cards.jsonl`) — the on-disk snapshot predates the latest
 Standard set.
 
-## What is NOT yet done (honest scope)
-- **Full V1 gate for Standard is not run.** V1.1 (clustering-recovery
-  agreement) and V1.2 (emergence backtest) need (a) a **historical Standard
-  corpus** (a holdout month with enough decks — a `MTGODecklistCache` clone;
-  the live slice is ~1 week, too thin), and (b) **parameterizing
-  `validation/v1_archetypes`** — `run_v11`/`run_v12` currently call
-  `load_definitions(conn)` / `load_decks(...)` with no format arg, so they
-  default to Modern. Both are follow-ups before Standard has a validated V1
-  claim; this report is the live-data classification-health check, not the V1
-  gate.
-- Refresh Scryfall bulk to clear the 9 new-card unresolveds.
+## Follow-ups
+- **V1 harness parameterized by format — DONE (this session).**
+  `run_v11(conn, format_name, holdout_start, holdout_end)` and
+  `run_v12(conn, format_name, emergence_events)` now thread the format through
+  (defaults reproduce the Modern gate byte-identically; CLI gains `--format` /
+  `--holdout-*`). What remains to actually RUN the V1 gate for Standard is a
+  **historical Standard corpus** (a holdout month with enough decks — a
+  `MTGODecklistCache` clone; the live slice is ~1 week, too thin) plus curated
+  **Standard emergence events** for V1.2 (Modern's Nadu/Basim don't apply).
+  Until then this report is the live-data classification-health check, not the
+  validated V1 gate.
+- **Scryfall bulk refresh — verified NO-OP (does not clear the 9 unresolveds).**
+  Fetched today's oracle-cards bulk (2026-07-08): byte-identical name set to the
+  on-disk snapshot (0 diff), and Scryfall fuzzy-search returns unrelated cards
+  for all 9 (Leyline Weaver → "Spider Manifestation"). These cards are simply
+  **not in Scryfall's database yet** (coverage lag for a very new set), so they
+  stay correctly-unresolved (logged, never guessed) and will auto-resolve once
+  Scryfall catalogues them — the resolver rebuilds from the cards table each run.
 
 ## Reproduce
 ```

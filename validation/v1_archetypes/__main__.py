@@ -1,9 +1,15 @@
 """CLI: python -m validation.v1_archetypes --out validation/reports/<file>.md
+             [--format modern] [--holdout-start YYYY-MM-DD] [--holdout-end ...]
 
 Runs V1.1 + V1.2 twice (V1.3 determinism check compares the serialized
 metrics byte-for-byte), then writes the report. Exits non-zero if V1.3 fails;
 V1.1/V1.2 target misses are written into the report for owner review, per
 CLAUDE.md (never silently lowered).
+
+Format-parameterized: defaults reproduce the Modern V1 gate exactly. Another
+format needs its own holdout window (via --holdout-*) and, for V1.2, its own
+curated emergence events (only Modern's are defined today; other formats run
+V1.1 only until theirs are added to run.EMERGENCE_EVENTS-style config).
 """
 
 from __future__ import annotations
@@ -16,6 +22,7 @@ from archetypes.classifier.clustering import ATTACH_TAU, MIN_CLUSTER_SIZE, MIN_S
 from db.connection import connect
 from validation.v1_archetypes.run import (
     AGREEMENT_TARGET,
+    EMERGENCE_EVENTS,
     EMERGENCE_HORIZON_DAYS,
     ESTABLISHED_MIN_DECKS,
     HOLDOUT_END,
@@ -33,12 +40,19 @@ def main() -> None:
     parser.add_argument(
         "--date", default=None, help="report date (YYYY-MM-DD); default: today"
     )
+    parser.add_argument("--format", default="modern", dest="format_name")
+    parser.add_argument("--holdout-start", type=dt.date.fromisoformat, default=HOLDOUT_START)
+    parser.add_argument("--holdout-end", type=dt.date.fromisoformat, default=HOLDOUT_END)
     args = parser.parse_args()
     report_date = args.date or dt.date.today().isoformat()
+    # V1.2 emergence events are format-specific; only Modern's are defined so
+    # far — other formats run V1.1 only until their events are curated.
+    events = EMERGENCE_EVENTS if args.format_name == "modern" else ()
 
+    fmt, hs, he = args.format_name, args.holdout_start, args.holdout_end
     with connect() as conn:
-        v11a, v12a = run_v11(conn), run_v12(conn)
-        v11b, v12b = run_v11(conn), run_v12(conn)
+        v11a, v12a = run_v11(conn, fmt, hs, he), run_v12(conn, fmt, events)
+        v11b, v12b = run_v11(conn, fmt, hs, he), run_v12(conn, fmt, events)
     a, b = format_metrics(v11a, v12a), format_metrics(v11b, v12b)
     deterministic = a == b
 

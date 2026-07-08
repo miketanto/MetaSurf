@@ -81,9 +81,14 @@ def _rule_truth(
     return truth
 
 
-def run_v11(conn: psycopg.Connection) -> dict[str, Any]:
-    defs, load_report = load_definitions(conn)
-    decks = load_decks(conn, HOLDOUT_START, HOLDOUT_END)
+def run_v11(
+    conn: psycopg.Connection,
+    format_name: str = "modern",
+    holdout_start: dt.date = HOLDOUT_START,
+    holdout_end: dt.date = HOLDOUT_END,
+) -> dict[str, Any]:
+    defs, load_report = load_definitions(conn, format_name=format_name)
+    decks = load_decks(conn, holdout_start, holdout_end, format_name)
     classifications = rules_label(decks, defs)
     truth = _rule_truth(decks, classifications)
 
@@ -157,12 +162,22 @@ def run_v11(conn: psycopg.Connection) -> dict[str, Any]:
     }
 
 
-def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
+def run_v12(
+    conn: psycopg.Connection,
+    format_name: str = "modern",
+    emergence_events: tuple[tuple[str, str, str, dt.date], ...] = EMERGENCE_EVENTS,
+) -> list[dict[str, Any]]:
+    # emergence events are format-specific (chosen from that format's corpus);
+    # a format with none defined simply has no V1.2 to run.
+    if not emergence_events:
+        return []
     results: list[dict[str, Any]] = []
-    full_defs, _ = load_definitions(conn)
+    full_defs, _ = load_definitions(conn, format_name=format_name)
     exclude = basic_land_ids(conn)
-    for label, file_stem, key_card, window_start in EMERGENCE_EVENTS:
-        blind_defs, _ = load_definitions(conn, frozenset({file_stem}))
+    for label, file_stem, key_card, window_start in emergence_events:
+        blind_defs, _ = load_definitions(
+            conn, frozenset({file_stem}), format_name=format_name
+        )
         assert len(blind_defs.archetypes) == len(full_defs.archetypes) - 1
 
         with conn.cursor() as cur:
@@ -175,7 +190,9 @@ def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
             assert row is not None, key_card
             key_id = row[0]
 
-        decks = load_decks(conn, window_start, window_start + dt.timedelta(days=60))
+        decks = load_decks(
+            conn, window_start, window_start + dt.timedelta(days=60), format_name
+        )
         # "the new deck" = decks playing the new key card in the mainboard
         target_ids = {d.deck_id for d in decks if key_id in d.deck.main}
         # first date with cumulative >= EMERGENCE_MIN_APPEARANCES target decks
