@@ -94,3 +94,70 @@ def load_directed_rows(
 
 def _in_window(d: dt.date, lo: dt.date | None, hi: dt.date | None) -> bool:
     return (lo is None or d >= lo) and (hi is None or d <= hi)
+
+
+def load_card_rows(
+    conn: psycopg.Connection,
+    format_name: str = "modern",
+    date_from: dt.date | None = None,
+    date_to: dt.date | None = None,
+) -> tuple[list, dict[int, str]]:
+    """Directed decided non-mirror rows carrying each deck's whole-75 card-id
+    set (for the card-level tech estimator), plus a card_id -> name map."""
+    from validation.tech_finder.cards import CardRow  # local: avoid cycle
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT dc.deck_id, array_agg(DISTINCT dc.card_id)
+            FROM matches m
+            JOIN deck_cards dc ON dc.deck_id IN (m.deck_id_a, m.deck_id_b)
+            GROUP BY dc.deck_id
+            """
+        )
+        cards: dict[int, frozenset[int]] = {
+            did: frozenset(cs) for did, cs in cur.fetchall()
+        }
+        cur.execute(
+            """
+            SELECT d.id, a.name, e.date
+            FROM decks d
+            JOIN archetypes a ON a.id = d.archetype_id
+            JOIN events e ON e.id = d.event_id
+            JOIN formats f ON f.id = e.format_id AND f.name = %s
+            """,
+            (format_name,),
+        )
+        meta: dict[int, tuple[str, dt.date]] = {
+            did: (name, date) for did, name, date in cur.fetchall()
+        }
+        cur.execute(
+            "SELECT deck_id_a, deck_id_b, result FROM matches WHERE deck_id_b IS NOT NULL"
+        )
+        raw = cur.fetchall()
+        cur.execute("SELECT id, name FROM cards")
+        names: dict[int, str] = dict(cur.fetchall())
+
+    rogue = "Rogue"
+    rows: list = []
+    for a, b, result in raw:
+        ma, mb = meta.get(a), meta.get(b)
+        if ma is None or mb is None:
+            continue
+        arch_a, date_a = ma
+        arch_b, date_b = mb
+        if arch_a in (arch_b, rogue) or arch_b == rogue:
+            continue
+        wl = _parse_wl(result)
+        if wl is None:
+            continue
+        wa, la = wl
+        if wa == la:
+            continue
+        ca = cards.get(a, frozenset())
+        cb = cards.get(b, frozenset())
+        if _in_window(date_a, date_from, date_to):
+            rows.append(CardRow(arch_a, arch_b, 1 if wa > la else 0, ca))
+        if _in_window(date_b, date_from, date_to):
+            rows.append(CardRow(arch_b, arch_a, 1 if la > wa else 0, cb))
+    return rows, names

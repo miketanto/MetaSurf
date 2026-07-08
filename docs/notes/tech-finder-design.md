@@ -126,8 +126,22 @@ Backlog **BL-1**, high value / high effort.
 - **Layer A** — `archetypes/roles` + `config/card_roles.json`: fixture-tested
   oracle-text role parser (40 tests vs real Scryfall text; interaction roles
   only). Materialize with `scripts/materialize_card_roles.py`.
-- **Layer B** — `validation/tech_finder/estimate.py`: the within-archetype,
-  matchup-conditioned DiD (card-agnostic → also the game-neutral seam).
+- **Layer B (roles)** — `validation/tech_finder/estimate.py`: the
+  within-archetype, matchup-conditioned DiD (card-agnostic → game-neutral seam).
+- **Card-level tech ("what card is good vs archetype A")** —
+  `validation/tech_finder/cards.py` + `card_report.py`: the SAME within-archetype
+  DiD with the treatment = a single card in the 75 (not a role). Per-archetype
+  ranked card sheets for both formats:
+  `validation/reports/tech-cards-{modern,standard}-2026-07-08.md`. Cards annotated
+  with their role(s) and flagged when they are pure manabase/deck-identity proxies
+  (a Land with no interaction role — rides deck-type correlation, imperfectly
+  controlled at thin strata). Sensible & useful in both formats — e.g. vs Tron:
+  Obsidian Charmaw / Spreading Seas / Void Mirror; vs Living End: The Stone Brain
+  (names it) / Karn (fetches the cage); vs Boros Convoke (Std): Sunfall /
+  Depopulate / Temporary Lockdown. Card-level can be SHARPER than the role view
+  (the specific best sweeper is A-specific vs Convoke even when the pooled
+  `board_sweeper` role is muddy). Only cards with enough sample are scored; the
+  thin/unplayed ones are what Layer C would infer from the role profile.
 - **B2 recovery (Modern): 5/7 gated PASS (10/13 across all targets).** On the
   rebuilt Modern corpus (347,438 decided non-mirror match rows) the
   within-archetype DiD ranks the known tech role in the top-3 for most of 13
