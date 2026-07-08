@@ -51,7 +51,7 @@ export default async function MetaPage({
       ) : (
         meta && (
           <>
-            <MetaTable archetypes={meta.archetypes} />
+            <MetaTable archetypes={meta.archetypes} game={game} format={format} />
 
             <LockedPanel title="Share &amp; winrate trends">
               See how each archetype&apos;s share and winrate have moved

@@ -4,12 +4,17 @@ import { confidence, pctInt, tint } from "@/lib/matchup";
 const DOT: Record<string, string> = { high: "●", med: "◐", low: "○" };
 
 // One deck's matchup spread: every opponent it has data against, best → worst.
+// Each opponent links to its own archetype page.
 export function MatchupBreakdown({
   m,
   focusId,
+  game,
+  format,
 }: {
   m: MatchupsResponse;
   focusId: number;
+  game: string;
+  format: string;
 }) {
   const names = new Map(m.archetypes.map((a) => [a.archetype_id, a.name]));
   const rows = m.cells
@@ -27,7 +32,11 @@ export function MatchupBreakdown({
       {rows.map((c) => {
         const conf = confidence(c.n_matches);
         return (
-          <div className="mrow" key={c.arch_b}>
+          <a
+            className="mrow"
+            key={c.arch_b}
+            href={`/${game}/${format}/archetypes/${c.arch_b}`}
+          >
             <div className="mname">{names.get(c.arch_b) ?? c.arch_b}</div>
             <div
               className="mchip"
@@ -40,7 +49,7 @@ export function MatchupBreakdown({
               <span className={`dot ${conf}`}>{DOT[conf]}</span>
               {c.n_matches} games
             </div>
-          </div>
+          </a>
         );
       })}
     </div>

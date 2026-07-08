@@ -44,7 +44,7 @@ export function MatchupGrid({
             <a
               className="grid-row"
               key={row.archetype_id}
-              href={`/${game}/${format}/matchups/${row.archetype_id}`}
+              href={`/${game}/${format}/archetypes/${row.archetype_id}`}
             >
               <div className="rowname" style={{ width: NAMECOL }}>
                 {row.name}

@@ -648,3 +648,66 @@ header.app .brand span {
   border-color: var(--accent);
   color: #06122b;
 }
+
+/* archetype hub: stat cards + best-matchup chips */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.stat-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-val {
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin: 3px 0 1px;
+}
+.stat-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
+.chip b {
+  color: var(--good);
+  margin-left: 4px;
+}
+.muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* clickable rows: hover affordance now that meta/matchup rows are links */
+.row:hover,
+.mrow:hover,
+.drow:hover {
+  background: var(--panel-2);
+}
+.row,
+.mrow {
+  color: inherit;
+}

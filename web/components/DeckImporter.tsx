@@ -96,9 +96,9 @@ export function DeckImporter({ game, format }: { game: string; format: string })
           {result.archetype_id != null && (
             <a
               className="btn primary wide"
-              href={`/${game}/${format}/matchups/${result.archetype_id}`}
+              href={`/${game}/${format}/archetypes/${result.archetype_id}`}
             >
-              See {result.name}&apos;s matchups ›
+              View {result.name} — decks &amp; matchups ›
             </a>
           )}
 

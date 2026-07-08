@@ -57,7 +57,7 @@ export default async function DeckDetailPage({
         </div>
       ) : (
         <>
-          <a className="back" href={`/${game}/${format}/matchups/${d.archetype_id}`}>
+          <a className="back" href={`/${game}/${format}/archetypes/${d.archetype_id}`}>
             ‹ {d.name ?? "Archetype"}
           </a>
           <h1 className="deck-title">{d.name ?? "Decklist"}</h1>

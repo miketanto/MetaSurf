@@ -10,12 +10,25 @@ function wrClass(a: MetaArchetype): string {
   return "wr";
 }
 
-export function MetaTable({ archetypes }: { archetypes: MetaArchetype[] }) {
+export function MetaTable({
+  archetypes,
+  game,
+  format,
+}: {
+  archetypes: MetaArchetype[];
+  game: string;
+  format: string;
+}) {
   const sorted = [...archetypes].sort((a, b) => b.share - a.share);
   return (
     <div className="card" role="table" aria-label="Metagame share and winrate">
       {sorted.map((a) => (
-        <div className="row" role="row" key={a.archetype_id}>
+        <a
+          className="row"
+          role="row"
+          key={a.archetype_id}
+          href={`/${game}/${format}/archetypes/${a.archetype_id}`}
+        >
           <div className="name">
             <div className="title">{a.name}</div>
             <div className="meta">
@@ -29,7 +42,7 @@ export function MetaTable({ archetypes }: { archetypes: MetaArchetype[] }) {
               {pct(a.wr_ci_lo)}–{pct(a.wr_ci_hi)}
             </div>
           </div>
-        </div>
+        </a>
       ))}
     </div>
   );
