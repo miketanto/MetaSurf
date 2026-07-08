@@ -132,6 +132,28 @@ def build_steps(
             return "disabled (METASURF_MELEE_ENABLED unset)"
         return melee_scraper.run_scrape(cache_root)
 
+    def _topdeck() -> str:
+        # first-party TopDeck.gg API. Gated off until the parser is validated
+        # against real captured responses (CLAUDE.md inspect-before-parse):
+        # needs BOTH a key and an explicit opt-in.
+        key = os.environ.get("TOPDECK_API_KEY")
+        enabled = os.environ.get("METASURF_TOPDECK_ENABLED", "").lower() in {
+            "1", "true", "yes", "on"
+        }
+        if not key or not enabled:
+            return (
+                "disabled (needs TOPDECK_API_KEY + METASURF_TOPDECK_ENABLED;"
+                " pending real-response validation)"
+            )
+        from ingest.topdeck_scraper.client import TopdeckClient
+        from ingest.topdeck_scraper.scrape import run_scrape as td_scrape
+        from ingest.topdeck_scraper.scrape import scrape_kwargs_from_config
+
+        client = TopdeckClient(key, raw_root=raw_root)
+        return td_scrape(
+            client, cache_root, **scrape_kwargs_from_config(game, format_name)
+        ).summary()
+
     def _mtgo_scrape() -> str:
         fetcher = Fetcher(RawArchive(raw_root))
         return run_scrape(fetcher, cache_root, game=game).summary()
@@ -163,6 +185,7 @@ def build_steps(
 
     return [
         Step("melee_scrape", _melee, required=False),
+        Step("topdeck_scrape", _topdeck, required=False),
         Step("mtgo_scrape", _mtgo_scrape),
         Step("import", _import),
         Step("match_extract", _match_extract),

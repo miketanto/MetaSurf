@@ -1,0 +1,74 @@
+{
+  "info": {
+    "id": "TESTTID123",
+    "name": "Modern RCQ Example",
+    "startDate": "2026-07-05T09:00:00Z",
+    "game": "Magic: The Gathering",
+    "format": "Modern"
+  },
+  "standings": [
+    {
+      "standing": 1,
+      "name": "Alice",
+      "id": "a1",
+      "points": 6,
+      "winRate": 1.0,
+      "opponentWinRate": 0.5,
+      "decklist": "~~Mainboard~~\n4 Ragavan, Nimble Pilferer\n4 Lightning Bolt\n20 Mountain\n~~Sideboard~~\n2 Engineered Explosives\n1 Nature's Claim"
+    },
+    {
+      "standing": 2,
+      "name": "Bob",
+      "id": "b1",
+      "points": 3,
+      "winRate": 0.5,
+      "opponentWinRate": 0.5,
+      "decklist": "~~Mainboard~~\n4 Urza's Saga\n4 Thought-Knot Seer\n~~Sideboard~~\n3 Nature's Claim"
+    },
+    {
+      "standing": 3,
+      "name": "Carol",
+      "id": "c1",
+      "points": 0,
+      "winRate": 0.0,
+      "opponentWinRate": 0.75,
+      "decklist": "~~Mainboard~~\n4 Sheoldred, the Apocalypse\n~~Sideboard~~\n2 Duress"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "tables": [
+        {
+          "table": 1,
+          "players": [{"name": "Alice", "id": "a1"}, {"name": "Bob", "id": "b1"}],
+          "winner": "Alice",
+          "winner_id": "a1",
+          "winner_games": 2,
+          "loser_games": 0,
+          "status": "Completed"
+        },
+        {
+          "table": 2,
+          "players": [{"name": "Carol", "id": "c1"}],
+          "winner": null,
+          "status": "Bye"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "tables": [
+        {
+          "table": 1,
+          "players": [{"name": "Carol", "id": "c1"}, {"name": "Alice", "id": "a1"}],
+          "winner": "Alice",
+          "winner_id": "a1",
+          "winner_games": 2,
+          "loser_games": 1,
+          "status": "Completed"
+        }
+      ]
+    }
+  ]
+}
