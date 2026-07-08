@@ -143,7 +143,12 @@ def build_steps(
         return extract_matches(conn, cache_root).summary()
 
     def _label() -> str:
-        return label_corpus(conn, format_name).summary()
+        # product granularity is the owner's choice (variant surfaces the
+        # specific archetype types, e.g. Broodscale/Ramp/Black Eldrazi);
+        # override with METASURF_ARCHETYPE_GRANULARITY=parent for the
+        # V1-validated identity.
+        granularity = os.environ.get("METASURF_ARCHETYPE_GRANULARITY", "variant")
+        return label_corpus(conn, format_name, granularity=granularity).summary()
 
     def _rollups() -> str:
         format_id = resolve_format_id(conn, game, format_name)

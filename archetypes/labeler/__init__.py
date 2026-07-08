@@ -5,8 +5,16 @@ Writes, for every Modern deck with at least one deck_cards row:
   method, confidence) — the full relabeling history (plan §4 schema);
 - `decks.archetype_id` + `decks.classifier_version` for the same version.
 
-Archetype identity is the rule/fallback file's `Name` (variant matches
-collapse to their parent archetype, the same identity V1 validated against).
+Archetype identity granularity is a parameter:
+- ``"parent"`` (default): the rule/fallback file's `Name`; variant matches
+  collapse to their parent archetype — the identity V1 validated against.
+- ``"variant"``: a matched variant becomes its own archetype (the rule file's
+  variant `Name`, e.g. Eldrazi -> Broodscale / Ramp Eldrazi / Black Eldrazi),
+  linked to its parent via ``archetypes.parent_id`` (plan §4 split seam). The
+  variant definitions are the same ported rule files, not new hand-authored
+  ones. NB: V1's per-archetype F1 was measured at parent granularity; running
+  the product at variant granularity is finer than what V1 pre-registered, so
+  a variant-level validation pass is owed before it's a validated claim.
 Decks matched by no rule and no fallback get the reserved `Rogue` archetype —
 the plan's "outliers are Rogue" semantics (§5 Layer 1). The clustering stage
 is deliberately NOT part of batch labeling: it exists to flag candidate new
@@ -92,16 +100,23 @@ def _corpus_range(conn: psycopg.Connection, format_name: str) -> tuple[dt.date, 
 
 
 def _upsert_archetypes(
-    conn: psycopg.Connection, format_name: str, names: set[str]
+    conn: psycopg.Connection,
+    format_name: str,
+    names: set[str],
+    parent_of: dict[str, str] | None = None,
 ) -> dict[str, int]:
     """Insert missing archetypes rows (sorted-name order for deterministic ids
-    on a fresh database) and return name -> id."""
+    on a fresh database) and return name -> id. When ``parent_of`` maps a
+    variant name to its parent name, set ``archetypes.parent_id`` accordingly
+    (plan §4 split seam); the parent row is inserted too if unseen."""
+    parent_of = parent_of or {}
+    all_names = set(names) | set(parent_of.values())
     with conn.cursor() as cur:
         cur.execute("SELECT id FROM formats WHERE name = %s", (format_name,))
         row = cur.fetchone()
         assert row is not None, f"format {format_name!r} not seeded"
         format_id = row[0]
-        for name in sorted(names):
+        for name in sorted(all_names):
             cur.execute(
                 """
                 INSERT INTO archetypes (format_id, name)
@@ -110,11 +125,27 @@ def _upsert_archetypes(
                 (format_id, name),
             )
         cur.execute("SELECT name, id FROM archetypes WHERE format_id = %s", (format_id,))
-        return dict(cur.fetchall())
+        name_to_id: dict[str, int] = dict(cur.fetchall())
+        for child, parent in sorted(parent_of.items()):
+            cur.execute(
+                "UPDATE archetypes SET parent_id = %s"
+                " WHERE id = %s AND parent_id IS DISTINCT FROM %s",
+                (name_to_id[parent], name_to_id[child], name_to_id[parent]),
+            )
+    return name_to_id
 
 
-def label_corpus(conn: psycopg.Connection, format_name: str = "modern") -> LabelStats:
-    """Classify every stored deck of the format and persist labels."""
+def label_corpus(
+    conn: psycopg.Connection,
+    format_name: str = "modern",
+    granularity: str = "parent",
+) -> LabelStats:
+    """Classify every stored deck of the format and persist labels.
+
+    ``granularity``: "parent" (V1-validated identity, default) or "variant"
+    (a matched variant is its own archetype under ``parent_id``)."""
+    if granularity not in ("parent", "variant"):
+        raise ValueError(f"granularity must be 'parent' or 'variant', got {granularity!r}")
     stats = LabelStats()
     defs, _report = load_definitions(conn, format_name=format_name)
     stats.classifier_version = defs.classifier_version
@@ -124,6 +155,7 @@ def label_corpus(conn: psycopg.Connection, format_name: str = "modern") -> Label
         raise RuntimeError(f"no events for format {format_name!r} — run the import first")
 
     rows: list[tuple[int, str, str, float | None]] = []  # deck_id, name, method, confidence
+    parent_of: dict[str, str] = {}  # variant name -> parent name (variant granularity)
     for month in _month_starts(*span):
         month_end = (
             dt.date(month.year + 1, 1, 1)
@@ -136,14 +168,19 @@ def label_corpus(conn: psycopg.Connection, format_name: str = "modern") -> Label
                 stats.conflicts += 1
             if c.match is None:
                 rows.append((loaded.deck_id, ROGUE_NAME, METHOD_ROGUE, None))
-            elif c.match.method == METHOD_RULES:
-                rows.append((loaded.deck_id, c.match.archetype, METHOD_RULES, 1.0))
+                continue
+            name = c.match.archetype
+            if granularity == "variant" and c.match.variant is not None:
+                name = c.match.variant
+                parent_of[name] = c.match.archetype
+            if c.match.method == METHOD_RULES:
+                rows.append((loaded.deck_id, name, METHOD_RULES, 1.0))
             else:
-                rows.append(
-                    (loaded.deck_id, c.match.archetype, METHOD_FALLBACK, c.match.similarity)
-                )
+                rows.append((loaded.deck_id, name, METHOD_FALLBACK, c.match.similarity))
 
-    name_to_id = _upsert_archetypes(conn, format_name, {name for _, name, _, _ in rows})
+    name_to_id = _upsert_archetypes(
+        conn, format_name, {name for _, name, _, _ in rows}, parent_of
+    )
     stats.archetypes_total = len(name_to_id)
 
     with conn.cursor() as cur:
