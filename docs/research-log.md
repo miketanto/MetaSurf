@@ -249,6 +249,19 @@ out). Each has a designed path and a gating dependency.
 | BL-2 Empirical tech-watch (descriptive) | Surface cards the field is teching into vs a rising deck | §4a | lead-lag hardening; still shows §4c confound — label as "co-moving", not "counters" | medium |
 | BL-3 Macro strategy navigation | card2vec + archetype clusters (validated M3.8); macro RPS is weak, frame as navigation | M3.8 done | ready to productize (in API) | done→product |
 | BL-4 Contrarian trend flag | "Overextended, likely to recede" | M3.6-3 | forward test (M4) | low, near-ready |
+| BL-5 MTG Arena as a data source | Arena constructed/limited meta. **Distinct from "Standard the format"** (which we already get via MTGO+paper — see note). Arena has **no public decklist feed**; data comes from third-party trackers (untapped.gg) and 17Lands (limited). | new source adapter + card resolver (Arena uses the same Scryfall cards) | **licensing** — untapped.gg / 17Lands commercial-use terms must clear first (same gate as the plan's 17Lands backlog); no bulk-scrape of a tracker's ToS-protected data | medium value / gated on licensing |
+
+**Additional constructed formats (Standard/Pioneer/Legacy/Pauper/Vintage) are
+NOT backlog — they are near-term "config, not code" work** (plan §2, §4.1).
+The source data already flows: the live mtgo.com listing carries Standard (15),
+Pioneer (14), Pauper (13), Legacy (13), Vintage (10) events per day, and
+TopDeck/Melee carry paper events for all of them. Enabling a format is (1) flip
+`import: true` in `config/formats.json` (trivial) + (2) **port that format's
+archetype rule files** from MTGOFormatData (the real work — only `modern/`
+exists today; without rules a format's decks all fall to Rogue/fallback). So
+each format is a small, well-scoped milestone, not indefinite backlog. Arena
+(BL-5) is the genuinely-gated one because it's a distinct, licensing-encumbered
+*source*, not just another format token.
 
 BL-1 is the owner's function-first tech finder. Its correctness rests on doing
 the card-understanding layer *before* correlating — that is what turns the
