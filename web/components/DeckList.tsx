@@ -1,10 +1,5 @@
 import type { DeckSummary } from "@/lib/types";
-
-function record(d: DeckSummary): string {
-  if (d.wins != null && d.losses != null) return `${d.wins}–${d.losses}`;
-  if (d.finish_rank != null) return `#${d.finish_rank}`;
-  return "";
-}
+import { record, finishBadge } from "@/lib/deckmeta";
 
 export function DeckList({
   decks,
@@ -15,24 +10,33 @@ export function DeckList({
   game: string;
   format: string;
 }) {
+  if (decks.length === 0) {
+    return <div className="error">No decklists match.</div>;
+  }
   return (
     <div className="card">
-      {decks.map((d) => (
-        <a
-          className="drow"
-          key={d.deck_id}
-          href={`/${game}/${format}/decks/${d.deck_id}`}
-        >
-          <div className="dinfo">
-            <div className="dplayer">{d.player ?? "Unknown pilot"}</div>
-            <div className="dmeta">
-              {d.event ?? d.source} · {d.date}
+      {decks.map((d) => {
+        const badge = finishBadge(d);
+        return (
+          <a
+            className="drow"
+            key={d.deck_id}
+            href={`/${game}/${format}/decks/${d.deck_id}`}
+          >
+            <div className="dinfo">
+              <div className="dplayer">
+                {d.player ?? "Unknown pilot"}
+                {badge && <span className="badge">{badge}</span>}
+              </div>
+              <div className="dmeta">
+                {d.event ?? d.source} · {d.date}
+              </div>
             </div>
-          </div>
-          <div className="drec">{record(d)}</div>
-          <div className="chev">›</div>
-        </a>
-      ))}
+            <div className="drec">{record(d)}</div>
+            <div className="chev">›</div>
+          </a>
+        );
+      })}
     </div>
   );
 }

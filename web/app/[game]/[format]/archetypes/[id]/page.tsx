@@ -1,16 +1,17 @@
 import { Nav } from "@/components/Nav";
-import { MatchupBreakdown } from "@/components/MatchupBreakdown";
+import { ArchetypeTabs } from "@/components/ArchetypeTabs";
 import { DeckList } from "@/components/DeckList";
 import { LockedPanel } from "@/components/LockedPanel";
 import { getMeta, getMatchups, getArchetypeDecks, ApiError } from "@/lib/api";
 import { pctInt } from "@/lib/matchup";
+import { isNotable } from "@/lib/deckmeta";
 import type { DeckSummary, MatchupsResponse, MetaArchetype } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 
-export default async function ArchetypePage({
+export default async function ArchetypeOverview({
   params,
 }: {
   params: { game: string; format: string; id: string };
@@ -18,21 +19,20 @@ export default async function ArchetypePage({
   const { game, format } = params;
   const id = Number(params.id);
 
-  let m: MatchupsResponse | null = null;
-  let stat: MetaArchetype | undefined;
-  let decks: DeckSummary[] = [];
-  let name: string | null = null;
-  let notFound = false;
-
   const [metaRes, matchRes, decksRes] = await Promise.allSettled([
     getMeta(game, format),
     getMatchups(game, format),
-    getArchetypeDecks(game, format, id, 25),
+    getArchetypeDecks(game, format, id, 40),
   ]);
+
+  let stat: MetaArchetype | undefined;
+  let m: MatchupsResponse | null = null;
+  let decks: DeckSummary[] = [];
+  let name: string | null = null;
 
   if (metaRes.status === "fulfilled") {
     stat = metaRes.value.archetypes.find((a) => a.archetype_id === id);
-    if (stat) name = stat.name;
+    name = stat?.name ?? null;
   }
   if (matchRes.status === "fulfilled") {
     m = matchRes.value;
@@ -41,20 +41,21 @@ export default async function ArchetypePage({
   if (decksRes.status === "fulfilled") {
     decks = decksRes.value.decks;
     name = name ?? decksRes.value.name;
-  } else if (
-    decksRes.reason instanceof ApiError &&
-    decksRes.reason.status === 404
-  ) {
-    notFound = !name;
   }
+  const unknown =
+    !name &&
+    decksRes.status === "rejected" &&
+    decksRes.reason instanceof ApiError &&
+    decksRes.reason.status === 404;
 
   const spread = m
     ? m.cells
         .filter((c) => c.arch_a === id && c.arch_b !== id && c.n_matches > 0)
         .sort((a, b) => b.p_a_beats_b - a.p_a_beats_b)
     : [];
-  const best = spread.slice(0, 3);
   const names = new Map((m?.archetypes ?? []).map((a) => [a.archetype_id, a.name]));
+  const notable = decks.filter(isNotable).slice(0, 6);
+  const recent = decks.slice(0, 5);
 
   return (
     <main className="container">
@@ -63,13 +64,14 @@ export default async function ArchetypePage({
         ‹ Meta
       </a>
 
-      {notFound || !name ? (
+      {unknown || !name ? (
         <div className="error">
           <strong>Unknown archetype.</strong>
         </div>
       ) : (
         <>
           <h1 className="deck-title">{name}</h1>
+          <ArchetypeTabs game={game} format={format} id={id} active="overview" />
 
           {stat && (
             <div className="stats">
@@ -88,11 +90,11 @@ export default async function ArchetypePage({
             </div>
           )}
 
-          {best.length > 0 && (
+          {spread.length > 0 && (
             <>
               <p className="subhead">Best matchups</p>
               <div className="chips">
-                {best.map((c) => (
+                {spread.slice(0, 3).map((c) => (
                   <a
                     key={c.arch_b}
                     className="chip"
@@ -101,31 +103,39 @@ export default async function ArchetypePage({
                     {names.get(c.arch_b)} <b>{pctInt(c.p_a_beats_b)}%</b>
                   </a>
                 ))}
+                <a className="chip more" href={`/${game}/${format}/archetypes/${id}/matchups`}>
+                  all matchups ›
+                </a>
               </div>
             </>
           )}
 
-          {m && spread.length > 0 && (
+          {notable.length > 0 && (
             <>
               <p className="subhead" style={{ marginTop: 20 }}>
-                Matchup spread — best to worst
+                Notable performances
               </p>
-              <MatchupBreakdown m={m} focusId={id} game={game} format={format} />
+              <DeckList decks={notable} game={game} format={format} />
             </>
           )}
 
-          <p className="subhead" style={{ marginTop: 22 }}>
-            Recent decklists {decks.length > 0 && <span className="muted">({decks.length})</span>}
-          </p>
-          {decks.length > 0 ? (
-            <DeckList decks={decks} game={game} format={format} />
-          ) : (
-            <div className="error">No stored decklists for this archetype yet.</div>
+          {recent.length > 0 && (
+            <>
+              <div className="rowhead">
+                <span className="subhead" style={{ margin: 0 }}>
+                  Recent decks
+                </span>
+                <a className="seeall" href={`/${game}/${format}/archetypes/${id}/decks`}>
+                  All decks ›
+                </a>
+              </div>
+              <DeckList decks={recent} game={game} format={format} />
+            </>
           )}
 
-          <LockedPanel title="Price, colors &amp; card-choice trends">
-            Average price, color breakdown, and how this archetype&apos;s card
-            choices have shifted week to week.
+          <LockedPanel title="New tech watch">
+            Cards breaking into {name} lately, and the tech other decks are
+            packing against it — from cross-field card data.
           </LockedPanel>
         </>
       )}

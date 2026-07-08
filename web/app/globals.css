@@ -711,3 +711,80 @@ header.app .brand span {
 .mrow {
   color: inherit;
 }
+
+/* archetype hub: badges, filters, pills, section headers */
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--lock);
+  color: var(--lock);
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.chip.more {
+  color: var(--accent);
+  border-style: dashed;
+}
+.chip.more b {
+  color: var(--accent);
+}
+.rowhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 20px 0 12px;
+}
+.seeall {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 10px;
+}
+.pillrow {
+  display: flex;
+  gap: 6px;
+}
+.pill {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pill.on {
+  background: var(--panel-2);
+  color: var(--text);
+  border-color: var(--accent);
+}
+.selrow {
+  display: flex;
+  gap: 8px;
+}
+.selrow select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.count {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 2px 8px;
+}
