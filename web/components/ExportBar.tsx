@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { CardLine } from "@/lib/decklist";
-import { toArena, toMtgo, tcgplayerUrl } from "@/lib/export";
+import { toArena, toMtgo, toPlain, tcgplayerUrl } from "@/lib/export";
 
 export function ExportBar({ cards }: { cards: CardLine[] }) {
   const [copied, setCopied] = useState<string | null>(null);
@@ -21,6 +21,12 @@ export function ExportBar({ cards }: { cards: CardLine[] }) {
     <div className="export">
       <div className="export-lbl">Export</div>
       <div className="export-btns">
+        <button
+          className="btn sm primary"
+          onClick={() => copy("LIST", toPlain(cards))}
+        >
+          {copied === "LIST" ? "Copied ✓" : "Copy list"}
+        </button>
         <button className="btn sm" onClick={() => copy("MTGA", toArena(cards))}>
           {copied === "MTGA" ? "Copied ✓" : "MTGA"}
         </button>

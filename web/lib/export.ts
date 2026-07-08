@@ -8,6 +8,15 @@ const main = (c: CardLine[]) => c.filter((x) => x.board !== "side");
 const side = (c: CardLine[]) => c.filter((x) => x.board === "side");
 const line = (c: CardLine) => `${c.count} ${c.name}`;
 
+// Plain, human-readable full list: mainboard, a blank line, a "Sideboard"
+// label, then the sideboard. Pasteable anywhere.
+export function toPlain(cards: CardLine[]): string {
+  const out = main(cards).map(line);
+  const sb = side(cards);
+  if (sb.length) out.push("", "Sideboard", ...sb.map(line));
+  return out.join("\n");
+}
+
 // MTGA: "Deck" / "Sideboard" headers, one "count name" per line.
 export function toArena(cards: CardLine[]): string {
   const out = ["Deck", ...main(cards).map(line)];

@@ -642,3 +642,9 @@ header.app .brand span {
   font-variant-numeric: tabular-nums;
   min-width: 18px;
 }
+
+.btn.sm.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06122b;
+}
