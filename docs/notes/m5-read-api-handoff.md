@@ -191,7 +191,11 @@ Deliberately not built, for the owner to sequence:
 - `/emerging` — the M1 clustering stage is not part of batch labeling and
   lives in `archetypes/` (game-specific), so the feed needs either a second
   Protocol seam like classify or a game-specific rollup writer outside
-  `jobs/`. Design decision required.
+  `jobs/`. Design decision required. **RESOLVED + BUILT** on branch
+  `feature-emerging`: both, actually — read side serves `rollup_emerging`
+  game-neutrally (no seam), build side goes through the `EmergingBuilder`
+  Protocol to a game-side writer outside `jobs/`. See
+  `next-features-handoff.md` §4.
 - Alert subscriptions (plan §8 "add to M5 scope") — the first user *write*
   path; belongs with auth (Phase 2 seam §4.2), not in the read layer.
 - "Projected weekend meta" — ruled out by the M3 verdict (do not ship share

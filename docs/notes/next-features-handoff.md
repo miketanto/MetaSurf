@@ -50,13 +50,10 @@ what's shipped; read that for the M4 detail.
    auto-resolve when catalogued. No action.
 
 ## 2. Next-features roadmap (owner to sequence)
-- **(A) Emerging-deck feed (`/emerging`, plan S5) — RECOMMENDED.** The
-  detect → characterize → human-name → promote-to-rule loop. The clustering
-  stage is validated and this session's V1.2 re-confirmed it detects real set-
-  release arrivals (Duskmourn Oculus/Demons) within 7 days. The work is
-  productizing it behind a game-neutral seam + a `rollup_emerging` table +
-  endpoint. **Auto-naming is out** (CLAUDE.md rule 4 — humans name; propose a
-  provisional descriptor). Kickoff prompt in §3.
+- **(A) Emerging-deck feed (`/emerging`, plan S5) — ✅ BUILT (branch
+  `feature-emerging`).** See §4 for the build-out addendum (seam choice, tests,
+  what it surfaced on real data). Detect → characterize → provisional-descriptor
+  → promote-to-rule loop is shipped; auto-naming deliberately not built.
 - **(B) More formats** — Pioneer / Legacy / Pauper / Vintage. Same battle-tested
   recipe (flip `import`, port that format's rules, V1). Non-rotating formats
   skip the era tooling. Mechanical, high reach.
@@ -122,3 +119,69 @@ SUGGESTED ORDER: (1) read + verify green; (2) emerging-cluster characterizer +
 DO NOT: auto-name archetypes; start more formats, M6, MTG Arena, or Phase 2 —
 one feature at a time.
 ---
+
+## 4. Build-out addendum (2026-07-08, emerging-feed session)
+
+Built on branch `feature-emerging` (off `formats-standard`). All gates green:
+**206 tests, ruff, mypy, game-neutrality (29 files), determinism.**
+
+**The seam choice.** Clustering is MTG-specific (`archetypes/`) and `jobs/`/`api/`
+may not import it. Two seams, chosen per direction:
+
+- **Read side — no seam needed.** `GET /v1/{game}/{format}/emerging` serves the
+  precomputed `rollup_emerging` tables like any other rollup; `api/` stays
+  game-neutral by reading persisted tables only (mirrors how `/meta` reads
+  `rollup_meta`). Premium-gated through the entitlements module.
+- **Build side — a Protocol seam, like classify.** `api/emerging.py` defines the
+  game-neutral `EmergingBuilder` Protocol; `archetypes/emerging_service.py` is
+  the MTG adapter; `scripts/build_emerging.py` is the composition root (outside
+  the gated packages) that wires it and runs nightly alongside
+  `python -m jobs.rollups`. The actual writer,
+  `archetypes/emerging.build_emerging`, lives game-side because it clusters card
+  vectors — the "game-specific rollup writer outside `jobs/`" option, reached
+  through the Protocol. This resolves the design decision flagged in
+  `m5-read-api-handoff.md` §10a.
+
+**Pieces.** `0003_rollup_emerging.py` (additive: `rollup_emerging` +
+`rollup_emerging_signature` child, snapshot-keyed by format_id+as_of);
+`archetypes/emerging.py` (detect via the validated `cluster_and_attach` over the
+Rogue/unlabeled pool → characterize: signature-card in-vs-out lift, engine
+`deck_color`/`_GUILD_NAMES` color identity, size, first-seen, 7-day growth,
+cluster winrate over decided games); `archetypes/promote.py` (scaffold a
+ported-shape rule file from a cluster's signatures — placeholder name only,
+`assert_named` refuses to promote unnamed). Fixture-DB tests
+(`tests/test_emerging.py`, `tests/test_promote.py`) + contract tests in
+`tests/test_api.py`; regenerated `api/openapi.json`.
+
+**CLAUDE.md rule 4 held throughout.** The feed never mints a name: every cluster
+carries `named=false` + a `provisional_descriptor` = `"Unnamed: <color group>
+<top signature card>"`. The promote helper scaffolds key-card conditions but
+leaves a loud `RENAME_ME_…` placeholder for a human. The loop-closing test
+proves a *human-named* scaffold, loaded by the production engine, then
+classifies its own cluster deterministically.
+
+**What it surfaced on the real corpus** (built with `scripts/build_emerging`;
+`as_of` = latest event 2026-07-08; 30-day default window; every number is
+printed job output). Rebuild is byte-identical (determinism verified):
+
+- **Standard — 3 candidate clusters.** Cleanest arrival: `Unnamed: Bant
+  Nature's Rhythm` — **12 lists, all 12 in the last 7 days, 83% winrate over 6
+  games**; signature `Nature's Rhythm` at in-cluster freq 1.00 / out 0.00 (lift
+  100). Exactly the plan §8 S5 shape ("new cluster detected, N lists, X%
+  winrate, unnamed"). Also `Unnamed: MonoWhite Meticulous Archive` (7 lists, no
+  match data) and `Unnamed: Izzet Steam Vents` (6 lists, 0/2).
+- **Modern — 6 candidate clusters** over the ~3-week live pool, led by
+  `Unnamed: MonoBlack Verdant Catacombs` (24 lists, 0.46 over 13 games) and a
+  family of MonoBlue tempo/artifact clusters (Relic of Progenitus 12 @ 0.75/4;
+  Emry 8; Aether Spellbomb 6; Hall of Storm Giants 6; Preordain 5).
+
+These are *candidates* for a human to name, not validated archetypes; the winrates
+are small-sample (shown with n). The Modern MonoBlue split into several small
+clusters is expected clustering granularity on a thin live pool — a human names
+the real one and `promote.py` scaffolds its rule.
+
+**Not run in this env / follow-ups.** Determinism CI (`scripts/check_determinism.py`)
+still hashes only the V1 suite; the emerging feed's reproducibility is covered by
+its fixture test + the real-corpus rebuild diff above (owner may fold an emerging
+snapshot into the determinism gate later). The nightly scheduler wiring for
+`scripts/build_emerging` belongs with the M4 soak (deploy/).
