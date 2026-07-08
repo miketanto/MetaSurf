@@ -100,6 +100,16 @@ def test_variant_granularity_splits_to_broodscale_under_eldrazi(one_eldrazi_deck
         assert cur.fetchone()[0] == "Eldrazi"
 
 
+def test_base_display_name_strips_color_and_prettifies():
+    from archetypes.classifier.engine import base_display_name
+
+    # the parent of a color/variant split: no color prefix, PascalCase split,
+    # "Generic" removed
+    assert base_display_name("Energy") == "Energy"
+    assert base_display_name("RubyStorm") == "Ruby Storm"
+    assert base_display_name("GenericTron") == "Tron"
+
+
 def test_variant_granularity_is_deterministic(one_eldrazi_deck):
     conn, deck_id = one_eldrazi_deck
     label_corpus(conn, "modern", granularity="variant")

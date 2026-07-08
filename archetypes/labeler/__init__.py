@@ -8,13 +8,15 @@ Writes, for every Modern deck with at least one deck_cards row:
 Archetype identity granularity is a parameter:
 - ``"parent"`` (default): the rule/fallback file's `Name`; variant matches
   collapse to their parent archetype — the identity V1 validated against.
-- ``"variant"``: a matched variant becomes its own archetype (the rule file's
-  variant `Name`, e.g. Eldrazi -> Broodscale / Ramp Eldrazi / Black Eldrazi),
-  linked to its parent via ``archetypes.parent_id`` (plan §4 split seam). The
-  variant definitions are the same ported rule files, not new hand-authored
-  ones. NB: V1's per-archetype F1 was measured at parent granularity; running
-  the product at variant granularity is finer than what V1 pre-registered, so
-  a variant-level validation pass is owed before it's a validated claim.
+- ``"variant"``: the classifier's full display label — rule variant AND color
+  group (guild/shard/wedge) where the definition opts in via
+  ``IncludeColorInName``. Examples: Eldrazi -> Broodscale / Ramp Eldrazi;
+  Energy -> "Boros Energy" / "Mardu Energy"; Blink -> "Esper Blink" /
+  "Jeskai Blink". Each split label is linked to its base archetype via
+  ``archetypes.parent_id`` (plan §4 split seam). The variant/color rules are
+  the ported rule files, not new hand-authored ones. NB: V1's per-archetype F1
+  was measured at parent granularity; this finer product granularity owes its
+  own validation pass before it's a validated claim.
 Decks matched by no rule and no fallback get the reserved `Rogue` archetype —
 the plan's "outliers are Rogue" semantics (§5 Layer 1). The clustering stage
 is deliberately NOT part of batch labeling: it exists to flag candidate new
@@ -37,7 +39,7 @@ from dataclasses import dataclass, field
 import psycopg
 
 from archetypes.classifier.corpus import load_decks, load_definitions
-from archetypes.classifier.engine import classify
+from archetypes.classifier.engine import base_display_name, classify
 
 ROGUE_NAME = "Rogue"
 
@@ -170,9 +172,15 @@ def label_corpus(
                 rows.append((loaded.deck_id, ROGUE_NAME, METHOD_ROGUE, None))
                 continue
             name = c.match.archetype
-            if granularity == "variant" and c.match.variant is not None:
-                name = c.match.variant
-                parent_of[name] = c.match.archetype
+            if granularity == "variant":
+                # the classifier's full display label: rule variant + color
+                # group where the definition opts in via IncludeColorInName
+                # (e.g. Energy -> "Boros Energy" / "Mardu Energy"; Eldrazi ->
+                # "Broodscale"). Link each split label to its base archetype.
+                name = c.match.label
+                base = base_display_name(c.match.archetype)
+                if name != base:
+                    parent_of[name] = base
             if c.match.method == METHOD_RULES:
                 rows.append((loaded.deck_id, name, METHOD_RULES, 1.0))
             else:

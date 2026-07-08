@@ -78,6 +78,13 @@ def _display_name(raw_name: str, include_color: bool, color: str) -> str:
     return re.sub(r"\s+", " ", name).strip()
 
 
+def base_display_name(raw_name: str) -> str:
+    """An archetype's display name WITHOUT any color prefix — the parent of a
+    color/variant split (e.g. 'Boros Energy' -> 'Energy', 'RubyStorm' ->
+    'Ruby Storm'). Used to link color/variant-split labels to their parent."""
+    return _display_name(raw_name, include_color=False, color="")
+
+
 def _condition_holds(cond: Condition, deck: Deck) -> bool:
     if cond.raw_count == 0:  # reference: skips broken (empty-Cards) conditions
         return True
