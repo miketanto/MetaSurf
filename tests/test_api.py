@@ -351,10 +351,108 @@ def test_trends_premium_gated_and_recomputable(client, seeded):
         assert m["delta"] == pytest.approx(cur_share - prev_share)
 
 
+# ------------------------------------------------------------------ /emerging
+
+# The 30-day default window has too few unlabeled fixture decks to cluster (see
+# test_emerging.py); the endpoint contract is exercised with a wide window that
+# yields real clusters. The builder is a game adapter, imported in the test.
+EMERGING_WINDOW = 400
+
+
+@pytest.fixture(scope="module")
+def emerging_seeded(seeded):
+    from archetypes.emerging import build_emerging as _build
+
+    conn, as_of = seeded
+    stats = _build(conn, GAME, FORMAT, as_of, window_days=EMERGING_WINDOW)
+    assert stats.n_clusters > 0  # the fixture must surface >= 1 candidate
+    return conn, as_of
+
+
+def test_emerging_requires_premium(client, emerging_seeded):
+    assert client.get(f"{BASE}/emerging").status_code == 403
+
+
+def test_emerging_contract(client, emerging_seeded):
+    conn, as_of = emerging_seeded
+    body = client.get(f"{BASE}/emerging", headers=PREMIUM_HEADERS).json()
+    assert body["game"] == GAME and body["format"] == FORMAT
+    assert body["as_of"] == as_of.isoformat()
+    clusters = body["clusters"]
+    assert clusters
+
+    # stored order: size desc, then first_seen, then cluster_key
+    order = [(-c["n_decks"], c["first_seen"], c["cluster_key"]) for c in clusters]
+    assert order == sorted(order)
+
+    keys_seen = set()
+    for c in clusters:
+        keys_seen.add(c["cluster_key"])
+        # never named here, and the descriptor is flagged unnamed (rule 4)
+        assert c["named"] is False
+        assert c["provisional_descriptor"].startswith("Unnamed:")
+        assert c["n_decks"] >= 1
+        assert 0 <= c["recent_decks"] <= c["n_decks"]
+        if c["n_match_games"] == 0:
+            assert c["winrate"] is None
+        else:
+            assert 0.0 <= c["winrate"] <= 1.0
+        # signatures ranked by lift desc; each genuinely in > out of cluster
+        lifts = [s["lift"] for s in c["signature_cards"]]
+        assert lifts == sorted(lifts, reverse=True)
+        for s in c["signature_cards"]:
+            assert s["in_cluster_freq"] > s["out_cluster_freq"]
+            assert s["name"]  # card name joined in
+    assert len(keys_seen) == len(clusters)  # cluster_key unique in the snapshot
+
+    # every row matches the stored rollup exactly (no per-request computation)
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT cluster_key, provisional_descriptor, color, n_decks, first_seen,"
+            " recent_decks, winrate, n_match_games FROM rollup_emerging"
+            " JOIN formats f ON f.id = rollup_emerging.format_id AND f.name = %s"
+            " WHERE as_of = %s ORDER BY n_decks DESC, first_seen, cluster_key",
+            (FORMAT, as_of),
+        )
+        stored = cur.fetchall()
+    assert len(stored) == len(clusters)
+    for c, (key, desc, color, n, first, recent, wr, games) in zip(clusters, stored, strict=True):
+        assert c["cluster_key"] == key
+        assert c["provisional_descriptor"] == desc
+        assert c["color"] == color
+        assert c["n_decks"] == n
+        assert c["first_seen"] == first.isoformat()
+        assert c["recent_decks"] == recent
+        assert c["n_match_games"] == games
+        if wr is None:
+            assert c["winrate"] is None
+        else:
+            assert c["winrate"] == pytest.approx(wr)
+
+
+def test_emerging_empty_snapshot_is_ok(client, emerging_seeded):
+    # a premium caller asking for a date with no clusters gets 200 + an empty
+    # feed (absence of emerging decks is a valid answer), never 403 or 500
+    resp = client.get(
+        f"{BASE}/emerging", params={"as_of": "2016-01-01"}, headers=PREMIUM_HEADERS
+    )
+    assert resp.status_code == 200
+    assert resp.json()["clusters"] == []
+
+
 def test_serve_entrypoint_wires_classifier():
     import serve
 
     assert GAME in serve.app.state.classifiers
+
+
+def test_emerging_build_entrypoint_wires_builder():
+    # the build seam's composition root (outside the gated packages) wires an
+    # EmergingBuilder adapter for the game, mirroring serve.py for classify
+    from scripts.build_emerging import BUILDERS
+
+    assert GAME in BUILDERS
+    assert hasattr(BUILDERS[GAME], "build_emerging")
 
 
 def test_openapi_spec_committed_and_current(client):

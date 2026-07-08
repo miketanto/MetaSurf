@@ -311,6 +311,107 @@
         "title": "Credit",
         "type": "object"
       },
+      "EmergingCluster": {
+        "properties": {
+          "cluster_key": {
+            "title": "Cluster Key",
+            "type": "integer"
+          },
+          "color": {
+            "title": "Color",
+            "type": "string"
+          },
+          "first_seen": {
+            "format": "date",
+            "title": "First Seen",
+            "type": "string"
+          },
+          "n_decks": {
+            "title": "N Decks",
+            "type": "integer"
+          },
+          "n_match_games": {
+            "title": "N Match Games",
+            "type": "integer"
+          },
+          "named": {
+            "title": "Named",
+            "type": "boolean"
+          },
+          "provisional_descriptor": {
+            "title": "Provisional Descriptor",
+            "type": "string"
+          },
+          "recent_decks": {
+            "title": "Recent Decks",
+            "type": "integer"
+          },
+          "signature_cards": {
+            "items": {
+              "$ref": "#/components/schemas/SignatureCard"
+            },
+            "title": "Signature Cards",
+            "type": "array"
+          },
+          "winrate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winrate"
+          }
+        },
+        "required": [
+          "cluster_key",
+          "named",
+          "provisional_descriptor",
+          "color",
+          "n_decks",
+          "first_seen",
+          "recent_decks",
+          "winrate",
+          "n_match_games",
+          "signature_cards"
+        ],
+        "title": "EmergingCluster",
+        "type": "object"
+      },
+      "EmergingResponse": {
+        "properties": {
+          "as_of": {
+            "format": "date",
+            "title": "As Of",
+            "type": "string"
+          },
+          "clusters": {
+            "items": {
+              "$ref": "#/components/schemas/EmergingCluster"
+            },
+            "title": "Clusters",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "as_of",
+          "clusters"
+        ],
+        "title": "EmergingResponse",
+        "type": "object"
+      },
       "EventEntry": {
         "properties": {
           "date": {
@@ -825,6 +926,39 @@
         "title": "SeriesPoint",
         "type": "object"
       },
+      "SignatureCard": {
+        "properties": {
+          "card_id": {
+            "title": "Card Id",
+            "type": "integer"
+          },
+          "in_cluster_freq": {
+            "title": "In Cluster Freq",
+            "type": "number"
+          },
+          "lift": {
+            "title": "Lift",
+            "type": "number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "out_cluster_freq": {
+            "title": "Out Cluster Freq",
+            "type": "number"
+          }
+        },
+        "required": [
+          "card_id",
+          "name",
+          "in_cluster_freq",
+          "out_cluster_freq",
+          "lift"
+        ],
+        "title": "SignatureCard",
+        "type": "object"
+      },
       "SpreadCell": {
         "properties": {
           "archetype_id": {
@@ -1198,6 +1332,90 @@
           }
         },
         "summary": "Classify Deck"
+      }
+    },
+    "/v1/{game}/{format}/emerging": {
+      "get": {
+        "description": "S5 emerging-deck feed (premium): dense new clusters of unlabeled decks\nthat match no rule \u2014 candidate archetypes awaiting a human name (CLAUDE.md\nrule 4). Each carries a provisional 'Unnamed:' descriptor, size, first-seen,\n7-day growth, a winrate when match data exists, and its signature cards.\nReads only the precomputed rollup_emerging tables (written game-side by the\nclustering stage behind the build seam).",
+        "operationId": "emerging_v1__game___format__emerging_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "snapshot date; default: latest",
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "snapshot date; default: latest",
+              "title": "As Of"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-entitlements",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Entitlements"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmergingResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Emerging"
       }
     },
     "/v1/{game}/{format}/events": {

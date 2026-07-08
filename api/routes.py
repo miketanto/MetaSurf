@@ -25,6 +25,8 @@ from api.schemas import (
     BestDecksResponse,
     ClassifyRequest,
     ClassifyResponse,
+    EmergingCluster,
+    EmergingResponse,
     EventEntry,
     EventsResponse,
     MatchupAxis,
@@ -36,6 +38,7 @@ from api.schemas import (
     MetaResponse,
     Mover,
     SeriesPoint,
+    SignatureCard,
     SpreadCell,
     TrendsResponse,
 )
@@ -272,6 +275,50 @@ def trends(ctx: Ctx, conn: Conn, ent: Entitled) -> TrendsResponse:
     movers.sort(key=lambda m: (-m.delta, m.archetype_id))
     return TrendsResponse(
         game=ctx.game, format=ctx.format_name, week=week, prev_week=prev_week, movers=movers
+    )
+
+
+@router.get("/emerging", response_model=EmergingResponse)
+def emerging(ctx: Ctx, conn: Conn, ent: Entitled, as_of: AsOf = None) -> EmergingResponse:
+    """S5 emerging-deck feed (premium): dense new clusters of unlabeled decks
+    that match no rule — candidate archetypes awaiting a human name (CLAUDE.md
+    rule 4). Each carries a provisional 'Unnamed:' descriptor, size, first-seen,
+    7-day growth, a winrate when match data exists, and its signature cards.
+    Reads only the precomputed rollup_emerging tables (written game-side by the
+    clustering stage behind the build seam)."""
+    if not ent.has(PREMIUM):
+        raise HTTPException(status_code=403, detail="premium entitlement required")
+    snap = _snapshot(conn, "rollup_emerging", ctx, as_of)
+    rows = queries.emerging_clusters(conn, ctx.format_id, snap)
+    sigs = queries.emerging_signatures(conn, ctx.format_id, snap)
+    return EmergingResponse(
+        game=ctx.game,
+        format=ctx.format_name,
+        as_of=snap,
+        clusters=[
+            EmergingCluster(
+                cluster_key=key,
+                named=False,  # never named here — the whole point of the feed
+                provisional_descriptor=descriptor,
+                color=color,
+                n_decks=n,
+                first_seen=first_seen,
+                recent_decks=recent,
+                winrate=wr,
+                n_match_games=games,
+                signature_cards=[
+                    SignatureCard(
+                        card_id=cid,
+                        name=name,
+                        in_cluster_freq=in_freq,
+                        out_cluster_freq=out_freq,
+                        lift=lift,
+                    )
+                    for cid, name, in_freq, out_freq, lift in sigs.get(key, [])
+                ],
+            )
+            for key, descriptor, color, n, first_seen, recent, wr, games in rows
+        ],
     )
 
 

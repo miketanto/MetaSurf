@@ -198,3 +198,41 @@ class EventsResponse(BaseModel):
     # required source attributions for the sources present in this feed
     # (e.g. TopDeck.gg) — clients must display these visibly
     credits: list[Credit]
+
+
+class SignatureCard(BaseModel):
+    card_id: int
+    name: str
+    in_cluster_freq: float  # fraction of the cluster's decks playing the card
+    out_cluster_freq: float  # fraction of out-of-cluster decks playing it
+    lift: float  # in_cluster_freq / max(out_cluster_freq, floor) — the signal
+
+
+class EmergingCluster(BaseModel):
+    # local, within-snapshot handle; NOT a stable archetype id (there is none —
+    # the cluster is unnamed until a human names it, CLAUDE.md rule 4)
+    cluster_key: int
+    # ALWAYS false here: an emerging cluster has no curated archetype name yet.
+    # The field is explicit so a client renders it as "unnamed / emerging".
+    named: bool
+    # provisional descriptor only: color group + top signature card, flagged
+    # "Unnamed:" — never a curated archetype name
+    provisional_descriptor: str
+    color: str  # WUBRG identity string ('' -> colorless)
+    n_decks: int
+    first_seen: dt.date
+    # decks seen in the most recent 7 days of the window (the growth signal)
+    recent_decks: int
+    # cluster winrate over decided stored games; null when no match data exists
+    winrate: float | None
+    n_match_games: int
+    signature_cards: list[SignatureCard]
+
+
+class EmergingResponse(BaseModel):
+    game: str
+    format: str
+    as_of: dt.date
+    # candidate emerging archetypes: dense new clusters of unlabeled decks that
+    # match no rule, awaiting a human name. Ordered biggest/newest first.
+    clusters: list[EmergingCluster]

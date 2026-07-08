@@ -13,7 +13,9 @@ import datetime as dt
 import psycopg
 
 # snapshot-keyed tables whose "current" as_of is queried by name
-_SNAPSHOT_TABLES = frozenset({"rollup_meta", "rollup_matchups", "rollup_best_decks"})
+_SNAPSHOT_TABLES = frozenset(
+    {"rollup_meta", "rollup_matchups", "rollup_best_decks", "rollup_emerging"}
+)
 
 
 def resolve_format_id(conn: psycopg.Connection, game_name: str, format_name: str) -> int | None:
@@ -206,3 +208,35 @@ def event_rows(conn: psycopg.Connection, format_id: int, limit: int) -> list[tup
             (format_id, limit),
         )
         return cur.fetchall()
+
+
+def emerging_clusters(conn: psycopg.Connection, format_id: int, as_of: dt.date) -> list[tuple]:
+    """One row per candidate emerging cluster in the snapshot, biggest/newest
+    first (the writer's stored order: size desc, first_seen, cluster_key)."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT cluster_key, provisional_descriptor, color, n_decks, first_seen,"
+            " recent_decks, winrate, n_match_games FROM rollup_emerging"
+            " WHERE format_id = %s AND as_of = %s"
+            " ORDER BY n_decks DESC, first_seen, cluster_key",
+            (format_id, as_of),
+        )
+        return cur.fetchall()
+
+
+def emerging_signatures(
+    conn: psycopg.Connection, format_id: int, as_of: dt.date
+) -> dict[int, list[tuple]]:
+    """cluster_key -> ranked [(card_id, name, in_freq, out_freq, lift)]."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT s.cluster_key, s.card_id, c.name, s.in_cluster_freq,"
+            " s.out_cluster_freq, s.lift FROM rollup_emerging_signature s"
+            " JOIN cards c ON c.id = s.card_id"
+            " WHERE s.format_id = %s AND s.as_of = %s ORDER BY s.cluster_key, s.rank",
+            (format_id, as_of),
+        )
+        out: dict[int, list[tuple]] = {}
+        for key, card_id, name, in_freq, out_freq, lift in cur.fetchall():
+            out.setdefault(key, []).append((card_id, name, in_freq, out_freq, lift))
+    return out
