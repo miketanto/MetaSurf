@@ -20,6 +20,11 @@ from ingest.normalize.cache_item import NormalizedEvent, detect_format, normaliz
 from ingest.normalize.resolver import CardResolver
 
 BATCH_FILES = 500
+# Live sources date next-day league instances across the UTC<->US day boundary;
+# a real completed event can legitimately read one day ahead of the ingesting
+# host. Beyond this small window a future date means a parse error (garbage),
+# which the DQ gate must still reject.
+FUTURE_DATE_TOLERANCE_DAYS = 2
 
 
 @dataclass
@@ -314,10 +319,24 @@ def run_post_import_checks(conn: psycopg.Connection, stats: ImportStats) -> None
         (n_decks,) = cur.fetchone()  # type: ignore[misc]
         if n_events == 0 or n_decks == 0:
             problems.append(f"row-count sanity failed: events={n_events} decks={n_decks}")
-        cur.execute("SELECT count(*) FROM events WHERE date > current_date")
+        # Live MTGO dates a league by its run-day instance, which is legitimately
+        # up to a day ahead of the ingesting host's current_date across the
+        # UTC<->US day boundary (verified 2026-07-08: modern-league-2026-07-08,
+        # 58 real 5-0 lists, ingested at 2026-07-07 19:38 America/Chicago). A
+        # genuine garbage date (parse error) is years off, far beyond this
+        # tolerance, so the gate still catches garbage while accepting real
+        # boundary events. Frozen-corpus behaviour is unchanged (no historical
+        # event is within the tolerance of "today").
+        cur.execute(
+            "SELECT count(*) FROM events WHERE date > current_date + %s::int",
+            (FUTURE_DATE_TOLERANCE_DAYS,),
+        )
         (n_future,) = cur.fetchone()  # type: ignore[misc]
         if n_future:
-            problems.append(f"{n_future} events dated in the future")
+            problems.append(
+                f"{n_future} events dated more than {FUTURE_DATE_TOLERANCE_DAYS} "
+                "days in the future"
+            )
         cur.execute(
             """
             SELECT count(*) FROM decks d

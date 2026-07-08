@@ -150,9 +150,15 @@ def test_load_and_resolve_end_to_end(db_conn):
         == "d5f31713-d380-42ba-8052-4b8d9beb3958"
     )
 
+    # observed live mtgo.com (2026) variant: split-card names written 'A/B'
+    # (no spaces) where the canonical name is 'A // B'. Same mechanical
+    # separator normalisation; resolves only if the ' // ' form exists.
+    assert ref("Alive/Well") == ORACLE["Alive // Well"]
+
     # unknown names stay unresolved — never guessed
     assert resolver.resolve("Not A Real Card Name") is None
     assert resolver.resolve("Not A Real && Card Name") is None
+    assert resolver.resolve("Not A Real/Card Name") is None
 
 
 @pytest.mark.db

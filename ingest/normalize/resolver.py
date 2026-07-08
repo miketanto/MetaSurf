@@ -61,6 +61,15 @@ class CardResolver:
         # mechanical separator mapping; spellings are still never guessed.
         if " && " in name:
             return self.resolve(name.replace(" && ", " // "))
+        # Live mtgo.com (2026) writes split-card names 'A/B' (no spaces) where
+        # the canonical Scryfall name is 'A // B'. Verified 2026-07-08 against
+        # the live corpus: every unresolved 'A/B' name (Wear/Tear x182,
+        # Fire/Ice, Claim/Fame, Dead/Gone, Rough/Tumble, Repudiate/Replicate)
+        # maps to a layout:split card present in the bulk. Same mechanical
+        # separator normalisation as ' && ' — spellings are still never guessed
+        # (it only resolves if the ' // ' form actually exists).
+        if "/" in name and " // " not in name:
+            return self.resolve(name.replace("/", " // "))
         return None
 
     def __len__(self) -> int:

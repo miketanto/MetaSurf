@@ -13,7 +13,11 @@ from pathlib import Path
 
 import pytest
 
-from ingest.cache_import.importer import run_import
+from ingest.cache_import.importer import (
+    FUTURE_DATE_TOLERANCE_DAYS,
+    run_import,
+    run_post_import_checks,
+)
 from ingest.match_extract.extractor import extract_matches
 from ingest.mtgo_scraper.parse import event_to_cacheitem, extract_decklists_data
 from ingest.mtgo_scraper.pipeline import write_cacheitem
@@ -116,6 +120,34 @@ def test_reimport_is_additive_no_duplicate_events(seeded):
     with conn.cursor() as cur:
         cur.execute("SELECT count(*) FROM events")
         assert cur.fetchone()[0] == 3
+
+
+def test_future_date_gate_tolerates_boundary_but_rejects_garbage(seeded):
+    """A next-day league instance (TZ boundary) must pass; a garbage future
+    date (parse error) must still fail the DQ gate loudly."""
+    conn, cache_root = seeded
+    run_import(conn, cache_root, only_formats={"modern"}, skip_existing=True)
+    from ingest.cache_import.importer import ImportStats
+
+    with conn.cursor() as cur:
+        # within tolerance: one day ahead of the host -> gate passes
+        cur.execute(
+            "UPDATE events SET date = current_date + 1"
+            " WHERE source_event_id = 'modern-league-2026-07-0610847'"
+        )
+    conn.commit()
+    run_post_import_checks(conn, ImportStats())  # no raise
+
+    with conn.cursor() as cur:
+        # garbage: far in the future -> gate fails
+        cur.execute(
+            "UPDATE events SET date = current_date + %s"
+            " WHERE source_event_id = 'modern-league-2026-07-0610847'",
+            (FUTURE_DATE_TOLERANCE_DAYS + 30,),
+        )
+    conn.commit()
+    with pytest.raises(RuntimeError, match="in the future"):
+        run_post_import_checks(conn, ImportStats())
 
 
 def test_match_extraction_from_challenge_bracket_only(seeded):
