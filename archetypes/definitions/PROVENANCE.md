@@ -12,7 +12,14 @@ format; do not depend on the .NET runtime.").
   `standard/metas.json`, `standard/color_overrides.json`
   ← `Formats/Standard/` (the *active* Standard set; the source repo also keeps
   dated historical folders `Standard-YYYYMMDD-YYYYMMDD/` for past rotations).
-  Ported unmodified at the same pinned commit. **Observed upstream typo:**
+  Ported unmodified at the same pinned commit. Standard rotates, so the
+  historical rotation eras are ported too, for era-matched labeling
+  (`archetypes/classifier/eras.py` derives the date windows from these folder
+  names — no config): `standard-20230701-20240802/` (31 archetypes) ←
+  `Formats/Standard-20230701-20240802/`, and `standard-20240803-20250730/`
+  (45 archetypes) ← `Formats/Standard-20240803-20250730/`. A deck is labeled
+  with the rule set current when its event happened, not today's post-rotation
+  rules. **Observed upstream typo:**
   `standard/Archetypes/UWMomo.json` has a condition type `"OneorMoreInMainboard"`
   (lowercase `or`). The data is kept byte-identical; the loader canonicalizes
   condition-type casing (`archetypes/classifier/definitions.py`) so pure case

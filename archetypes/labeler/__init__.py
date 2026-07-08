@@ -141,18 +141,24 @@ def label_corpus(
     conn: psycopg.Connection,
     format_name: str = "modern",
     granularity: str = "parent",
+    rules_dir: str | None = None,
+    restrict: tuple[dt.date, dt.date] | None = None,
 ) -> LabelStats:
     """Classify every stored deck of the format and persist labels.
 
     ``granularity``: "parent" (V1-validated identity, default) or "variant"
-    (a matched variant is its own archetype under ``parent_id``)."""
+    (a matched variant is its own archetype under ``parent_id``).
+    ``rules_dir``: which definitions subdir to classify with (default the
+    format's own dir). ``restrict``: only label decks with event date in this
+    inclusive range (used for era-matched labeling; skips the whole-format
+    coverage check since other eras cover the rest)."""
     if granularity not in ("parent", "variant"):
         raise ValueError(f"granularity must be 'parent' or 'variant', got {granularity!r}")
     stats = LabelStats()
-    defs, _report = load_definitions(conn, format_name=format_name)
+    defs, _report = load_definitions(conn, format_name=rules_dir or format_name)
     stats.classifier_version = defs.classifier_version
 
-    span = _corpus_range(conn, format_name)
+    span = restrict or _corpus_range(conn, format_name)
     if span is None:
         raise RuntimeError(f"no events for format {format_name!r} — run the import first")
 
@@ -240,14 +246,65 @@ def label_corpus(
         stats.decks_without_cards = cur.fetchone()[0]  # type: ignore[index]
     conn.commit()
 
-    _post_label_checks(conn, format_name, defs.classifier_version, stats)
+    _post_label_checks(
+        conn, format_name, defs.classifier_version, stats, check_coverage=restrict is None
+    )
     return stats
 
 
+def label_corpus_eras(
+    conn: psycopg.Connection,
+    format_name: str = "modern",
+    granularity: str = "parent",
+) -> list[LabelStats]:
+    """Era-matched labeling for rotating formats: each deck is classified with
+    the rule set current when its event happened (see classifier.eras). Tiles
+    the whole corpus by era — the earliest era is extended back to cover any
+    pre-era decks; the open current era covers up to the latest event. Returns
+    one LabelStats per era. Formats with no dated folders fall back to a single
+    whole-corpus run identical to label_corpus."""
+    from archetypes.classifier.eras import format_eras
+
+    span = _corpus_range(conn, format_name)
+    if span is None:
+        raise RuntimeError(f"no events for format {format_name!r} — run the import first")
+    corpus_start, corpus_end = span
+
+    eras = format_eras(format_name)
+    out: list[LabelStats] = []
+    for i, era in enumerate(eras):
+        # first era covers everything before it; open end covers to corpus end
+        start = corpus_start if i == 0 else (era.start or corpus_start)
+        end = era.end or corpus_end
+        if start > end or start > corpus_end or end < corpus_start:
+            continue
+        out.append(
+            label_corpus(
+                conn,
+                format_name,
+                granularity,
+                rules_dir=era.rules_dir,
+                restrict=(max(start, corpus_start), min(end, corpus_end)),
+            )
+        )
+    # one whole-format coverage check now that every era has run
+    if out:
+        _post_label_checks(
+            conn, format_name, out[-1].classifier_version, out[-1], check_coverage=True
+        )
+    return out
+
+
 def _post_label_checks(
-    conn: psycopg.Connection, format_name: str, version: str, stats: LabelStats
+    conn: psycopg.Connection,
+    format_name: str,
+    version: str,
+    stats: LabelStats,
+    check_coverage: bool = True,
 ) -> None:
-    """DQ gates: fail loudly instead of persisting a partial labeling."""
+    """DQ gates: fail loudly instead of persisting a partial labeling. The
+    whole-format coverage check is skipped for a single era (other eras cover
+    the rest); callers doing era-matched labeling run it once at the end."""
     problems: list[str] = []
     with conn.cursor() as cur:
         cur.execute(
@@ -257,19 +314,20 @@ def _post_label_checks(
         (n_labels,) = cur.fetchone()  # type: ignore[misc]
         if n_labels != stats.decks_labeled:
             problems.append(f"label rows {n_labels} != decks labeled {stats.decks_labeled}")
-        cur.execute(
-            """
-            SELECT count(*) FROM decks d
-            JOIN events e ON e.id = d.event_id
-            JOIN formats f ON f.id = e.format_id AND f.name = %s
-            WHERE d.archetype_id IS NULL
-              AND EXISTS (SELECT 1 FROM deck_cards dc WHERE dc.deck_id = d.id)
-            """,
-            (format_name,),
-        )
-        (n_unlabeled,) = cur.fetchone()  # type: ignore[misc]
-        if n_unlabeled:
-            problems.append(f"{n_unlabeled} non-empty decks left without archetype_id")
+        if check_coverage:
+            cur.execute(
+                """
+                SELECT count(*) FROM decks d
+                JOIN events e ON e.id = d.event_id
+                JOIN formats f ON f.id = e.format_id AND f.name = %s
+                WHERE d.archetype_id IS NULL
+                  AND EXISTS (SELECT 1 FROM deck_cards dc WHERE dc.deck_id = d.id)
+                """,
+                (format_name,),
+            )
+            (n_unlabeled,) = cur.fetchone()  # type: ignore[misc]
+            if n_unlabeled:
+                problems.append(f"{n_unlabeled} non-empty decks left without archetype_id")
         cur.execute(
             """
             SELECT count(*) FROM archetype_labels al

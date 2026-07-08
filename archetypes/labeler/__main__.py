@@ -1,4 +1,5 @@
-"""CLI: python -m archetypes.labeler [--format modern] [--granularity parent|variant]"""
+"""CLI: python -m archetypes.labeler [--format modern]
+             [--granularity parent|variant] [--era]"""
 
 from __future__ import annotations
 
@@ -6,7 +7,7 @@ import argparse
 
 import psycopg
 
-from archetypes.labeler import label_corpus
+from archetypes.labeler import label_corpus, label_corpus_eras
 from db.connection import database_url
 
 
@@ -19,10 +20,20 @@ def main() -> None:
         choices=("parent", "variant"),
         help="parent = V1-validated identity; variant = split archetypes by rule variant",
     )
+    parser.add_argument(
+        "--era",
+        action="store_true",
+        help="era-matched: label each deck with the rule set current when its "
+        "event happened (rotating formats; needs dated definition folders)",
+    )
     args = parser.parse_args()
     with psycopg.connect(database_url()) as conn:
-        stats = label_corpus(conn, args.format_name, granularity=args.granularity)
-    print(stats.summary())
+        if args.era:
+            for stats in label_corpus_eras(conn, args.format_name, args.granularity):
+                print(stats.summary(), "\n")
+        else:
+            stats = label_corpus(conn, args.format_name, granularity=args.granularity)
+            print(stats.summary())
 
 
 if __name__ == "__main__":
