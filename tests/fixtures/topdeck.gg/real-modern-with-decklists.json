@@ -1,0 +1,2598 @@
+{
+ "TID": "impact-returns-26-sunday-modern-2015",
+ "tournamentName": "Impact Returns 26 Sunday Modern 2015",
+ "swissNum": 4,
+ "startDate": 1783250100,
+ "game": "Magic: The Gathering",
+ "format": "Modern",
+ "topCut": 0,
+ "eventData": {
+  "lat": 43.501289,
+  "lng": -8.192374,
+  "city": "Narón",
+  "state": "",
+  "headerImage": "https://imagedelivery.net/kN_u_RUfFF6xsGMKYWhO1g/06f6fa08-acb7-4dc6-c9b5-887bb61fe500/public",
+  "address": "Narón, España"
+ },
+ "standings": [
+  {
+   "name": "Gerardo Pérez",
+   "decklist": "~~Mainboard~~\\n1 Cavern of Souls\\n2 Day of Judgment\\n1 Elspeth, Sun\\'s Champion\\n2 Emeria, the Sky Ruin\\n4 Flagstones of Trokair\\n4 Ghost Quarter\\n4 Ghostly Prison\\n1 Kami of False Hope\\n4 Martyr of Sands\\n1 Mistveil Plains\\n1 Oblivion Ring\\n4 Path to Exile\\n11 Plains\\n3 Proclamation of Rebirth\\n4 Ranger of Eos\\n4 Serra Ascendant\\n4 Squadron Hawk\\n1 Sun Titan\\n1 Tectonic Edge\\n1 Weathered Wayfarer\\n2 Wrath of God\\n\\n~~Sideboard~~\\n2 Aven Mindcensor\\n2 Celestial Purge\\n1 Crucible of Worlds\\n1 Disenchant\\n1 Felidar Sovereign\\n1 Hex Parasite\\n1 Pithing Needle\\n2 Runed Halo\\n2 Stony Silence\\n2 Surgical Extraction\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Cavern of Souls": {
+      "id": "89ca686a-7c72-4d8f-9290-e89635624a83",
+      "count": 1
+     },
+     "Day of Judgment": {
+      "id": "d057289d-5e28-43d5-8ff3-4a1bc723477d",
+      "count": 2
+     },
+     "Elspeth, Sun's Champion": {
+      "id": "05e6b243-48a6-4a42-bc5f-413441de9c33",
+      "count": 1
+     },
+     "Emeria, the Sky Ruin": {
+      "id": "cc999cf2-c99b-4911-8c52-6cc4a99fcc7b",
+      "count": 2
+     },
+     "Flagstones of Trokair": {
+      "id": "f73979bb-91a5-4388-b70b-0cd7a4e14291",
+      "count": 4
+     },
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 4
+     },
+     "Ghostly Prison": {
+      "id": "e828b189-0e8f-43b8-b909-4c23e742e028",
+      "count": 4
+     },
+     "Kami of False Hope": {
+      "id": "49984248-4800-4f46-933a-fedd970ae910",
+      "count": 1
+     },
+     "Martyr of Sands": {
+      "id": "f2048140-b691-4753-8239-1aa75059e389",
+      "count": 4
+     },
+     "Mistveil Plains": {
+      "id": "bb5c1817-ac22-4779-9005-251bc354f181",
+      "count": 1
+     },
+     "Oblivion Ring": {
+      "id": "bd9b9772-f5f9-4c6b-913e-7193bea5d0a7",
+      "count": 1
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 4
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 11
+     },
+     "Proclamation of Rebirth": {
+      "id": "e1e5592c-3605-4069-89d0-b462dec83516",
+      "count": 3
+     },
+     "Ranger of Eos": {
+      "id": "b9c8b929-f3ee-457f-9cbc-9de18eb69dc5",
+      "count": 4
+     },
+     "Serra Ascendant": {
+      "id": "27ad3e00-6ffb-48f7-8469-8868d066d1e2",
+      "count": 4
+     },
+     "Squadron Hawk": {
+      "id": "00ab9841-934f-4a66-a98d-68d01661b1c9",
+      "count": 4
+     },
+     "Sun Titan": {
+      "id": "b2e950fb-cb7e-40a0-a311-5bbdd0477b29",
+      "count": 1
+     },
+     "Tectonic Edge": {
+      "id": "4927150d-7ff6-4232-b20e-d2ea245ac710",
+      "count": 1
+     },
+     "Weathered Wayfarer": {
+      "id": "1093fdb6-bd4f-46a8-92e3-5aa46b52bb4f",
+      "count": 1
+     },
+     "Wrath of God": {
+      "id": "34515b16-c9a4-4f98-8c77-416a7a523407",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Aven Mindcensor": {
+      "id": "d9517c5d-66d0-4178-96fb-a8c04f311ad8",
+      "count": 2
+     },
+     "Celestial Purge": {
+      "id": "ec1f6188-2516-46ac-8a03-7b7285b23a62",
+      "count": 2
+     },
+     "Crucible of Worlds": {
+      "id": "33c722cf-b4bf-431f-aefd-ee96241a7fbf",
+      "count": 1
+     },
+     "Disenchant": {
+      "id": "a7e97fa9-4b72-4548-b854-5be5f18a6f1a",
+      "count": 1
+     },
+     "Felidar Sovereign": {
+      "id": "5ae3cbb9-9f0c-4077-ae7c-fba660d7fb4b",
+      "count": 1
+     },
+     "Hex Parasite": {
+      "id": "c180f21b-f553-4839-80c7-a3ce2fae9b5a",
+      "count": 1
+     },
+     "Pithing Needle": {
+      "id": "a188fe7e-68de-4c7c-806c-bfe8fc7b44bf",
+      "count": 1
+     },
+     "Runed Halo": {
+      "id": "14cefb15-d833-4c70-80c9-f2d34b6c846b",
+      "count": 2
+     },
+     "Stony Silence": {
+      "id": "12c63a45-7eb2-4262-b571-3358182f5610",
+      "count": 2
+     },
+     "Surgical Extraction": {
+      "id": "3bfa088c-9a47-4123-aee5-4de44e355bef",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 4,
+   "draws": 0,
+   "losses": 0,
+   "winRate": 1
+  },
+  {
+   "name": "Jesús G",
+   "decklist": "~~Mainboard~~\\n4 Arid Mesa\\n4 Bitterblossom\\n2 Brimaz, King of Oreskos\\n2 Fetid Heath\\n4 Godless Shrine\\n4 Inquisition of Kozilek\\n4 Intangible Virtue\\n1 Isolated Chapel\\n2 Liliana of the Veil\\n4 Lingering Souls\\n4 Marsh Flats\\n2 Murderous Cut\\n4 Path to Exile\\n3 Plains\\n3 Sorin, Solemn Visitor\\n4 Spectral Procession\\n1 Swamp\\n4 Thoughtseize\\n1 Vault of the Archangel\\n3 Windbrisk Heights\\n\\n~~Sideboard~~\\n2 Rest in Peace\\n4 Timely Reinforcements\\n1 Vault of the Archangel\\n2 Zealous Persecution\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Arid Mesa": {
+      "id": "c5acf2a5-40f4-433d-a74d-1cb56c521464",
+      "count": 4
+     },
+     "Bitterblossom": {
+      "id": "fb868840-09fa-49b1-85cb-b08ad065e972",
+      "count": 4
+     },
+     "Brimaz, King of Oreskos": {
+      "id": "49471b65-be9d-4ded-b2e5-dfc81b306b54",
+      "count": 2
+     },
+     "Fetid Heath": {
+      "id": "42bf259d-4bb9-49c3-b4ec-223dca62f4d6",
+      "count": 2
+     },
+     "Godless Shrine": {
+      "id": "73864fcc-1bde-4bc0-831e-2b93e546e417",
+      "count": 4
+     },
+     "Inquisition of Kozilek": {
+      "id": "395611fa-aec2-4c9e-92c3-70cf95cc00f4",
+      "count": 4
+     },
+     "Intangible Virtue": {
+      "id": "d21c3c8f-d105-4ba9-bf69-e5f26f0f8ec5",
+      "count": 4
+     },
+     "Isolated Chapel": {
+      "id": "7e5d9efe-48a9-434b-bb09-056e0e09cc9a",
+      "count": 1
+     },
+     "Liliana of the Veil": {
+      "id": "0ba134d8-ee7d-48ec-8dc6-57942b8e9261",
+      "count": 2
+     },
+     "Lingering Souls": {
+      "id": "0b8c3337-04dd-4798-8203-6d8b8cfb936b",
+      "count": 4
+     },
+     "Marsh Flats": {
+      "id": "dab520d0-20b4-4273-ba6b-eb07f85ea433",
+      "count": 4
+     },
+     "Murderous Cut": {
+      "id": "c0ce7d5a-68fd-41f3-b5ba-a1a178cee9ec",
+      "count": 2
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 4
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 3
+     },
+     "Sorin, Solemn Visitor": {
+      "id": "1f1f1ae7-dd00-4825-832e-3a049cf8ce73",
+      "count": 3
+     },
+     "Spectral Procession": {
+      "id": "376271a6-80f0-47a6-990a-5ec5517aae42",
+      "count": 4
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 1
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 4
+     },
+     "Vault of the Archangel": {
+      "id": "eeaac65a-3480-475a-bb28-e6375d53f487",
+      "count": 1
+     },
+     "Windbrisk Heights": {
+      "id": "3589bcfc-42b0-414a-adce-bc690dc631c8",
+      "count": 3
+     }
+    },
+    "Sideboard": {
+     "Rest in Peace": {
+      "id": "087f9ad7-e74f-40e2-8102-1ed2925d0418",
+      "count": 2
+     },
+     "Timely Reinforcements": {
+      "id": "64f4f0ed-e924-459e-86a4-8202fae6ef3e",
+      "count": 4
+     },
+     "Vault of the Archangel": {
+      "id": "eeaac65a-3480-475a-bb28-e6375d53f487",
+      "count": 1
+     },
+     "Zealous Persecution": {
+      "id": "ccf8d919-1399-4bef-94ac-04c67f122828",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 3,
+   "draws": 0,
+   "losses": 1,
+   "winRate": 0.75
+  },
+  {
+   "name": "Adrian Rubio",
+   "decklist": "~~Mainboard~~\\n2 Blood Crypt\\n4 Bloodstained Mire\\n4 Death\\'s Shadow\\n2 Dismember\\n4 Gitaxian Raptor\\n4 Gurmag Angler\\n1 Island\\n4 Lightning Bolt\\n4 Mishra\\'s Bauble\\n4 Polluted Delta\\n3 Scalding Tarn\\n3 Snapcaster Mage\\n4 Street Wraith\\n4 Stubborn Denial\\n1 Swamp\\n2 Temur Battle Rage\\n4 Thought Scour\\n4 Thoughtseize\\n2 Watery Grave\\n\\n~~Sideboard~~\\n3 Disdainful Stroke\\n1 Hurkyl\\'s Recall\\n2 Kolaghan\\'s Command\\n3 Nihil Spellbomb\\n1 Pyroclasm\\n1 Spell Pierce\\n1 Surgical Extraction\\n1 Temur Battle Rage\\n2 Terminate\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Blood Crypt": {
+      "id": "43985bbc-a0f6-4812-984e-392bc8562633",
+      "count": 2
+     },
+     "Bloodstained Mire": {
+      "id": "fc0707c7-d504-4ccf-a0d2-3eb6e26e7a57",
+      "count": 4
+     },
+     "Death's Shadow": {
+      "id": "e08722b3-0f79-4c82-b298-603e04a37857",
+      "count": 4
+     },
+     "Dismember": {
+      "id": "fd74f8eb-0253-42dd-8277-186d4934da38",
+      "count": 2
+     },
+     "Gitaxian Raptor": {
+      "id": "6096b221-7b6e-4528-8b5d-8ad0fcef3fba",
+      "count": 4
+     },
+     "Gurmag Angler": {
+      "id": "315772f2-abd2-4681-b8c8-1db4b0ccbbcd",
+      "count": 4
+     },
+     "Island": {
+      "id": "b2c6aa39-2d2a-459c-a555-fb48ba993373",
+      "count": 1
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Mishra's Bauble": {
+      "id": "63afc3d1-7653-476e-838f-fc18d4a62a21",
+      "count": 4
+     },
+     "Polluted Delta": {
+      "id": "ef86989d-ce80-4e55-aece-7d11710eeffa",
+      "count": 4
+     },
+     "Scalding Tarn": {
+      "id": "cb027150-848c-4a66-88ad-e20222304dd8",
+      "count": 3
+     },
+     "Snapcaster Mage": {
+      "id": "2bb2eda7-3b38-4c56-870f-c3218a1056f5",
+      "count": 3
+     },
+     "Street Wraith": {
+      "id": "bd7867f4-4f58-49c2-9c24-a124dfdb506d",
+      "count": 4
+     },
+     "Stubborn Denial": {
+      "id": "3adc3af3-5086-4d61-b38c-c1dddeaeebe6",
+      "count": 4
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 1
+     },
+     "Temur Battle Rage": {
+      "id": "2fdc0d17-b683-4263-949e-4f74ec76badf",
+      "count": 2
+     },
+     "Thought Scour": {
+      "id": "83101ba8-a569-4827-8c53-9ca0dfcd59a7",
+      "count": 4
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 4
+     },
+     "Watery Grave": {
+      "id": "fc9ec820-4245-4a96-b009-5308a818ca58",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Disdainful Stroke": {
+      "id": "11e02134-7b1a-46a4-a89e-7539dd1efada",
+      "count": 3
+     },
+     "Hurkyl's Recall": {
+      "id": "ed1e5d24-c8a8-48fe-a88f-1003ad432477",
+      "count": 1
+     },
+     "Kolaghan's Command": {
+      "id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+      "count": 2
+     },
+     "Nihil Spellbomb": {
+      "id": "b713e49f-1b13-42d1-91f2-cc7a579e7614",
+      "count": 3
+     },
+     "Pyroclasm": {
+      "id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+      "count": 1
+     },
+     "Spell Pierce": {
+      "id": "d64b0848-0193-4025-ba62-63ecd8fb9f50",
+      "count": 1
+     },
+     "Surgical Extraction": {
+      "id": "3bfa088c-9a47-4123-aee5-4de44e355bef",
+      "count": 1
+     },
+     "Temur Battle Rage": {
+      "id": "2fdc0d17-b683-4263-949e-4f74ec76badf",
+      "count": 1
+     },
+     "Terminate": {
+      "id": "6257c2fd-005f-41e3-8a72-af76df1eb134",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "Noé Somoza",
+   "decklist": "~~Mainboard~~\\n2 Abzan Charm\\n2 Anafenza, the Foremost\\n1 Arid Mesa\\n2 Blood Crypt\\n2 Bloodstained Mire\\n3 Crackling Doom\\n1 Forest\\n1 Godless Shrine\\n3 Kolaghan\\'s Command\\n4 Lightning Bolt\\n2 Lightning Helix\\n1 Liliana of the Veil\\n2 Lingering Souls\\n1 Marsh Flats\\n1 Mountain\\n2 Overgrown Tomb\\n3 Path to Exile\\n1 Plains\\n1 Raging Ravine\\n1 Sacred Foundry\\n4 Siege Rhino\\n1 Sorin, Solemn Visitor\\n2 Soulfire Grand Master\\n1 Stomping Ground\\n1 Swamp\\n4 Tarmogoyf\\n1 Tasigur, the Golden Fang\\n2 Temple Garden\\n2 Verdant Catacombs\\n4 Voice of Resurgence\\n1 Windswept Heath\\n2 Wooded Foothills\\n\\n~~Sideboard~~\\n2 Abrupt Decay\\n1 Dromoka\\'s Command\\n3 Fulminator Mage\\n2 Gaddock Teeg\\n2 Rakdos Charm\\n2 Stony Silence\\n3 Thoughtseize\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Abzan Charm": {
+      "id": "4137a22c-f793-4e27-a9b2-72740a6e2121",
+      "count": 2
+     },
+     "Anafenza, the Foremost": {
+      "id": "ebfafabc-5255-4024-be59-7403bdb16ee4",
+      "count": 2
+     },
+     "Arid Mesa": {
+      "id": "c5acf2a5-40f4-433d-a74d-1cb56c521464",
+      "count": 1
+     },
+     "Blood Crypt": {
+      "id": "43985bbc-a0f6-4812-984e-392bc8562633",
+      "count": 2
+     },
+     "Bloodstained Mire": {
+      "id": "fc0707c7-d504-4ccf-a0d2-3eb6e26e7a57",
+      "count": 2
+     },
+     "Crackling Doom": {
+      "id": "ee81f37b-2a81-46d7-8d2f-9091123846c4",
+      "count": 3
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 1
+     },
+     "Godless Shrine": {
+      "id": "73864fcc-1bde-4bc0-831e-2b93e546e417",
+      "count": 1
+     },
+     "Kolaghan's Command": {
+      "id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+      "count": 3
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Lightning Helix": {
+      "id": "800c258a-cfc4-4a54-a667-065ea8dea69e",
+      "count": 2
+     },
+     "Liliana of the Veil": {
+      "id": "0ba134d8-ee7d-48ec-8dc6-57942b8e9261",
+      "count": 1
+     },
+     "Lingering Souls": {
+      "id": "0b8c3337-04dd-4798-8203-6d8b8cfb936b",
+      "count": 2
+     },
+     "Marsh Flats": {
+      "id": "dab520d0-20b4-4273-ba6b-eb07f85ea433",
+      "count": 1
+     },
+     "Mountain": {
+      "id": "a3fb7228-e76b-4e96-a40e-20b5fed75685",
+      "count": 1
+     },
+     "Overgrown Tomb": {
+      "id": "975ec9a3-6f20-4177-8211-82526e092538",
+      "count": 2
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 3
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 1
+     },
+     "Raging Ravine": {
+      "id": "8d38194e-b607-4ff4-9c19-0e8636d463bf",
+      "count": 1
+     },
+     "Sacred Foundry": {
+      "id": "45181cb8-2090-4471-ba90-e5a8f04d525f",
+      "count": 1
+     },
+     "Siege Rhino": {
+      "id": "e1087ce2-e3c2-4ab1-bd08-1dc9ab70f12f",
+      "count": 4
+     },
+     "Sorin, Solemn Visitor": {
+      "id": "1f1f1ae7-dd00-4825-832e-3a049cf8ce73",
+      "count": 1
+     },
+     "Soulfire Grand Master": {
+      "id": "e65769f4-50ae-482b-933b-ac5cf3843f2a",
+      "count": 2
+     },
+     "Stomping Ground": {
+      "id": "16052b52-ade1-406f-a06b-ce7ea607fb63",
+      "count": 1
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 1
+     },
+     "Tarmogoyf": {
+      "id": "45900b2f-f6a9-4c42-9642-008f3c1cf6dd",
+      "count": 4
+     },
+     "Tasigur, the Golden Fang": {
+      "id": "837e3fde-241f-4826-ad04-f146fdcf2278",
+      "count": 1
+     },
+     "Temple Garden": {
+      "id": "f413a83d-a40d-434c-b20a-4c707c0527fa",
+      "count": 2
+     },
+     "Verdant Catacombs": {
+      "id": "67d60b24-d429-4ded-90d9-06e49f28c396",
+      "count": 2
+     },
+     "Voice of Resurgence": {
+      "id": "5cbbb3f3-63a4-4983-81ea-8c405b10e63f",
+      "count": 4
+     },
+     "Windswept Heath": {
+      "id": "29737a60-3ebd-40d9-b935-c4f54b90d45d",
+      "count": 1
+     },
+     "Wooded Foothills": {
+      "id": "6587a463-a108-4854-b6d1-944e89b8c8a4",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Abrupt Decay": {
+      "id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+      "count": 2
+     },
+     "Dromoka's Command": {
+      "id": "3bd8ea71-cbcc-4659-b9a8-88cf27ee12d8",
+      "count": 1
+     },
+     "Fulminator Mage": {
+      "id": "bd4c46a3-b723-4b35-9061-9a1dee7cc9d8",
+      "count": 3
+     },
+     "Gaddock Teeg": {
+      "id": "98dd6d43-cc56-4656-9e0c-240d0679b404",
+      "count": 2
+     },
+     "Rakdos Charm": {
+      "id": "5e62b51d-faec-4aa0-9504-cf2c282d08ea",
+      "count": 2
+     },
+     "Stony Silence": {
+      "id": "12c63a45-7eb2-4262-b571-3358182f5610",
+      "count": 2
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 3
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern",
+     "importedFrom": "https://moxfield.com/decks/7_xx_0rMh0yg1nRwsNoDJA"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "Jose Ignacio Perez Janeiro",
+   "decklist": "~~Mainboard~~\\n4 Ad Nauseam\\n4 Angel\\'s Grace\\n4 City of Brass\\n3 Darkslick Shores\\n1 Dreadship Reef\\n3 Gemstone Mine\\n2 Lightning Storm\\n4 Lotus Bloom\\n3 Pact of Negation\\n4 Pentad Prism\\n3 Phyrexian Unlife\\n1 Plains\\n3 Seachrome Coast\\n4 Serum Visions\\n3 Simian Brawler\\n4 Sleight of Hand\\n4 Spoils of the Vault\\n2 Temple of Deceit\\n2 Temple of Enlightenment\\n1 Tolaria West\\n1 Urborg, Tomb of Yawgmoth\\n\\n~~Sideboard~~\\n1 Boseiju, Who Shelters All\\n1 Echoing Truth\\n2 Jace, Vryn\\'s Prodigy // Jace, Telepath Unbound\\n1 Laboratory Maniac\\n4 Leyline of Sanctity\\n1 Pact of Negation\\n1 Slaughter Pact\\n4 Thoughtseize\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Ad Nauseam": {
+      "id": "981b0e21-e5e6-4a1e-bfde-679d56623f7f",
+      "count": 4
+     },
+     "Angel's Grace": {
+      "id": "66ca8a60-e028-4a5f-8177-860b888cb9d1",
+      "count": 4
+     },
+     "City of Brass": {
+      "id": "f25351e3-539b-4bbc-b92d-6480acf4d722",
+      "count": 4
+     },
+     "Darkslick Shores": {
+      "id": "a2b48695-f7d7-42ce-a8a0-2a723428542a",
+      "count": 3
+     },
+     "Dreadship Reef": {
+      "id": "130a8cf5-1354-4d17-91c8-c073642eb3db",
+      "count": 1
+     },
+     "Gemstone Mine": {
+      "id": "0c828f10-4775-492f-9224-1e2814ad2cad",
+      "count": 3
+     },
+     "Lightning Storm": {
+      "id": "2c0fceb6-d92d-4f4a-85a2-0af5be5bba81",
+      "count": 2
+     },
+     "Lotus Bloom": {
+      "id": "04cf02dc-f053-414e-87d8-1537f25bcbf4",
+      "count": 4
+     },
+     "Pact of Negation": {
+      "id": "f3e213a4-ba5a-468a-93b3-c0a34e1bd725",
+      "count": 3
+     },
+     "Pentad Prism": {
+      "id": "72e8d67a-41e6-4074-bcbd-b54ead995237",
+      "count": 4
+     },
+     "Phyrexian Unlife": {
+      "id": "6598d988-d60e-4441-88b6-8d0995c4675a",
+      "count": 3
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 1
+     },
+     "Seachrome Coast": {
+      "id": "9e7a240d-dc33-47ac-9f17-77fab4c1c340",
+      "count": 3
+     },
+     "Serum Visions": {
+      "id": "56956afd-db53-4542-816b-490c8b0bbcf7",
+      "count": 4
+     },
+     "Simian Brawler": {
+      "id": "2497cfe2-a85c-47ea-af7a-9a745d84f8b4",
+      "count": 3
+     },
+     "Sleight of Hand": {
+      "id": "05a039ad-1689-4d13-b393-6c1219583b5d",
+      "count": 4
+     },
+     "Spoils of the Vault": {
+      "id": "ef86f861-1fdf-4be0-9497-8adc064af3de",
+      "count": 4
+     },
+     "Temple of Deceit": {
+      "id": "33b9b3bd-33ca-46f3-b8bb-a978bc3d1085",
+      "count": 2
+     },
+     "Temple of Enlightenment": {
+      "id": "89f43e27-790b-4ca1-8ba7-0882b31e0783",
+      "count": 2
+     },
+     "Tolaria West": {
+      "id": "46eefc72-2d9e-4389-8ae1-26d9ee472b5c",
+      "count": 1
+     },
+     "Urborg, Tomb of Yawgmoth": {
+      "id": "db6174d7-211d-4817-b8e4-8384594c83f9",
+      "count": 1
+     }
+    },
+    "Sideboard": {
+     "Boseiju, Who Shelters All": {
+      "id": "36937483-30cb-449a-8028-75017a124922",
+      "count": 1
+     },
+     "Echoing Truth": {
+      "id": "ef100544-3e6d-4661-a1d1-8b02e58c059c",
+      "count": 1
+     },
+     "Jace, Vryn's Prodigy // Jace, Telepath Unbound": {
+      "id": "594f6881-c059-46f8-aa4e-7151d502de73",
+      "count": 2
+     },
+     "Laboratory Maniac": {
+      "id": "aa286dd5-aa19-446d-9003-684d81eb57ca",
+      "count": 1
+     },
+     "Leyline of Sanctity": {
+      "id": "492e0e6c-8c27-4376-938b-f8a8b6205810",
+      "count": 4
+     },
+     "Pact of Negation": {
+      "id": "f3e213a4-ba5a-468a-93b3-c0a34e1bd725",
+      "count": 1
+     },
+     "Slaughter Pact": {
+      "id": "67c4b1d5-757c-46cf-8bb1-9889d9ed1a1f",
+      "count": 1
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 4
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "Iñigo Epelde Martija",
+   "decklist": "~~Mainboard~~\\n2 Abrupt Decay\\n2 Academy Ruins\\n4 Ancient Stirrings\\n2 Blackcleave Cliffs\\n4 Codex Shredder\\n1 Copperline Gorge\\n4 Ensnaring Bridge\\n1 Forest\\n1 Ghirapur Aether Grid\\n2 Ghost Quarter\\n4 Ghoulcaller\\'s Bell\\n4 Glimmervoid\\n4 Inquisition of Kozilek\\n4 Lantern of Insight\\n4 Llanowar Wastes\\n4 Mox Opal\\n3 Pithing Needle\\n2 Pyrite Spellbomb\\n3 Spellskite\\n2 Surgical Extraction\\n1 Tendo Ice Bridge\\n2 Thoughtseize\\n\\n~~Sideboard~~\\n1 Ancient Grudge\\n2 Grafdigger\\'s Cage\\n1 Nature\\'s Claim\\n1 Pithing Needle\\n3 Pyroclasm\\n1 Spellskite\\n3 Sun Droplet\\n3 Welding Jar\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Abrupt Decay": {
+      "id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+      "count": 2
+     },
+     "Academy Ruins": {
+      "id": "a3da7d5b-2c2b-45fe-b9c5-413b8c8fc0a2",
+      "count": 2
+     },
+     "Ancient Stirrings": {
+      "id": "82f18e7d-5c42-47c4-8e74-3fccc9b7b1f0",
+      "count": 4
+     },
+     "Blackcleave Cliffs": {
+      "id": "5ad94412-6f79-4c5d-bbd4-4ef5779a7b6d",
+      "count": 2
+     },
+     "Codex Shredder": {
+      "id": "ef7b11ab-24e7-4e7c-91a7-920bade6e60b",
+      "count": 4
+     },
+     "Copperline Gorge": {
+      "id": "a05f641c-15c9-43dc-ae0d-1ea372fd33d5",
+      "count": 1
+     },
+     "Ensnaring Bridge": {
+      "id": "dade5835-ccaf-45e3-b9a3-46017e0384b3",
+      "count": 4
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 1
+     },
+     "Ghirapur Aether Grid": {
+      "id": "05d75b10-4f20-4083-af27-f85c6e207fd0",
+      "count": 1
+     },
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 2
+     },
+     "Ghoulcaller's Bell": {
+      "id": "36e1485d-3b8c-4c23-9d12-6937fd216b25",
+      "count": 4
+     },
+     "Glimmervoid": {
+      "id": "b92e9854-4527-4133-8615-e282a213e7e3",
+      "count": 4
+     },
+     "Inquisition of Kozilek": {
+      "id": "395611fa-aec2-4c9e-92c3-70cf95cc00f4",
+      "count": 4
+     },
+     "Lantern of Insight": {
+      "id": "e4d9c9c9-90e4-4397-9a88-9457fc6854fa",
+      "count": 4
+     },
+     "Llanowar Wastes": {
+      "id": "32116127-cf96-4a1b-8896-a1ebc087b597",
+      "count": 4
+     },
+     "Mox Opal": {
+      "id": "de2440de-e948-4811-903c-0bbe376ff64d",
+      "count": 4
+     },
+     "Pithing Needle": {
+      "id": "a188fe7e-68de-4c7c-806c-bfe8fc7b44bf",
+      "count": 3
+     },
+     "Pyrite Spellbomb": {
+      "id": "2c10cae2-951a-4f4f-94e4-8713b58d07dd",
+      "count": 2
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 3
+     },
+     "Surgical Extraction": {
+      "id": "3bfa088c-9a47-4123-aee5-4de44e355bef",
+      "count": 2
+     },
+     "Tendo Ice Bridge": {
+      "id": "9e006a4b-8dde-4416-8cb4-8401562d0fd5",
+      "count": 1
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Ancient Grudge": {
+      "id": "306593b0-6ea8-476f-a3f2-e17876c1bab4",
+      "count": 1
+     },
+     "Grafdigger's Cage": {
+      "id": "753cb2b2-24ce-484f-a2d0-be6fd2c67ebd",
+      "count": 2
+     },
+     "Nature's Claim": {
+      "id": "6d4e558e-9109-4918-a082-fdcbaffd516b",
+      "count": 1
+     },
+     "Pithing Needle": {
+      "id": "a188fe7e-68de-4c7c-806c-bfe8fc7b44bf",
+      "count": 1
+     },
+     "Pyroclasm": {
+      "id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+      "count": 3
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 1
+     },
+     "Sun Droplet": {
+      "id": "1820af5c-9cc2-4b77-b4ca-86084442f087",
+      "count": 3
+     },
+     "Welding Jar": {
+      "id": "e4a6c421-bef1-4360-a2dc-ae9c61d86b2f",
+      "count": 3
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern",
+     "importedFrom": "https://moxfield.com/decks/IgNh2ZtawUisXDbhjG-7-A"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "Hector mateos herrero",
+   "decklist": "~~Mainboard~~\\n1 Blood Crypt\\n4 Delver of Secrets // Insectile Aberration\\n3 Gitaxian Raptor\\n1 Gurmag Angler\\n4 Island\\n3 Kolaghan\\'s Command\\n4 Lightning Bolt\\n4 Mana Leak\\n1 Mountain\\n4 Polluted Delta\\n4 Scalding Tarn\\n4 Serum Visions\\n4 Snapcaster Mage\\n1 Spell Pierce\\n2 Spell Snare\\n2 Steam Vents\\n1 Sulfur Falls\\n1 Swamp\\n2 Tasigur, the Golden Fang\\n2 Terminate\\n4 Thought Scour\\n1 Watery Grave\\n3 Young Pyromancer\\n\\n~~Sideboard~~\\n3 Blood Moon\\n2 Dispel\\n2 Electrolyze\\n2 Izzet Staticaster\\n2 Negate\\n1 Shattering Spree\\n1 Spell Pierce\\n1 Spell Snare\\n1 Terminate\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Blood Crypt": {
+      "id": "43985bbc-a0f6-4812-984e-392bc8562633",
+      "count": 1
+     },
+     "Delver of Secrets // Insectile Aberration": {
+      "id": "edd531b9-f615-4399-8c8c-1c5e18c4acbf",
+      "count": 4
+     },
+     "Gitaxian Raptor": {
+      "id": "6096b221-7b6e-4528-8b5d-8ad0fcef3fba",
+      "count": 3
+     },
+     "Gurmag Angler": {
+      "id": "315772f2-abd2-4681-b8c8-1db4b0ccbbcd",
+      "count": 1
+     },
+     "Island": {
+      "id": "b2c6aa39-2d2a-459c-a555-fb48ba993373",
+      "count": 4
+     },
+     "Kolaghan's Command": {
+      "id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+      "count": 3
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Mana Leak": {
+      "id": "c61fe162-2202-4e56-9ba0-393547f9875f",
+      "count": 4
+     },
+     "Mountain": {
+      "id": "a3fb7228-e76b-4e96-a40e-20b5fed75685",
+      "count": 1
+     },
+     "Polluted Delta": {
+      "id": "ef86989d-ce80-4e55-aece-7d11710eeffa",
+      "count": 4
+     },
+     "Scalding Tarn": {
+      "id": "cb027150-848c-4a66-88ad-e20222304dd8",
+      "count": 4
+     },
+     "Serum Visions": {
+      "id": "56956afd-db53-4542-816b-490c8b0bbcf7",
+      "count": 4
+     },
+     "Snapcaster Mage": {
+      "id": "2bb2eda7-3b38-4c56-870f-c3218a1056f5",
+      "count": 4
+     },
+     "Spell Pierce": {
+      "id": "d64b0848-0193-4025-ba62-63ecd8fb9f50",
+      "count": 1
+     },
+     "Spell Snare": {
+      "id": "38877c68-b69b-4ee1-8e8f-5137a184a8f7",
+      "count": 2
+     },
+     "Steam Vents": {
+      "id": "17039058-822d-409f-938c-b727a366ba63",
+      "count": 2
+     },
+     "Sulfur Falls": {
+      "id": "6a6c5e17-6465-4a1f-9d63-8a3ce2edc522",
+      "count": 1
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 1
+     },
+     "Tasigur, the Golden Fang": {
+      "id": "837e3fde-241f-4826-ad04-f146fdcf2278",
+      "count": 2
+     },
+     "Terminate": {
+      "id": "6257c2fd-005f-41e3-8a72-af76df1eb134",
+      "count": 2
+     },
+     "Thought Scour": {
+      "id": "83101ba8-a569-4827-8c53-9ca0dfcd59a7",
+      "count": 4
+     },
+     "Watery Grave": {
+      "id": "fc9ec820-4245-4a96-b009-5308a818ca58",
+      "count": 1
+     },
+     "Young Pyromancer": {
+      "id": "5fac139a-07d3-4e6c-98e3-d98b199f7a6f",
+      "count": 3
+     }
+    },
+    "Sideboard": {
+     "Blood Moon": {
+      "id": "94fac5fe-97d5-4c12-a80c-8efff9d853ae",
+      "count": 3
+     },
+     "Dispel": {
+      "id": "6d7be242-a072-40ce-b540-95880506cccd",
+      "count": 2
+     },
+     "Electrolyze": {
+      "id": "07b222d7-24f2-4994-9004-ff6672ebe161",
+      "count": 2
+     },
+     "Izzet Staticaster": {
+      "id": "d63adbed-07d3-44e4-83f8-1cbdfc186df4",
+      "count": 2
+     },
+     "Negate": {
+      "id": "3407fe41-fdd3-4119-8f70-4bc4590a379f",
+      "count": 2
+     },
+     "Shattering Spree": {
+      "id": "fe725b27-49ef-41bc-91f9-9cd9871ad863",
+      "count": 1
+     },
+     "Spell Pierce": {
+      "id": "d64b0848-0193-4025-ba62-63ecd8fb9f50",
+      "count": 1
+     },
+     "Spell Snare": {
+      "id": "38877c68-b69b-4ee1-8e8f-5137a184a8f7",
+      "count": 1
+     },
+     "Terminate": {
+      "id": "6257c2fd-005f-41e3-8a72-af76df1eb134",
+      "count": 1
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "David Blanco Remesar",
+   "decklist": "~~Mainboard~~\\n1 Cavern of Souls\\n3 Celestial Colonnade\\n2 Cryptic Command\\n2 Electrolyze\\n1 Engineered Explosives\\n4 Flooded Strand\\n4 Geist of Saint Traft\\n2 Ghost Quarter\\n1 Hallowed Fountain\\n2 Island\\n4 Lightning Bolt\\n4 Lightning Helix\\n1 Mountain\\n4 Path to Exile\\n2 Plains\\n4 Remand\\n3 Restoration Angel\\n1 Sacred Foundry\\n3 Scalding Tarn\\n4 Snapcaster Mage\\n2 Spell Snare\\n2 Steam Vents\\n2 Sulfur Falls\\n2 Vendilion Clique\\n\\n~~Sideboard~~\\n2 Blood Moon\\n1 Counterflux\\n2 Dispel\\n1 Engineered Explosives\\n1 Izzet Staticaster\\n1 Keranos, God of Storms\\n2 Stony Silence\\n2 Timely Reinforcements\\n2 Wear // Tear\\n1 Wrath of God\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Cavern of Souls": {
+      "id": "89ca686a-7c72-4d8f-9290-e89635624a83",
+      "count": 1
+     },
+     "Celestial Colonnade": {
+      "id": "876ac6f6-74de-4666-84c6-83d81f054723",
+      "count": 3
+     },
+     "Cryptic Command": {
+      "id": "a3e51a35-09df-4189-b131-08a21e6a557d",
+      "count": 2
+     },
+     "Electrolyze": {
+      "id": "07b222d7-24f2-4994-9004-ff6672ebe161",
+      "count": 2
+     },
+     "Engineered Explosives": {
+      "id": "95fd897e-9086-42c4-8e0d-61bb02333c5f",
+      "count": 1
+     },
+     "Flooded Strand": {
+      "id": "f3c7af78-a77d-4134-82a2-a5ce84285a84",
+      "count": 4
+     },
+     "Geist of Saint Traft": {
+      "id": "4304035c-c3e4-4a19-aa1f-92a83d8aed1f",
+      "count": 4
+     },
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 2
+     },
+     "Hallowed Fountain": {
+      "id": "f1750962-a87c-49f6-b731-02ae971ac6ea",
+      "count": 1
+     },
+     "Island": {
+      "id": "b2c6aa39-2d2a-459c-a555-fb48ba993373",
+      "count": 2
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Lightning Helix": {
+      "id": "800c258a-cfc4-4a54-a667-065ea8dea69e",
+      "count": 4
+     },
+     "Mountain": {
+      "id": "a3fb7228-e76b-4e96-a40e-20b5fed75685",
+      "count": 1
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 4
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 2
+     },
+     "Remand": {
+      "id": "d71cd08e-3e84-41ff-b9db-9e343c0af6b4",
+      "count": 4
+     },
+     "Restoration Angel": {
+      "id": "dfbd3afc-9905-4cff-a4f4-df08a4d0a7fa",
+      "count": 3
+     },
+     "Sacred Foundry": {
+      "id": "45181cb8-2090-4471-ba90-e5a8f04d525f",
+      "count": 1
+     },
+     "Scalding Tarn": {
+      "id": "cb027150-848c-4a66-88ad-e20222304dd8",
+      "count": 3
+     },
+     "Snapcaster Mage": {
+      "id": "2bb2eda7-3b38-4c56-870f-c3218a1056f5",
+      "count": 4
+     },
+     "Spell Snare": {
+      "id": "38877c68-b69b-4ee1-8e8f-5137a184a8f7",
+      "count": 2
+     },
+     "Steam Vents": {
+      "id": "17039058-822d-409f-938c-b727a366ba63",
+      "count": 2
+     },
+     "Sulfur Falls": {
+      "id": "6a6c5e17-6465-4a1f-9d63-8a3ce2edc522",
+      "count": 2
+     },
+     "Vendilion Clique": {
+      "id": "244d4807-0802-41bc-9460-55ac38a28a72",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Blood Moon": {
+      "id": "94fac5fe-97d5-4c12-a80c-8efff9d853ae",
+      "count": 2
+     },
+     "Counterflux": {
+      "id": "8c983da8-1436-4c06-af9c-91b72cab48c1",
+      "count": 1
+     },
+     "Dispel": {
+      "id": "6d7be242-a072-40ce-b540-95880506cccd",
+      "count": 2
+     },
+     "Engineered Explosives": {
+      "id": "95fd897e-9086-42c4-8e0d-61bb02333c5f",
+      "count": 1
+     },
+     "Izzet Staticaster": {
+      "id": "d63adbed-07d3-44e4-83f8-1cbdfc186df4",
+      "count": 1
+     },
+     "Keranos, God of Storms": {
+      "id": "2bd6f13a-ae02-426d-8f99-c20c5c08cf55",
+      "count": 1
+     },
+     "Stony Silence": {
+      "id": "12c63a45-7eb2-4262-b571-3358182f5610",
+      "count": 2
+     },
+     "Timely Reinforcements": {
+      "id": "64f4f0ed-e924-459e-86a4-8202fae6ef3e",
+      "count": 2
+     },
+     "Wear // Tear": {
+      "id": "9842734c-1eac-4509-a731-4c22017ae586",
+      "count": 2
+     },
+     "Wrath of God": {
+      "id": "34515b16-c9a4-4f98-8c77-416a7a523407",
+      "count": 1
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern",
+     "importedFrom": "https://moxfield.com/decks/LKcfvcvc6UODd5N9YdIHeA"
+    }
+   },
+   "wins": 2,
+   "draws": 1,
+   "losses": 1,
+   "winRate": 0.5
+  },
+  {
+   "name": "Víctor Fernández Ceinos",
+   "decklist": "~~Mainboard~~\\n4 Ancient Stirrings\\n4 Chromatic Sphere\\n4 Chromatic Star\\n1 Emrakul, the Aeons Torn\\n4 Expedition Map\\n1 Eye Gouge\\n2 Forest\\n1 Ghost Quarter\\n4 Grove of the Burnwillows\\n4 Karn Liberated\\n3 Oblivion Stone\\n3 Pyroclasm\\n3 Relic of Progenitus\\n1 Spellskite\\n4 Sylvan Scrying\\n2 Ugin, the Spirit Dragon\\n4 Urza\\'s Mine\\n4 Urza\\'s Power Plant\\n4 Urza\\'s Tower\\n3 Wurmcoil Engine\\n\\n~~Sideboard~~\\n1 Ghost Quarter\\n4 Nature\\'s Claim\\n1 Oblivion Stone\\n1 Pyroclasm\\n2 Rending Volley\\n2 Spellskite\\n2 Thragtusk\\n2 Torpor Orb\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Ancient Stirrings": {
+      "id": "82f18e7d-5c42-47c4-8e74-3fccc9b7b1f0",
+      "count": 4
+     },
+     "Chromatic Sphere": {
+      "id": "2e03e44a-9fff-4490-859f-b42e89e8563a",
+      "count": 4
+     },
+     "Chromatic Star": {
+      "id": "fedbd40b-e3a5-449c-a8a3-b42e9da191a9",
+      "count": 4
+     },
+     "Emrakul, the Aeons Torn": {
+      "id": "900ca697-ad38-4b2b-bc74-2ff7eb6ea951",
+      "count": 1
+     },
+     "Expedition Map": {
+      "id": "8fcf50cd-e6d0-4516-850f-d42ee75dcc3a",
+      "count": 4
+     },
+     "Eye Gouge": {
+      "id": "89661ef9-cb42-401a-ae45-b57bb8dac033",
+      "count": 1
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 2
+     },
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 1
+     },
+     "Grove of the Burnwillows": {
+      "id": "d33c3fbb-8306-4c2d-b0dd-88f12639da94",
+      "count": 4
+     },
+     "Karn Liberated": {
+      "id": "0ca233f4-1b7f-4807-ab6e-2b1f5439b3db",
+      "count": 4
+     },
+     "Oblivion Stone": {
+      "id": "2fd61c9f-44d2-48d7-a271-8e4208407cca",
+      "count": 3
+     },
+     "Pyroclasm": {
+      "id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+      "count": 3
+     },
+     "Relic of Progenitus": {
+      "id": "6a9c3401-570c-41cb-a605-75dfa57d6ab7",
+      "count": 3
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 1
+     },
+     "Sylvan Scrying": {
+      "id": "ee24bf27-484d-4e1c-998e-6a74e3d3f6c4",
+      "count": 4
+     },
+     "Ugin, the Spirit Dragon": {
+      "id": "eecb3047-a563-441a-9175-200421981ac3",
+      "count": 2
+     },
+     "Urza's Mine": {
+      "id": "33e85a8a-86df-4cdc-a9cc-8cbabe92c3c0",
+      "count": 4
+     },
+     "Urza's Power Plant": {
+      "id": "e11966cd-2ee3-4df4-b099-abf42dcdf0db",
+      "count": 4
+     },
+     "Urza's Tower": {
+      "id": "32fbb638-ab14-4e8b-a07a-d4c44e3496f2",
+      "count": 4
+     },
+     "Wurmcoil Engine": {
+      "id": "d1a60f44-7696-49ee-91fb-cab5b3102962",
+      "count": 3
+     }
+    },
+    "Sideboard": {
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 1
+     },
+     "Nature's Claim": {
+      "id": "6d4e558e-9109-4918-a082-fdcbaffd516b",
+      "count": 4
+     },
+     "Oblivion Stone": {
+      "id": "2fd61c9f-44d2-48d7-a271-8e4208407cca",
+      "count": 1
+     },
+     "Pyroclasm": {
+      "id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+      "count": 1
+     },
+     "Rending Volley": {
+      "id": "0324941f-484c-4656-8d1c-66e919c2bc7c",
+      "count": 2
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 2
+     },
+     "Thragtusk": {
+      "id": "0dd0e91a-d16b-4718-8d11-1a3fcf8e0753",
+      "count": 2
+     },
+     "Torpor Orb": {
+      "id": "97326cad-b13c-4e52-82ce-850a39e5ff08",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 1,
+   "draws": 0,
+   "losses": 2,
+   "winRate": 0.3333333333333333
+  },
+  {
+   "name": "Carlos Montero Lino ",
+   "decklist": "~~Mainboard~~\\n2 Abrupt Decay\\n3 Arid Mesa\\n1 Blood Crypt\\n1 Breeding Pool\\n1 Forest\\n4 Geist of Saint Traft\\n3 Ghor-Clan Rampager\\n1 Godless Shrine\\n1 Hallowed Fountain\\n4 Lightning Bolt\\n4 Noble Hierarch\\n1 Overgrown Tomb\\n3 Path to Exile\\n1 Plains\\n1 Sacred Foundry\\n4 Siege Rhino\\n2 Snapcaster Mage\\n1 Steam Vents\\n1 Stomping Ground\\n4 Tarmogoyf\\n1 Temple Garden\\n4 Tribal Flames\\n4 Wild Nacatl\\n4 Windswept Heath\\n4 Wooded Foothills\\n\\n~~Sideboard~~\\n1 Ancient Grudge\\n2 Gaddock Teeg\\n2 Kor Firewalker\\n2 Meddling Mage\\n2 Nihil Spellbomb\\n2 Pyroclasm\\n2 Rending Volley\\n2 Wear // Tear\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Abrupt Decay": {
+      "id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+      "count": 2
+     },
+     "Arid Mesa": {
+      "id": "c5acf2a5-40f4-433d-a74d-1cb56c521464",
+      "count": 3
+     },
+     "Blood Crypt": {
+      "id": "43985bbc-a0f6-4812-984e-392bc8562633",
+      "count": 1
+     },
+     "Breeding Pool": {
+      "id": "20283c4a-f1f0-42f0-bc08-6da87474426b",
+      "count": 1
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 1
+     },
+     "Geist of Saint Traft": {
+      "id": "4304035c-c3e4-4a19-aa1f-92a83d8aed1f",
+      "count": 4
+     },
+     "Ghor-Clan Rampager": {
+      "id": "ec7a9e7f-742b-4344-983e-73372c6a1760",
+      "count": 3
+     },
+     "Godless Shrine": {
+      "id": "73864fcc-1bde-4bc0-831e-2b93e546e417",
+      "count": 1
+     },
+     "Hallowed Fountain": {
+      "id": "f1750962-a87c-49f6-b731-02ae971ac6ea",
+      "count": 1
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Noble Hierarch": {
+      "id": "98aa9424-5912-4bd6-9300-b3972a31d8af",
+      "count": 4
+     },
+     "Overgrown Tomb": {
+      "id": "975ec9a3-6f20-4177-8211-82526e092538",
+      "count": 1
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 3
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 1
+     },
+     "Sacred Foundry": {
+      "id": "45181cb8-2090-4471-ba90-e5a8f04d525f",
+      "count": 1
+     },
+     "Siege Rhino": {
+      "id": "e1087ce2-e3c2-4ab1-bd08-1dc9ab70f12f",
+      "count": 4
+     },
+     "Snapcaster Mage": {
+      "id": "2bb2eda7-3b38-4c56-870f-c3218a1056f5",
+      "count": 2
+     },
+     "Steam Vents": {
+      "id": "17039058-822d-409f-938c-b727a366ba63",
+      "count": 1
+     },
+     "Stomping Ground": {
+      "id": "16052b52-ade1-406f-a06b-ce7ea607fb63",
+      "count": 1
+     },
+     "Tarmogoyf": {
+      "id": "45900b2f-f6a9-4c42-9642-008f3c1cf6dd",
+      "count": 4
+     },
+     "Temple Garden": {
+      "id": "f413a83d-a40d-434c-b20a-4c707c0527fa",
+      "count": 1
+     },
+     "Tribal Flames": {
+      "id": "c82eda61-d195-49c9-8ff0-a78dfa650689",
+      "count": 4
+     },
+     "Wild Nacatl": {
+      "id": "35d3d96a-d303-4bf5-b972-f311331ec07a",
+      "count": 4
+     },
+     "Windswept Heath": {
+      "id": "29737a60-3ebd-40d9-b935-c4f54b90d45d",
+      "count": 4
+     },
+     "Wooded Foothills": {
+      "id": "6587a463-a108-4854-b6d1-944e89b8c8a4",
+      "count": 4
+     }
+    },
+    "Sideboard": {
+     "Ancient Grudge": {
+      "id": "306593b0-6ea8-476f-a3f2-e17876c1bab4",
+      "count": 1
+     },
+     "Gaddock Teeg": {
+      "id": "98dd6d43-cc56-4656-9e0c-240d0679b404",
+      "count": 2
+     },
+     "Kor Firewalker": {
+      "id": "fb37ff1c-7461-4a16-b27f-6eef0db937fe",
+      "count": 2
+     },
+     "Meddling Mage": {
+      "id": "a5d02339-9f6d-486e-87d8-5ec2274cf680",
+      "count": 2
+     },
+     "Nihil Spellbomb": {
+      "id": "b713e49f-1b13-42d1-91f2-cc7a579e7614",
+      "count": 2
+     },
+     "Pyroclasm": {
+      "id": "e4bcd4ea-e7cd-4471-8f3b-18bb51d3d70c",
+      "count": 2
+     },
+     "Rending Volley": {
+      "id": "0324941f-484c-4656-8d1c-66e919c2bc7c",
+      "count": 2
+     },
+     "Wear // Tear": {
+      "id": "9842734c-1eac-4509-a731-4c22017ae586",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern",
+     "importedFrom": "https://moxfield.com/decks/uqe2e6vyLU6rPpsFkZhoeQ"
+    }
+   },
+   "wins": 2,
+   "draws": 0,
+   "losses": 2,
+   "winRate": 0.5
+  },
+  {
+   "name": "Luis G",
+   "decklist": "~~Mainboard~~\\n4 Aether Vial\\n2 Cavern of Souls\\n4 Cursecatcher\\n2 Dismember\\n1 Faerie Conclave\\n3 Harbinger of the Tides\\n11 Island\\n1 Kira, Great Glass-Spinner\\n4 Lord of Atlantis\\n4 Master of the Pearl Trident\\n3 Master of Waves\\n2 Merrow Reejerey\\n1 Minamo, School at Water\\'s Edge\\n4 Mutavault\\n1 Oboro, Palace in the Clouds\\n1 Phantasmal Image\\n2 Sea\\'s Claim\\n4 Silvergill Adept\\n2 Spell Pierce\\n4 Spreading Seas\\n\\n~~Sideboard~~\\n2 Chalice of the Void\\n2 Disdainful Stroke\\n1 Echoing Truth\\n1 Kira, Great Glass-Spinner\\n2 Negate\\n1 Pithing Needle\\n2 Relic of Progenitus\\n2 Snapback\\n2 Spellskite\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Aether Vial": {
+      "id": "fc148e1e-dff0-448e-9f16-625341754356",
+      "count": 4
+     },
+     "Cavern of Souls": {
+      "id": "89ca686a-7c72-4d8f-9290-e89635624a83",
+      "count": 2
+     },
+     "Cursecatcher": {
+      "id": "a59a23f2-158f-4dea-8593-75fe7b31b726",
+      "count": 4
+     },
+     "Dismember": {
+      "id": "fd74f8eb-0253-42dd-8277-186d4934da38",
+      "count": 2
+     },
+     "Faerie Conclave": {
+      "id": "0c25f6b1-8fb3-4406-9605-0282d2dbbcec",
+      "count": 1
+     },
+     "Harbinger of the Tides": {
+      "id": "9f5277e8-1cbe-478c-a8bc-ac028f13305e",
+      "count": 3
+     },
+     "Island": {
+      "id": "b2c6aa39-2d2a-459c-a555-fb48ba993373",
+      "count": 11
+     },
+     "Kira, Great Glass-Spinner": {
+      "id": "60808c8f-5257-451b-a9b6-389ba51598d5",
+      "count": 1
+     },
+     "Lord of Atlantis": {
+      "id": "cc7f290f-ca00-4285-9bdb-4b4402444f30",
+      "count": 4
+     },
+     "Master of the Pearl Trident": {
+      "id": "9f6ea9fe-eee5-4dca-a34e-c66d3e218716",
+      "count": 4
+     },
+     "Master of Waves": {
+      "id": "07d40173-53e7-4328-a3b0-6214d93855b6",
+      "count": 3
+     },
+     "Merrow Reejerey": {
+      "id": "6b7e6ae4-2ee1-44bf-ac93-79fc87494515",
+      "count": 2
+     },
+     "Minamo, School at Water's Edge": {
+      "id": "17784f90-89a1-47a5-83ef-ae60dfc30bd1",
+      "count": 1
+     },
+     "Mutavault": {
+      "id": "6b3cc59a-7ea5-4eb5-9bf9-5a9c07f80e2b",
+      "count": 4
+     },
+     "Oboro, Palace in the Clouds": {
+      "id": "645fb11b-d684-4bec-8532-8fa97e8f7b28",
+      "count": 1
+     },
+     "Phantasmal Image": {
+      "id": "bde94af8-faea-41ff-8eed-ba642eac9968",
+      "count": 1
+     },
+     "Sea's Claim": {
+      "id": "ed11efb6-1423-4ce0-be1d-9e0320124758",
+      "count": 2
+     },
+     "Silvergill Adept": {
+      "id": "cb66c5ec-e7a4-4bd2-b825-6c9b846ba40d",
+      "count": 4
+     },
+     "Spell Pierce": {
+      "id": "d64b0848-0193-4025-ba62-63ecd8fb9f50",
+      "count": 2
+     },
+     "Spreading Seas": {
+      "id": "af32757c-9d3c-4f6c-a6fa-d5729a440382",
+      "count": 4
+     }
+    },
+    "Sideboard": {
+     "Chalice of the Void": {
+      "id": "74027ba4-a6ba-4696-baf1-60ef0b27ee0a",
+      "count": 2
+     },
+     "Disdainful Stroke": {
+      "id": "11e02134-7b1a-46a4-a89e-7539dd1efada",
+      "count": 2
+     },
+     "Echoing Truth": {
+      "id": "ef100544-3e6d-4661-a1d1-8b02e58c059c",
+      "count": 1
+     },
+     "Kira, Great Glass-Spinner": {
+      "id": "60808c8f-5257-451b-a9b6-389ba51598d5",
+      "count": 1
+     },
+     "Negate": {
+      "id": "3407fe41-fdd3-4119-8f70-4bc4590a379f",
+      "count": 2
+     },
+     "Pithing Needle": {
+      "id": "a188fe7e-68de-4c7c-806c-bfe8fc7b44bf",
+      "count": 1
+     },
+     "Relic of Progenitus": {
+      "id": "6a9c3401-570c-41cb-a605-75dfa57d6ab7",
+      "count": 2
+     },
+     "Snapback": {
+      "id": "e88de17c-086d-4e2a-b5b2-2f9f57ca7c0f",
+      "count": 2
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 2
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 0,
+   "draws": 0,
+   "losses": 3,
+   "winRate": 0
+  },
+  {
+   "name": "Manuel Lago Alvarez",
+   "decklist": "~~Mainboard~~\\n3 Abrupt Decay\\n1 Dismember\\n1 Forest\\n1 Gavony Township\\n2 Godless Shrine\\n4 Inquisition of Kozilek\\n3 Liliana of the Veil\\n4 Lingering Souls\\n1 Maelstrom Pulse\\n2 Marsh Flats\\n2 Noble Hierarch\\n2 Overgrown Tomb\\n3 Path to Exile\\n1 Plains\\n2 Scavenging Ooze\\n3 Siege Rhino\\n1 Sorin, Solemn Visitor\\n2 Stirring Wildwood\\n2 Swamp\\n4 Tarmogoyf\\n2 Tasigur, the Golden Fang\\n1 Temple Garden\\n2 Thoughtseize\\n1 Treetop Village\\n1 Urborg, Tomb of Yawgmoth\\n4 Verdant Catacombs\\n2 Voice of Resurgence\\n3 Windswept Heath\\n\\n~~Sideboard~~\\n1 Celestial Purge\\n1 Choke\\n1 Dromoka\\'s Command\\n3 Fulminator Mage\\n1 Gaddock Teeg\\n2 Kitchen Finks\\n1 Nihil Spellbomb\\n1 Sigarda, Host of Herons\\n2 Stony Silence\\n1 Surgical Extraction\\n1 Zealous Persecution\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Abrupt Decay": {
+      "id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+      "count": 3
+     },
+     "Dismember": {
+      "id": "fd74f8eb-0253-42dd-8277-186d4934da38",
+      "count": 1
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 1
+     },
+     "Gavony Township": {
+      "id": "8a44e4e7-dfa2-427b-bbff-11c398fa60bb",
+      "count": 1
+     },
+     "Godless Shrine": {
+      "id": "73864fcc-1bde-4bc0-831e-2b93e546e417",
+      "count": 2
+     },
+     "Inquisition of Kozilek": {
+      "id": "395611fa-aec2-4c9e-92c3-70cf95cc00f4",
+      "count": 4
+     },
+     "Liliana of the Veil": {
+      "id": "0ba134d8-ee7d-48ec-8dc6-57942b8e9261",
+      "count": 3
+     },
+     "Lingering Souls": {
+      "id": "0b8c3337-04dd-4798-8203-6d8b8cfb936b",
+      "count": 4
+     },
+     "Maelstrom Pulse": {
+      "id": "95ce305f-34bc-4d6d-b7ba-ffd4b2a25336",
+      "count": 1
+     },
+     "Marsh Flats": {
+      "id": "dab520d0-20b4-4273-ba6b-eb07f85ea433",
+      "count": 2
+     },
+     "Noble Hierarch": {
+      "id": "98aa9424-5912-4bd6-9300-b3972a31d8af",
+      "count": 2
+     },
+     "Overgrown Tomb": {
+      "id": "975ec9a3-6f20-4177-8211-82526e092538",
+      "count": 2
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 3
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 1
+     },
+     "Scavenging Ooze": {
+      "id": "1ff25f67-36a7-4cfa-a2b1-2135b5b6fb67",
+      "count": 2
+     },
+     "Siege Rhino": {
+      "id": "e1087ce2-e3c2-4ab1-bd08-1dc9ab70f12f",
+      "count": 3
+     },
+     "Sorin, Solemn Visitor": {
+      "id": "1f1f1ae7-dd00-4825-832e-3a049cf8ce73",
+      "count": 1
+     },
+     "Stirring Wildwood": {
+      "id": "e900f211-dc8b-40f7-a217-1b1462b15c26",
+      "count": 2
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 2
+     },
+     "Tarmogoyf": {
+      "id": "45900b2f-f6a9-4c42-9642-008f3c1cf6dd",
+      "count": 4
+     },
+     "Tasigur, the Golden Fang": {
+      "id": "837e3fde-241f-4826-ad04-f146fdcf2278",
+      "count": 2
+     },
+     "Temple Garden": {
+      "id": "f413a83d-a40d-434c-b20a-4c707c0527fa",
+      "count": 1
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 2
+     },
+     "Treetop Village": {
+      "id": "b53f216d-1592-4eee-b204-502a805fbc8c",
+      "count": 1
+     },
+     "Urborg, Tomb of Yawgmoth": {
+      "id": "db6174d7-211d-4817-b8e4-8384594c83f9",
+      "count": 1
+     },
+     "Verdant Catacombs": {
+      "id": "67d60b24-d429-4ded-90d9-06e49f28c396",
+      "count": 4
+     },
+     "Voice of Resurgence": {
+      "id": "5cbbb3f3-63a4-4983-81ea-8c405b10e63f",
+      "count": 2
+     },
+     "Windswept Heath": {
+      "id": "29737a60-3ebd-40d9-b935-c4f54b90d45d",
+      "count": 3
+     }
+    },
+    "Sideboard": {
+     "Celestial Purge": {
+      "id": "ec1f6188-2516-46ac-8a03-7b7285b23a62",
+      "count": 1
+     },
+     "Choke": {
+      "id": "057fa60b-10b0-4612-be0d-157076c82241",
+      "count": 1
+     },
+     "Dromoka's Command": {
+      "id": "3bd8ea71-cbcc-4659-b9a8-88cf27ee12d8",
+      "count": 1
+     },
+     "Fulminator Mage": {
+      "id": "bd4c46a3-b723-4b35-9061-9a1dee7cc9d8",
+      "count": 3
+     },
+     "Gaddock Teeg": {
+      "id": "98dd6d43-cc56-4656-9e0c-240d0679b404",
+      "count": 1
+     },
+     "Kitchen Finks": {
+      "id": "5470dcfa-4eff-43da-abf7-19922841f719",
+      "count": 2
+     },
+     "Nihil Spellbomb": {
+      "id": "b713e49f-1b13-42d1-91f2-cc7a579e7614",
+      "count": 1
+     },
+     "Sigarda, Host of Herons": {
+      "id": "e55104e2-4900-48de-b288-d3e6abd5e09e",
+      "count": 1
+     },
+     "Stony Silence": {
+      "id": "12c63a45-7eb2-4262-b571-3358182f5610",
+      "count": 2
+     },
+     "Surgical Extraction": {
+      "id": "3bfa088c-9a47-4123-aee5-4de44e355bef",
+      "count": 1
+     },
+     "Zealous Persecution": {
+      "id": "ccf8d919-1399-4bef-94ac-04c67f122828",
+      "count": 1
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 1,
+   "draws": 0,
+   "losses": 3,
+   "winRate": 0.25
+  },
+  {
+   "name": "Adrian ",
+   "decklist": "~~Mainboard~~\\n3 Abrupt Decay\\n4 Blackcleave Cliffs\\n1 Blood Crypt\\n3 Bloodstained Mire\\n4 Dark Confidant\\n1 Forest\\n2 Huntmaster of the Fells // Ravager of the Fells\\n3 Inquisition of Kozilek\\n2 Kolaghan\\'s Command\\n4 Lightning Bolt\\n4 Liliana of the Veil\\n1 Maelstrom Pulse\\n2 Overgrown Tomb\\n4 Raging Ravine\\n3 Scavenging Ooze\\n2 Stomping Ground\\n2 Swamp\\n4 Tarmogoyf\\n3 Terminate\\n3 Thoughtseize\\n1 Twilight Mire\\n4 Verdant Catacombs\\n2 Wooded Foothills\\n\\n~~Sideboard~~\\n1 Ancient Grudge\\n2 Anger of the Gods\\n1 Chandra, Pyromaster\\n1 Duress\\n3 Fulminator Mage\\n2 Kitchen Finks\\n1 Kolaghan\\'s Command\\n1 Maelstrom Pulse\\n1 Nihil Spellbomb\\n1 Shatterstorm\\n1 Unravel the Aether\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Abrupt Decay": {
+      "id": "1c747fe2-289e-492a-a846-aa77707e2dc3",
+      "count": 3
+     },
+     "Blackcleave Cliffs": {
+      "id": "5ad94412-6f79-4c5d-bbd4-4ef5779a7b6d",
+      "count": 4
+     },
+     "Blood Crypt": {
+      "id": "43985bbc-a0f6-4812-984e-392bc8562633",
+      "count": 1
+     },
+     "Bloodstained Mire": {
+      "id": "fc0707c7-d504-4ccf-a0d2-3eb6e26e7a57",
+      "count": 3
+     },
+     "Dark Confidant": {
+      "id": "2068185c-1b50-47d0-aa3f-bf505d199428",
+      "count": 4
+     },
+     "Forest": {
+      "id": "b34bb2dc-c1af-4d77-b0b3-a0fb342a5fc6",
+      "count": 1
+     },
+     "Huntmaster of the Fells // Ravager of the Fells": {
+      "id": "582328cd-660d-47a4-bb23-e91e80b9a907",
+      "count": 2
+     },
+     "Inquisition of Kozilek": {
+      "id": "395611fa-aec2-4c9e-92c3-70cf95cc00f4",
+      "count": 3
+     },
+     "Kolaghan's Command": {
+      "id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+      "count": 2
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Liliana of the Veil": {
+      "id": "0ba134d8-ee7d-48ec-8dc6-57942b8e9261",
+      "count": 4
+     },
+     "Maelstrom Pulse": {
+      "id": "95ce305f-34bc-4d6d-b7ba-ffd4b2a25336",
+      "count": 1
+     },
+     "Overgrown Tomb": {
+      "id": "975ec9a3-6f20-4177-8211-82526e092538",
+      "count": 2
+     },
+     "Raging Ravine": {
+      "id": "8d38194e-b607-4ff4-9c19-0e8636d463bf",
+      "count": 4
+     },
+     "Scavenging Ooze": {
+      "id": "1ff25f67-36a7-4cfa-a2b1-2135b5b6fb67",
+      "count": 3
+     },
+     "Stomping Ground": {
+      "id": "16052b52-ade1-406f-a06b-ce7ea607fb63",
+      "count": 2
+     },
+     "Swamp": {
+      "id": "56719f6a-1a6c-4c0a-8d21-18f7d7350b68",
+      "count": 2
+     },
+     "Tarmogoyf": {
+      "id": "45900b2f-f6a9-4c42-9642-008f3c1cf6dd",
+      "count": 4
+     },
+     "Terminate": {
+      "id": "6257c2fd-005f-41e3-8a72-af76df1eb134",
+      "count": 3
+     },
+     "Thoughtseize": {
+      "id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
+      "count": 3
+     },
+     "Twilight Mire": {
+      "id": "db623754-e078-4030-ba07-818803c348a8",
+      "count": 1
+     },
+     "Verdant Catacombs": {
+      "id": "67d60b24-d429-4ded-90d9-06e49f28c396",
+      "count": 4
+     },
+     "Wooded Foothills": {
+      "id": "6587a463-a108-4854-b6d1-944e89b8c8a4",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Ancient Grudge": {
+      "id": "306593b0-6ea8-476f-a3f2-e17876c1bab4",
+      "count": 1
+     },
+     "Anger of the Gods": {
+      "id": "3a7fe095-8278-4b1d-bec4-19b35bdcdd1b",
+      "count": 2
+     },
+     "Chandra, Pyromaster": {
+      "id": "68e12748-9a7b-4e99-a6de-be097a269342",
+      "count": 1
+     },
+     "Duress": {
+      "id": "33d405ea-7a9a-4970-b70f-9c05d90dd6f0",
+      "count": 1
+     },
+     "Fulminator Mage": {
+      "id": "bd4c46a3-b723-4b35-9061-9a1dee7cc9d8",
+      "count": 3
+     },
+     "Kitchen Finks": {
+      "id": "5470dcfa-4eff-43da-abf7-19922841f719",
+      "count": 2
+     },
+     "Kolaghan's Command": {
+      "id": "45f1e957-09f0-4d46-8e32-238f26060a87",
+      "count": 1
+     },
+     "Maelstrom Pulse": {
+      "id": "95ce305f-34bc-4d6d-b7ba-ffd4b2a25336",
+      "count": 1
+     },
+     "Nihil Spellbomb": {
+      "id": "b713e49f-1b13-42d1-91f2-cc7a579e7614",
+      "count": 1
+     },
+     "Shatterstorm": {
+      "id": "96ce2403-4607-440a-92ae-80aceb458c5d",
+      "count": 1
+     },
+     "Unravel the Aether": {
+      "id": "128e0bd1-ed1d-4f53-8dae-83ee95f6fa2a",
+      "count": 1
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 1,
+   "draws": 0,
+   "losses": 3,
+   "winRate": 0.25
+  },
+  {
+   "name": "Marina Castaño Garrido",
+   "decklist": "~~Mainboard~~\\n2 Arid Mesa\\n2 Aven Mindcensor\\n4 Celestial Colonnade\\n2 Electrolyze\\n4 Flooded Strand\\n4 Geist of Saint Traft\\n2 Ghost Quarter\\n1 Hallowed Fountain\\n2 Island\\n1 Keranos, God of Storms\\n4 Lightning Bolt\\n4 Lightning Helix\\n2 Mana Leak\\n1 Mountain\\n4 Path to Exile\\n2 Plains\\n2 Remand\\n3 Restoration Angel\\n1 Sacred Foundry\\n3 Scalding Tarn\\n4 Snapcaster Mage\\n1 Spell Snare\\n2 Steam Vents\\n1 Sulfur Falls\\n2 Vendilion Clique\\n\\n~~Sideboard~~\\n1 Anger of the Gods\\n1 Blood Moon\\n2 Cryptic Command\\n2 Engineered Explosives\\n1 Keranos, God of Storms\\n1 Negate\\n1 Rest in Peace\\n2 Spellskite\\n1 Stony Silence\\n1 Supreme Verdict\\n1 Timely Reinforcements\\n1 Wear // Tear\\n",
+   "deckObj": {
+    "Mainboard": {
+     "Arid Mesa": {
+      "id": "c5acf2a5-40f4-433d-a74d-1cb56c521464",
+      "count": 2
+     },
+     "Aven Mindcensor": {
+      "id": "d9517c5d-66d0-4178-96fb-a8c04f311ad8",
+      "count": 2
+     },
+     "Celestial Colonnade": {
+      "id": "876ac6f6-74de-4666-84c6-83d81f054723",
+      "count": 4
+     },
+     "Electrolyze": {
+      "id": "07b222d7-24f2-4994-9004-ff6672ebe161",
+      "count": 2
+     },
+     "Flooded Strand": {
+      "id": "f3c7af78-a77d-4134-82a2-a5ce84285a84",
+      "count": 4
+     },
+     "Geist of Saint Traft": {
+      "id": "4304035c-c3e4-4a19-aa1f-92a83d8aed1f",
+      "count": 4
+     },
+     "Ghost Quarter": {
+      "id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
+      "count": 2
+     },
+     "Hallowed Fountain": {
+      "id": "f1750962-a87c-49f6-b731-02ae971ac6ea",
+      "count": 1
+     },
+     "Island": {
+      "id": "b2c6aa39-2d2a-459c-a555-fb48ba993373",
+      "count": 2
+     },
+     "Keranos, God of Storms": {
+      "id": "2bd6f13a-ae02-426d-8f99-c20c5c08cf55",
+      "count": 1
+     },
+     "Lightning Bolt": {
+      "id": "4457ed35-7c10-48c8-9776-456485fdf070",
+      "count": 4
+     },
+     "Lightning Helix": {
+      "id": "800c258a-cfc4-4a54-a667-065ea8dea69e",
+      "count": 4
+     },
+     "Mana Leak": {
+      "id": "c61fe162-2202-4e56-9ba0-393547f9875f",
+      "count": 2
+     },
+     "Mountain": {
+      "id": "a3fb7228-e76b-4e96-a40e-20b5fed75685",
+      "count": 1
+     },
+     "Path to Exile": {
+      "id": "d683d985-9888-4d21-8b5f-69e69ce4a03b",
+      "count": 4
+     },
+     "Plains": {
+      "id": "bc71ebf6-2056-41f7-be35-b2e5c34afa99",
+      "count": 2
+     },
+     "Remand": {
+      "id": "d71cd08e-3e84-41ff-b9db-9e343c0af6b4",
+      "count": 2
+     },
+     "Restoration Angel": {
+      "id": "dfbd3afc-9905-4cff-a4f4-df08a4d0a7fa",
+      "count": 3
+     },
+     "Sacred Foundry": {
+      "id": "45181cb8-2090-4471-ba90-e5a8f04d525f",
+      "count": 1
+     },
+     "Scalding Tarn": {
+      "id": "cb027150-848c-4a66-88ad-e20222304dd8",
+      "count": 3
+     },
+     "Snapcaster Mage": {
+      "id": "2bb2eda7-3b38-4c56-870f-c3218a1056f5",
+      "count": 4
+     },
+     "Spell Snare": {
+      "id": "38877c68-b69b-4ee1-8e8f-5137a184a8f7",
+      "count": 1
+     },
+     "Steam Vents": {
+      "id": "17039058-822d-409f-938c-b727a366ba63",
+      "count": 2
+     },
+     "Sulfur Falls": {
+      "id": "6a6c5e17-6465-4a1f-9d63-8a3ce2edc522",
+      "count": 1
+     },
+     "Vendilion Clique": {
+      "id": "244d4807-0802-41bc-9460-55ac38a28a72",
+      "count": 2
+     }
+    },
+    "Sideboard": {
+     "Anger of the Gods": {
+      "id": "3a7fe095-8278-4b1d-bec4-19b35bdcdd1b",
+      "count": 1
+     },
+     "Blood Moon": {
+      "id": "94fac5fe-97d5-4c12-a80c-8efff9d853ae",
+      "count": 1
+     },
+     "Cryptic Command": {
+      "id": "a3e51a35-09df-4189-b131-08a21e6a557d",
+      "count": 2
+     },
+     "Engineered Explosives": {
+      "id": "95fd897e-9086-42c4-8e0d-61bb02333c5f",
+      "count": 2
+     },
+     "Keranos, God of Storms": {
+      "id": "2bd6f13a-ae02-426d-8f99-c20c5c08cf55",
+      "count": 1
+     },
+     "Negate": {
+      "id": "3407fe41-fdd3-4119-8f70-4bc4590a379f",
+      "count": 1
+     },
+     "Rest in Peace": {
+      "id": "087f9ad7-e74f-40e2-8102-1ed2925d0418",
+      "count": 1
+     },
+     "Spellskite": {
+      "id": "e0aa6ce0-ca31-433b-ac6c-32b8675cdb71",
+      "count": 2
+     },
+     "Stony Silence": {
+      "id": "12c63a45-7eb2-4262-b571-3358182f5610",
+      "count": 1
+     },
+     "Supreme Verdict": {
+      "id": "0230de18-8d15-4cfa-9d42-7ccddd9f9570",
+      "count": 1
+     },
+     "Timely Reinforcements": {
+      "id": "64f4f0ed-e924-459e-86a4-8202fae6ef3e",
+      "count": 1
+     },
+     "Wear // Tear": {
+      "id": "9842734c-1eac-4509-a731-4c22017ae586",
+      "count": 1
+     }
+    },
+    "metadata": {
+     "game": "Magic: The Gathering",
+     "format": "Modern"
+    }
+   },
+   "wins": 1,
+   "draws": 0,
+   "losses": 3,
+   "winRate": 0.25
+  },
+  {
+   "name": "Mario Gomez Garcia",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 0,
+   "draws": 0,
+   "losses": 2,
+   "winRate": 0
+  }
+ ],
+ "rounds": [
+  {
+   "round": 1,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Gerardo Pérez",
+       "id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3"
+      },
+      {
+       "name": "Mario Gomez Garcia",
+       "id": "5mfQhpLuzSRgptPG9RKElyESX8Y2"
+      }
+     ],
+     "winner": "Gerardo Pérez",
+     "winner_id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Marina Castaño Garrido",
+       "id": "oygh9klOgeWYDAwZrNl6p2BhEnK2"
+      },
+      {
+       "name": "David Blanco Remesar",
+       "id": "neIN8T0Cebfdn6uo0VSEtMi2qt62"
+      }
+     ],
+     "winner": "David Blanco Remesar",
+     "winner_id": "neIN8T0Cebfdn6uo0VSEtMi2qt62",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Jose Ignacio Perez Janeiro",
+       "id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92"
+      },
+      {
+       "name": "Manuel Lago Alvarez",
+       "id": "flu6TwTJSWQKfLPZqfKHAGJa9BI2"
+      }
+     ],
+     "winner": "Jose Ignacio Perez Janeiro",
+     "winner_id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 4,
+     "players": [
+      {
+       "name": "Jesús G",
+       "id": "IJIJtVnz8jZNQriSumEOBJC2Yti2"
+      },
+      {
+       "name": "Hector mateos herrero",
+       "id": "7btTXsUxjiYuAcGuyDJEnFDsGib2"
+      }
+     ],
+     "winner": "Jesús G",
+     "winner_id": "IJIJtVnz8jZNQriSumEOBJC2Yti2",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 5,
+     "players": [
+      {
+       "name": "Iñigo Epelde Martija",
+       "id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2"
+      },
+      {
+       "name": "Adrian Rubio",
+       "id": "Fios92831JUsbjAuVgXaTij65Y13"
+      }
+     ],
+     "winner": "Adrian Rubio",
+     "winner_id": "Fios92831JUsbjAuVgXaTij65Y13",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 6,
+     "players": [
+      {
+       "name": "Luis G",
+       "id": "pit9kRUS0yX3VdzOZdXz3sWm0Cv2"
+      },
+      {
+       "name": "Carlos Montero Lino ",
+       "id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1"
+      }
+     ],
+     "winner": "Carlos Montero Lino ",
+     "winner_id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 7,
+     "players": [
+      {
+       "name": "Noé Somoza",
+       "id": "8et90Z0mwrbSb4PIwmk7LFzffoG3"
+      },
+      {
+       "name": "Adrian ",
+       "id": "USJlVw3lx6Q90QFiR27R4E8WiUg2"
+      }
+     ],
+     "winner": "Noé Somoza",
+     "winner_id": "8et90Z0mwrbSb4PIwmk7LFzffoG3",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Carlos Montero Lino ",
+       "id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1"
+      },
+      {
+       "name": "Adrian Rubio",
+       "id": "Fios92831JUsbjAuVgXaTij65Y13"
+      }
+     ],
+     "winner": "Adrian Rubio",
+     "winner_id": "Fios92831JUsbjAuVgXaTij65Y13",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Noé Somoza",
+       "id": "8et90Z0mwrbSb4PIwmk7LFzffoG3"
+      },
+      {
+       "name": "Gerardo Pérez",
+       "id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3"
+      }
+     ],
+     "winner": "Gerardo Pérez",
+     "winner_id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Jose Ignacio Perez Janeiro",
+       "id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92"
+      },
+      {
+       "name": "Víctor Fernández Ceinos",
+       "id": "fpS04oPeNcVriDNnKDEyUwqlQmG3"
+      }
+     ],
+     "winner": "Jose Ignacio Perez Janeiro",
+     "winner_id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 4,
+     "players": [
+      {
+       "name": "Jesús G",
+       "id": "IJIJtVnz8jZNQriSumEOBJC2Yti2"
+      },
+      {
+       "name": "David Blanco Remesar",
+       "id": "neIN8T0Cebfdn6uo0VSEtMi2qt62"
+      }
+     ],
+     "winner": "Jesús G",
+     "winner_id": "IJIJtVnz8jZNQriSumEOBJC2Yti2",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 5,
+     "players": [
+      {
+       "name": "Mario Gomez Garcia",
+       "id": "5mfQhpLuzSRgptPG9RKElyESX8Y2"
+      },
+      {
+       "name": "Adrian ",
+       "id": "USJlVw3lx6Q90QFiR27R4E8WiUg2"
+      }
+     ],
+     "winner": "Adrian ",
+     "winner_id": "USJlVw3lx6Q90QFiR27R4E8WiUg2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 6,
+     "players": [
+      {
+       "name": "Iñigo Epelde Martija",
+       "id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2"
+      },
+      {
+       "name": "Marina Castaño Garrido",
+       "id": "oygh9klOgeWYDAwZrNl6p2BhEnK2"
+      }
+     ],
+     "winner": "Iñigo Epelde Martija",
+     "winner_id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 7,
+     "players": [
+      {
+       "name": "Manuel Lago Alvarez",
+       "id": "flu6TwTJSWQKfLPZqfKHAGJa9BI2"
+      },
+      {
+       "name": "Hector mateos herrero",
+       "id": "7btTXsUxjiYuAcGuyDJEnFDsGib2"
+      }
+     ],
+     "winner": "Hector mateos herrero",
+     "winner_id": "7btTXsUxjiYuAcGuyDJEnFDsGib2",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Gerardo Pérez",
+       "id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3"
+      },
+      {
+       "name": "Jose Ignacio Perez Janeiro",
+       "id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92"
+      }
+     ],
+     "winner": "Gerardo Pérez",
+     "winner_id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Adrian Rubio",
+       "id": "Fios92831JUsbjAuVgXaTij65Y13"
+      },
+      {
+       "name": "Jesús G",
+       "id": "IJIJtVnz8jZNQriSumEOBJC2Yti2"
+      }
+     ],
+     "winner": "Jesús G",
+     "winner_id": "IJIJtVnz8jZNQriSumEOBJC2Yti2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Víctor Fernández Ceinos",
+       "id": "fpS04oPeNcVriDNnKDEyUwqlQmG3"
+      },
+      {
+       "name": "Noé Somoza",
+       "id": "8et90Z0mwrbSb4PIwmk7LFzffoG3"
+      }
+     ],
+     "winner": "Noé Somoza",
+     "winner_id": "8et90Z0mwrbSb4PIwmk7LFzffoG3",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 4,
+     "players": [
+      {
+       "name": "Luis G",
+       "id": "pit9kRUS0yX3VdzOZdXz3sWm0Cv2"
+      },
+      {
+       "name": "David Blanco Remesar",
+       "id": "neIN8T0Cebfdn6uo0VSEtMi2qt62"
+      }
+     ],
+     "winner": "David Blanco Remesar",
+     "winner_id": "neIN8T0Cebfdn6uo0VSEtMi2qt62",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 5,
+     "players": [
+      {
+       "name": "Carlos Montero Lino ",
+       "id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1"
+      },
+      {
+       "name": "Iñigo Epelde Martija",
+       "id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2"
+      }
+     ],
+     "winner": "Iñigo Epelde Martija",
+     "winner_id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 6,
+     "players": [
+      {
+       "name": "Hector mateos herrero",
+       "id": "7btTXsUxjiYuAcGuyDJEnFDsGib2"
+      },
+      {
+       "name": "Adrian ",
+       "id": "USJlVw3lx6Q90QFiR27R4E8WiUg2"
+      }
+     ],
+     "winner": "Hector mateos herrero",
+     "winner_id": "7btTXsUxjiYuAcGuyDJEnFDsGib2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 7,
+     "players": [
+      {
+       "name": "Marina Castaño Garrido",
+       "id": "oygh9klOgeWYDAwZrNl6p2BhEnK2"
+      },
+      {
+       "name": "Manuel Lago Alvarez",
+       "id": "flu6TwTJSWQKfLPZqfKHAGJa9BI2"
+      }
+     ],
+     "winner": "Manuel Lago Alvarez",
+     "winner_id": "flu6TwTJSWQKfLPZqfKHAGJa9BI2",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    }
+   ]
+  },
+  {
+   "round": 4,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Gerardo Pérez",
+       "id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3"
+      },
+      {
+       "name": "Jesús G",
+       "id": "IJIJtVnz8jZNQriSumEOBJC2Yti2"
+      }
+     ],
+     "winner": "Gerardo Pérez",
+     "winner_id": "n3vD72Tz0XaIKvHdyBfCgkLqKMA3",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Hector mateos herrero",
+       "id": "7btTXsUxjiYuAcGuyDJEnFDsGib2"
+      },
+      {
+       "name": "Adrian Rubio",
+       "id": "Fios92831JUsbjAuVgXaTij65Y13"
+      }
+     ],
+     "winner": "Draw",
+     "winner_id": "Draw",
+     "winner_games": null,
+     "loser_games": null,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "David Blanco Remesar",
+       "id": "neIN8T0Cebfdn6uo0VSEtMi2qt62"
+      },
+      {
+       "name": "Jose Ignacio Perez Janeiro",
+       "id": "BH6rZkTe0bUMjj3rDQLrXWPZQO92"
+      }
+     ],
+     "winner": "Draw",
+     "winner_id": "Draw",
+     "winner_games": null,
+     "loser_games": null,
+     "status": "Completed"
+    },
+    {
+     "table": 4,
+     "players": [
+      {
+       "name": "Iñigo Epelde Martija",
+       "id": "laJLi5niQ0ZmhPC6iJMBfw3zIrp2"
+      },
+      {
+       "name": "Noé Somoza",
+       "id": "8et90Z0mwrbSb4PIwmk7LFzffoG3"
+      }
+     ],
+     "winner": "Draw",
+     "winner_id": "Draw",
+     "winner_games": null,
+     "loser_games": null,
+     "status": "Completed"
+    },
+    {
+     "table": 5,
+     "players": [
+      {
+       "name": "Víctor Fernández Ceinos",
+       "id": "fpS04oPeNcVriDNnKDEyUwqlQmG3"
+      },
+      {
+       "name": "Luis G",
+       "id": "pit9kRUS0yX3VdzOZdXz3sWm0Cv2"
+      }
+     ],
+     "winner": "Víctor Fernández Ceinos",
+     "winner_id": "fpS04oPeNcVriDNnKDEyUwqlQmG3",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 6,
+     "players": [
+      {
+       "name": "Carlos Montero Lino ",
+       "id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1"
+      },
+      {
+       "name": "Manuel Lago Alvarez",
+       "id": "flu6TwTJSWQKfLPZqfKHAGJa9BI2"
+      }
+     ],
+     "winner": "Carlos Montero Lino ",
+     "winner_id": "7drmq5Nr54Rf6HkfNovgJVkm7Cn1",
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 7,
+     "players": [
+      {
+       "name": "Adrian ",
+       "id": "USJlVw3lx6Q90QFiR27R4E8WiUg2"
+      },
+      {
+       "name": "Marina Castaño Garrido",
+       "id": "oygh9klOgeWYDAwZrNl6p2BhEnK2"
+      }
+     ],
+     "winner": "Marina Castaño Garrido",
+     "winner_id": "oygh9klOgeWYDAwZrNl6p2BhEnK2",
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    }
+   ]
+  }
+ ]
+}

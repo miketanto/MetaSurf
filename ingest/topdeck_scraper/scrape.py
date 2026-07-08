@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +13,7 @@ import orjson
 
 from ingest.topdeck_scraper import SOURCE
 from ingest.topdeck_scraper.client import TopdeckClient
-from ingest.topdeck_scraper.parse import build_cacheitem
+from ingest.topdeck_scraper.parse import build_cacheitem, to_iso_date
 
 # TopDeck games/formats are their own vocabulary; the canonical format token is
 # what the importer matches on, so we tag the filename with it.
@@ -39,19 +38,10 @@ class TopdeckScrapeStats:
         return line
 
 
-def _event_relpath(tid: str, format_slug: str, date: str | None) -> str:
-    m = _RE_DATE.search(date or "")
+def _event_relpath(tid: str, format_slug: str, date_iso: str | None) -> str:
+    m = _RE_DATE.search(date_iso or "")
     y, mo, d = (m.group(1), m.group(2), m.group(3)) if m else ("0000", "00", "00")
     return f"Tournaments/{SOURCE}/{y}/{mo}/{d}/{format_slug}-{tid}.json"
-
-
-def _iso(date: str | None) -> str | None:
-    if not date:
-        return None
-    try:
-        return datetime.fromisoformat(date.replace("Z", "+00:00")).strftime("%Y-%m-%dT%H:%M:%SZ")
-    except ValueError:
-        return date
 
 
 def run_scrape(
@@ -61,26 +51,24 @@ def run_scrape(
     game: str,
     fmt: str,
     format_slug: str,
-    start: str | None = None,
-    end: str | None = None,
+    last: int = 30,
 ) -> TopdeckScrapeStats:
+    """Search completed tournaments (last N days) — the search returns
+    standings + rounds inline — and land each new one as a CacheItem."""
     stats = TopdeckScrapeStats()
-    tournaments = client.search(game, fmt, start=start, end=end)
+    tournaments = client.search(game, fmt, last=last)
     stats.tournaments_found = len(tournaments)
     for t in tournaments:
-        tid = t.get("id") or t.get("TID")
+        tid = t.get("TID") or t.get("id")
         if not tid:
             continue
-        date = t.get("startDate") or t.get("date") or t.get("start")
-        rel = _event_relpath(tid, format_slug, date)
+        date_iso = to_iso_date(t.get("startDate") or t.get("date") or t.get("start"))
+        rel = _event_relpath(tid, format_slug, date_iso)
         if (cache_root / rel).exists():
             stats.already_have += 1
             continue
         try:
-            info = {**t, "id": tid, "startDate": _iso(date)}
-            standings = client.standings(tid)
-            rounds = client.rounds(tid)
-            item = build_cacheitem(info, standings, rounds)
+            item = build_cacheitem(t, t.get("standings") or [], t.get("rounds") or [])
         except Exception as exc:  # best-effort: one bad tournament never sinks the run
             stats.errors += 1
             stats.error_tids.append(f"{tid}:{type(exc).__name__}")

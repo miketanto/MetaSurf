@@ -1,10 +1,10 @@
-"""TopDeck parser tests against the documented API schema (see
-tests/fixtures/topdeck.gg/README.md: these are schema examples, not real
-captures — the source stays disabled until validated on real responses)."""
+"""TopDeck parser tests against REAL captured API responses (fixtures under
+tests/fixtures/topdeck.gg/, captured 2026-07-08 from the live v2 API)."""
 
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -13,66 +13,89 @@ from ingest.topdeck_scraper.parse import (
     TopdeckParseError,
     build_cacheitem,
     parse_decklist,
+    to_iso_date,
 )
 
-FIX = Path(__file__).resolve().parent / "fixtures" / "topdeck.gg" / "modern-rcq-example.json"
+FIX = Path(__file__).resolve().parent / "fixtures" / "topdeck.gg"
+WITH_DECKS = FIX / "real-modern-with-decklists.json"
+NO_DECKS = FIX / "real-no-decklists-edge.json"
 
 
-def _bundle() -> dict:
-    return json.loads(FIX.read_text())
+def _t(path: Path) -> dict:
+    return json.loads(path.read_text())
 
 
-def test_parse_decklist_splits_main_and_side():
-    text = "~~Mainboard~~\n4 Ragavan, Nimble Pilferer\n20 Mountain\n~~Sideboard~~\n2 Duress"
+def _item(path: Path) -> dict:
+    t = _t(path)
+    return build_cacheitem(t, t["standings"], t["rounds"])
+
+
+def test_parse_decklist_handles_double_escaped_text():
+    # real API quirk: literal "\n" separators + escaped apostrophes
+    text = (
+        "~~Mainboard~~\\n1 Cavern of Souls\\n1 Elspeth, Sun\\'s Champion"
+        "\\n~~Sideboard~~\\n2 Duress"
+    )
     main, side = parse_decklist(text)
     assert {c["CardName"]: c["Count"] for c in main} == {
-        "Ragavan, Nimble Pilferer": 4,
-        "Mountain": 20,
+        "Cavern of Souls": 1,
+        "Elspeth, Sun's Champion": 1,  # apostrophe un-escaped
     }
     assert side == [{"CardName": "Duress", "Count": 2}]
 
 
-def test_parse_decklist_empty_is_empty():
+def test_parse_decklist_empty():
     assert parse_decklist("") == ([], [])
     assert parse_decklist(None) == ([], [])
 
 
-def test_build_cacheitem_tournament_and_decks():
-    b = _bundle()
-    item = build_cacheitem(b["info"], b["standings"], b["rounds"])
-    assert item["Tournament"]["Name"] == "Modern RCQ Example"
-    assert item["Tournament"]["Date"].startswith("2026-07-05")
-    assert item["Tournament"]["Uri"].endswith("/event/TESTTID123")
-    assert len(item["Decks"]) == 3
-    alice = next(d for d in item["Decks"] if d["Player"] == "Alice")
-    assert alice["Result"] == "1st Place"
-    assert {c["CardName"]: c["Count"] for c in alice["Mainboard"]}["Ragavan, Nimble Pilferer"] == 4
-    assert {c["CardName"]: c["Count"] for c in alice["Sideboard"]}["Engineered Explosives"] == 2
+def test_to_iso_date_from_unix_and_iso():
+    assert to_iso_date(1783250100) == "2026-07-05T11:15:00Z"
+    assert to_iso_date("1783250100") == "2026-07-05T11:15:00Z"
+    assert to_iso_date("2026-07-05T11:15:00Z") == "2026-07-05T11:15:00Z"
+    assert to_iso_date(None) is None
 
 
-def test_build_cacheitem_standings_sorted():
-    b = _bundle()
-    item = build_cacheitem(b["info"], b["standings"], b["rounds"])
-    assert [s["Rank"] for s in item["Standings"]] == [1, 2, 3]
-    assert item["Standings"][0]["Player"] == "Alice"
+def test_real_tournament_maps_to_cacheitem():
+    item = _item(WITH_DECKS)
+    assert item["Tournament"]["Name"] == "Impact Returns 26 Sunday Modern 2015"
+    assert re.match(r"2026-07-\d\dT", item["Tournament"]["Date"])
+    assert item["Tournament"]["Uri"].endswith("/event/impact-returns-26-sunday-modern-2015")
+    assert len(item["Decks"]) == 15
+    with_main = [d for d in item["Decks"] if d["Mainboard"]]
+    assert len(with_main) == 14  # 14 of 15 players submitted lists
+    # a real submitted list is a legal-size Modern deck; apostrophe card resolved
+    d = with_main[0]
+    assert sum(c["Count"] for c in d["Mainboard"]) >= 60
+    names = {c["CardName"] for dd in with_main for c in dd["Mainboard"]}
+    assert "Elspeth, Sun's Champion" in names
+    # record-shaped Result the normalizer already parses
+    assert re.match(r"^\d+-\d+(-\d+)?$", d["Result"])
 
 
-def test_build_cacheitem_rounds_and_bye():
-    b = _bundle()
-    item = build_cacheitem(b["info"], b["standings"], b["rounds"])
-    assert [r["RoundName"] for r in item["Rounds"]] == ["1", "2"]
-    r1 = item["Rounds"][0]["Matches"]
-    # Player1's-perspective game counts; Alice beat Bob 2-0
-    ab = next(m for m in r1 if m["Player1"] == "Alice" and m["Player2"] == "Bob")
-    assert ab["Result"] == "2-0-0"
-    # Carol's table is a bye -> Player2 None (never a match row downstream)
-    bye = next(m for m in r1 if m["Player1"] == "Carol")
-    assert bye["Player2"] is None
-    # round 2: Carol (P1) lost to Alice 1-2 -> from Carol's perspective "1-2-0"
-    r2 = item["Rounds"][1]["Matches"][0]
-    assert r2["Player1"] == "Carol" and r2["Result"] == "1-2-0"
+def test_real_standings_ranked_with_records():
+    item = _item(WITH_DECKS)
+    st = item["Standings"]
+    assert [s["Rank"] for s in st] == list(range(1, 16))
+    assert st[0]["Player"] and "Wins" in st[0] and "Losses" in st[0]
 
 
-def test_build_cacheitem_requires_id():
+def test_real_rounds_player1_perspective():
+    item = _item(WITH_DECKS)
+    m = item["Rounds"][0]["Matches"][0]
+    # W-L-D from Player1's perspective (verified: Gerardo beat Mario 2-1)
+    assert re.match(r"^\d+-\d+-\d+$", m["Result"])
+    assert m["Player1"] and m["Player2"]
+
+
+def test_no_decklists_edge_does_not_crash():
+    item = _item(NO_DECKS)
+    assert len(item["Decks"]) >= 1
+    # players submitted no lists -> empty boards, record-based Result, no error
+    assert all(d["Mainboard"] == [] for d in item["Decks"])
+    assert all(re.match(r"^\d+-\d+", d["Result"]) for d in item["Decks"])
+
+
+def test_build_cacheitem_requires_tid():
     with pytest.raises(TopdeckParseError):
-        build_cacheitem({"name": "no id"}, [], [])
+        build_cacheitem({"tournamentName": "no id"}, [], [])

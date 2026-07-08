@@ -1,28 +1,30 @@
 """Pure parsers: TopDeck Tournament Data API responses -> CacheItem dict.
 
-Written against the documented v2 schema (https://topdeck.gg/docs/tournaments-v2,
-captured 2026-07-08) — see the module docstring in __init__ for the
-inspect-before-you-parse caveat. No network, no DB.
+Written against REAL captured v2 responses (fixtures under
+tests/fixtures/topdeck.gg/, captured 2026-07-08), not just the docs — the live
+API differs from https://topdeck.gg/docs/tournaments-v2 in ways that matter:
 
-Documented shapes used:
-- standings: [{"standing": int, "name": str, "id": str, "decklist": str,
-   "points": int, "winRate": float, "opponentWinRate": float}]
-- rounds: [{"round": int, "tables": [{"table": int,
-   "players": [{"name": str, "id": str}, ...], "winner": str|None,
-   "winner_id": str|None, "winner_games": int?, "loser_games": int?,
-   "status": str}]}]
-- decklist text: sections "~~Mainboard~~" / "~~Sideboard~~" / "~~Commanders~~",
-   each followed by "<qty> <card name>" lines.
+- A `POST /v2/tournaments` search returns tournament objects with `standings`
+  and `rounds` INLINE (one call). Event name is `tournamentName`; the date is
+  a unix-seconds `startDate`; the id is `TID`.
+- standings entries: {"name", "decklist", "deckObj", "wins", "draws",
+  "losses", "winRate"} — there is NO "standing" field; rank is the row order,
+  and the record comes from wins/draws/losses.
+- decklist text is DOUBLE-ESCAPED: line breaks are the literal two chars
+  '\\n' and quotes arrive as "\\'" / '\\"'. `parse_decklist` normalizes these.
+- rounds/tables: {"round", "tables":[{"players":[{name,id}], "winner",
+  "winner_id", "winner_games", "loser_games", "status"}]}.
 
 Output matches the MTGODecklistCache CacheItem shape so the existing
-normalize/import/match-extract paths ingest TopDeck events unchanged. The
-existing code already handles topdeck.gg's documented quirks (numeric round
-names, match-level results, byes) — see docs/notes/mtgodecklistcache-observed-schema.md.
+normalize/import/match-extract paths ingest TopDeck events unchanged (the
+importer already handles topdeck.gg's quirks — see
+docs/notes/mtgodecklistcache-observed-schema.md). No network, no DB here.
 """
 
 from __future__ import annotations
 
 import re
+from datetime import UTC, datetime
 from typing import Any
 
 BASE_URL = "https://topdeck.gg"
@@ -43,7 +45,19 @@ def parse_decklist(text: str | None) -> tuple[list[dict[str, Any]], list[dict[st
     main: list[dict[str, Any]] = []
     side: list[dict[str, Any]] = []
     zone: str | None = None
-    for raw in (text or "").splitlines():
+    # Real API quirk (verified 2026-07-08): the decklist string is double-
+    # escaped — line breaks are the literal two chars '\n' and quotes come as
+    # "\'" / '\"'. Normalize before splitting. (Real newlines, if a source ever
+    # sends them, pass through splitlines unchanged.)
+    normalized = (
+        (text or "")
+        .replace("\\r\\n", "\n")
+        .replace("\\n", "\n")
+        .replace("\\r", "\n")
+        .replace("\\'", "'")
+        .replace('\\"', '"')
+    )
+    for raw in normalized.splitlines():
         line = raw.strip()
         if not line:
             continue
@@ -65,17 +79,27 @@ def _ordinal_place(rank: int) -> str:
     return f"{rank}{suffix} Place"
 
 
+def _record(s: dict[str, Any]) -> str:
+    """A standing's swiss record 'W-L-D' (real TopDeck standings carry wins/
+    draws/losses). Empty string when the record isn't present."""
+    w, losses, d = s.get("wins"), s.get("losses"), s.get("draws")
+    if w is None or losses is None:
+        return ""
+    return f"{int(w)}-{int(losses)}-{int(d)}" if d is not None else f"{int(w)}-{int(losses)}"
+
+
 def _decks(standings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    # Real standings are ordered by finish and carry no explicit 'standing'
+    # field, so rank = row order; the record comes from wins/draws/losses.
     decks: list[dict[str, Any]] = []
-    for s in standings:
-        name = s.get("name")
+    for i, s in enumerate(standings):
         main, side = parse_decklist(s.get("decklist"))
-        rank = s.get("standing")
+        result = _record(s) or _ordinal_place(i + 1)
         decks.append(
             {
-                "Player": name,
+                "Player": s.get("name"),
                 "AnchorUri": None,
-                "Result": _ordinal_place(int(rank)) if rank is not None else "",
+                "Result": result,
                 "Mainboard": main,
                 "Sideboard": side,
             }
@@ -87,18 +111,17 @@ def _standings(standings: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
     if not standings:
         return None
     out: list[dict[str, Any]] = []
-    for s in standings:
-        rank = s.get("standing")
-        if rank is None:
-            continue
-        row: dict[str, Any] = {"Rank": int(rank), "Player": s.get("name")}
+    for i, s in enumerate(standings):
+        row: dict[str, Any] = {"Rank": i + 1, "Player": s.get("name")}
+        for src, dst in (("wins", "Wins"), ("losses", "Losses"), ("draws", "Draws")):
+            if s.get(src) is not None:
+                row[dst] = int(s[src])
         if s.get("points") is not None:
             row["Points"] = int(s["points"])
         for src, dst in (("winRate", "GWP"), ("opponentWinRate", "OGWP")):
             if s.get(src) is not None:
                 row[dst] = s[src]
         out.append(row)
-    out.sort(key=lambda r: r["Rank"])
     return out
 
 
@@ -147,6 +170,22 @@ def _rounds(rounds: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
     return out
 
 
+def to_iso_date(value: Any) -> str | None:
+    """TopDeck startDate is a unix timestamp (seconds); accept that, an ISO
+    string, or None. Returns ISO-8601 'YYYY-MM-DDTHH:MM:SSZ'."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)) or (isinstance(value, str) and value.isdigit()):
+        dt = datetime.fromtimestamp(int(value), tz=UTC)
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+    except ValueError:
+        return None
+
+
 def build_cacheitem(
     info: dict[str, Any],
     standings: list[dict[str, Any]],
@@ -154,16 +193,17 @@ def build_cacheitem(
 ) -> dict[str, Any]:
     """Assemble a CacheItem from a tournament's info + standings + rounds.
 
-    ``info`` carries at least an id (TID); name/date are used when present.
+    ``info`` carries at least an id (TID); the real API names the event
+    ``tournamentName`` and dates it with a unix ``startDate``.
     """
-    tid = info.get("id") or info.get("TID")
+    tid = info.get("TID") or info.get("id")
     if not tid:
-        raise TopdeckParseError("tournament info has no id/TID")
+        raise TopdeckParseError("tournament has no TID/id")
     date = info.get("startDate") or info.get("date") or info.get("start")
     return {
         "Tournament": {
-            "Date": date,
-            "Name": info.get("name"),
+            "Date": to_iso_date(date),
+            "Name": info.get("tournamentName") or info.get("name"),
             "Uri": f"{BASE_URL}/event/{tid}",
         },
         "Decks": _decks(standings or []),

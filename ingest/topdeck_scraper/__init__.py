@@ -10,11 +10,13 @@ Access: a free API key (Authorization header). Attribution is REQUIRED — any
 surface using this data must show "Data provided by TopDeck.gg" with a link
 (see ATTRIBUTION_HTML). Rate limit: 100 req/min on standard endpoints.
 
-STATUS: built against the documented API schema (2026-07-08). Per CLAUDE.md
-(inspect before you parse) the parser MUST be validated against 2-3 real
-captured responses before it is trusted — the daily chain keeps this source
-DISABLED until that validation lands and real fixtures replace the
-documentation-derived ones under tests/fixtures/topdeck.gg/.
+STATUS: VALIDATED against real captured responses (2026-07-08). Real fixtures
+live under tests/fixtures/topdeck.gg/; on the live corpus an 8-tournament
+Modern search imported to 93 decks with 0 unresolved cards and 184 extracted
+matches (full swiss pairings — more match signal per event than MTGO's Top-8
+brackets). The daily chain still keeps the source behind an explicit opt-in
+(TOPDECK_API_KEY + METASURF_TOPDECK_ENABLED) as a best-effort source that
+never blocks MTGO.
 """
 
 from __future__ import annotations

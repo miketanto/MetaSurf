@@ -11,7 +11,10 @@ import pytest
 from ingest.topdeck_scraper.client import Response, TopdeckClient, TopdeckError
 from ingest.topdeck_scraper.scrape import run_scrape
 
-FIX = Path(__file__).resolve().parent / "fixtures" / "topdeck.gg" / "modern-rcq-example.json"
+FIX = (
+    Path(__file__).resolve().parent
+    / "fixtures" / "topdeck.gg" / "real-modern-with-decklists.json"
+)
 
 
 class FakeClock:
@@ -98,22 +101,20 @@ def test_archives_raw_response(tmp_path):
 
 
 def test_run_scrape_writes_cacheitem(tmp_path):
-    bundle = json.loads(FIX.read_text())
-    routes = {
-        ("POST", "/v2/tournaments"): _json([bundle["info"]]),
-        ("GET", "/standings"): _json(bundle["standings"]),
-        ("GET", "/rounds"): _json(bundle["rounds"]),
-    }
+    # the real search returns tournaments with standings + rounds inline
+    tournament = json.loads(FIX.read_text())
+    routes = {("POST", "/v2/tournaments"): _json([tournament])}
     c, _ = _client(FakeTransport(routes))
     stats = run_scrape(
         c, tmp_path / "cache", game="Magic: The Gathering", fmt="Modern", format_slug="modern"
     )
     assert stats.tournaments_found == 1 and stats.written == 1 and stats.errors == 0
-    written = tmp_path / "cache" / "Tournaments/topdeck.gg/2026/07/05/modern-TESTTID123.json"
+    tid = tournament["TID"]
+    written = tmp_path / "cache" / f"Tournaments/topdeck.gg/2026/07/05/modern-{tid}.json"
     assert written.exists()
     item = orjson.loads(written.read_bytes())
-    assert item["Tournament"]["Name"] == "Modern RCQ Example"
-    assert len(item["Decks"]) == 3
+    assert item["Tournament"]["Name"] == "Impact Returns 26 Sunday Modern 2015"
+    assert len(item["Decks"]) == 15
     # second run: already have -> nothing written (idempotent)
     stats2 = run_scrape(
         c, tmp_path / "cache", game="Magic: The Gathering", fmt="Modern", format_slug="modern"

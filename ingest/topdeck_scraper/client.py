@@ -115,13 +115,29 @@ class TopdeckClient:
     # -- endpoints (documented v2) --------------------------------------
 
     def search(
-        self, game: str, fmt: str, start: str | None = None, end: str | None = None
+        self,
+        game: str,
+        fmt: str,
+        *,
+        last: int | None = None,
+        start: int | None = None,
+        end: int | None = None,
+        columns: list[str] | None = None,
+        rounds: bool = True,
     ) -> list[dict[str, Any]]:
-        """POST /v2/tournaments — completed tournaments for a game+format."""
-        body: dict[str, Any] = {"game": game, "format": fmt}
-        if start:
+        """POST /v2/tournaments — completed tournaments for a game+format, with
+        standings (and rounds) inline. One call returns everything we ingest."""
+        body: dict[str, Any] = {
+            "game": game,
+            "format": fmt,
+            "columns": columns or ["name", "decklist", "wins", "draws", "losses", "winRate"],
+            "rounds": rounds,
+        }
+        if last is not None:
+            body["last"] = last
+        if start is not None:
             body["start"] = start
-        if end:
+        if end is not None:
             body["end"] = end
         result = self._request("POST", "/v2/tournaments", body)
         return result if isinstance(result, list) else result.get("tournaments", [])

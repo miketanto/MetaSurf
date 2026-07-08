@@ -1,0 +1,245 @@
+{
+ "TID": "monday-night-premodern-at-the-side-deck-8-956",
+ "tournamentName": "Monday Night Premodern at The Side Deck",
+ "swissNum": 3,
+ "startDate": 1782774000,
+ "game": "Magic: The Gathering",
+ "format": "Modern",
+ "topCut": 0,
+ "standings": [
+  {
+   "name": "Jessie",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 3,
+   "draws": 0,
+   "losses": 0,
+   "winRate": 1
+  },
+  {
+   "name": "Zach W.",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 2,
+   "draws": 0,
+   "losses": 1,
+   "winRate": 0.6666666666666666
+  },
+  {
+   "name": "Ryan",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 2,
+   "draws": 0,
+   "losses": 1,
+   "winRate": 0.6666666666666666
+  },
+  {
+   "name": "Ellery",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 1,
+   "draws": 0,
+   "losses": 2,
+   "winRate": 0.3333333333333333
+  },
+  {
+   "name": "Teddy",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 1,
+   "draws": 0,
+   "losses": 2,
+   "winRate": 0.3333333333333333
+  },
+  {
+   "name": "Amanda",
+   "decklist": null,
+   "deckObj": null,
+   "wins": 0,
+   "draws": 0,
+   "losses": 3,
+   "winRate": 0
+  }
+ ],
+ "rounds": [
+  {
+   "round": 1,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Jessie",
+       "id": "1CkNXPNPLZEvBaCmRTcQ"
+      },
+      {
+       "name": "Ellery",
+       "id": "XDQHZon5z7cf7qAAiyRB"
+      }
+     ],
+     "winner": "Jessie",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Teddy",
+       "id": "Ywj4Pkv0sNkV838x6ILF"
+      },
+      {
+       "name": "Ryan",
+       "id": "m00JODtweIK7V4uR3dE3"
+      }
+     ],
+     "winner": "Ryan",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Amanda",
+       "id": "AzIGM0NkqYzT9FjuVynZ"
+      },
+      {
+       "name": "Zach W.",
+       "id": "x0Vp9kidaUBRA4HSqux3"
+      }
+     ],
+     "winner": "Zach W.",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    }
+   ]
+  },
+  {
+   "round": 2,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Jessie",
+       "id": "1CkNXPNPLZEvBaCmRTcQ"
+      },
+      {
+       "name": "Zach W.",
+       "id": "x0Vp9kidaUBRA4HSqux3"
+      }
+     ],
+     "winner": "Jessie",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Ryan",
+       "id": "m00JODtweIK7V4uR3dE3"
+      },
+      {
+       "name": "Amanda",
+       "id": "AzIGM0NkqYzT9FjuVynZ"
+      }
+     ],
+     "winner": "Ryan",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Teddy",
+       "id": "Ywj4Pkv0sNkV838x6ILF"
+      },
+      {
+       "name": "Ellery",
+       "id": "XDQHZon5z7cf7qAAiyRB"
+      }
+     ],
+     "winner": "Ellery",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    }
+   ]
+  },
+  {
+   "round": 3,
+   "tables": [
+    {
+     "table": 1,
+     "players": [
+      {
+       "name": "Jessie",
+       "id": "1CkNXPNPLZEvBaCmRTcQ"
+      },
+      {
+       "name": "Ryan",
+       "id": "m00JODtweIK7V4uR3dE3"
+      }
+     ],
+     "winner": "Jessie",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 1,
+     "status": "Completed"
+    },
+    {
+     "table": 2,
+     "players": [
+      {
+       "name": "Ellery",
+       "id": "XDQHZon5z7cf7qAAiyRB"
+      },
+      {
+       "name": "Zach W.",
+       "id": "x0Vp9kidaUBRA4HSqux3"
+      }
+     ],
+     "winner": "Zach W.",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    },
+    {
+     "table": 3,
+     "players": [
+      {
+       "name": "Teddy",
+       "id": "Ywj4Pkv0sNkV838x6ILF"
+      },
+      {
+       "name": "Amanda",
+       "id": "AzIGM0NkqYzT9FjuVynZ"
+      }
+     ],
+     "winner": "Teddy",
+     "winner_id": null,
+     "winner_games": 2,
+     "loser_games": 0,
+     "status": "Completed"
+    }
+   ]
+  }
+ ],
+ "eventData": {}
+}

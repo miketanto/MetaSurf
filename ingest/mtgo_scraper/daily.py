@@ -141,10 +141,7 @@ def build_steps(
             "1", "true", "yes", "on"
         }
         if not key or not enabled:
-            return (
-                "disabled (needs TOPDECK_API_KEY + METASURF_TOPDECK_ENABLED;"
-                " pending real-response validation)"
-            )
+            return "disabled (set TOPDECK_API_KEY + METASURF_TOPDECK_ENABLED to enable)"
         from ingest.topdeck_scraper.client import TopdeckClient
         from ingest.topdeck_scraper.scrape import run_scrape as td_scrape
         from ingest.topdeck_scraper.scrape import scrape_kwargs_from_config
