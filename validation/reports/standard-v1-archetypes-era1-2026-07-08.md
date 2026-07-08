@@ -1,4 +1,9 @@
-# M1 V1 archetype-classifier validation — 2026-07-08
+# M1 V1 archetype-classifier validation — 2026-07-08 (Standard, era `standard-20230701-20240802`)
+
+Per-era Standard V1 (rotating format): this validates the 2023-07-01..2024-08-02
+era. The later era (`standard-v1-archetypes-era2-2026-07-08.md`) PASSES all
+criteria (V1.1 0.9876 no misses; V1.2 both Duskmourn emergence events detected).
+This era passes agreement but flags one archetype below F1 — see the verdict.
 
 All numbers are printed output of `python -m validation.v1_archetypes` against the rebuilt database. Methodology: docstring of `validation/v1_archetypes/run.py`.
 

@@ -66,6 +66,20 @@ EMERGENCE_EVENTS = (
         dt.date(2024, 7, 1),
     ),
 )
+# Standard emergence events (era standard-20240803-20250730). Both are Duskmourn
+# (2024-09-27) decks whose signature new card drives their arrival — chosen from
+# executed corpus queries: Oculus decks are 254/254 on Abhorrent Oculus; Demons
+# on Unholy Annex // Ritual Chamber. Exclusion by file stem (Demons' file is
+# UBDemon.json). Both arrive inside the [window_start, +60d] window.
+STANDARD_EMERGENCE_EVENTS = (
+    ("Duskmourn release — Oculus", "Oculus", "Abhorrent Oculus", dt.date(2024, 9, 1)),
+    (
+        "Duskmourn release — Demons",
+        "UBDemon",
+        "Unholy Annex // Ritual Chamber",
+        dt.date(2024, 9, 1),
+    ),
+)
 EMERGENCE_HORIZON_DAYS = 7
 EMERGENCE_MIN_APPEARANCES = 5
 
@@ -169,18 +183,19 @@ def run_v12(
     conn: psycopg.Connection,
     format_name: str = "modern",
     emergence_events: tuple[tuple[str, str, str, dt.date], ...] = EMERGENCE_EVENTS,
+    rules_dir: str | None = None,
 ) -> list[dict[str, Any]]:
     # emergence events are format-specific (chosen from that format's corpus);
-    # a format with none defined simply has no V1.2 to run.
+    # a format with none defined simply has no V1.2 to run. ``rules_dir`` uses
+    # the era-matched rule set for a rotating-format window.
     if not emergence_events:
         return []
+    rd = rules_dir or format_name
     results: list[dict[str, Any]] = []
-    full_defs, _ = load_definitions(conn, format_name=format_name)
+    full_defs, _ = load_definitions(conn, format_name=rd)
     exclude = basic_land_ids(conn)
     for label, file_stem, key_card, window_start in emergence_events:
-        blind_defs, _ = load_definitions(
-            conn, frozenset({file_stem}), format_name=format_name
-        )
+        blind_defs, _ = load_definitions(conn, frozenset({file_stem}), format_name=rd)
         assert len(blind_defs.archetypes) == len(full_defs.archetypes) - 1
 
         with conn.cursor() as cur:

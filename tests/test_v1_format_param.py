@@ -5,7 +5,20 @@ from __future__ import annotations
 
 import inspect
 
-from validation.v1_archetypes.run import run_v11, run_v12
+from validation.v1_archetypes.run import (
+    STANDARD_EMERGENCE_EVENTS,
+    run_v11,
+    run_v12,
+)
+
+
+def test_standard_emergence_events_curated():
+    # each event is (label, rule-file stem, key card, window-start date) grounded
+    # in the corpus (Duskmourn arrivals); used by V1.2 for Standard
+    assert STANDARD_EMERGENCE_EVENTS
+    for label, stem, key_card, start in STANDARD_EMERGENCE_EVENTS:
+        assert label and stem and key_card
+        assert start.year == 2024
 
 
 def test_run_v11_v12_default_to_modern():

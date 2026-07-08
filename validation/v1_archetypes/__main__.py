@@ -28,10 +28,14 @@ from validation.v1_archetypes.run import (
     HOLDOUT_END,
     HOLDOUT_START,
     MAJOR_F1_TARGET,
+    STANDARD_EMERGENCE_EVENTS,
     format_metrics,
     run_v11,
     run_v12,
 )
+
+# curated emergence events per format (V1.2); a format without any runs V1.1 only
+_EMERGENCE_BY_FORMAT = {"modern": EMERGENCE_EVENTS, "standard": STANDARD_EMERGENCE_EVENTS}
 
 
 def main() -> None:
@@ -50,14 +54,14 @@ def main() -> None:
     )
     args = parser.parse_args()
     report_date = args.date or dt.date.today().isoformat()
-    # V1.2 emergence events are format-specific; only Modern's are defined so
-    # far — other formats run V1.1 only until their events are curated.
-    events = EMERGENCE_EVENTS if args.format_name == "modern" else ()
+    # V1.2 emergence events are format-specific; a format without curated events
+    # runs V1.1 only.
+    events = _EMERGENCE_BY_FORMAT.get(args.format_name, ())
 
     fmt, hs, he, rd = args.format_name, args.holdout_start, args.holdout_end, args.rules_dir
     with connect() as conn:
-        v11a, v12a = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events)
-        v11b, v12b = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events)
+        v11a, v12a = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events, rd)
+        v11b, v12b = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events, rd)
     a, b = format_metrics(v11a, v12a), format_metrics(v11b, v12b)
     deterministic = a == b
 
