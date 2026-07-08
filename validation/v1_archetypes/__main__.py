@@ -43,16 +43,21 @@ def main() -> None:
     parser.add_argument("--format", default="modern", dest="format_name")
     parser.add_argument("--holdout-start", type=dt.date.fromisoformat, default=HOLDOUT_START)
     parser.add_argument("--holdout-end", type=dt.date.fromisoformat, default=HOLDOUT_END)
+    parser.add_argument(
+        "--rules-dir", default=None,
+        help="era-matched definitions subdir for a rotating-format holdout "
+        "(e.g. standard-20230701-20240802); default: the format's current rules",
+    )
     args = parser.parse_args()
     report_date = args.date or dt.date.today().isoformat()
     # V1.2 emergence events are format-specific; only Modern's are defined so
     # far — other formats run V1.1 only until their events are curated.
     events = EMERGENCE_EVENTS if args.format_name == "modern" else ()
 
-    fmt, hs, he = args.format_name, args.holdout_start, args.holdout_end
+    fmt, hs, he, rd = args.format_name, args.holdout_start, args.holdout_end, args.rules_dir
     with connect() as conn:
-        v11a, v12a = run_v11(conn, fmt, hs, he), run_v12(conn, fmt, events)
-        v11b, v12b = run_v11(conn, fmt, hs, he), run_v12(conn, fmt, events)
+        v11a, v12a = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events)
+        v11b, v12b = run_v11(conn, fmt, hs, he, rd), run_v12(conn, fmt, events)
     a, b = format_metrics(v11a, v12a), format_metrics(v11b, v12b)
     deterministic = a == b
 
@@ -86,7 +91,8 @@ def main() -> None:
         f"unresolved={v11['unresolved_rule_names']}"
     )
 
-    s.append(f"\n## V1.1 — hold-out month {HOLDOUT_START} .. {HOLDOUT_END}\n")
+    era = f" (era-matched rules `{rd}`)" if rd else ""
+    s.append(f"\n## V1.1 — {fmt} hold-out {hs} .. {he}{era}\n")
     s.append(
         f"Decks: {v11['decks']} | specific-rules labeled: {v11['rules_labeled']} "
         f"(conflicts: {v11['conflicts']}, fallback-labeled: {v11['fallback_labeled']}) | "

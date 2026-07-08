@@ -86,8 +86,11 @@ def run_v11(
     format_name: str = "modern",
     holdout_start: dt.date = HOLDOUT_START,
     holdout_end: dt.date = HOLDOUT_END,
+    rules_dir: str | None = None,
 ) -> dict[str, Any]:
-    defs, load_report = load_definitions(conn, format_name=format_name)
+    # rules_dir lets a rotating-format holdout validate against the era-matched
+    # rule set current at the holdout date, not today's post-rotation rules.
+    defs, load_report = load_definitions(conn, format_name=rules_dir or format_name)
     decks = load_decks(conn, holdout_start, holdout_end, format_name)
     classifications = rules_label(decks, defs)
     truth = _rule_truth(decks, classifications)
