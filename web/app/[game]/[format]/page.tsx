@@ -1,29 +1,10 @@
+import { Nav } from "@/components/Nav";
 import { MetaTable } from "@/components/MetaTable";
 import { LockedPanel } from "@/components/LockedPanel";
-import { getMeta, KNOWN_FORMATS, ApiError } from "@/lib/api";
+import { getMeta, ApiError } from "@/lib/api";
 import type { MetaResponse } from "@/lib/types";
 
-// always render fresh from the rollup API
 export const dynamic = "force-dynamic";
-
-function Tabs({ game, format }: { game: string; format: string }) {
-  return (
-    <nav className="tabs">
-      {KNOWN_FORMATS.map((f) => {
-        const active = f.game === game && f.format === format;
-        return (
-          <a
-            key={`${f.game}/${f.format}`}
-            className={active ? "tab active" : "tab"}
-            href={`/${f.game}/${f.format}`}
-          >
-            {f.label}
-          </a>
-        );
-      })}
-    </nav>
-  );
-}
 
 export default async function MetaPage({
   params,
@@ -45,15 +26,8 @@ export default async function MetaPage({
 
   return (
     <main className="container">
-      <header className="app">
-        <div className="brand">
-          Meta<span>Surf</span>
-        </div>
-        {meta && <div className="subhead">as of {meta.as_of}</div>}
-      </header>
+      <Nav game={game} format={format} section="meta" asOf={meta?.as_of} />
       <p className="subhead">Metagame snapshot — share &amp; winrate</p>
-
-      <Tabs game={game} format={format} />
 
       {error ? (
         <div className="error">
