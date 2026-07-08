@@ -27,7 +27,7 @@
         "exile all graveyards?",
         "exile target player'?s? graveyard",
         "exile each opponent'?s? graveyard",
-        "exiles?[^.]*cards?[^.]*from (a|an opponent's|their) graveyard",
+        "exiles?[^.]*cards?[^.]*from (a|an opponent's|their|a single) graveyard",
         "(owner's|opponent's|their) graveyard[^.]*\\bexile",
         "put into[^.]*graveyard from anywhere, exile it instead",
         "can't cast spells from (their )?graveyards",
@@ -37,21 +37,25 @@
     },
     {
       "role": "creature_removal",
-      "doc": "single-target creature/permanent removal",
+      "doc": "single-target creature/permanent removal (incl. 'destroy target <x> creature', exile, edict, burn)",
       "any": [
-        "destroy target creature",
+        "destroy target[^.]*\\bcreature\\b",
+        "exile target[^.]*\\bcreature\\b",
         "destroy target (nonland )?permanent",
+        "exile target (nonland )?permanent",
         "deals \\d+ damage to (any target|target creature)",
-        "exile target creature"
+        "sacrifices a[^.]*\\bcreature\\b"
       ]
     },
     {
       "role": "board_sweeper",
-      "doc": "mass creature removal",
+      "doc": "mass creature removal (destroy/exile all creatures, mass damage, mass -X/-X, mass permanent exile)",
       "any": [
         "destroy all creatures",
+        "exile all creatures",
         "deals \\d+ damage to each creature",
-        "each creature gets -\\d+/-\\d+"
+        "each creature gets -\\d+/-\\d+",
+        "exile each nonland permanent"
       ]
     },
     {
@@ -70,13 +74,13 @@
     },
     {
       "role": "artifact_enchant_removal",
-      "doc": "destroys/exiles artifacts or enchantments",
+      "doc": "destroys/exiles artifacts or enchantments (incl. flexible any-permanent removal)",
       "any": [
-        "destroy target artifact",
-        "destroy target enchantment",
-        "destroy target[^.]*artifact or enchantment",
+        "destroy target[^.]*\\bartifact\\b",
+        "destroy target[^.]*\\benchantment\\b",
+        "exile target[^.]*\\b(artifact|enchantment)\\b",
         "destroy target (nonland )?permanent",
-        "exile target artifact or enchantment"
+        "exile target (nonland )?permanent"
       ]
     },
     {

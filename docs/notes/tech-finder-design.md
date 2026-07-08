@@ -128,21 +128,32 @@ Backlog **BL-1**, high value / high effort.
   only). Materialize with `scripts/materialize_card_roles.py`.
 - **Layer B** — `validation/tech_finder/estimate.py`: the within-archetype,
   matchup-conditioned DiD (card-agnostic → also the game-neutral seam).
-- **B2 recovery: 6/7 gated PASS (11/13 across all targets).** On the rebuilt
-  Modern corpus (347,438 decided non-mirror match rows) the within-archetype DiD
-  ranks the known tech role in the top-3 for 13 pre-registered archetypes, and
-  at a rank ≤ the naive prevalence baseline everywhere it passes — often far
-  better (Tron 1 vs 5, Titan 2 vs 5, Ruby Storm 2 vs 5, Aggro 2 vs 8). It also
-  surfaces correct nuance: vs Titan it ranks `mana_denial` above `land_destruction`
-  (Amulet floods lands, so Blood Moon bites but land destruction doesn't). Two
-  honest misses: HammerTime (artifact removal ranks last — Hammer is resilient
-  to removal / a-priori wisdom wrong) and Yawgmoth (graveyard hate not A-specific
-  — it's a battlefield engine, our label was likely wrong).
+- **B2 recovery (Modern): 5/7 gated PASS (10/13 across all targets).** On the
+  rebuilt Modern corpus (347,438 decided non-mirror match rows) the
+  within-archetype DiD ranks the known tech role in the top-3 for most of 13
+  pre-registered archetypes, and at a rank ≤ the naive prevalence baseline
+  everywhere it passes — often far better (Tron 1 vs 5, Titan 2 vs 5, Ruby Storm
+  2 vs 5, Aggro 2 vs 8). It surfaces correct nuance: vs Titan it ranks
+  `mana_denial` above `land_destruction` (Amulet floods lands, so Blood Moon
+  bites but land destruction doesn't). Three honest misses: HammerTime (artifact
+  removal ranks near-last — Hammer is resilient / a-priori wisdom wrong); Affinity
+  (artifact removal fell to rank 4 after the role vocab was broadened to fold
+  flexible any-permanent removal in for Standard — functionally correct but
+  dilutes artifact-specificity); Yawgmoth (graveyard hate not A-specific — it's a
+  battlefield engine, our label was likely wrong).
 - **B1 reproducibility: 2/7 gated.** Only graveyard_hate vs the graveyard decks
   (LivingEnd, GoryoReanimator) is positive+top-k across two disjoint eras
   (2022–23 / 2024–25). Every narrow tech (land destruction, mana denial, artifact
   removal, counters, discard) shifts across eras → graveyard hate is a persistent
   structural tech, most other tech is metagame-contingent. Reported, not lowered.
+- **Standard transfer test: the method does NOT transfer (gated 0/3).** Report:
+  `validation/reports/tech-finder-standard-2026-07-08.md`. Standard 2024–25 has
+  ~62k directed rows and few archetypes, so the within-archetype DiD has only
+  1–3 contributing strata (vs Modern's 15–31) — single-archetype noise outranks
+  the genuine (weak) graveyard-hate signal; and the go-wide aggro targets are
+  §4d's muddy creature-deck case (sweepers are generic, not A-specific). The tool
+  needs both large match volume AND a distinctive non-generic weakness — Modern
+  supplies both, Standard neither.
 - **Layer C** (rank *unplayed* hidden tech) and **C1** (temporal precision@k)
   remain future work; want more live volume (§4b phase 4).
 

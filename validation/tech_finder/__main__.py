@@ -1,14 +1,16 @@
-"""Print the tech-finder B2/B1 report (real Modern corpus). Redirect to
-validation/reports/tech-finder-b1b2-<date>.md."""
+"""Print the tech-finder B2/B1 report. `--format modern` (default) or
+`--format standard`. Redirect to validation/reports/tech-finder-<fmt>-<date>.md."""
 
 from __future__ import annotations
+
+import argparse
 
 import psycopg
 
 from archetypes.roles import all_roles
 from db.connection import database_url
 from validation.tech_finder.data import load_directed_rows
-from validation.tech_finder.run import TOP_K, run_b1, run_b2
+from validation.tech_finder.run import TARGETS_BY_FORMAT, TOP_K, run_b1, run_b2
 
 
 def _fmt_effects_table(effects: list) -> list[str]:
@@ -25,20 +27,26 @@ def _fmt_effects_table(effects: list) -> list[str]:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--format", default="modern", choices=sorted(TARGETS_BY_FORMAT))
+    fmt = ap.parse_args().format
+    targets = TARGETS_BY_FORMAT[fmt]
+
     roles = all_roles()
     with psycopg.connect(database_url()) as conn:
-        rows = load_directed_rows(conn, "modern")
-        b2 = run_b2(rows, roles)
-        b1 = run_b1(conn, roles)
+        rows = load_directed_rows(conn, fmt)
+        b2 = run_b2(rows, roles, targets)
+        b1 = run_b1(conn, roles, targets, fmt)
 
-    print("# Tech finder — B2 known-tech recovery + B1 reproducibility (Modern)")
+    print(f"# Tech finder — B2 known-tech recovery + B1 reproducibility ({fmt})")
     print()
     print(f"Directed decided non-mirror match rows: **{len(rows)}**. "
           f"Roles vocabulary ({len(roles)}): {', '.join(roles)}.")
     print()
-    print("All numbers are printed output of `python -m validation.tech_finder` "
-          "against the rebuilt Modern corpus (import + match_extract + rules "
-          "labeling). Design: docstring of `validation/tech_finder/estimate.py`.")
+    print(f"All numbers are printed output of `python -m validation.tech_finder "
+          f"--format {fmt}` against the rebuilt {fmt} corpus (import + "
+          "match_extract + rules labeling). Design: docstring of "
+          "`validation/tech_finder/estimate.py`.")
     print()
     print("## B2 — recovery: does the within-archetype DiD rank the known tech "
           f"role in the top {TOP_K}, beating the frequency-only baseline?")

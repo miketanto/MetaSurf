@@ -28,10 +28,18 @@ from validation.tech_finder.estimate import (
 
 MIN_CELL = 20
 TOP_K = 3
-B1_BLOCKS = (
-    (dt.date(2022, 1, 1), dt.date(2023, 12, 31)),
-    (dt.date(2024, 1, 1), dt.date(2025, 12, 31)),
-)
+# Two disjoint temporal blocks per format for B1 (a-priori calendar splits at a
+# format's data density; chosen before per-block results).
+B1_BLOCKS_BY_FORMAT = {
+    "modern": (
+        (dt.date(2022, 1, 1), dt.date(2023, 12, 31)),
+        (dt.date(2024, 1, 1), dt.date(2025, 12, 31)),
+    ),
+    "standard": (  # corpus is 2024-01..2026-07, so split at the year boundary
+        (dt.date(2024, 1, 1), dt.date(2024, 12, 31)),
+        (dt.date(2025, 1, 1), dt.date(2026, 12, 31)),
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -47,7 +55,7 @@ class ProofTarget:
 # single role B1 reproducibility is checked on) is the most iconic answer.
 # `gated` = the weakness maps cleanly to one of our 9 roles -> counts toward the
 # verdict; `reported-only` = muddy/generic/thin-sample, shown for context.
-TARGETS = (
+_MODERN_TARGETS = (
     # ramp / greedy-manabase decks -> attack the lands/mana
     ProofTarget("GenericTron", frozenset({"land_destruction", "mana_denial"}),
                 "land_destruction", True),
@@ -76,6 +84,29 @@ TARGETS = (
     # help vs every creature deck; the honest boundary of the method)
     ProofTarget("Aggro", frozenset({"board_sweeper"}), "board_sweeper", False),
 )
+
+# Standard 2024-25 (labels as classified). Fewer textbook structural weaknesses
+# than Modern; the clean cases are graveyard decks and go-wide aggro.
+_STANDARD_TARGETS = (
+    # reanimator / graveyard-threat decks -> graveyard hate
+    ProofTarget("Reanimator", frozenset({"graveyard_hate"}), "graveyard_hate", True),
+    ProofTarget("Oculus", frozenset({"graveyard_hate"}), "graveyard_hate", True),
+    ProofTarget("Demons", frozenset({"graveyard_hate"}), "graveyard_hate", False),
+    # go-wide creature aggro -> board sweeper
+    ProofTarget("Boros Convoke", frozenset({"board_sweeper"}), "board_sweeper", True),
+    ProofTarget("Convoke", frozenset({"board_sweeper"}), "board_sweeper", False),
+    ProofTarget("Poison", frozenset({"board_sweeper"}), "board_sweeper", False),
+    # artifact aggro -> artifact removal
+    ProofTarget("Artifact Aggro", frozenset({"artifact_enchant_removal"}),
+                "artifact_enchant_removal", False),
+    # midrange/creature decks -> board sweeper (muddy boundary, reported)
+    ProofTarget("Aggro", frozenset({"board_sweeper"}), "board_sweeper", False),
+)
+
+TARGETS_BY_FORMAT = {
+    "modern": _MODERN_TARGETS,
+    "standard": _STANDARD_TARGETS,
+}
 
 
 @dataclass(frozen=True)
@@ -110,9 +141,11 @@ class B1Result:
         return ok
 
 
-def run_b2(rows: list, roles: tuple[str, ...]) -> list[B2Result]:
+def run_b2(
+    rows: list, roles: tuple[str, ...], targets: tuple[ProofTarget, ...]
+) -> list[B2Result]:
     results = []
-    for t in TARGETS:
+    for t in targets:
         eff = role_effects_for_opponent(rows, t.opponent, roles, min_cell=MIN_CELL)
         results.append(
             B2Result(
@@ -125,15 +158,21 @@ def run_b2(rows: list, roles: tuple[str, ...]) -> list[B2Result]:
     return results
 
 
-def run_b1(conn: psycopg.Connection, roles: tuple[str, ...]) -> list[B1Result]:
+def run_b1(
+    conn: psycopg.Connection,
+    roles: tuple[str, ...],
+    targets: tuple[ProofTarget, ...],
+    format_name: str,
+) -> list[B1Result]:
+    blocks = B1_BLOCKS_BY_FORMAT[format_name]
     block_rows = [
-        load_directed_rows(conn, "modern", date_from=lo, date_to=hi)
-        for lo, hi in B1_BLOCKS
+        load_directed_rows(conn, format_name, date_from=lo, date_to=hi)
+        for lo, hi in blocks
     ]
     results = []
-    for t in TARGETS:
+    for t in targets:
         per_block = []
-        for blk, rows in zip(B1_BLOCKS, block_rows, strict=True):
+        for blk, rows in zip(blocks, block_rows, strict=True):
             eff = role_effects_for_opponent(rows, t.opponent, roles, min_cell=MIN_CELL)
             primary = next((e for e in eff if e.role == t.primary), None)
             rk = rank_of(eff, {t.primary}, "a_specific")

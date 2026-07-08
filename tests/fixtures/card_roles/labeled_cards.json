@@ -28,6 +28,16 @@
     ]
   },
   {
+    "name": "Anguished Unmaking",
+    "oracle_id": "ad09b3c3-c8e7-481c-8c45-e7f234935117",
+    "type_line": "Instant",
+    "oracle_text": "Exile target nonland permanent. You lose 3 life.",
+    "expected_roles": [
+      "artifact_enchant_removal",
+      "creature_removal"
+    ]
+  },
+  {
     "name": "Assassin's Trophy",
     "oracle_id": "ac10d218-f9a6-4058-9cda-a15ca1b0b7b5",
     "type_line": "Instant",
@@ -81,6 +91,15 @@
     "oracle_text": "Counter target spell.",
     "expected_roles": [
       "counter_spell"
+    ]
+  },
+  {
+    "name": "Cut Down",
+    "oracle_id": "1b30210d-10e9-4703-8967-032063bb4f26",
+    "type_line": "Instant",
+    "oracle_text": "Destroy target creature with total power and toughness 5 or less.",
+    "expected_roles": [
+      "creature_removal"
     ]
   },
   {
@@ -138,12 +157,31 @@
     ]
   },
   {
+    "name": "Get Lost",
+    "oracle_id": "522dd417-364b-44ab-8ca9-fb55db5f26a6",
+    "type_line": "Instant",
+    "oracle_text": "Destroy target creature, enchantment, or planeswalker. Its controller creates two Map tokens. (They're artifacts with \"{1}, {T}, Sacrifice this token: Target creature you control explores. Activate only as a sorcery.\")",
+    "expected_roles": [
+      "artifact_enchant_removal",
+      "creature_removal"
+    ]
+  },
+  {
     "name": "Ghost Quarter",
     "oracle_id": "2ec4288e-34c6-4831-a2c0-ba1ca1d9d1dc",
     "type_line": "Land",
     "oracle_text": "{T}: Add {C}.\n{T}, Sacrifice this land: Destroy target land. Its controller may search their library for a basic land card, put it onto the battlefield, then shuffle.",
     "expected_roles": [
       "land_destruction"
+    ]
+  },
+  {
+    "name": "Go for the Throat",
+    "oracle_id": "2f092562-9e17-43cd-aeb8-d0567f99363e",
+    "type_line": "Instant",
+    "oracle_text": "Destroy target nonartifact creature.",
+    "expected_roles": [
+      "creature_removal"
     ]
   },
   {
@@ -251,6 +289,15 @@
     ]
   },
   {
+    "name": "Sheoldred's Edict",
+    "oracle_id": "217062f5-96f1-454c-9507-17f34ef37070",
+    "type_line": "Instant",
+    "oracle_text": "Choose one —\n• Each opponent sacrifices a nontoken creature of their choice.\n• Each opponent sacrifices a creature token of their choice.\n• Each opponent sacrifices a planeswalker of their choice.",
+    "expected_roles": [
+      "creature_removal"
+    ]
+  },
+  {
     "name": "Soul-Guide Lantern",
     "oracle_id": "1b5e6560-ff2e-4475-96cb-63f64c8a86db",
     "type_line": "Artifact",
@@ -266,6 +313,15 @@
     "oracle_text": "Counter target creature spell with power or toughness 2 or less.",
     "expected_roles": [
       "counter_spell"
+    ]
+  },
+  {
+    "name": "Sunfall",
+    "oracle_id": "fb3f5097-0da0-458c-8508-60823567e2da",
+    "type_line": "Sorcery",
+    "oracle_text": "Exile all creatures. Incubate X, where X is the number of creatures exiled this way. (Create an Incubator token with X +1/+1 counters on it and \"{2}: Transform this token.\" It transforms into a 0/0 Phyrexian artifact creature.)",
+    "expected_roles": [
+      "board_sweeper"
     ]
   },
   {
@@ -287,6 +343,24 @@
     ]
   },
   {
+    "name": "Temporary Lockdown",
+    "oracle_id": "b21c99b3-b975-4428-9c9a-326ded2fa8dc",
+    "type_line": "Enchantment",
+    "oracle_text": "When this enchantment enters, exile each nonland permanent with mana value 2 or less until this enchantment leaves the battlefield.",
+    "expected_roles": [
+      "board_sweeper"
+    ]
+  },
+  {
+    "name": "The Wandering Emperor",
+    "oracle_id": "0c7f18d5-36cb-4bc6-a358-443b97666215",
+    "type_line": "Legendary Planeswalker",
+    "oracle_text": "Flash\nAs long as The Wandering Emperor entered this turn, you may activate her loyalty abilities any time you could cast an instant.\n+1: Put a +1/+1 counter on up to one target creature. It gains first strike until end of turn.\n−1: Create a 2/2 white Samurai creature token with vigilance.\n−2: Exile target tapped creature. You gain 2 life.",
+    "expected_roles": [
+      "creature_removal"
+    ]
+  },
+  {
     "name": "Thoughtseize",
     "oracle_id": "edd8d1e8-be43-4c38-bb3a-83081fbaf0b5",
     "type_line": "Sorcery",
@@ -302,6 +376,24 @@
     "oracle_text": "Flash\nWhen this creature enters, counter up to one target activated or triggered ability. If an ability of an artifact, creature, or planeswalker is countered this way, that permanent loses all abilities for as long as this creature remains on the battlefield. (Mana abilities can't be targeted.)",
     "expected_roles": [
       "counter_ability"
+    ]
+  },
+  {
+    "name": "Torch the Tower",
+    "oracle_id": "10d33e95-3e5d-447e-ba4a-acd3c33b4045",
+    "type_line": "Instant",
+    "oracle_text": "Bargain (You may sacrifice an artifact, enchantment, or token as you cast this spell.)\nTorch the Tower deals 2 damage to target creature or planeswalker. If this spell was bargained, instead it deals 3 damage to that permanent and you scry 1.\nIf a permanent dealt damage by Torch the Tower would die this turn, exile it instead.",
+    "expected_roles": [
+      "creature_removal"
+    ]
+  },
+  {
+    "name": "Unlicensed Hearse",
+    "oracle_id": "c640654c-487e-4a2c-aced-126ed835b78f",
+    "type_line": "Artifact — Vehicle",
+    "oracle_text": "{T}: Exile up to two target cards from a single graveyard.\nUnlicensed Hearse's power and toughness are each equal to the number of cards exiled with it.\nCrew 2",
+    "expected_roles": [
+      "graveyard_hate"
     ]
   },
   {
