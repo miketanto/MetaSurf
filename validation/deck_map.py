@@ -225,7 +225,32 @@ def render_html(points: list[dict[str, Any]], title: str = "Modern deck map") ->
          "total": len(points), "narch": len(cnt)},
         separators=(",", ":"),
     )
-    return _load_template().replace("__TITLE__", title).replace("__DATA__", data)
+    sources: set[str] = {str(p["source"]) for p in points if p.get("source")}
+    return (
+        _load_template()
+        .replace("__TITLE__", title)
+        .replace("__DATA__", data)
+        .replace("__CREDITS__", _credits_html(sources))
+    )
+
+
+def _credits_html(sources: set[str]) -> str:
+    """Visible source attributions for the deck sources shown (config-driven;
+    required sources like TopDeck.gg must be credited)."""
+    cfg = json.loads(
+        (Path(__file__).resolve().parent.parent / "config" / "sources.json").read_text()
+    ).get("sources", {})
+    present = sorted(
+        (m for k, m in cfg.items() if k in sources),
+        key=lambda m: (not m.get("required"), str(m.get("name"))),
+    )
+    if not present:
+        return ""
+    links = " · ".join(
+        f'<a href="{m.get("url", "")}" target="_blank" rel="noopener">{m.get("attribution")}</a>'
+        for m in present
+    )
+    return f'<div id="credits" style="margin-top:8px;font-size:11.5px;color:#888">{links}</div>'
 
 
 _TEMPLATE_PATH = Path(__file__).resolve().parent / "deck_map_template.html"

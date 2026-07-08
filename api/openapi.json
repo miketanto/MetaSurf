@@ -278,6 +278,39 @@
         "title": "ClassifyResponse",
         "type": "object"
       },
+      "Credit": {
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "required": {
+            "title": "Required",
+            "type": "boolean"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "name",
+          "url",
+          "attribution",
+          "required"
+        ],
+        "title": "Credit",
+        "type": "object"
+      },
       "EventEntry": {
         "properties": {
           "date": {
@@ -352,6 +385,13 @@
       },
       "EventsResponse": {
         "properties": {
+          "credits": {
+            "items": {
+              "$ref": "#/components/schemas/Credit"
+            },
+            "title": "Credits",
+            "type": "array"
+          },
           "events": {
             "items": {
               "$ref": "#/components/schemas/EventEntry"
@@ -371,7 +411,8 @@
         "required": [
           "game",
           "format",
-          "events"
+          "events",
+          "credits"
         ],
         "title": "EventsResponse",
         "type": "object"

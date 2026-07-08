@@ -15,6 +15,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from api import queries
+from api.attribution import credits_for
 from api.classifier import CardLine, ClassifierService
 from api.db import Conn
 from api.entitlements import PREMIUM, Entitled
@@ -360,4 +361,5 @@ def events(
             )
             for event_id, date, name, source, players, top in rows
         ],
+        credits=credits_for({source for _, _, _, source, _, _ in rows}),
     )

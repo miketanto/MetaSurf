@@ -183,7 +183,18 @@ class EventEntry(BaseModel):
     top_archetype: str | None
 
 
+class Credit(BaseModel):
+    source: str
+    name: str
+    url: str
+    attribution: str
+    required: bool
+
+
 class EventsResponse(BaseModel):
     game: str
     format: str
     events: list[EventEntry]
+    # required source attributions for the sources present in this feed
+    # (e.g. TopDeck.gg) — clients must display these visibly
+    credits: list[Credit]

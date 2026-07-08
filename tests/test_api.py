@@ -203,6 +203,31 @@ def test_events_contract(client, seeded):
     assert len(client.get(f"{BASE}/events", params={"limit": 3}).json()["events"]) == 3
 
 
+def test_events_credits_match_sources(client, seeded):
+    body = client.get(f"{BASE}/events").json()
+    assert "credits" in body
+    feed_sources = {e["source"] for e in body["events"]}
+    for c in body["credits"]:
+        assert c["source"] in feed_sources  # never credit a source not shown
+        assert c["url"] and c["attribution"]
+    # required credits (if any) sort before optional ones
+    reqs = [c["required"] for c in body["credits"]]
+    assert reqs == sorted(reqs, reverse=True)
+
+
+def test_credits_for_is_config_driven():
+    from api.attribution import credits_for
+
+    td = credits_for({"topdeck.gg"})
+    assert len(td) == 1
+    assert td[0].source == "topdeck.gg" and td[0].required is True
+    assert td[0].attribution == "Data provided by TopDeck.gg"
+    assert credits_for({"nonexistent-source"}) == []
+    # required sources come first
+    both = credits_for({"topdeck.gg", "mtgo.com"})
+    assert [c.required for c in both] == sorted([c.required for c in both], reverse=True)
+
+
 @pytest.fixture(scope="module")
 def classify_client(seeded, test_db_url):
     """Client with the MTG classifier adapter injected, as serve.py wires it."""

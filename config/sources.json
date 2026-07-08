@@ -1,0 +1,22 @@
+{
+  "sources": {
+    "mtgo.com": {
+      "name": "Magic Online",
+      "url": "https://www.mtgo.com/decklists",
+      "attribution": "Decklists from Magic Online (mtgo.com)",
+      "required": false
+    },
+    "topdeck.gg": {
+      "name": "TopDeck.gg",
+      "url": "https://topdeck.gg",
+      "attribution": "Data provided by TopDeck.gg",
+      "required": true
+    },
+    "melee.gg": {
+      "name": "Melee.gg",
+      "url": "https://melee.gg",
+      "attribution": "Data provided by Melee.gg",
+      "required": true
+    }
+  }
+}
