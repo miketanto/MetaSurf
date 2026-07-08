@@ -8,6 +8,15 @@ format; do not depend on the .NET runtime.").
 - `modern/Archetypes/` (130 files), `modern/Fallbacks/` (9 files),
   `modern/metas.json`, `modern/color_overrides.json`
   ← `Formats/Modern/` in the source repo.
+- `standard/Archetypes/` (59 files), `standard/Fallbacks/` (8 files),
+  `standard/metas.json`, `standard/color_overrides.json`
+  ← `Formats/Standard/` (the *active* Standard set; the source repo also keeps
+  dated historical folders `Standard-YYYYMMDD-YYYYMMDD/` for past rotations).
+  Ported unmodified at the same pinned commit. **Observed upstream typo:**
+  `standard/Archetypes/UWMomo.json` has a condition type `"OneorMoreInMainboard"`
+  (lowercase `or`). The data is kept byte-identical; the loader canonicalizes
+  condition-type casing (`archetypes/classifier/definitions.py`) so pure case
+  typos resolve while genuinely-unknown types still fail.
 - `card_colors.json` ← `Formats/card_colors.json` (global land/non-land color
   table used for color detection and IncludeColorInName).
 

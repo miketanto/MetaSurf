@@ -53,7 +53,7 @@
         },
         {
           "name": "standard",
-          "import": false,
+          "import": true,
           "slug_tokens": [
             "standard"
           ],

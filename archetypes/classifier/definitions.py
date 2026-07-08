@@ -43,6 +43,12 @@ CONDITION_TYPES = frozenset(
         "DoesNotContainSideboard",
     }
 )
+# Canonical form keyed by casefold, so a pure case typo in the ported data
+# (observed: "OneorMoreInMainboard" in Standard/UWMomo.json — a lowercase 'or')
+# resolves to the real type. Genuinely-unknown types still fail. Keeps ported
+# rule files byte-identical to upstream (PROVENANCE), the same policy as the
+# loader tolerating Modern's trailing-comma color_overrides.
+_CANONICAL_CONDITION = {t.casefold(): t for t in CONDITION_TYPES}
 
 
 def fold_name(name: str) -> str:
@@ -151,9 +157,9 @@ def _read_json(path: Path) -> dict:
 def _load_conditions(raw: dict, resolver: _NameResolver) -> tuple[Condition, ...]:
     out: list[Condition] = []
     for cond in raw.get("Conditions") or []:
-        ctype = cond["Type"]
-        if ctype not in CONDITION_TYPES:
-            raise ValueError(f"unknown condition type {ctype!r}")
+        ctype = _CANONICAL_CONDITION.get(cond["Type"].casefold())
+        if ctype is None:
+            raise ValueError(f"unknown condition type {cond['Type']!r}")
         names = cond.get("Cards") or []
         # reference behavior: single-card types only ever inspect Cards[0]
         if ctype.startswith(("In", "DoesNotContain")):
