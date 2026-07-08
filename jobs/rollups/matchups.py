@@ -53,7 +53,9 @@ def build_matchups(
     conn: psycopg.Connection, game_name: str, format_name: str, as_of: dt.date
 ) -> SnapshotStats:
     format_id = resolve_format_id(conn, game_name, format_name)
-    counts = weekend_archetype_counts(conn, format_id, trailing_window_start(as_of), as_of)
+    counts = weekend_archetype_counts(
+        conn, format_id, trailing_window_start(as_of), as_of, format_name
+    )
     universe = universe_ids(counts)
 
     rows: list[tuple[int, dt.date, int, int, float, float, float, int]] = []

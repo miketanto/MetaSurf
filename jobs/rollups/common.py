@@ -83,9 +83,19 @@ def fit_cutoff_day(as_of: dt.date) -> int:
 
 
 def weekend_archetype_counts(
-    conn: psycopg.Connection, format_id: int, first: dt.date, last: dt.date
+    conn: psycopg.Connection,
+    format_id: int,
+    first: dt.date,
+    last: dt.date,
+    format_name: str,
 ) -> dict[int, int]:
-    """Labeled weekend decks per archetype, event date in [first, last]."""
+    """Labeled weekend decks per archetype, event date in [first, last], that
+    are still LEGAL in the format now — a deck is excluded iff it holds a card
+    explicitly ``banned`` or ``not_legal`` for the format (per the ingested
+    Scryfall legalities). This keeps the served 'current' meta free of rotated
+    or banned-card decks; historical decks stay in the DB for backtesting.
+    Cards with unknown/missing legality never exclude (benefit of the doubt).
+    """
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -96,9 +106,15 @@ def weekend_archetype_counts(
               AND d.archetype_id IS NOT NULL
               AND extract(isodow FROM e.date) IN (6, 7)
               AND e.date BETWEEN %s AND %s
+              AND NOT EXISTS (
+                SELECT 1 FROM deck_cards dc
+                JOIN cards c ON c.id = dc.card_id
+                WHERE dc.deck_id = d.id
+                  AND c.attrs->'legalities'->>%s IN ('banned', 'not_legal')
+              )
             GROUP BY 1 ORDER BY 1
             """,
-            (format_id, first, last),
+            (format_id, first, last, format_name),
         )
         return {int(a): int(n) for a, n in cur.fetchall()}
 

@@ -30,7 +30,11 @@ from validation.v2_winrates.data import load_match_data, n_archetype_slots
 
 
 def _latest_weekend_field(
-    conn: psycopg.Connection, format_id: int, as_of: dt.date, universe: list[int]
+    conn: psycopg.Connection,
+    format_id: int,
+    as_of: dt.date,
+    universe: list[int],
+    format_name: str,
 ) -> np.ndarray | None:
     """Universe shares of the most recent weekend bucket with any labeled
     decks, walking back within the trailing window; None if all are empty."""
@@ -38,7 +42,7 @@ def _latest_weekend_field(
     first = trailing_window_start(as_of)
     while sat >= first:
         bucket = weekend_archetype_counts(
-            conn, format_id, sat, min(as_of, sat + dt.timedelta(days=1))
+            conn, format_id, sat, min(as_of, sat + dt.timedelta(days=1)), format_name
         )
         vec = np.array([bucket.get(a, 0) for a in universe], dtype=np.float64)
         if vec.sum() > 0:
@@ -51,12 +55,14 @@ def build_best_decks(
     conn: psycopg.Connection, game_name: str, format_name: str, as_of: dt.date
 ) -> SnapshotStats:
     format_id = resolve_format_id(conn, game_name, format_name)
-    counts = weekend_archetype_counts(conn, format_id, trailing_window_start(as_of), as_of)
+    counts = weekend_archetype_counts(
+        conn, format_id, trailing_window_start(as_of), as_of, format_name
+    )
     universe = universe_ids(counts)
 
     rows: list[tuple[int, dt.date, int, int, float]] = []
     if universe:
-        field = _latest_weekend_field(conn, format_id, as_of, universe)
+        field = _latest_weekend_field(conn, format_id, as_of, universe, format_name)
         if field is not None:
             data, names, _stats = load_match_data(conn, format_name)
             post = WinrateModel().fit(data, fit_cutoff_day(as_of), n_archetype_slots(names))
