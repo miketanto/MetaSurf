@@ -236,3 +236,44 @@ class EmergingResponse(BaseModel):
     # candidate emerging archetypes: dense new clusters of unlabeled decks that
     # match no rule, awaiting a human name. Ordered biggest/newest first.
     clusters: list[EmergingCluster]
+
+
+class DeckSummary(BaseModel):
+    deck_id: int
+    date: dt.date
+    event: str | None
+    source: str
+    player: str | None
+    finish_rank: int | None
+    wins: int | None
+    losses: int | None
+
+
+class DecksResponse(BaseModel):
+    game: str
+    format: str
+    archetype_id: int
+    name: str
+    decks: list[DeckSummary]
+
+
+class DeckCard(BaseModel):
+    name: str
+    count: int
+    board: str  # 'main' | 'side' (as stored)
+
+
+class DeckDetailResponse(BaseModel):
+    game: str
+    format: str
+    deck_id: int
+    archetype_id: int | None
+    name: str | None
+    date: dt.date
+    event: str | None
+    source: str
+    player: str | None
+    finish_rank: int | None
+    wins: int | None
+    losses: int | None
+    cards: list[DeckCard]

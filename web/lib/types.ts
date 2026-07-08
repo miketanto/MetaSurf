@@ -62,3 +62,44 @@ export interface ClassifyResponse {
   matchup_spread: SpreadCell[];
   exp_winrate_vs_field: number | null;
 }
+
+export interface DeckSummary {
+  deck_id: number;
+  date: string;
+  event: string | null;
+  source: string;
+  player: string | null;
+  finish_rank: number | null;
+  wins: number | null;
+  losses: number | null;
+}
+
+export interface DecksResponse {
+  game: string;
+  format: string;
+  archetype_id: number;
+  name: string;
+  decks: DeckSummary[];
+}
+
+export interface DeckCard {
+  name: string;
+  count: number;
+  board: string;
+}
+
+export interface DeckDetailResponse {
+  game: string;
+  format: string;
+  deck_id: number;
+  archetype_id: number | null;
+  name: string | null;
+  date: string;
+  event: string | null;
+  source: string;
+  player: string | null;
+  finish_rank: number | null;
+  wins: number | null;
+  losses: number | null;
+  cards: DeckCard[];
+}

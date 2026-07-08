@@ -1,9 +1,10 @@
 import { Nav } from "@/components/Nav";
 import { MatchupBreakdown } from "@/components/MatchupBreakdown";
+import { DeckList } from "@/components/DeckList";
 import { LockedPanel } from "@/components/LockedPanel";
-import { getMatchups, ApiError } from "@/lib/api";
+import { getMatchups, getArchetypeDecks, ApiError } from "@/lib/api";
 import { pctInt } from "@/lib/matchup";
-import type { MatchupsResponse } from "@/lib/types";
+import type { MatchupsResponse, DeckSummary } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,13 @@ export default async function DeckMatchupsPage({
   const best = spread[0];
   const worst = spread[spread.length - 1];
   const names = new Map((m?.archetypes ?? []).map((a) => [a.archetype_id, a.name]));
+
+  let decks: DeckSummary[] = [];
+  try {
+    decks = (await getArchetypeDecks(game, format, focusId, 8)).decks;
+  } catch {
+    decks = [];
+  }
 
   return (
     <main className="container">
@@ -66,6 +74,15 @@ export default async function DeckMatchupsPage({
 
           <p className="subhead">Matchup spread — best to worst</p>
           <MatchupBreakdown m={m} focusId={focusId} />
+
+          {decks.length > 0 && (
+            <>
+              <p className="subhead" style={{ marginTop: 22 }}>
+                Recent decklists
+              </p>
+              <DeckList decks={decks} game={game} format={format} />
+            </>
+          )}
 
           <LockedPanel title="What to bring">
             The sideboard tech that swings this deck&apos;s toughest matchups,

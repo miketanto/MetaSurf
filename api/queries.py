@@ -240,3 +240,48 @@ def emerging_signatures(
         for key, card_id, name, in_freq, out_freq, lift in cur.fetchall():
             out.setdefault(key, []).append((card_id, name, in_freq, out_freq, lift))
     return out
+
+
+def archetype_decks(
+    conn: psycopg.Connection, format_id: int, archetype_id: int, limit: int
+) -> list[tuple]:
+    """Recent stored decks of an archetype: newest first, best finish first."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT d.id, e.date, e.name, e.source, d.player, d.finish_rank,"
+            " d.wins, d.losses"
+            " FROM decks d JOIN events e ON e.id = d.event_id"
+            " WHERE e.format_id = %s AND d.archetype_id = %s"
+            " ORDER BY e.date DESC, d.finish_rank ASC NULLS LAST, d.id"
+            " LIMIT %s",
+            (format_id, archetype_id, limit),
+        )
+        return cur.fetchall()
+
+
+def deck_header(
+    conn: psycopg.Connection, format_id: int, deck_id: int
+) -> tuple | None:
+    """A deck's metadata (scoped to the format), or None if it isn't there."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT d.id, d.archetype_id, a.name, e.date, e.name, e.source,"
+            " d.player, d.finish_rank, d.wins, d.losses"
+            " FROM decks d JOIN events e ON e.id = d.event_id"
+            " LEFT JOIN archetypes a ON a.id = d.archetype_id"
+            " WHERE e.format_id = %s AND d.id = %s",
+            (format_id, deck_id),
+        )
+        return cur.fetchone()
+
+
+def deck_card_rows(conn: psycopg.Connection, deck_id: int) -> list[tuple]:
+    """(name, count, board) for a deck's whole 75, board then name."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT c.name, dc.count, dc.board FROM deck_cards dc"
+            " JOIN cards c ON c.id = dc.card_id"
+            " WHERE dc.deck_id = %s ORDER BY dc.board, c.name",
+            (deck_id,),
+        )
+        return cur.fetchall()

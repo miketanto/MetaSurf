@@ -66,3 +66,20 @@ export const KNOWN_FORMATS: { game: string; format: string; label: string }[] = 
   { game: "mtg", format: "modern", label: "Modern" },
   { game: "mtg", format: "standard", label: "Standard" },
 ];
+
+export function getArchetypeDecks(
+  game: string,
+  format: string,
+  archetypeId: number,
+  limit = 30,
+): Promise<import("./types").DecksResponse> {
+  return getJson(`/v1/${game}/${format}/archetypes/${archetypeId}/decks?limit=${limit}`);
+}
+
+export function getDeck(
+  game: string,
+  format: string,
+  deckId: number,
+): Promise<import("./types").DeckDetailResponse> {
+  return getJson(`/v1/${game}/${format}/decks/${deckId}`);
+}

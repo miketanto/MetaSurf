@@ -25,6 +25,10 @@ from api.schemas import (
     BestDecksResponse,
     ClassifyRequest,
     ClassifyResponse,
+    DeckCard,
+    DeckDetailResponse,
+    DecksResponse,
+    DeckSummary,
     EmergingCluster,
     EmergingResponse,
     EventEntry,
@@ -409,4 +413,57 @@ def events(
             for event_id, date, name, source, players, top in rows
         ],
         credits=credits_for({source for _, _, _, source, _, _ in rows}),
+    )
+
+
+@router.get("/archetypes/{archetype_id}/decks", response_model=DecksResponse)
+def list_archetype_decks(
+    ctx: Ctx,
+    conn: Conn,
+    archetype_id: int,
+    limit: Annotated[int, Query(ge=1, le=100, description="how many decks")] = 30,
+) -> DecksResponse:
+    """Recent decklists of an archetype (free): newest first, best finish first."""
+    names = queries.archetype_names(conn, ctx.format_id)
+    name = names.get(archetype_id)
+    if name is None:
+        raise HTTPException(status_code=404, detail="unknown archetype")
+    rows = queries.archetype_decks(conn, ctx.format_id, archetype_id, limit)
+    return DecksResponse(
+        game=ctx.game,
+        format=ctx.format_name,
+        archetype_id=archetype_id,
+        name=name,
+        decks=[
+            DeckSummary(
+                deck_id=d, date=date, event=ev, source=src, player=pl,
+                finish_rank=fr, wins=w, losses=los,
+            )
+            for d, date, ev, src, pl, fr, w, los in rows
+        ],
+    )
+
+
+@router.get("/decks/{deck_id}", response_model=DeckDetailResponse)
+def deck_detail(ctx: Ctx, conn: Conn, deck_id: int) -> DeckDetailResponse:
+    """A single stored decklist (free): metadata + the full 75 by zone."""
+    header = queries.deck_header(conn, ctx.format_id, deck_id)
+    if header is None:
+        raise HTTPException(status_code=404, detail="unknown deck")
+    did, arch_id, arch_name, date, ev, src, pl, fr, w, losses = header
+    cards = queries.deck_card_rows(conn, deck_id)
+    return DeckDetailResponse(
+        game=ctx.game,
+        format=ctx.format_name,
+        deck_id=did,
+        archetype_id=arch_id,
+        name=arch_name,
+        date=date,
+        event=ev,
+        source=src,
+        player=pl,
+        finish_rank=fr,
+        wins=w,
+        losses=losses,
+        cards=[DeckCard(name=n, count=cnt, board=b) for n, cnt, b in cards],
     )

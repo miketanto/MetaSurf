@@ -311,6 +311,275 @@
         "title": "Credit",
         "type": "object"
       },
+      "DeckCard": {
+        "properties": {
+          "board": {
+            "title": "Board",
+            "type": "string"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "count",
+          "board"
+        ],
+        "title": "DeckCard",
+        "type": "object"
+      },
+      "DeckDetailResponse": {
+        "properties": {
+          "archetype_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archetype Id"
+          },
+          "cards": {
+            "items": {
+              "$ref": "#/components/schemas/DeckCard"
+            },
+            "title": "Cards",
+            "type": "array"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "deck_id": {
+            "title": "Deck Id",
+            "type": "integer"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event"
+          },
+          "finish_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finish Rank"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "losses": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Losses"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "player": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "wins": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wins"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "deck_id",
+          "archetype_id",
+          "name",
+          "date",
+          "event",
+          "source",
+          "player",
+          "finish_rank",
+          "wins",
+          "losses",
+          "cards"
+        ],
+        "title": "DeckDetailResponse",
+        "type": "object"
+      },
+      "DeckSummary": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "deck_id": {
+            "title": "Deck Id",
+            "type": "integer"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event"
+          },
+          "finish_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finish Rank"
+          },
+          "losses": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Losses"
+          },
+          "player": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "wins": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wins"
+          }
+        },
+        "required": [
+          "deck_id",
+          "date",
+          "event",
+          "source",
+          "player",
+          "finish_rank",
+          "wins",
+          "losses"
+        ],
+        "title": "DeckSummary",
+        "type": "object"
+      },
+      "DecksResponse": {
+        "properties": {
+          "archetype_id": {
+            "title": "Archetype Id",
+            "type": "integer"
+          },
+          "decks": {
+            "items": {
+              "$ref": "#/components/schemas/DeckSummary"
+            },
+            "title": "Decks",
+            "type": "array"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "game",
+          "format",
+          "archetype_id",
+          "name",
+          "decks"
+        ],
+        "title": "DecksResponse",
+        "type": "object"
+      },
       "EmergingCluster": {
         "properties": {
           "cluster_key": {
@@ -1191,6 +1460,78 @@
         "summary": "Archetype Detail"
       }
     },
+    "/v1/{game}/{format}/archetypes/{archetype_id}/decks": {
+      "get": {
+        "description": "Recent decklists of an archetype (free): newest first, best finish first.",
+        "operationId": "list_archetype_decks_v1__game___format__archetypes__archetype_id__decks_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "archetype_id",
+            "required": true,
+            "schema": {
+              "title": "Archetype Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "description": "how many decks",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "description": "how many decks",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecksResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Archetype Decks"
+      }
+    },
     "/v1/{game}/{format}/best-decks": {
       "get": {
         "description": "S2/S6 ranked best-positioned archetypes vs the current field (free).",
@@ -1332,6 +1673,64 @@
           }
         },
         "summary": "Classify Deck"
+      }
+    },
+    "/v1/{game}/{format}/decks/{deck_id}": {
+      "get": {
+        "description": "A single stored decklist (free): metadata + the full 75 by zone.",
+        "operationId": "deck_detail_v1__game___format__decks__deck_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "deck_id",
+            "required": true,
+            "schema": {
+              "title": "Deck Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "schema": {
+              "title": "Format",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Deck Detail"
       }
     },
     "/v1/{game}/{format}/emerging": {

@@ -576,3 +576,69 @@ header.app .brand span {
 .btn.sm:hover {
   border-color: var(--accent);
 }
+
+/* decklist list rows */
+.drow {
+  display: grid;
+  grid-template-columns: 1fr auto 14px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border);
+  color: inherit;
+}
+.drow:first-child {
+  border-top: none;
+}
+.dplayer {
+  font-size: 14px;
+  font-weight: 600;
+}
+.dmeta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.drec {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--good);
+}
+.drow .chev {
+  color: var(--accent);
+  font-size: 15px;
+}
+
+/* decklist zones */
+.zone {
+  margin-bottom: 16px;
+}
+.zone-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 0 2px 7px;
+}
+.crow {
+  display: flex;
+  gap: 10px;
+  padding: 7px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+.crow:first-child {
+  border-top: none;
+}
+.crow .cnt {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 18px;
+}

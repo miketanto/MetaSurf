@@ -459,3 +459,36 @@ def test_openapi_spec_committed_and_current(client):
     committed = json.loads(Path("api/openapi.json").read_text())
     live = client.get("/openapi.json").json()
     assert committed == live, "api/openapi.json is stale; run python -m scripts.export_openapi"
+
+
+def test_archetype_decks_and_deck_detail(client):
+    meta = client.get(f"{BASE}/meta").json()
+    # an archetype with stored decks (the biggest by share will have some)
+    arch = meta["archetypes"][0]
+    aid = arch["archetype_id"]
+
+    decks = client.get(f"{BASE}/archetypes/{aid}/decks", params={"limit": 5}).json()
+    assert decks["archetype_id"] == aid and decks["name"] == arch["name"]
+    assert decks["decks"], "expected at least one stored deck"
+    dates = [d["date"] for d in decks["decks"]]
+    assert dates == sorted(dates, reverse=True)  # newest first
+    for d in decks["decks"]:
+        assert set(d) == {
+            "deck_id", "date", "event", "source",
+            "player", "finish_rank", "wins", "losses",
+        }
+
+    deck_id = decks["decks"][0]["deck_id"]
+    detail = client.get(f"{BASE}/decks/{deck_id}").json()
+    assert detail["deck_id"] == deck_id
+    assert detail["archetype_id"] == aid
+    assert detail["cards"], "a deck must have cards"
+    boards = {c["board"] for c in detail["cards"]}
+    assert boards <= {"main", "side"}
+    for c in detail["cards"]:
+        assert c["name"] and c["count"] >= 1
+
+
+def test_deck_endpoints_404s(client):
+    assert client.get(f"{BASE}/archetypes/99999999/decks").status_code == 404
+    assert client.get(f"{BASE}/decks/99999999").status_code == 404
