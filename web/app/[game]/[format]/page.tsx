@@ -27,6 +27,16 @@ export default async function MetaPage({
   return (
     <main className="container">
       <Nav game={game} format={format} section="meta" asOf={meta?.as_of} />
+
+      <a className="cta" href={`/${game}/${format}/deck`}>
+        <span className="cta-emoji">🧭</span>
+        <span className="cta-text">
+          <b>What do you play?</b>
+          <small>Name your deck &amp; see its matchups</small>
+        </span>
+        <span className="cta-arrow">›</span>
+      </a>
+
       <p className="subhead">Metagame snapshot — share &amp; winrate</p>
 
       {error ? (

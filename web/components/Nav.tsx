@@ -8,10 +8,11 @@ export function Nav({
 }: {
   game: string;
   format: string;
-  section: "meta" | "matchups";
+  section: "meta" | "matchups" | "deck";
   asOf?: string;
 }) {
-  const suffix = section === "matchups" ? "/matchups" : "";
+  const suffix =
+    section === "matchups" ? "/matchups" : section === "deck" ? "/deck" : "";
   return (
     <>
       <header className="app">
@@ -48,6 +49,12 @@ export function Nav({
           href={`/${game}/${format}/matchups`}
         >
           Matchups
+        </a>
+        <a
+          className={section === "deck" ? "section active" : "section"}
+          href={`/${game}/${format}/deck`}
+        >
+          Your deck
         </a>
       </nav>
     </>

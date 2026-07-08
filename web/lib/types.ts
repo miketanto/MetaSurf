@@ -40,3 +40,25 @@ export interface MatchupsResponse {
   archetypes: MatchupAxis[];
   cells: MatchupCell[];
 }
+
+export interface SpreadCell {
+  archetype_id: number;
+  name: string;
+  p_win: number;
+  ci_lo: number;
+  ci_hi: number;
+  n_matches: number;
+}
+
+export interface ClassifyResponse {
+  game: string;
+  format: string;
+  archetype_id: number | null;
+  name: string;
+  method: string; // "rules" | "fallback"
+  confidence: number | null;
+  unresolved_cards: string[];
+  as_of: string | null;
+  matchup_spread: SpreadCell[];
+  exp_winrate_vs_field: number | null;
+}

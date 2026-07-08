@@ -429,3 +429,116 @@ header.app .brand span {
   min-width: 74px;
   text-align: right;
 }
+
+/* deck importer + CTA */
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 4px 0 16px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid #2f6bd6;
+  border-radius: 12px;
+}
+.cta-emoji {
+  font-size: 18px;
+}
+.cta-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cta-text b {
+  font-size: 14px;
+}
+.cta-text small {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 1px;
+}
+.cta-arrow {
+  color: var(--accent);
+  font-size: 20px;
+}
+.deckbox {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 12px 14px;
+  resize: vertical;
+}
+.deckbox:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.deckbtns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06122b;
+}
+.btn.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.btn.wide {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  margin-top: 14px;
+}
+.result {
+  margin-top: 18px;
+  padding: 18px 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.result-lead {
+  color: var(--muted);
+  font-size: 13px;
+}
+.result-arch {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 2px 0 2px;
+}
+.result-meta {
+  color: var(--muted);
+  font-size: 13px;
+}
+.unresolved {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--lock);
+  background: #171410;
+  border-radius: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.unresolved b {
+  color: var(--text);
+}
