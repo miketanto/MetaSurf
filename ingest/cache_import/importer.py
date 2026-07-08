@@ -29,6 +29,7 @@ class ImportStats:
     files_skipped_format_unknown: int = 0
     files_skipped_other_format: int = 0
     files_skipped_duplicate: int = 0
+    files_skipped_existing: int = 0
     events: int = 0
     decks: int = 0
     deck_card_rows: int = 0
@@ -46,6 +47,7 @@ class ImportStats:
             f"  skipped (format unknown): {self.files_skipped_format_unknown}",
             f"  skipped (other format):   {self.files_skipped_other_format}",
             f"  skipped (duplicate):      {self.files_skipped_duplicate}",
+            f"  skipped (already in db):  {self.files_skipped_existing}",
             f"events inserted:            {self.events}",
             f"decks inserted:             {self.decks}",
             f"deck_cards rows:            {self.deck_card_rows}",
@@ -85,8 +87,17 @@ def discover_files(
     tokens_by_format: dict[str, tuple[str, ...]],
     target_formats: set[str],
     stats: ImportStats,
+    existing: set[tuple[str, str]] | None = None,
 ) -> list[tuple[Path, str, str]]:
-    """Sorted, deduplicated (path, source, format) list for the target formats."""
+    """Sorted, deduplicated (path, source, format) list for the target formats.
+
+    `existing` is a set of (source, source_event_id) already in the events
+    table; matching files are skipped and counted (incremental daily ingestion,
+    M4). events dedupe on (source, source_event_id) — the filename stem is the
+    source_event_id — so this keeps a re-run additive instead of colliding on
+    the events unique constraint.
+    """
+    already = existing or set()
     tournaments = cache_root / "Tournaments"
     files = sorted(tournaments.glob("*/*/*/*/*.json"))
     seen: set[tuple[str, str]] = set()
@@ -104,6 +115,9 @@ def discover_files(
         key = (source, path.stem)
         if key in seen:
             stats.files_skipped_duplicate += 1
+            continue
+        if key in already:
+            stats.files_skipped_existing += 1
             continue
         seen.add(key)
         out.append((path, source, fmt))
@@ -204,6 +218,7 @@ def run_import(
     cache_root: Path,
     game: str = "mtg",
     only_formats: set[str] | None = None,
+    skip_existing: bool = False,
 ) -> ImportStats:
     stats = ImportStats()
     formats = [f for f in load_formats() if f.game == game]
@@ -232,7 +247,17 @@ def run_import(
             "(all deck cards would be unresolved)"
         )
 
-    files = discover_files(cache_root, tokens_by_format, targets, stats)
+    existing: set[tuple[str, str]] | None = None
+    if skip_existing:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT source, source_event_id FROM events e"
+                " JOIN formats f ON f.id = e.format_id WHERE f.game_id = %s",
+                (game_id,),
+            )
+            existing = {(s, sid) for s, sid in cur.fetchall()}
+
+    files = discover_files(cache_root, tokens_by_format, targets, stats, existing)
     unresolved: dict[tuple[str, str], list[int]] = {}
     batch: list[tuple[NormalizedEvent, str]] = []
     for path, source, fmt in files:
