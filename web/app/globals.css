@@ -542,3 +542,37 @@ header.app .brand span {
 .unresolved b {
   color: var(--text);
 }
+
+/* export bar */
+.export {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.export-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.export-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn.sm {
+  padding: 8px 13px;
+  font-size: 13px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn.sm:hover {
+  border-color: var(--accent);
+}

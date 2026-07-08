@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { parseDecklist } from "@/lib/decklist";
+import { parseDecklist, type CardLine } from "@/lib/decklist";
+import { ExportBar } from "./ExportBar";
 import type { ClassifyResponse } from "@/lib/types";
 
 const SAMPLE = `4 Karn, the Great Creator
@@ -20,14 +21,16 @@ export function DeckImporter({ game, format }: { game: string; format: string })
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ClassifyResponse | null>(null);
+  const [cards, setCards] = useState<CardLine[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   async function analyze() {
-    const cards = parseDecklist(text);
-    if (cards.length === 0) {
+    const parsed = parseDecklist(text);
+    if (parsed.length === 0) {
       setError("Paste a decklist first.");
       return;
     }
+    setCards(parsed);
     setLoading(true);
     setError(null);
     setResult(null);
@@ -35,7 +38,7 @@ export function DeckImporter({ game, format }: { game: string; format: string })
       const res = await fetch(`/api/classify?game=${game}&format=${format}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cards }),
+        body: JSON.stringify({ cards: parsed }),
       });
       if (!res.ok) {
         setError(res.status === 422 ? "Couldn't read that list." : "Analysis failed.");
@@ -98,6 +101,8 @@ export function DeckImporter({ game, format }: { game: string; format: string })
               See {result.name}&apos;s matchups ›
             </a>
           )}
+
+          <ExportBar cards={cards} />
 
           {result.unresolved_cards.length > 0 && (
             <div className="unresolved">
