@@ -51,6 +51,10 @@ def test_parse_filters_nonplayable_layouts_and_extracts_faces():
     assert split.name == "Alive // Well"
     assert split.attrs["layout"] == "split"
     assert split.attrs["face_names"] == ["Alive", "Well"]
+    # per-format legality is carried into attrs (used to tell whether a deck is
+    # still legal in a rotating format, not just played)
+    assert split.attrs["legalities"]["standard"] == "not_legal"
+    assert split.attrs["legalities"]["legacy"] in {"legal", "banned", "restricted"}
 
     dfc = by_ref[ORACLE["Fable of the Mirror-Breaker // Reflection of Kiki-Jiki"]]
     assert dfc.attrs["layout"] == "transform"

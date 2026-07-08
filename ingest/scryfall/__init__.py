@@ -106,6 +106,10 @@ def _to_row(card: dict[str, Any]) -> CardRow:
         "set_type": card["set_type"],
         "type_line": card["type_line"],
         "resolution_tier": 1 if card["set_type"] in DEPRIORITIZED_SET_TYPES else 0,
+        # per-format legality (Scryfall: legal / not_legal / banned / restricted).
+        # Point-in-time snapshot as of the bulk file; used to tell whether a deck
+        # is still legal in a rotating format (rotation/bans), not just played.
+        "legalities": card.get("legalities") or {},
     }
     faces = card.get("card_faces")
     if faces:
