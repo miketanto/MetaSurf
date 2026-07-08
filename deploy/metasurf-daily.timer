@@ -1,0 +1,14 @@
+# Daily trigger for metasurf-daily.service.
+# 08:30 UTC runs after MTGO has published the prior day's events; Persistent=
+# catches up a missed run if the host was down at trigger time.
+
+[Unit]
+Description=Run MetaSurf M4 daily ingestion once per day
+
+[Timer]
+OnCalendar=*-*-* 08:30:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

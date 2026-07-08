@@ -38,6 +38,30 @@ Not shipped, deliberately: share *prediction* (M3 verdict), the contrarian
 emerging-deck feed (needs the M1 clustering stage productized behind a
 game-neutral seam) — see the handoff doc §10 addendum.
 
+## Live ingestion (M4)
+
+Own daily scraper for `mtgo.com/decklists` feeding the same canonical pipeline
+(the frozen corpus was history; this keeps it current). The scraper archives
+raw HTML immutably, parses each event into the CacheItem shape the existing
+importer already reads, and the nightly chain refreshes everything the API
+serves:
+
+```bash
+python -m ingest.mtgo_scraper           # scrape only: fetch new events -> CacheItem files
+python -m ingest.mtgo_scraper.daily     # full chain: scrape -> import -> match-extract -> label -> rollups
+python -m ingest.mtgo_scraper.soak      # DoD verdict: consecutive-successful-day streak (N/14)
+```
+
+Polite by construction: custom UA, <=1 req/sec/host, exponential backoff, raw
+archive before parsing, never re-fetches an archived event, dedupes on
+`(source, source_event_id)`. Data-quality gates fail loudly. Melee is a
+best-effort seam (plan §10 risk 2) that can never block the MTGO chain.
+Failures alert through `METASURF_ALERT_CMD` (+ stderr + `alerts.jsonl`).
+Scheduling units + the operations/monitoring runbook: [`deploy/`](deploy/) and
+[`docs/notes/m4-live-ingestion-runbook.md`](docs/notes/m4-live-ingestion-runbook.md).
+The current-site schema (it changed since the Badaro cache) is in
+[`docs/notes/mtgo-com-observed-schema.md`](docs/notes/mtgo-com-observed-schema.md).
+
 ## Layout
 
 ```

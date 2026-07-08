@@ -1,0 +1,26 @@
+# systemd oneshot for the M4 daily ingestion chain (Linux production).
+# Install: copy this + metasurf-daily.timer to /etc/systemd/system/, put your
+# env in /etc/metasurf/metasurf-daily.env, then:
+#   systemctl daemon-reload && systemctl enable --now metasurf-daily.timer
+#
+# The chain alerts on its own failures (METASURF_ALERT_CMD). OnFailure= here is
+# a belt-and-suspenders for a crash so hard the app can't alert (e.g. OOM).
+
+[Unit]
+Description=MetaSurf M4 daily metagame ingestion (scrape -> import -> label -> rollups)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=metasurf
+WorkingDirectory=/opt/metasurf
+EnvironmentFile=/etc/metasurf/metasurf-daily.env
+# Use the project venv's interpreter (Python 3.11+ with deps installed).
+ExecStart=/opt/metasurf/.venv/bin/python -m ingest.mtgo_scraper.daily --game mtg --format modern
+# polite + bounded: the scraper self-throttles to <=1 req/s; cap total runtime
+TimeoutStartSec=1800
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

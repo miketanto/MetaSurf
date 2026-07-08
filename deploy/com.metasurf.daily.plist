@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS launchd daily trigger (for running the soak on a Mac dev host).
+  Install:
+    1. Edit the paths below (ProjectDir, python, env values) for your machine.
+    2. cp deploy/com.metasurf.daily.plist ~/Library/LaunchAgents/
+    3. launchctl load ~/Library/LaunchAgents/com.metasurf.daily.plist
+  Runs 08:30 local daily; RunAtLoad also fires once on load so you can verify.
+  Logs land in the StandardOut/ErrorPath below; the chain also writes
+  daily_status.jsonl + alerts.jsonl under METASURF_STATE_DIR.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.metasurf.daily</string>
+  <key>WorkingDirectory</key><string>/Users/YOU/MetaSurf</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/YOU/MetaSurf/.venv/bin/python</string>
+    <string>-m</string><string>ingest.mtgo_scraper.daily</string>
+    <string>--game</string><string>mtg</string>
+    <string>--format</string><string>modern</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>DATABASE_URL</key><string>postgresql://metagame:metagame@localhost:5432/metagame</string>
+    <key>METASURF_CACHE_ROOT</key><string>/Users/YOU/MetaSurf/data/MTGODecklistCache</string>
+    <key>METASURF_RAW_ROOT</key><string>/Users/YOU/MetaSurf/data/raw</string>
+    <key>METASURF_STATE_DIR</key><string>/Users/YOU/MetaSurf/data/state</string>
+    <!-- <key>METASURF_ALERT_CMD</key><string>mail -s "MetaSurf alert" you@example.com</string> -->
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/YOU/MetaSurf/data/state/launchd.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/YOU/MetaSurf/data/state/launchd.err.log</string>
+</dict>
+</plist>

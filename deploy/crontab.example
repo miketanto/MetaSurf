@@ -1,0 +1,8 @@
+# Plain-cron alternative to the systemd timer (any Unix). Edit paths, then
+#   crontab deploy/crontab.example   (or paste the line into `crontab -e`).
+#
+# Loads the env file, then runs the daily chain at 08:30 UTC. The chain writes
+# its own status + alerts; cron MAILTO catches a hard crash as a backstop.
+MAILTO=you@example.com
+
+30 8 * * *  set -a; . /etc/metasurf/metasurf-daily.env; set +a; cd /opt/metasurf && .venv/bin/python -m ingest.mtgo_scraper.daily --game mtg --format modern >> /var/lib/metasurf/data/state/cron.log 2>&1

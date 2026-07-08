@@ -179,11 +179,19 @@ def main() -> int:
 
     started_at = dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
     alerter = LoggingAlerter(args.state_dir / "alerts.jsonl")
-    with psycopg.connect(database_url()) as conn:
-        steps = build_steps(
-            conn, args.cache_root, args.raw_root, game=args.game, format_name=args.format_name
-        )
-        report = run_pipeline(steps, alerter, started_at=started_at)
+    try:
+        with psycopg.connect(database_url()) as conn:
+            steps = build_steps(
+                conn, args.cache_root, args.raw_root, game=args.game, format_name=args.format_name
+            )
+            report = run_pipeline(steps, alerter, started_at=started_at)
+    except Exception:
+        # top-level failure outside any step (e.g. DB unreachable at connect):
+        # still alert + record a failed run so the soak never silently stalls
+        tb = traceback.format_exc()
+        alerter.alert("[MetaSurf M4] daily ingestion crashed before/around the chain", tb)
+        report = RunReport(started_at=started_at, ok=False)
+        report.steps.append(StepResult("startup", "failed", tb.strip().splitlines()[-1]))
     write_status(args.state_dir, report)
     for s in report.steps:
         print(f"[{s.status}] {s.name}: {s.detail.splitlines()[0] if s.detail else ''}")
