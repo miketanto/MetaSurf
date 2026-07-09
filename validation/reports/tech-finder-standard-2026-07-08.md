@@ -296,3 +296,6 @@ with a distinctive weakness and enough sample, or pool eras/sources for volume.
 python scripts/materialize_card_roles.py            # roles incl. Standard fixtures
 python -m validation.tech_finder --format standard   # this report
 ```
+
+**NB:** the parent-granularity relabel above overwrites the serving labels (the app/rollups use `--granularity variant`). After reproducing, restore with
+`python -m archetypes.labeler --format modern --granularity variant` and re-run `python -m jobs.rollups --game mtg --format modern` for each served `as_of`.
