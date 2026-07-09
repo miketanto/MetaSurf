@@ -88,6 +88,8 @@ export interface DeckCard {
   name: string;
   count: number;
   board: string;
+  type_line: string | null;
+  colors: string[];
 }
 
 export interface DeckDetailResponse {

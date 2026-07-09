@@ -317,6 +317,13 @@
             "title": "Board",
             "type": "string"
           },
+          "colors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Colors",
+            "type": "array"
+          },
           "count": {
             "title": "Count",
             "type": "integer"
@@ -324,12 +331,25 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "type_line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Line"
           }
         },
         "required": [
           "name",
           "count",
-          "board"
+          "board",
+          "type_line",
+          "colors"
         ],
         "title": "DeckCard",
         "type": "object"

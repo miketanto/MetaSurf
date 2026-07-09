@@ -263,6 +263,8 @@ class DeckCard(BaseModel):
     name: str
     count: int
     board: str  # 'main' | 'side' (as stored)
+    type_line: str | None  # card type text from card attrs (client groups by it)
+    colors: list[str]  # per-card colour codes from card attrs
 
 
 class DeckDetailResponse(BaseModel):

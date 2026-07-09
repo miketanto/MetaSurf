@@ -2,7 +2,8 @@ import { Nav } from "@/components/Nav";
 import { ExportBar } from "@/components/ExportBar";
 import { ColorPips } from "@/components/ColorPips";
 import { getDeck, ApiError } from "@/lib/api";
-import type { DeckDetailResponse } from "@/lib/types";
+import { groupByType, countOf } from "@/lib/cardtypes";
+import type { DeckCard, DeckDetailResponse } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -12,22 +13,27 @@ function record(d: DeckDetailResponse): string {
   return "";
 }
 
-function Zone({ title, cards }: { title: string; cards: { name: string; count: number }[] }) {
-  if (cards.length === 0) return null;
-  const total = cards.reduce((s, c) => s + c.count, 0);
+function CardRows({ cards }: { cards: DeckCard[] }) {
   return (
-    <div className="zone">
-      <div className="zone-head">
-        {title} <span>{total}</span>
+    <>
+      {cards.map((c) => (
+        <div className="crow" key={c.name}>
+          <span className="cnt">{c.count}</span>
+          <span className="cname">{c.name}</span>
+          {c.colors.length > 0 && <ColorPips colors={c.colors} />}
+        </div>
+      ))}
+    </>
+  );
+}
+
+function TypeSection({ title, cards }: { title: string; cards: DeckCard[] }) {
+  return (
+    <div className="typesec">
+      <div className="typesec-head">
+        {title} <span>[{countOf(cards)}]</span>
       </div>
-      <div className="card">
-        {cards.map((c) => (
-          <div className="crow" key={c.name}>
-            <span className="cnt">{c.count}</span>
-            <span className="cname">{c.name}</span>
-          </div>
-        ))}
-      </div>
+      <CardRows cards={cards} />
     </div>
   );
 }
@@ -47,6 +53,9 @@ export default async function DeckDetailPage({
   } catch (e) {
     error = e instanceof ApiError && e.status === 404 ? "Deck not found." : "Could not reach the API.";
   }
+
+  const main = d ? d.cards.filter((c) => c.board !== "side") : [];
+  const side = d ? d.cards.filter((c) => c.board === "side") : [];
 
   return (
     <main className="container">
@@ -72,9 +81,27 @@ export default async function DeckDetailPage({
 
           <ExportBar cards={d.cards} />
 
-          <div style={{ marginTop: 18 }}>
-            <Zone title="Mainboard" cards={d.cards.filter((c) => c.board !== "side")} />
-            <Zone title="Sideboard" cards={d.cards.filter((c) => c.board === "side")} />
+          <div className="deckcols">
+            <div className="card deckpane">
+              <div className="pane-head">
+                Maindeck <span>({countOf(main)})</span>
+              </div>
+              {groupByType(main).map(([t, cs]) => (
+                <TypeSection key={t} title={t} cards={cs} />
+              ))}
+            </div>
+            {side.length > 0 && (
+              <div className="card deckpane">
+                <div className="pane-head">
+                  Sideboard <span>({countOf(side)})</span>
+                </div>
+                <CardRows
+                  cards={[...side].sort(
+                    (a, b) => b.count - a.count || a.name.localeCompare(b.name),
+                  )}
+                />
+              </div>
+            )}
           </div>
 
           <p className="foot">Source: {d.source}. Exact list as recorded.</p>

@@ -818,3 +818,52 @@ header.app .brand span {
 .dmeta .pips {
   margin-right: 2px;
 }
+
+/* type-grouped deck view */
+.deckcols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 18px;
+}
+@media (min-width: 640px) {
+  .deckcols {
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+  }
+}
+.deckpane {
+  padding: 4px 0 8px;
+}
+.pane-head {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 14px 6px;
+}
+.pane-head span {
+  color: var(--muted);
+  font-weight: 600;
+}
+.typesec-head {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  padding: 10px 14px 4px;
+  border-top: 1px solid var(--border);
+}
+.typesec:first-of-type .typesec-head {
+  border-top: none;
+}
+.typesec-head span {
+  color: var(--muted);
+}
+.deckpane .crow {
+  border-top: none;
+  padding: 4px 14px;
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}

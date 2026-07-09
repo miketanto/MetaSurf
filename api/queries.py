@@ -276,11 +276,14 @@ def deck_header(
 
 
 def deck_card_rows(conn: psycopg.Connection, deck_id: int) -> list[tuple]:
-    """(name, count, board) for a deck's whole 75, board then name."""
+    """(name, count, board, type_line, colors) for a deck's whole 75. type_line
+    and colors come straight from card attrs (data, not game knowledge — the
+    client decides how to group/render them)."""
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT c.name, dc.count, dc.board FROM deck_cards dc"
-            " JOIN cards c ON c.id = dc.card_id"
+            "SELECT c.name, dc.count, dc.board, c.attrs->>'type_line',"
+            " COALESCE(c.attrs->'color_identity', '[]'::jsonb)"
+            " FROM deck_cards dc JOIN cards c ON c.id = dc.card_id"
             " WHERE dc.deck_id = %s ORDER BY dc.board, c.name",
             (deck_id,),
         )

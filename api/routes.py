@@ -476,5 +476,8 @@ def deck_detail(ctx: Ctx, conn: Conn, deck_id: int) -> DeckDetailResponse:
         wins=w,
         losses=losses,
         colors=colors,
-        cards=[DeckCard(name=n, count=cnt, board=b) for n, cnt, b in cards],
+        cards=[
+            DeckCard(name=n, count=cnt, board=b, type_line=tl, colors=ci or [])
+            for n, cnt, b, tl, ci in cards
+        ],
     )
