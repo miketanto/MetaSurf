@@ -1,5 +1,6 @@
 import { Nav } from "@/components/Nav";
 import { ExportBar } from "@/components/ExportBar";
+import { ColorPips } from "@/components/ColorPips";
 import { getDeck, ApiError } from "@/lib/api";
 import type { DeckDetailResponse } from "@/lib/types";
 
@@ -60,7 +61,10 @@ export default async function DeckDetailPage({
           <a className="back" href={`/${game}/${format}/archetypes/${d.archetype_id}`}>
             ‹ {d.name ?? "Archetype"}
           </a>
-          <h1 className="deck-title">{d.name ?? "Decklist"}</h1>
+          <div className="titlerow">
+            <h1 className="deck-title">{d.name ?? "Decklist"}</h1>
+            <ColorPips colors={d.colors} />
+          </div>
           <p className="subhead">
             {d.player ?? "Unknown pilot"} · {d.event ?? d.source} · {d.date}
             {record(d) && <> · {record(d)}</>}

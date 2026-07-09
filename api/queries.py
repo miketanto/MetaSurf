@@ -285,3 +285,26 @@ def deck_card_rows(conn: psycopg.Connection, deck_id: int) -> list[tuple]:
             (deck_id,),
         )
         return cur.fetchall()
+
+
+def deck_colors(
+    conn: psycopg.Connection, deck_ids: list[int], min_copies: int = 4
+) -> dict[int, list[str]]:
+    """Per-deck colour codes: a colour counts when >= ``min_copies`` copies in
+    the deck carry it in card data (filters single-card splashes). Empty list =
+    colourless. Codes are whatever the card data stores; the client orders them."""
+    if not deck_ids:
+        return {}
+    out: dict[int, list[str]] = {}
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT dc.deck_id, ci FROM deck_cards dc JOIN cards c ON c.id = dc.card_id"
+            " CROSS JOIN LATERAL jsonb_array_elements_text(c.attrs->'color_identity') ci"
+            " WHERE dc.deck_id = ANY(%s)"
+            " GROUP BY dc.deck_id, ci HAVING sum(dc.count) >= %s"
+            " ORDER BY dc.deck_id, ci",
+            (deck_ids, min_copies),
+        )
+        for did, code in cur.fetchall():
+            out.setdefault(did, []).append(code)
+    return out

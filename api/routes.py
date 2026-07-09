@@ -429,15 +429,24 @@ def list_archetype_decks(
     if name is None:
         raise HTTPException(status_code=404, detail="unknown archetype")
     rows = queries.archetype_decks(conn, ctx.format_id, archetype_id, limit)
+    colors = queries.deck_colors(conn, [r[0] for r in rows])
+    # archetype colours: those present in >= 30% of its decks (min 1)
+    tally: dict[str, int] = {}
+    for cs in colors.values():
+        for code in cs:
+            tally[code] = tally.get(code, 0) + 1
+    threshold = max(1, (len(rows) * 3 + 9) // 10)
+    arch_colors = sorted(c for c, n in tally.items() if n >= threshold)
     return DecksResponse(
         game=ctx.game,
         format=ctx.format_name,
         archetype_id=archetype_id,
         name=name,
+        colors=arch_colors,
         decks=[
             DeckSummary(
                 deck_id=d, date=date, event=ev, source=src, player=pl,
-                finish_rank=fr, wins=w, losses=los,
+                finish_rank=fr, wins=w, losses=los, colors=colors.get(d, []),
             )
             for d, date, ev, src, pl, fr, w, los in rows
         ],
@@ -452,6 +461,7 @@ def deck_detail(ctx: Ctx, conn: Conn, deck_id: int) -> DeckDetailResponse:
         raise HTTPException(status_code=404, detail="unknown deck")
     did, arch_id, arch_name, date, ev, src, pl, fr, w, losses = header
     cards = queries.deck_card_rows(conn, deck_id)
+    colors = queries.deck_colors(conn, [did]).get(did, [])
     return DeckDetailResponse(
         game=ctx.game,
         format=ctx.format_name,
@@ -465,5 +475,6 @@ def deck_detail(ctx: Ctx, conn: Conn, deck_id: int) -> DeckDetailResponse:
         finish_rank=fr,
         wins=w,
         losses=losses,
+        colors=colors,
         cards=[DeckCard(name=n, count=cnt, board=b) for n, cnt, b in cards],
     )

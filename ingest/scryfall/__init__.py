@@ -110,6 +110,8 @@ def _to_row(card: dict[str, Any]) -> CardRow:
         # Point-in-time snapshot as of the bulk file; used to tell whether a deck
         # is still legal in a rotating format (rotation/bans), not just played.
         "legalities": card.get("legalities") or {},
+        # WUBRG color identity (for deck colour indicators); [] = colorless.
+        "color_identity": card.get("color_identity") or [],
     }
     faces = card.get("card_faces")
     if faces:

@@ -247,6 +247,7 @@ class DeckSummary(BaseModel):
     finish_rank: int | None
     wins: int | None
     losses: int | None
+    colors: list[str]  # WUBRG codes present (>= threshold copies); [] = colorless
 
 
 class DecksResponse(BaseModel):
@@ -254,6 +255,7 @@ class DecksResponse(BaseModel):
     format: str
     archetype_id: int
     name: str
+    colors: list[str]  # archetype colours (present in a plurality of its decks)
     decks: list[DeckSummary]
 
 
@@ -276,4 +278,5 @@ class DeckDetailResponse(BaseModel):
     finish_rank: int | None
     wins: int | None
     losses: int | None
+    colors: list[str]
     cards: list[DeckCard]

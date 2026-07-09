@@ -475,7 +475,7 @@ def test_archetype_decks_and_deck_detail(client):
     for d in decks["decks"]:
         assert set(d) == {
             "deck_id", "date", "event", "source",
-            "player", "finish_rank", "wins", "losses",
+            "player", "finish_rank", "wins", "losses", "colors",
         }
 
     deck_id = decks["decks"][0]["deck_id"]

@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { ArchetypeTabs } from "@/components/ArchetypeTabs";
 import { DeckList } from "@/components/DeckList";
+import { ColorPips } from "@/components/ColorPips";
 import { LockedPanel } from "@/components/LockedPanel";
 import { getMeta, getMatchups, getArchetypeDecks, ApiError } from "@/lib/api";
 import { pctInt } from "@/lib/matchup";
@@ -28,6 +29,7 @@ export default async function ArchetypeOverview({
   let stat: MetaArchetype | undefined;
   let m: MatchupsResponse | null = null;
   let decks: DeckSummary[] = [];
+  let archColors: string[] = [];
   let name: string | null = null;
 
   if (metaRes.status === "fulfilled") {
@@ -40,6 +42,7 @@ export default async function ArchetypeOverview({
   }
   if (decksRes.status === "fulfilled") {
     decks = decksRes.value.decks;
+    archColors = decksRes.value.colors;
     name = name ?? decksRes.value.name;
   }
   const unknown =
@@ -70,7 +73,10 @@ export default async function ArchetypeOverview({
         </div>
       ) : (
         <>
-          <h1 className="deck-title">{name}</h1>
+          <div className="titlerow">
+            <h1 className="deck-title">{name}</h1>
+            <ColorPips colors={archColors} />
+          </div>
           <ArchetypeTabs game={game} format={format} id={id} active="overview" />
 
           {stat && (

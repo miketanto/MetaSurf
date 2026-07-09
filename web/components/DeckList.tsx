@@ -1,5 +1,6 @@
 import type { DeckSummary } from "@/lib/types";
 import { record, finishBadge } from "@/lib/deckmeta";
+import { ColorPips } from "./ColorPips";
 
 export function DeckList({
   decks,
@@ -29,7 +30,7 @@ export function DeckList({
                 {badge && <span className="badge">{badge}</span>}
               </div>
               <div className="dmeta">
-                {d.event ?? d.source} · {d.date}
+                <ColorPips colors={d.colors} /> {d.event ?? d.source} · {d.date}
               </div>
             </div>
             <div className="drec">{record(d)}</div>

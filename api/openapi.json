@@ -354,6 +354,13 @@
             "title": "Cards",
             "type": "array"
           },
+          "colors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Colors",
+            "type": "array"
+          },
           "date": {
             "format": "date",
             "title": "Date",
@@ -455,6 +462,7 @@
           "finish_rank",
           "wins",
           "losses",
+          "colors",
           "cards"
         ],
         "title": "DeckDetailResponse",
@@ -462,6 +470,13 @@
       },
       "DeckSummary": {
         "properties": {
+          "colors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Colors",
+            "type": "array"
+          },
           "date": {
             "format": "date",
             "title": "Date",
@@ -539,7 +554,8 @@
           "player",
           "finish_rank",
           "wins",
-          "losses"
+          "losses",
+          "colors"
         ],
         "title": "DeckSummary",
         "type": "object"
@@ -549,6 +565,13 @@
           "archetype_id": {
             "title": "Archetype Id",
             "type": "integer"
+          },
+          "colors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Colors",
+            "type": "array"
           },
           "decks": {
             "items": {
@@ -575,6 +598,7 @@
           "format",
           "archetype_id",
           "name",
+          "colors",
           "decks"
         ],
         "title": "DecksResponse",

@@ -72,6 +72,7 @@ export interface DeckSummary {
   finish_rank: number | null;
   wins: number | null;
   losses: number | null;
+  colors: string[];
 }
 
 export interface DecksResponse {
@@ -79,6 +80,7 @@ export interface DecksResponse {
   format: string;
   archetype_id: number;
   name: string;
+  colors: string[];
   decks: DeckSummary[];
 }
 
@@ -101,5 +103,6 @@ export interface DeckDetailResponse {
   finish_rank: number | null;
   wins: number | null;
   losses: number | null;
+  colors: string[];
   cards: DeckCard[];
 }

@@ -788,3 +788,33 @@ header.app .brand span {
   font-size: 12px;
   margin: 0 2px 8px;
 }
+
+/* colour pips */
+.titlerow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.titlerow .deck-title {
+  margin-bottom: 4px;
+}
+.pips {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: -2px;
+}
+.pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  font-size: 9.5px;
+  font-weight: 800;
+  line-height: 1;
+}
+.dmeta .pips {
+  margin-right: 2px;
+}

@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { ArchetypeTabs } from "@/components/ArchetypeTabs";
 import { DecksBrowser } from "@/components/DecksBrowser";
+import { ColorPips } from "@/components/ColorPips";
 import { getArchetypeDecks, ApiError } from "@/lib/api";
 import type { DecksResponse } from "@/lib/types";
 
@@ -34,7 +35,10 @@ export default async function ArchetypeDecksPage({
         </div>
       ) : (
         <>
-          <h1 className="deck-title">{res.name}</h1>
+          <div className="titlerow">
+            <h1 className="deck-title">{res.name}</h1>
+            <ColorPips colors={res.colors} />
+          </div>
           <ArchetypeTabs game={game} format={format} id={id} active="decks" />
           <DecksBrowser decks={res.decks} game={game} format={format} />
         </>
