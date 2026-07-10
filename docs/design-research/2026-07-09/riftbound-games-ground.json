@@ -1,0 +1,301 @@
+{
+  "_meta": {
+    "purpose": "Grounding data for Riftbound + multi-game registry design work. Every value below was read from real files in the MetaSurf main repo (branch multi-tcg-wave1) on 2026-07-09. Nothing is invented.",
+    "mined_on": "2026-07-09",
+    "sources": [
+      "/Users/michaelsutanto/MetaSurf/web/lib/games/types.ts",
+      "/Users/michaelsutanto/MetaSurf/web/lib/games/index.ts",
+      "/Users/michaelsutanto/MetaSurf/web/lib/games/mtg.ts",
+      "/Users/michaelsutanto/MetaSurf/web/lib/games/onepiece.ts",
+      "/Users/michaelsutanto/MetaSurf/web/lib/games/riftbound.ts",
+      "/Users/michaelsutanto/MetaSurf/config/formats.json",
+      "/Users/michaelsutanto/MetaSurf/config/sources.json",
+      "/Users/michaelsutanto/MetaSurf/api/routes.py",
+      "/Users/michaelsutanto/MetaSurf/api/schemas.py",
+      "/Users/michaelsutanto/MetaSurf/api/attribution.py",
+      "/Users/michaelsutanto/MetaSurf/serve.py",
+      "/Users/michaelsutanto/MetaSurf/docs/notes/riftcodex-observed-schema.md",
+      "/Users/michaelsutanto/MetaSurf/.claude/worktrees/wf_11005726-af5-4/data/riftcodex/cards-page{1..11}.json (full 1,064-card raw Riftcodex capture of 2026-07-08)",
+      "/Users/michaelsutanto/MetaSurf/tests/fixtures/riftcodex/cards-page-real.json"
+    ]
+  },
+
+  "IMAGE_POLICY_CRITICAL": {
+    "riftbound": "DO NOT HOTLINK RIFTBOUND CARD IMAGES. The Riftcodex catalogue's media.image_url points at Riot's CDN (cmsassets.rgpub.io). Per the owner's ToS decision (2026-07-08, unregistered posture vs Riot's metagame-data ban): no Riot API, no CDN hotlinks. The catalogue adapter deliberately does NOT carry image URLs into card attrs. Riftbound card slots must render as domain-colored placeholder frames with the card name.",
+    "onepiece": "Only use image URLs found in local grounding data; none are included in this file, so use color-framed placeholders.",
+    "mtg": "Scryfall image URLs from grounding data are fine to hotlink (none included in this file)."
+  },
+
+  "game_ui_registry": {
+    "source": "web/lib/games/*.ts, copied verbatim",
+    "contract_GameUiConfig": {
+      "pipPalette": "Record<string, {bg, fg}> keyed by the game's own colour codes (cards.attrs color_identity vocabulary)",
+      "pipOrder": "display order of pip codes; codes not listed sort first (legacy indexOf semantics)",
+      "colorlessCode": "code rendered when a deck/card has no colours",
+      "typeGroupOrder": "type-group match + display order for the deck view; matched by substring against the front face of the card's type_line, first hit wins; 'Other' is the catch-all and must be last"
+    },
+    "lookup": "gameUi(game?: string) — route slugs are /{game}/{format}/...; unknown/missing slugs fall back to mtg",
+    "games": {
+      "mtg": {
+        "pipPalette": {
+          "W": { "bg": "#f4eecf", "fg": "#6b6437" },
+          "U": { "bg": "#3b7bd0", "fg": "#eaf2fd" },
+          "B": { "bg": "#2b2b33", "fg": "#c9c4d2" },
+          "R": { "bg": "#d3492f", "fg": "#fdeae6" },
+          "G": { "bg": "#3e9c62", "fg": "#e9f7ee" },
+          "C": { "bg": "#8a919e", "fg": "#12151b" }
+        },
+        "pipOrder": ["W", "U", "B", "R", "G", "C"],
+        "colorlessCode": "C",
+        "typeGroupOrder": ["Creature", "Planeswalker", "Instant", "Sorcery", "Enchantment", "Artifact", "Battle", "Land", "Other"]
+      },
+      "onepiece": {
+        "pipPalette": {
+          "Red": { "bg": "#d3492f", "fg": "#fdeae6" },
+          "Green": { "bg": "#3e9c62", "fg": "#e9f7ee" },
+          "Blue": { "bg": "#3b7bd0", "fg": "#eaf2fd" },
+          "Purple": { "bg": "#7b4fa6", "fg": "#f3eafd" },
+          "Black": { "bg": "#2b2b33", "fg": "#c9c4d2" },
+          "Yellow": { "bg": "#e0b73a", "fg": "#3d3410" },
+          "—": { "bg": "#8a919e", "fg": "#12151b" }
+        },
+        "pipOrder": ["Red", "Green", "Blue", "Purple", "Black", "Yellow", "—"],
+        "colorlessCode": "—",
+        "typeGroupOrder": ["Leader", "Character", "Event", "Stage", "Other"],
+        "notes": "Codes are the punk-records catalogue's own vocabulary; multicolour cards carry two codes and render two pips; no colourless One Piece card observed — '—' is defensive fallback only. Leader is the archetype axis."
+      },
+      "riftbound": {
+        "pipPalette": {
+          "Body": { "bg": "#3e9c62", "fg": "#e9f7ee" },
+          "Calm": { "bg": "#3aa7a3", "fg": "#e8f7f6" },
+          "Chaos": { "bg": "#a54fc4", "fg": "#f6ebfb" },
+          "Fury": { "bg": "#d3492f", "fg": "#fdeae6" },
+          "Mind": { "bg": "#3b7bd0", "fg": "#eaf2fd" },
+          "Order": { "bg": "#c9a13b", "fg": "#241d07" },
+          "Colorless": { "bg": "#8a919e", "fg": "#12151b" }
+        },
+        "pipOrder": ["Body", "Calm", "Chaos", "Fury", "Mind", "Order", "Colorless"],
+        "colorlessCode": "Colorless",
+        "typeGroupOrder": ["Legend", "Unit", "Spell", "Gear", "Battlefield", "Rune", "Other"],
+        "notes": "Domain codes are the game's own color_identity vocabulary as observed in the real Riftcodex capture. The swatch hues are the PROJECT'S provisional design choices — no official palette was ingested (Riot assets off-limits). pipOrder is alphabetical pending any data-backed canonical order. Legend first in typeGroupOrder because it defines the deck (archetype_axis)."
+      }
+    },
+    "registry_seam_gaps": [
+      "ColorPips renders the raw code text inside the pip, so Riftbound pips show full domain words ('Body', 'Chaos') and One Piece pips show full colour words — a per-code short-label extension to GameUiConfig is a flagged gap (owner call), not yet implemented.",
+      "No display-name metadata (e.g. 'Riftbound' vs slug 'riftbound') exists in the registry; slugs are the only client-side identity. Format display metadata comes from GET /v1/games config passthrough instead."
+    ]
+  },
+
+  "riftbound_catalogue": {
+    "source": "Riftcodex community API capture 2026-07-08 (api.riftcodex.com — NOT the Riot API; keyless; robots.txt has no Disallow). Raw archive: 11 pages x 100, total 1,064 printings, verified against docs/notes/riftcodex-observed-schema.md.",
+    "granularity": "printing-level (unlike the oracle-level MTG catalogue); 979 distinct playable names over 1,059 playable items; 24-hex 'id' is the unique canonical_ref; riftbound_id is NOT unique (16 OPP base/(Metal) pairs share one).",
+    "sets_observed": [
+      { "set_id": "OGN", "name": "Origins", "card_count": 352, "published_on": "2025-10-31" },
+      { "set_id": "OGS", "name": "Origins: Proving Grounds", "card_count": 24, "published_on": "2025-10-31" },
+      { "set_id": "PR", "name": "Riftbound Promotional Cards", "card_count": 12, "published_on": "2025-10-31" },
+      { "set_id": "OPP", "name": "Riftbound Organized Play Promotional Cards", "card_count": 107, "published_on": "2025-10-31" },
+      { "set_id": "JDG", "name": "Riftbound Judge Promotional Cards", "card_count": 1, "published_on": "2025-12-01" },
+      { "set_id": "SFD", "name": "Spiritforged", "card_count": 288, "published_on": "2026-02-13" },
+      { "set_id": "UNL", "name": "Unleashed", "card_count": 280, "published_on": "2026-05-08" },
+      { "set_id": "VEN", "name": "Vendetta", "card_count": 0, "published_on": "2026-07-31 (announced, no cards yet)" }
+    ],
+    "type_counts_full_corpus": { "Unit": 536, "Spell": 202, "Legend": 145, "Gear": 106, "Battlefield": 57, "Rune": 18 },
+    "type_counts_base_nonpromo_printings": { "Unit": 375, "Spell": 192, "Gear": 91, "Battlefield": 54, "Legend": 36, "Rune": 6 },
+    "domains": ["Body", "Calm", "Chaos", "Fury", "Mind", "Order"],
+    "domain_facts": [
+      "classification.domain is a list, length 1 (873 cards) or 2 (191 cards).",
+      "Every Legend has exactly 2 domains (0 exceptions in corpus).",
+      "Battlefields are always ['Colorless'] (all 57; also the only landscape-orientation cards).",
+      "Runes carry exactly 1 real domain; the 6 base runes are one per domain.",
+      "'Colorless' is the source's explicit none-marker (62 cards: 57 Battlefields + 5 Tokens); stored as [] in attrs, rendered via colorlessCode."
+    ],
+    "deck_shape": {
+      "source": "config/formats.json, game 'riftbound', format 'constructed' — VERIFIED, matches the 'legend + 40 main + 12 runes + 3 battlefields' brief",
+      "zone_map": { "Mainboard": "main", "Legend": "legend", "Runes": "runes", "Battlefields": "battlefield" },
+      "zone_sizes": {
+        "main": { "min": 40 },
+        "legend": { "min": 1, "max": 1 },
+        "runes": { "min": 12, "max": 12 },
+        "battlefield": { "min": 3, "max": 3 }
+      },
+      "archetype_axis": "legend",
+      "vector_exclude_type_line_prefixes": ["Rune"],
+      "import": false,
+      "note": "main is min 40 with NO max in config (i.e. 40+, not exactly 40)."
+    },
+    "legends_all_36_base_nonpromo": [
+      { "name": "Ahri - Nine-Tailed Fox", "domains": ["Calm", "Mind"], "riftbound_id": "ogn-255-298", "set": "OGN" },
+      { "name": "Azir - Emperor of the Sands", "domains": ["Calm", "Order"], "riftbound_id": "sfd-197-221", "set": "SFD" },
+      { "name": "Darius - Hand of Noxus", "domains": ["Fury", "Order"], "riftbound_id": "ogn-253-298", "set": "OGN" },
+      { "name": "Diana - Scorn of the Moon", "domains": ["Mind", "Chaos"], "riftbound_id": "unl-197-219", "set": "UNL" },
+      { "name": "Draven - Glorious Executioner", "domains": ["Fury", "Chaos"], "riftbound_id": "sfd-185-221", "set": "SFD" },
+      { "name": "Ezreal - Prodigal Explorer", "domains": ["Mind", "Chaos"], "riftbound_id": "sfd-199-221", "set": "SFD" },
+      { "name": "Fiora - Grand Duelist", "domains": ["Body", "Order"], "riftbound_id": "sfd-205-221", "set": "SFD" },
+      { "name": "Irelia - Blade Dancer", "domains": ["Calm", "Chaos"], "riftbound_id": "sfd-195-221", "set": "SFD" },
+      { "name": "Ivern - Green Father", "domains": ["Calm", "Order"], "riftbound_id": "unl-195-219", "set": "UNL" },
+      { "name": "Jax - Grandmaster At Arms", "domains": ["Calm", "Body"], "riftbound_id": "sfd-193-221", "set": "SFD" },
+      { "name": "Jhin - Virtuoso", "domains": ["Fury", "Mind"], "riftbound_id": "unl-181-219", "set": "UNL" },
+      { "name": "Jinx - Loose Cannon", "domains": ["Fury", "Chaos"], "riftbound_id": "ogn-251-298", "set": "OGN" },
+      { "name": "Kai'Sa - Daughter of the Void", "domains": ["Fury", "Mind"], "riftbound_id": "ogn-247-298", "set": "OGN" },
+      { "name": "Kha'Zix - Voidreaver", "domains": ["Body", "Chaos"], "riftbound_id": "unl-201-219", "set": "UNL" },
+      { "name": "LeBlanc - Deceiver", "domains": ["Mind", "Order"], "riftbound_id": "unl-199-219", "set": "UNL" },
+      { "name": "Lee Sin - Blind Monk", "domains": ["Calm", "Body"], "riftbound_id": "ogn-257-298", "set": "OGN" },
+      { "name": "Leona - Radiant Dawn", "domains": ["Calm", "Order"], "riftbound_id": "ogn-261-298", "set": "OGN" },
+      { "name": "Lillia - Bashful Bloom", "domains": ["Calm", "Mind"], "riftbound_id": "unl-189-219", "set": "UNL" },
+      { "name": "Lucian - Purifier", "domains": ["Fury", "Body"], "riftbound_id": "sfd-183-221", "set": "SFD" },
+      { "name": "Master Yi - Wuju Master", "domains": ["Calm", "Body"], "riftbound_id": "unl-191-219", "set": "UNL" },
+      { "name": "Miss Fortune - Bounty Hunter", "domains": ["Body", "Chaos"], "riftbound_id": "ogn-267-298", "set": "OGN" },
+      { "name": "Ornn - Fire Below the Mountain", "domains": ["Calm", "Mind"], "riftbound_id": "sfd-189-221", "set": "SFD" },
+      { "name": "Poppy - Keeper of the Hammer", "domains": ["Body", "Order"], "riftbound_id": "unl-203-219", "set": "UNL" },
+      { "name": "Pyke - Bloodharbor Ripper", "domains": ["Fury", "Chaos"], "riftbound_id": "unl-185-219", "set": "UNL" },
+      { "name": "Rek'sai - Void Burrower", "domains": ["Fury", "Order"], "riftbound_id": "sfd-187-221", "set": "SFD" },
+      { "name": "Renata Glasc - Chem-Baroness", "domains": ["Mind", "Order"], "riftbound_id": "sfd-201-221", "set": "SFD" },
+      { "name": "Rengar - Pridestalker", "domains": ["Fury", "Body"], "riftbound_id": "unl-183-219", "set": "UNL" },
+      { "name": "Rumble - Mechanized Menace", "domains": ["Fury", "Mind"], "riftbound_id": "sfd-181-221", "set": "SFD" },
+      { "name": "Sett - The Boss", "domains": ["Body", "Order"], "riftbound_id": "ogn-269-298", "set": "OGN" },
+      { "name": "Sivir - Battle Mistress", "domains": ["Body", "Chaos"], "riftbound_id": "sfd-203-221", "set": "SFD" },
+      { "name": "Teemo - Swift Scout", "domains": ["Mind", "Chaos"], "riftbound_id": "ogn-263-298", "set": "OGN" },
+      { "name": "Vex - Gloomist", "domains": ["Calm", "Chaos"], "riftbound_id": "unl-193-219", "set": "UNL" },
+      { "name": "Vi - Piltover Enforcer", "domains": ["Fury", "Order"], "riftbound_id": "unl-187-219", "set": "UNL" },
+      { "name": "Viktor - Herald of the Arcane", "domains": ["Mind", "Order"], "riftbound_id": "ogn-265-298", "set": "OGN" },
+      { "name": "Volibear - Relentless Storm", "domains": ["Fury", "Body"], "riftbound_id": "ogn-249-298", "set": "OGN" },
+      { "name": "Yasuo - Unforgiven", "domains": ["Calm", "Chaos"], "riftbound_id": "ogn-259-298", "set": "OGN" }
+    ],
+    "runes_base_ogn": [
+      { "name": "Fury Rune", "domains": ["Fury"], "riftbound_id": "ogn-007-298", "supertype": "Basic" },
+      { "name": "Calm Rune", "domains": ["Calm"], "riftbound_id": "ogn-042-298", "supertype": "Basic" },
+      { "name": "Mind Rune", "domains": ["Mind"], "riftbound_id": "ogn-089-298", "supertype": "Basic" },
+      { "name": "Body Rune", "domains": ["Body"], "riftbound_id": "ogn-126-298", "supertype": "Basic" },
+      { "name": "Chaos Rune", "domains": ["Chaos"], "riftbound_id": "ogn-166-298", "supertype": "Basic" },
+      { "name": "Order Rune", "domains": ["Order"], "riftbound_id": "ogn-214-298", "supertype": "Basic" }
+    ],
+    "battlefields_sample": [
+      { "name": "Obelisk of Power", "domains": ["Colorless"], "riftbound_id": "ogn-284-298" },
+      { "name": "Startipped Peak", "domains": ["Colorless"], "riftbound_id": "ogn-288-298" },
+      { "name": "Targon's Peak", "domains": ["Colorless"], "riftbound_id": "ogn-289-298" },
+      { "name": "The Arena's Greatest", "domains": ["Colorless"], "riftbound_id": "ogn-290-298" },
+      { "name": "The Candlelit Sanctum", "domains": ["Colorless"], "riftbound_id": "ogn-291-298" },
+      { "name": "The Dreaming Tree", "domains": ["Colorless"], "riftbound_id": "ogn-292-298" },
+      { "name": "Power Nexus", "domains": ["Colorless"], "riftbound_id": "sfd-214-221" },
+      { "name": "Ravenbloom Conservatory", "domains": ["Colorless"], "riftbound_id": "sfd-215-221" }
+    ],
+    "units_sample": [
+      { "name": "Jhin - Murderous Artist", "domains": ["Fury"], "riftbound_id": "unl-022-219", "energy": 4, "might": 4, "power": 1 },
+      { "name": "Inviolus Vox", "domains": ["Fury"], "riftbound_id": "unl-027-219", "energy": 8, "might": 8, "power": 2 },
+      { "name": "Nilah - Joyful Ascetic", "domains": ["Body"], "riftbound_id": "unl-115-219", "energy": 3, "might": 4, "power": 1 },
+      { "name": "Crescent Guardian", "domains": ["Chaos"], "riftbound_id": "unl-122-219", "energy": 4, "might": 4, "power": null },
+      { "name": "Insightful Investigator", "domains": ["Chaos"], "riftbound_id": "unl-135-219", "energy": 3, "might": 3, "power": null },
+      { "name": "Diana - No Longer Human", "domains": ["Chaos"], "riftbound_id": "unl-149-219", "energy": 4, "might": 3, "power": 1 },
+      { "name": "Ashe - Focused", "domains": ["Order"], "riftbound_id": "unl-169-219", "energy": 5, "might": 4, "power": 1 },
+      { "name": "Atakhan", "domains": ["Order"], "riftbound_id": "unl-170-219", "energy": 10, "might": 7, "power": 3 },
+      { "name": "Vilemaw", "domains": ["Calm"], "riftbound_id_of_alt_art_printing": "unl-060a-219", "energy": 8, "might": 8, "power": 2, "note": "base printing exists; alt-art row shown in fixture" }
+    ],
+    "spells_sample": [
+      { "name": "Upstage Comedy", "domains": ["Fury"], "riftbound_id": "unl-009-219" },
+      { "name": "Dancing Grenade", "domains": ["Fury"], "riftbound_id": "unl-020-219" },
+      { "name": "Abandon", "domains": ["Chaos"], "riftbound_id": "unl-131-219" },
+      { "name": "Lilting Lullaby", "domains": ["Calm", "Mind"], "riftbound_id": "unl-190-219" },
+      { "name": "Alpha Strike", "domains": ["Calm", "Body"], "riftbound_id": "unl-192-219" },
+      { "name": "Mirror Image", "domains": ["Mind", "Order"], "riftbound_id": "unl-200-219" }
+    ],
+    "gear_sample": [
+      { "name": "Fresh Beans", "domains": ["Fury"], "riftbound_id": "unl-011-219" },
+      { "name": "Frigid Jewel", "domains": ["Mind"], "riftbound_id": "unl-074-219" },
+      { "name": "Hunter's Machete", "domains": ["Body"], "riftbound_id": "unl-096-219" },
+      { "name": "Brutalizer", "domains": ["Calm"], "riftbound_id": "sfd-042-221" },
+      { "name": "Chemtech Cask", "domains": ["Mind"], "riftbound_id": "sfd-063-221" },
+      { "name": "Doran's Blade", "domains": ["Body"], "riftbound_id": "sfd-095-221" }
+    ],
+    "attribute_semantics": "attributes {energy, might, power} always present, ints or null. Legends/Battlefields/Runes: all-null. Units: energy+might (power on some). Spells/Gear: energy (power on some). Energy range observed 0-12."
+  },
+
+  "api_shapes": {
+    "source": "api/routes.py + api/schemas.py (branch multi-tcg-wave1), field lists copied verbatim from the pydantic models",
+    "GET /v1/games": {
+      "auth": "free",
+      "response_GamesResponse": {
+        "games": [
+          {
+            "name": "str (game slug, e.g. 'mtg' | 'onepiece' | 'riftbound')",
+            "formats": [
+              {
+                "name": "str (format slug)",
+                "config": "dict — the format's config/formats.json entry passed through VERBATIM from seeded formats.config (zone maps, zone_sizes, archetype_axis, board_zones, etc.). Clients enumerate this instead of baking in what exists."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "POST /v1/{game}/{format}/classify": {
+      "auth": "premium (403 without entitlement); 501 if no ClassifierService registered for the game",
+      "classifier_registration_fact": "serve.py registers classifiers={'mtg': MtgClassifierService()} ONLY — onepiece and riftbound classify currently returns 501 'classification not available for this game'",
+      "request_ClassifyRequest": {
+        "cards": "list[ClassifyCard], 1..500 items; ClassifyCard = { name: str (min 1 char), count: int (1..250), board: str }"
+      },
+      "response_ClassifyResponse": {
+        "game": "str",
+        "format": "str",
+        "archetype_id": "int | null (null when the archetype has no stored decks yet)",
+        "name": "str (archetype name)",
+        "method": "str",
+        "confidence": "float | null",
+        "unresolved_cards": "list[str] — names that did not resolve to known cards; reported, never guessed",
+        "as_of": "date | null (backing matchup snapshot)",
+        "matchup_spread": "list[SpreadCell] = { archetype_id, name, p_win, ci_lo, ci_hi, n_matches }",
+        "exp_winrate_vs_field": "float | null"
+      },
+      "errors": { "422": "unparseable/invalid deck (ValueError from classifier)", "403": "premium required", "501": "no classifier for game" }
+    },
+    "GET /v1/{game}/{format}/emerging": {
+      "auth": "premium (403 without entitlement)",
+      "query": { "as_of": "date, optional; default latest rollup_emerging snapshot" },
+      "response_EmergingResponse": {
+        "game": "str",
+        "format": "str",
+        "as_of": "date",
+        "clusters": "list[EmergingCluster], ordered biggest/newest first"
+      },
+      "EmergingCluster": {
+        "cluster_key": "int — local, within-snapshot handle; NOT a stable archetype id",
+        "named": "bool — ALWAYS false in this feed; explicit so clients render 'unnamed / emerging'",
+        "provisional_descriptor": "str — colour group + top signature card, flagged 'Unnamed:' — never a curated archetype name",
+        "color": "str — WUBRG identity string ('' -> colorless). NOTE: schema comment is MTG-vocabulary; game-neutral value is the game's colour codes",
+        "n_decks": "int",
+        "first_seen": "date",
+        "recent_decks": "int — decks seen in the most recent 7 days of the window (the growth signal)",
+        "winrate": "float | null — cluster winrate over decided stored games; null when no match data",
+        "n_match_games": "int",
+        "signature_cards": "list[SignatureCard]"
+      },
+      "SignatureCard": {
+        "card_id": "int",
+        "name": "str",
+        "in_cluster_freq": "float — fraction of the cluster's decks playing the card",
+        "out_cluster_freq": "float — fraction of out-of-cluster decks playing it",
+        "lift": "float — in_cluster_freq / max(out_cluster_freq, floor) — the signal"
+      }
+    },
+    "attribution": {
+      "shape_Credit": { "source": "str", "name": "str", "url": "str", "attribution": "str", "required": "bool" },
+      "where": "EventsResponse.credits — clients must display required credits visibly with link",
+      "sources_config_values": [
+        { "source": "topdeck.gg", "name": "TopDeck.gg", "url": "https://topdeck.gg", "attribution": "Data provided by TopDeck.gg", "required": true },
+        { "source": "melee.gg", "name": "Melee.gg", "url": "https://melee.gg", "attribution": "Data provided by Melee.gg", "required": true },
+        { "source": "mtgo.com", "name": "Magic Online", "url": "https://www.mtgo.com/decklists", "attribution": "Decklists from Magic Online (mtgo.com)", "required": false }
+      ]
+    }
+  },
+
+  "gaps_and_honest_limits": [
+    "NO Riftbound decklists, events, archetypes, or winrates exist anywhere in the repo — formats.json has riftbound constructed with import:false, and no Riftbound event source is ingested. Any Riftbound meta/matchup/emerging numbers in a mockup are PLACEHOLDER and must be labeled as such.",
+    "NO official Riftbound domain colour palette was ingested; the riftbound.ts hues are the project's provisional design choices, and pipOrder is alphabetical pending a data-backed canonical order.",
+    "The Riftcodex API has NO legality field — rotation/ban legality cannot be shown for Riftbound (recorded owner blocker).",
+    "Riftcodex data carries no stated license (recorded owner blocker).",
+    "No GameUiConfig short-label support: pips render full domain words for Riftbound / colour words for One Piece (flagged registry seam gap).",
+    "The classify endpoint is registered for mtg only (serve.py); riftbound/onepiece classify returns 501 today.",
+    "EmergingCluster.color is documented in schemas.py as a WUBRG string — the emerging feed has only ever run on MTG data; no Riftbound emerging rows exist.",
+    "Riftbound main deck is min 40 with no configured max (not 'exactly 40'); legend exactly 1, runes exactly 12, battlefields exactly 3 (config/formats.json).",
+    "The riftbound_catalogue samples above are printings from the raw capture; the full base catalogue has 754 base non-promo playable printings — use only names listed here (or re-mine the capture) in design work."
+  ]
+}

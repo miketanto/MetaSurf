@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — One Piece Deck Viewer — Pit-Wall Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   No "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;         /* favorable — blue side of CVD-safe scale */
+  --loss:#ff7a1a;        /* unfavorable / caveat keel — orange side */
+  --acc:#b45bff;         /* sector purple — best-in-class / 1st place only */
+  --shadow:#000000;
+  --unlit:#3a3a48;       /* unlit plaque star / unlit DSEG readout */
+  /* colorless 1-bit speckle mask — riso grain prints any gradient through it */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* white overlay grain (tokens §4.3) — for the livery grainband */
+  --grainwhite:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* ONE PIECE livery accent — extension-spec §0 (provisional, owner to bless).
+     The ONLY per-game hue outside rimmed identity chips; never a deck's colors. */
+  --livery:#e0b73a;
+}
+
+*{box-sizing:border-box; margin:0; padding:0; border-radius:0 !important;}
+html{background:var(--bg);}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'JetBrains Mono',monospace; font-size:13px;
+  font-variant-numeric:tabular-nums; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23f2f2f7'%3E%3Crect x='7' width='3' height='6'/%3E%3Crect x='7' y='11' width='3' height='6'/%3E%3Crect y='7' width='6' height='3'/%3E%3Crect x='11' y='7' width='6' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23b45bff'/%3E%3C/svg%3E") 8 8, crosshair;}   /* fallback = crosshair — tokens §3.5 */
+}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px;}
+
+.wrap{max-width:680px; margin:0 auto; padding:0 12px;}
+
+/* ============ mechanical press physics ============ */
+.press{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); color:var(--ink);
+  font-family:inherit; transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.press:active{transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none;}
+
+/* ============ wire ticker — tokens §5.1 structure: WIRE badge · track · pause glyph ============ */
+.tickerbar{
+  position:sticky; top:0; z-index:50; background:#101017;
+  border-bottom:1px solid var(--line); cursor:pointer;
+  display:flex; align-items:stretch; min-height:44px;   /* whole bar is the pause toggle → 44px touch min (tokens §5.1) */
+}
+.tickerbar:focus-visible{outline-offset:-2px;}   /* full-bleed bar — ring stays on-screen */
+.wirebadge{
+  flex:none; display:flex; align-items:center; padding:0 10px;
+  font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:1px;
+  background:var(--acc); color:var(--bg); border-right:1px solid var(--line);
+}
+.tickerbar.paused .wirebadge{background:var(--loss);}   /* halted feed = caveat keel */
+.ticker-clip{flex:1; min-width:0; overflow:hidden; white-space:nowrap; display:flex; align-items:center;}
+.ticker-track{display:inline-flex; width:max-content; animation:tick 42s linear infinite; will-change:transform;}
+.tickerbar.paused .ticker-track{animation-play-state:paused;}
+.ticker-seq{display:inline-block; font-size:11px; letter-spacing:.04em; color:var(--dim);}
+.ticker-seq b{color:var(--ink); font-weight:700;}
+.ticker-seq .pu{color:var(--acc);}
+.wirepause{   /* visible ❚❚/▶ affordance — pause state is not aria-only */
+  flex:none; min-width:44px; display:flex; align-items:center; justify-content:center;
+  border-left:1px solid var(--line); color:var(--dim); font-size:11px; letter-spacing:2px;
+}
+.tickerbar.paused .wirepause{color:var(--loss);}
+@keyframes tick{to{transform:translateX(-50%);}}
+
+/* ============ header ============ */
+.tophdr{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 0 10px;}
+.backbtn{
+  font-family:'Press Start 2P',monospace; font-size:8px; padding:10px 14px;
+  min-height:44px; display:inline-flex; align-items:center; cursor:pointer;
+}
+.clock{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:22px; color:var(--ink); line-height:1;}
+.lit{position:relative; z-index:1;}
+
+/* ============ SPLIT COLOR-FIELD HERO PLATE — attention-art-spec §2.4 ============
+   Non-art focal equivalent of the A-band: NO card image (OP posture — no
+   recorded Limitless hotlink decision). The deck's identity hues print as an
+   oversized flat field — dual identities as the hard 45° split (the
+   split-octagon geometry of ext §1.2 scaled to a band), riso grain over the
+   field (tokens §4.1 mask), misregistered second-pass offset (tokens §4.3)
+   reading at the split seam. The name/readout zone sits on the ≥.88 carbon
+   scrim stop (§2.2). Livery stays the 4px grainband ONLY — the field hues
+   below it are DECK identity hues from the grounded deckColors, never livery. */
+.lhero{
+  position:relative; overflow:hidden; min-height:200px;   /* ≥168px L0 floor at 390px */
+  background:var(--bg); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  margin-bottom:12px;
+}
+.lhero::after{ /* 4px livery grainband strip — tokens §4.3 recipe recolored to the livery (sanctioned slot: page-title underline rule) */
+  content:""; position:absolute; top:0; left:0; right:0; height:4px; z-index:4;
+  background-image:var(--grainwhite), linear-gradient(90deg, var(--livery), rgba(224,183,58,.25));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.lfield{ /* the color field: 45° split of the deck's dual hues + colorless riso speckle */
+  position:absolute; inset:0; z-index:0;
+  background-image:var(--noise), linear-gradient(135deg, var(--fa,#8a919e) 0 50%, var(--fb,#8a919e) 50% 100%);
+  background-size:48px 48px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.lfield::before{ /* misregistered second ink pass — 3px offset duplicate, visible at the split seam */
+  content:""; position:absolute; inset:0; transform:translate(3px,3px);
+  background:linear-gradient(135deg, var(--fa,#8a919e) 0 50%, var(--fb,#8a919e) 50% 100%);
+  opacity:.35;
+}
+.lscrim{ /* legibility scrim — ends ≥.88 carbon over the text zone (§2.2) */
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg, rgba(13,13,18,.12) 0%, rgba(13,13,18,.45) 38%, rgba(13,13,18,.88) 68%, rgba(13,13,18,.94) 100%);
+}
+.linfo{position:relative; z-index:2; min-width:0; padding:56px 12px 8px;}
+.lkick{font-size:9px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin-bottom:6px;}
+.lband{ /* honest-chrome lower band — .prov microline + population caveat (§2.4) */
+  position:relative; z-index:2; padding:0 12px 10px;
+  display:flex; flex-direction:column; gap:6px; align-items:flex-start;
+}
+.lband .prov{padding-bottom:0; margin-bottom:0; border-bottom:none;}
+.keytoggle{ /* pipkey collapsed behind KEY ▸ — sanctioned op-matchup-matrix pattern (§1.4.1) */
+  font-family:'Press Start 2P',monospace; font-size:7px; padding:8px 9px;
+  cursor:pointer; color:var(--dim);
+}
+.keytoggle[aria-expanded="true"]{color:var(--ink);}
+.arch-title{
+  font-family:'Archivo',sans-serif; font-variation-settings:'wdth' 62; font-stretch:62%;
+  font-weight:900; font-size:42px; line-height:.95; letter-spacing:-.01em;   /* hero-plate display range 42–64px (§2.4) */
+  text-transform:uppercase; text-shadow:2px 2px 0 var(--shadow); margin:0 0 10px;
+  overflow-wrap:break-word;
+}
+.chiprow{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+.chip{font-family:'Press Start 2P',monospace; font-size:7px; padding:6px 7px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); line-height:1;}
+.chip.first{color:var(--acc); border-color:var(--acc);}         /* purple = 1st place only */
+.chip.axis{color:var(--dim);}                                    /* T2 register: name is a card */
+.chip.cid{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--dim); padding:5px 6px;}
+.lmeta{font-size:10px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; margin-top:10px; line-height:1.7;}
+.lmeta b{color:var(--ink);}
+
+/* ============ One Piece octagon pips (cut-corner silhouette — never the MTG circle) ============ */
+.opip{
+  display:inline-flex; flex:none; width:10px; height:10px; padding:1px;   /* scale S = 10px in dense contexts — extension-spec §1.2 */
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+  background:var(--prim, rgba(242,242,247,.25));            /* 1px rim, survives the clip */
+  vertical-align:middle;
+}
+.opip i{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+  background:var(--pbg,#8a919e); color:var(--pfg,#12151b);
+  font-family:'Press Start 2P',monospace; font-size:6px; font-style:normal; line-height:1;
+}
+.opip.m{width:16px; height:16px;}
+.octapair{display:inline-flex; gap:0; align-items:center;}   /* dual = fused pair, one atom */
+.pipkey{
+  font-size:9px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;
+}
+.pipkey span{display:inline-flex; align-items:center; gap:4px;}
+.pipkey[hidden]{display:none;}   /* display:flex would otherwise defeat [hidden] */
+
+/* ============ caveat chrome — one component, several messages ============ */
+.cavrow{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;}
+.caveat{
+  display:inline-flex; align-items:center; gap:6px;
+  font:400 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:5px 7px; line-height:1.5;
+}
+.caveat b{color:var(--ink); font-weight:700;}
+
+/* ============ event line + star plaque ============ */
+.eventline{font-size:11px; color:var(--dim); margin:0 0 12px; letter-spacing:.04em; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.eventline b{color:var(--ink);}
+.plaque{
+  font-size:11px; letter-spacing:3px; white-space:nowrap; line-height:1;
+  padding:3px 4px 3px 7px; border:1px solid var(--line); background:var(--panel2);
+}
+.plaque .on{color:var(--loss);}
+.plaque .off{color:var(--unlit);}   /* unlit segments stay visible — plaque, not ghost */
+
+/* ============ deck switcher — two real lists from the same event ============ */
+.switchrow{display:flex; gap:0; margin-bottom:12px; overflow-x:auto; scrollbar-width:none;}
+.switchrow::-webkit-scrollbar{display:none;}
+.swd{
+  flex:1; min-height:44px; padding:8px 10px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px; justify-content:center;
+  font-family:'Press Start 2P',monospace; font-size:7px; line-height:1.6; color:var(--dim);
+  white-space:nowrap;
+}
+.swd:not(:first-child){border-left-width:0;}     /* fused segment */
+.swd[aria-pressed="true"]{color:var(--bg); background:var(--ink); border-color:var(--ink);}
+.swd[aria-pressed="true"] .opip{--prim:var(--bg);}
+
+/* ============ hero DSEG readouts ============ */
+.hero{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;}
+.cell{padding:12px 12px 10px; text-align:left; width:100%;}
+.cell .lbl{font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; display:flex; justify-content:space-between; gap:6px;}
+.cell .seg{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:30px; line-height:1.15; display:inline-block; margin-top:6px;}
+.cell .sub{font-size:10px; color:var(--dim); margin-top:2px; display:block;}
+.cell.share .lit{color:var(--ink);}
+.cell.wrcell .seg{color:var(--unlit);}           /* unlit readout — value refused, not faked */
+.cell.wide{grid-column:1 / -1; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;}
+.cell.wide .seg{font-size:24px;}
+.cell.wide .lit{color:var(--ink);}
+/* price DSEG demoted from the tile grid to the list header (attention-art-spec
+   §3 item 8: "tile grid → ≤4 with price/leader demoted to the list header") */
+.cell.price{flex-wrap:wrap; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;}
+.cell.price .seg{font-size:20px;}   /* L2 register — DSEG ≤20px below the fold */
+.cell.price .lit{color:var(--loss);}   /* price = orange species of number — tokens §5.3 */
+.cell .unit{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dim); letter-spacing:.08em;}
+.curtoggle{display:flex; gap:8px; flex:none; align-self:flex-end;}
+.curbtn{font-family:'Press Start 2P',monospace; font-size:8px; padding:10px; min-height:38px; cursor:pointer; color:var(--dim);}   /* 38px dense-console floor — tokens §3.4 */
+.curbtn[aria-pressed="true"]{color:var(--win); border-color:var(--win); transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow);}
+.cell.price .pnote{flex:0 0 100%; margin-top:8px; padding-top:6px; border-top:1px solid var(--line);}
+
+/* ============ copy / export ============ */
+.exportrow{display:flex; gap:8px; margin-bottom:18px;}
+.xbtn{
+  flex:1; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font-family:'Press Start 2P',monospace; font-size:8px; cursor:pointer; color:var(--ink); padding:10px;
+}
+.xbtn.ghosted{color:var(--dim);}
+
+/* ============ panels & list ============ */
+.panel{background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); padding:12px; margin-bottom:18px;}
+.panel h2{font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; font-weight:400; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:8px;}
+.sect{font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin:4px 0 10px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
+.listpanel{padding:10px 12px;}
+
+.grp{margin-bottom:12px;}
+.grp:last-child{margin-bottom:0;}
+.grp-head{display:flex; align-items:baseline; gap:8px; padding:2px 0 3px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim);}
+.grp-head .gct{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:12px; color:var(--ink);}
+.grp-head::after{content:""; flex:1; border-top:1px solid var(--line); transform:translateY(-3px);}
+.grp-head .gsub{order:1; font-size:10px; letter-spacing:.04em; color:var(--ink);}
+.grp-empty{font-size:10px; color:var(--unlit); letter-spacing:.08em; padding:4px 2px 2px;}
+
+.crow{
+  display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  min-height:32px; padding:3px 2px;
+  background:transparent; border:none; border-bottom:1px solid #1e1e26;
+  color:var(--ink); font-family:inherit; font-size:12.5px; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+@media (pointer:coarse){ .crow{min-height:44px;} }
+.crow:last-child{border-bottom:none;}
+.crow:hover, .crow:focus-visible{background:#1b1b24; outline:none;}
+.crow:hover .nm, .crow:focus-visible .nm{color:var(--win);}
+.crow:active{transform:translate(1px,1px);}
+.crow .ct{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:13px; width:22px; flex:none; text-align:right; color:var(--win);}
+.crow .nm{flex:1; min-width:0; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;}
+.crow .nm .cid{color:var(--dim); font-size:10px;}
+.crow .pips{display:inline-flex; gap:3px; flex:none; align-items:center;}
+.cchip{
+  width:13px; height:13px; flex:none; display:inline-flex; align-items:center; justify-content:center;
+  font-family:'Press Start 2P',monospace; font-size:6px; line-height:1;
+  border:1px solid var(--line); background:var(--panel2); color:var(--ink);
+}
+.cchip.nul{color:var(--unlit);}
+.crow .pr{flex:none; width:56px; text-align:right; font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums;}
+.crow:hover .pr, .crow:focus-visible .pr{color:var(--ink);}
+.pdet .cur{color:var(--ink);}
+.pdet .oth{color:var(--dim);}
+
+/* ============ cost curve — crisp vector ============ */
+#curve{width:100%; display:block;}
+#curve .bar{fill:var(--win); shape-rendering:crispEdges;}
+#curve .bar.zero{fill:#2b2b35;}
+#curve .grid{stroke:#2b2b35; stroke-width:1; stroke-dasharray:2 3; shape-rendering:crispEdges;}
+#curve .base{stroke:var(--dim); stroke-width:1; shape-rendering:crispEdges;}
+#curve .xlab{fill:var(--dim); font-family:'Press Start 2P',monospace; font-size:7px; text-anchor:middle;}
+#curve .vlab{fill:var(--ink); font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:11px; text-anchor:middle;}
+.curvecap{font-size:10px; color:var(--dim); margin-top:8px; letter-spacing:.04em; line-height:1.6;}
+
+/* ============ top-cut field panel ============ */
+.credit{
+  font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--panel2); border:1px solid var(--line); padding:4px 6px;
+  color:var(--ink); text-decoration:none; white-space:nowrap;
+}
+.credit:hover{border-color:var(--ink);}
+.frow{display:flex; align-items:center; gap:7px; padding:4px 0; border-bottom:1px solid #1e1e26; font-size:11px;}
+.frow:last-child{border-bottom:none;}
+.frow.me{box-shadow:inset 0 0 0 2px var(--ink); padding:4px 5px;}   /* 2px selected treatment — tokens §3.3 */
+.frow .fnm{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;}
+.frow .fnm .fc{color:var(--dim);}
+.frow .fbar{flex:none; width:52px; height:6px; background:#1c1c26; border:1px solid var(--line); position:relative;}
+.frow .fbar i{position:absolute; inset:0; right:auto; background:var(--ink);}
+.frow .fct{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-size:12px; width:22px; text-align:right; flex:none; color:var(--ink);}
+.frow .fsh{width:44px; text-align:right; flex:none; color:var(--dim); font-size:10px;}
+.footnote{font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; margin-top:8px; line-height:1.7;}
+
+/* ============ hover float + tap modal + inspector dock ============ */
+#hoverPrev{
+  position:fixed; z-index:90; pointer-events:none; display:none;
+  border:1px solid var(--line); box-shadow:4px 4px 0 0 var(--shadow);
+  background:var(--panel); padding:4px;
+}
+/* hover preview card: the 244px .imgph plate below — tokens §5.7 width verbatim */
+#hoverPrev .hp-cap{width:244px; font-size:10px; line-height:1.6; padding:6px 2px 2px; letter-spacing:.02em;}
+@media (hover:hover) and (pointer:fine){ #hoverPrev.on{display:block;} }
+
+#modal{
+  position:fixed; inset:0; z-index:100; display:none;
+  background:rgba(13,13,18,.86); align-items:center; justify-content:center;
+  flex-direction:column; gap:10px; padding:20px; cursor:pointer;
+}
+#modal.on{display:flex;}
+#modal .frame{border:1px solid var(--line); box-shadow:4px 4px 0 0 var(--shadow); background:var(--panel); padding:6px; max-width:min(84vw,336px);}   /* 336px verbatim — tokens §5.7 */
+#modal .mname{font-family:'Press Start 2P',monospace; font-size:8px; color:var(--ink); background:var(--panel); border:1px solid var(--line); padding:8px 10px; max-width:84vw; text-align:center; line-height:1.6;}
+#modal .mprice{font-size:10px; background:var(--panel); border:1px solid var(--line); padding:6px 10px; max-width:84vw; text-align:center; line-height:1.7; letter-spacing:.02em;}
+#modal .mhint{font-size:10px; color:var(--dim); letter-spacing:.1em;}
+
+.col-dock{display:none;}
+.docksticky{position:sticky; top:56px;}   /* clears the 44px+1px ticker */
+.dockpanel{padding:10px;}
+.dframe{border:1px solid var(--line); background:#0f0f15; padding:4px;}
+.dname{font-family:'Press Start 2P',monospace; font-size:8px; line-height:1.7; margin-top:10px;}
+.dmeta{font-size:10px; color:var(--dim); margin-top:6px; letter-spacing:.06em; text-transform:uppercase; display:flex; align-items:center; gap:6px; flex-wrap:wrap; line-height:1.8;}
+.dprice{font-size:11px; margin-top:8px; border-top:1px solid var(--line); padding-top:8px; line-height:1.8;}
+
+/* ============ color-framed card plate — the PRIMARY card rendering ============
+   NO card images on OP pages (attention-art-spec §2.4 — no recorded owner ToS
+   decision on Bandai/Limitless hosting; op-matchup-matrix holds the same
+   line). Every card slot renders this frame: name + set id on carbon, rim =
+   deck-color split (same 135° 50/50 convention as splitOcta). */
+.imgph{
+  display:flex; flex-direction:column; justify-content:flex-end; gap:3px;
+  aspect-ratio:600/838; width:100%; padding:8px 7px;
+  border:2px solid transparent;
+  background:linear-gradient(#0f0f15,#0f0f15) padding-box,
+             linear-gradient(135deg,var(--pha,#8a919e) 0 50%,var(--phb,#8a919e) 50% 100%) border-box;
+}
+.imgph .phn{font-family:'Press Start 2P',monospace; font-size:7px; line-height:1.7; color:var(--ink); overflow-wrap:break-word;}
+.imgph .phi{font-size:10px; color:var(--dim); letter-spacing:.06em;}
+.imgph .phx{font-size:7px; color:var(--unlit); letter-spacing:.12em; text-transform:uppercase; margin-top:2px;}
+#hoverPrev .imgph{width:244px;}
+#modal .imgph{width:min(74vw,322px);}
+.thumbph{   /* 22×30 row thumb: frame only — name + id already sit beside it in the row */
+  width:22px; height:30px; flex:none; border:2px solid transparent;
+  background:linear-gradient(#0f0f15,#0f0f15) padding-box,
+             linear-gradient(135deg,var(--pha,#8a919e) 0 50%,var(--phb,#8a919e) 50% 100%) border-box;
+}
+
+/* ============ canonical provenance microline — extension-spec §4.2 ============ */
+.prov{
+  font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase;
+  padding-bottom:6px; margin-bottom:8px; border-bottom:1px solid var(--line);
+}
+
+/* ============ one-shot RGB-split glitch ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{animation:glitch 240ms steps(2,jump-none) 1;}
+
+/* ============ footer ============ */
+footer{margin:34px 0 26px;}
+.wordmark{
+  font-family:'Archivo',sans-serif; font-variation-settings:'wdth' 62; font-stretch:62%;
+  font-weight:900; text-transform:uppercase; font-size:46px; line-height:.9; letter-spacing:-.01em;
+}
+.wordmark .l2{color:#3a3a46;}
+.finecap{font-size:10px; color:var(--dim); margin-top:12px; letter-spacing:.08em; line-height:1.7;}
+.finecap a{color:var(--dim);}
+
+/* ============ mid widths ============ */
+@media (min-width:720px){
+  .hero{grid-template-columns:repeat(3,1fr);}
+  .cell.wide{grid-column:auto;}
+  .arch-title{font-size:52px;}
+  .lhero{min-height:230px;}
+  .wordmark{font-size:72px;}
+  .cols{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); column-gap:14px; align-items:start;}
+  .col-side{position:sticky; top:56px;}   /* clears the 44px+1px ticker */
+}
+
+/* ============ ≥1100px — three-zone pit-wall console ============ */
+@media (min-width:1100px){
+  .wrap{
+    max-width:1560px; display:grid;
+    grid-template-columns:minmax(0,1fr) 340px 320px; column-gap:22px;
+    grid-template-areas:
+      "head   head  head"
+      "band   band  band"
+      "event  event event"
+      "export hero  dock"
+      "main   hero  dock"
+      "main   rail  dock"
+      "foot   foot  foot";
+  }
+  .tophdr{grid-area:head;}
+  .lhero{grid-area:band; min-height:250px;}
+  .arch-title{font-size:64px;}   /* top of the §2.4 hero-plate display range */
+  .eventzone{grid-area:event;}
+  .exportrow{grid-area:export;}
+  .hero{grid-area:hero; grid-template-columns:1fr 1fr; align-content:start;}
+  .cell.wide{grid-column:1 / -1;}
+  .cols{display:contents;}
+  .col-main{grid-area:main;}
+  .col-side{grid-area:rail; position:static;}
+  .col-dock{grid-area:dock; display:block;}
+  footer{grid-area:foot;}
+}
+@media (min-width:1360px){
+  #mainCol{column-count:2; column-gap:28px; column-rule:1px solid var(--line);}
+  #mainCol .grp{break-inside:avoid;}
+}
+
+/* ============ interactive cursor — purple-fill crosshair variant (tokens §3.5) ============
+   last in the sheet so it outranks component-level cursor:pointer at equal specificity */
+@media (hover:hover) and (pointer:fine){
+  a, button, [role="button"], .press{
+    cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23b45bff'%3E%3Crect x='7' width='3' height='6'/%3E%3Crect x='7' y='11' width='3' height='6'/%3E%3Crect y='7' width='6' height='3'/%3E%3Crect x='11' y='7' width='6' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23f2f2f7'/%3E%3C/svg%3E") 8 8, crosshair;
+  }
+}
+
+/* ============ reduced motion ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;}
+  .glitch{animation:none;}
+  .press, .press:active{transition:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ results wire ticker — facts from the loaded event fixture only ============ -->
+<!-- pause toggle: tap / Enter / Space (tokens §5.1 behavior contract) -->
+<div class="tickerbar" id="tickerbar" role="button" tabindex="0" aria-pressed="false" aria-live="off" aria-label="results wire feed — tap, Enter or Space to pause">
+  <span class="wirebadge" aria-hidden="true">WIRE</span>
+  <div class="ticker-clip">
+    <div class="ticker-track" id="tickertrack">
+      <span class="ticker-seq" id="tickseq">
+        &nbsp;REGIONAL BIELEFELD · 2026-07-04 · 1,541 PLAYERS · OP16 · <b>1st LUKA FORJAN — PURPLE ENEL</b> &nbsp;·&nbsp; 2nd MARC@@@1 — RED/BLACK KOBY &nbsp;·&nbsp; 3rd SAMMY WANG — GREEN/BLUE LUFFY &nbsp;·&nbsp; TOP 64 PUBLISHED OF 1,541 &nbsp;·&nbsp; SOURCE: ONEPIECE.LIMITLESSTCG.COM &nbsp;·&nbsp; WIRE OP-431 &nbsp;·&nbsp;
+      </span>
+      <span class="ticker-seq" aria-hidden="true"></span>
+    </div>
+  </div>
+  <span class="wirepause" id="wirePause" aria-hidden="true">❚❚</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ header ============ -->
+  <div class="tophdr">
+    <button class="press backbtn" onclick="return false" aria-label="back to One Piece meta snapshot">◀ OP META</button>
+    <div class="clock" aria-label="local time"><span class="lit" id="clock">--:--</span></div>
+  </div>
+
+  <!-- ============ SPLIT COLOR-FIELD HERO PLATE — leader name typographic hero over the
+       deck's identity hues (attention-art-spec §2.4/§2.5). NO card image: OP posture,
+       no recorded Limitless hotlink decision. T2 register (ext §2): name is a card. -->
+  <div class="lhero">
+    <div class="lfield" id="heroField" aria-hidden="true"></div>
+    <div class="lscrim" aria-hidden="true"></div>
+    <div class="linfo">
+      <div class="lkick">LEADER SLOT — ARCHETYPE IDENTITY · COLOR-FIELD PLATE, NO CARD IMAGE</div>
+      <h1 class="arch-title" id="deckTitle">—</h1>
+      <div class="chiprow" id="chipRow"></div>
+      <div class="lmeta" id="leaderMeta"></div>
+    </div>
+    <div class="lband">
+      <!-- honest chrome in the plate's lower band (§2.4): prov microline + population caveat -->
+      <div class="prov">WINDOW 2026-07-04 · N=64 PUBLISHED OF 1,541 · AS-OF 2026-07-08</div>
+      <span class="caveat">TOP-CUT SHARE — <b>TOP 64</b> PUBLISHED OF <b>1,541</b> ENTRIES ¹</span>
+      <button class="press keytoggle" id="keyToggle" aria-expanded="false" aria-controls="pipkey">COLOR KEY ▸</button>
+      <div class="pipkey" role="img" aria-label="One Piece color key: R red, G green, B blue, P purple, K black, Y yellow" id="pipkey" hidden></div>
+    </div>
+  </div>
+
+  <div class="eventzone">
+    <!-- ============ event line + star plaque ============ -->
+    <!-- calm strip (§1.5): one dim event line between L0 plate and the L1 grid -->
+    <p class="eventline">
+      <b>REGIONAL BIELEFELD</b> · 2026-07-04 · <b>1,541</b> PLAYERS · OP16
+      <span class="plaque" role="img" aria-label="event grade 5 of 5 — 1,541 players" title="1,541 players — ★ scale: <32 · 32–63 · 64–127 · 128–255 · 256+"><span class="on">★★★★★</span></span>
+      <span id="pilotLine"></span>
+    </p>
+
+    <!-- ============ caveat chrome — degradation states of this source ============
+         Density budget §1.3: the top-cut population caveat lives in the hero
+         plate's lower band (§2.4); ★-scale legend lives in the plaque title +
+         footer. One caveat chip remains above the first data row. The
+         image-omission note is the footer honesty line. -->
+    <div class="cavrow">
+      <span class="caveat">SHARE-ONLY FEED — NO PAIRINGS PUBLISHED · <b>WINRATES UNAVAILABLE</b></span>
+    </div>
+
+    <!-- ============ deck switcher — two REAL published lists from this event ============ -->
+    <div class="switchrow" role="group" aria-label="published decklists from this event">
+      <button class="press swd" id="swd0" aria-pressed="true"></button>
+      <button class="press swd" id="swd1" aria-pressed="false"></button>
+    </div>
+  </div>
+
+  <!-- ============ hero DSEG readouts — L1 grid, 3 tiles (≤4, §1.3) ============
+       price + leader DSEGs demoted per attention-art-spec §3 item 8: price
+       moves to the list header; leader count (always 1, own board zone) is a
+       dim sub-line, not a readout. 390px fold: clock + 3 tiles = 4 DSEG ≤6. -->
+  <div class="hero">
+    <div class="press cell share">
+      <span class="lbl">TOP-CUT SHARE ¹</span>
+      <span class="seg"><span class="lit roll" id="shVal" data-target="0" data-dec="1">0.0</span><span class="unit"> %</span></span>
+      <span class="sub" id="shSub"></span>
+    </div>
+    <div class="press cell wrcell">
+      <span class="lbl">EVENT WIN RATE</span>
+      <span class="seg" id="wrVal" aria-label="win rate unavailable — share-only source">--.-</span>
+      <span class="sub">SHARE-ONLY SOURCE — NO PAIRINGS PUBLISHED</span>
+    </div>
+    <div class="press cell wide">
+      <div>
+        <span class="lbl">MAIN DECK</span><br>
+        <span class="seg"><span class="lit roll" id="mbVal" data-target="0" data-dec="0">0</span></span>
+        <span class="sub">CARDS · FROM LIST · NO SIDEBOARD IN OP · + 1 LEADER (OWN BOARD ZONE)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ copy / export ============ -->
+  <div class="exportrow">
+    <button class="press xbtn" id="copyBtn">⧉ COPY DECKLIST</button>
+    <button class="press xbtn ghosted" id="exportBtn" aria-label="export decklist (visual mockup)">▼ EXPORT .TXT</button>
+  </div>
+
+  <!-- ============ list · (curve + top-cut field) · inspector dock ============ -->
+  <div class="cols">
+
+    <div class="col-main">
+      <div class="sect"><span>DECK — <span id="mbSect"></span> + LEADER · REGISTRY GROUP ORDER</span><span id="mbLegend"></span></div>
+      <!-- price demoted from the L1 tile grid to the list header (§3 item 8) -->
+      <div class="press cell price">
+        <div>
+          <span class="lbl">DECK PRICE — LEADER + MAIN</span><br>
+          <span class="seg"><span class="unit" id="unitPre">$</span><span class="lit roll" id="prVal" data-target="0" data-dec="2">0.00</span><span class="unit" id="unitSuf"></span></span>
+          <span class="sub" id="prSub"></span>
+        </div>
+        <div class="curtoggle" role="group" aria-label="price currency">
+          <button class="press curbtn" id="btnUsd" aria-pressed="true">USD</button>
+          <button class="press curbtn" id="btnEur" aria-pressed="false">EUR</button>
+        </div>
+        <span class="sub pnote">ROW PRICES AS PRINTED BY ONEPIECE.LIMITLESSTCG.COM (CAPTURED 2026-07-08) · TOTAL RECOMPUTED FROM ROWS AT RENDER</span>
+      </div>
+      <div class="panel listpanel" id="mainCol"></div>
+    </div>
+
+    <div class="col-side">
+      <div class="sect"><span>COST CURVE — MAIN 50</span><span>CATALOGUE COST</span></div>
+      <div class="panel">
+        <svg id="curve" viewBox="0 0 328 148" role="img" aria-label="cost curve bar chart"></svg>
+        <div class="curvecap" id="curveCap"></div>
+      </div>
+
+      <div class="sect"><span>TOP-CUT FIELD — 64 LISTS ¹</span><a class="credit" href="https://onepiece.limitlesstcg.com/tournaments/431" target="_blank" rel="noopener">DATA: ONEPIECE.LIMITLESSTCG.COM ↗</a></div>
+      <div class="panel" id="fieldPanel"></div>
+    </div>
+
+    <aside class="col-dock" aria-label="card inspector">
+      <div class="docksticky">
+        <div class="sect"><span>CARD INSPECTOR</span><span>HOVER A ROW</span></div>
+        <div class="panel dockpanel">
+          <div class="dframe" id="dockFrame"></div>
+          <div class="dname" id="dockName"></div>
+          <div class="dmeta" id="dockMeta"></div>
+          <div class="dprice pdet" id="dockPrice"></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ============ footer ============ -->
+  <footer>
+    <div class="wordmark">METASURF<br><span class="l2">OP DECK VIEWER</span></div>
+    <div class="finecap" id="finecap">
+      PIT-WALL CONSOLE · ONE PIECE DECK VIEWER MOCKUP · DECKLISTS ARE REAL &amp; VERBATIM —
+      REGIONAL BIELEFELD, 2026-07-04, 1,541 PLAYERS, OP16
+      (<a href="https://onepiece.limitlesstcg.com/tournaments/431" target="_blank" rel="noopener">ONEPIECE.LIMITLESSTCG.COM/TOURNAMENTS/431</a>):
+      1ST LUKA FORJAN — PURPLE ENEL (LIST 6508) · 2ND MARC@@@1 — RED/BLACK KOBY (LIST 6509) ·
+      ¹ TOP-CUT SHARE: OFFLINE REGIONALS PUBLISH ONLY THE TOP 64 — ALL SHARES ON THIS PAGE ARE SHARE OF THE PUBLISHED TOP CUT, NOT FIELD SHARE ·
+      THIS SOURCE PUBLISHES NO PAIRINGS OR RECORDS → NO WINRATES SHOWN; OP MATCH DATA ELSEWHERE IN METASURF IS ONLINE-POPULATION ONLY (N=849 MATCHES) ·
+      CARD ATTRS (COST / POWER / COUNTER / TYPES / COLORS): PUNK-RECORDS CATALOGUE, COMMIT 96E41C4 (2026-07-03); COST FIELD MISSING ON SOME EVENT CARDS — DISCLOSED AT THE CURVE ·
+      PRICES: SOURCE ROW-PRICE COLUMNS AS PRINTED (USD / EUR), CAPTURED 2026-07-08 — DECK TOTALS RECOMPUTED FROM ROWS AT RENDER AND MATCH THE SOURCE'S PRINTED TOTALS ·
+      ★ SCALE: &lt;32 · 32–63 · 64–127 · 128–255 · 256+ ·
+      CARD IMAGES OMITTED — HOSTING/TOS DECISION PENDING (NO RECORDED OWNER DECISION ON BANDAI/LIMITLESS IMAGE HOSTING; EVERY CARD SLOT RENDERS THE COLOR-FRAMED NAME+ID PLATE) ·
+      SOURCE: <a href="https://onepiece.limitlesstcg.com" target="_blank" rel="noopener">ONEPIECE.LIMITLESSTCG.COM</a> — REQUIRED-CREDIT WORDING PENDING OWNER CONFIRMATION (NO LIMITLESS ENTRY IN THE ATTRIBUTION CONFIG)
+    </div>
+  </footer>
+
+</div>
+
+<!-- floating hover preview (fine pointer, below dock breakpoint) -->
+<div id="hoverPrev" aria-hidden="true"><div id="hoverFrame"></div><div class="hp-cap pdet" id="hoverCap"></div></div>
+
+<!-- tap modal (all inputs) -->
+<div id="modal" role="dialog" aria-modal="true" aria-label="card preview">
+  <div class="frame" id="modalFrame"></div>
+  <div class="mname" id="modalName"></div>
+  <div class="mprice pdet" id="modalPrice"></div>
+  <div class="mhint">TAP ANYWHERE TO CLOSE</div>
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =====================================================================
+   GROUND DATA — all verbatim from saved captures in the MetaSurf repo:
+   · decklists + row prices: tests/fixtures/
+     onepiece.limitlesstcg.com/t431-decklists.html (Regional Bielefeld,
+     2026-07-04, 1,541 players, OP16 — capture of 2026-07-08)
+   · NO image URLs: OP card images are omitted (no recorded owner ToS
+     decision on Bandai/Limitless hosting — attention-art-spec §2.4/§5.1);
+     every card slot renders the color-framed name+id plate instead.
+   · card attrs (category/colors/cost/power/counter/types/attributes):
+     data/punk-records english catalogue, commit 96e41c4 (2026-07-03)
+   · u/e = the source's printed ROW price (count × unit) in USD/EUR.
+     Unit prices are derived as row ÷ count at render. Deck totals are
+     recomputed from rows and equal the source's printed deck totals
+     ($156.21 / 139.28€ and $91.73 / 56.21€). Never edit these values.
+   ===================================================================== */
+const DECKS=[
+{
+  title:"Purple Enel", place:"1ST PLACE", first:true, pilot:"LUKA FORJAN",
+  deckColors:["Purple"], listUri:"https://onepiece.limitlesstcg.com/decks/list/6508",
+  topcutCount:9,   /* counted from the 64 published t431 standings rows */
+  cards:[
+   {g:"Leader",n:1,id:"OP15-058",nm:"Enel",u:0.14,e:0.2,cat:"Leader",col:["Purple"],cost:null,pow:5000,ctr:null,ty:["Sky Island"],at:["Special"]},
+   {g:"Character",n:4,id:"OP15-061",nm:"Ohm",u:0.68,e:0.6,cat:"Character",col:["Purple"],cost:1,pow:2000,ctr:1000,ty:["Sky Island","Vassals"],at:["Slash"]},
+   {g:"Character",n:4,id:"OP15-067",nm:"Shura",u:1.36,e:1.32,cat:"Character",col:["Purple"],cost:1,pow:2000,ctr:1000,ty:["Sky Island","Vassals"],at:["Slash"]},
+   {g:"Character",n:3,id:"OP12-071",nm:"Charlotte Pudding",u:3.45,e:1.53,cat:"Character",col:["Purple"],cost:1,pow:2000,ctr:1000,ty:["Big Mom Pirates"],at:["Wisdom"]},
+   {g:"Character",n:3,id:"OP15-066",nm:"Satori",u:0.72,e:0.63,cat:"Character",col:["Purple"],cost:1,pow:2000,ctr:1000,ty:["Sky Island","Vassals"],at:["Strike"]},
+   {g:"Character",n:4,id:"OP12-063",nm:"Vinsmoke Reiju",u:9.96,e:10.52,cat:"Character",col:["Purple"],cost:4,pow:5000,ctr:1000,ty:["The Vinsmoke Family","GERMA 66"],at:["Special"]},
+   {g:"Character",n:3,id:"OP09-072",nm:"Franky",u:2.61,e:1.35,cat:"Character",col:["Purple"],cost:4,pow:5000,ctr:1000,ty:["Straw Hat Crew"],at:["Strike"]},
+   {g:"Character",n:2,id:"OP10-067",nm:"Senor Pink",u:0.7,e:0.4,cat:"Character",col:["Purple"],cost:5,pow:6000,ctr:null,ty:["Donquixote Pirates"],at:["Special"]},
+   {g:"Character",n:4,id:"OP15-118",nm:"Enel",u:65.28,e:64.64,cat:"Character",col:["Purple"],cost:6,pow:8000,ctr:null,ty:["Sky Island"],at:["Special"]},
+   {g:"Event",n:4,id:"OP15-075",nm:"El Thor",u:0.48,e:0.44,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["Sky Island"],at:[]},
+   {g:"Event",n:4,id:"OP15-076",nm:"Lightning Beast Kiten",u:0.68,e:0.64,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["Sky Island"],at:[]},
+   {g:"Event",n:4,id:"OP15-077",nm:"Lightning Dragon",u:0.84,e:0.84,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["Sky Island"],at:[]},
+   {g:"Event",n:4,id:"OP15-078",nm:"Mamaragan",u:67.12,e:54.08,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["Sky Island"],at:[]},
+   {g:"Event",n:3,id:"OP15-074",nm:"Varie",u:0.48,e:0.42,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["Sky Island"],at:[]},
+   {g:"Event",n:1,id:"OP13-076",nm:"Divine Departure",u:0.93,e:1.34,cat:"Event",col:["Purple"],cost:null,pow:null,ctr:null,ty:["King of the Pirates","Roger Pirates"],at:[]},
+   {g:"Event",n:3,id:"OP05-077",nm:"Gamma Knife",u:0.78,e:0.33,cat:"Event",col:["Purple"],cost:2,pow:null,ctr:null,ty:["Heart Pirates"],at:[]}
+  ]
+},
+{
+  title:"Red/Black Koby", place:"2ND PLACE", first:false, pilot:"MARC@@@1",
+  deckColors:["Red","Black"], listUri:"https://onepiece.limitlesstcg.com/decks/list/6509",
+  topcutCount:1,   /* counted from the 64 published t431 standings rows */
+  cards:[
+   {g:"Leader",n:1,id:"OP11-001",nm:"Koby",u:0.13,e:0.06,cat:"Leader",col:["Red","Black"],cost:null,pow:5000,ctr:null,ty:["Navy","SWORD"],at:["Strike"]},
+   {g:"Character",n:4,id:"OP11-004",nm:"Kujyaku",u:4.36,e:2.56,cat:"Character",col:["Red"],cost:1,pow:null,ctr:1000,ty:["Navy","SWORD"],at:["Special"]},
+   {g:"Character",n:4,id:"OP11-082",nm:"Aramaki",u:0.72,e:0.36,cat:"Character",col:["Black"],cost:1,pow:2000,ctr:2000,ty:["Navy"],at:["Special"]},
+   {g:"Character",n:4,id:"OP11-096",nm:"Ripper",u:0.56,e:0.24,cat:"Character",col:["Black"],cost:1,pow:1000,ctr:1000,ty:["East Blue","Navy"],at:["Wisdom"]},
+   {g:"Character",n:3,id:"OP13-007",nm:"Ace & Sabo & Luffy",u:9.18,e:8.61,cat:"Character",col:["Red"],cost:1,pow:1000,ctr:2000,ty:["Goa Kingdom"],at:["Strike"]},
+   {g:"Character",n:4,id:"EB03-008",nm:"Hibari",u:1.0,e:1.0,cat:"Character",col:["Red"],cost:3,pow:5000,ctr:null,ty:["Navy","SWORD"],at:["Ranged"]},
+   {g:"Character",n:4,id:"EB04-047",nm:"Helmeppo",u:0.72,e:0.64,cat:"Character",col:["Black"],cost:3,pow:3000,ctr:2000,ty:["Navy","SWORD"],at:["Slash"]},
+   {g:"Character",n:4,id:"OP11-008",nm:"Doll",u:0.64,e:0.48,cat:"Character",col:["Red"],cost:4,pow:1000,ctr:1000,ty:["Navy"],at:["Strike"]},
+   {g:"Character",n:4,id:"PRB02-001",nm:"Koby",u:50.88,e:23.8,cat:"Character",col:["Red"],cost:4,pow:5000,ctr:1000,ty:["Navy","SWORD"],at:["Strike"]},
+   {g:"Character",n:3,id:"EB03-041",nm:"Kujyaku",u:0.72,e:0.66,cat:"Character",col:["Black"],cost:4,pow:6000,ctr:null,ty:["Navy","SWORD"],at:["Special"]},
+   {g:"Character",n:4,id:"OP11-092",nm:"Helmeppo",u:1.76,e:2.64,cat:"Character",col:["Black"],cost:6,pow:7000,ctr:null,ty:["Navy","SWORD"],at:["Slash"]},
+   {g:"Character",n:4,id:"EB04-044",nm:"Koby",u:2.36,e:2.36,cat:"Character",col:["Black"],cost:6,pow:7000,ctr:1000,ty:["Navy","SWORD"],at:["Strike"]},
+   {g:"Character",n:2,id:"EB04-003",nm:"Smoker & Tashigi",u:0.32,e:0.22,cat:"Character",col:["Red"],cost:8,pow:8000,ctr:null,ty:["Punk Hazard","Navy"],at:["Slash","Special"]},
+   {g:"Event",n:4,id:"OP11-099",nm:"I'm Gonna Be a Navy Officer!!!",u:0.96,e:0.52,cat:"Event",col:["Black"],cost:1,pow:null,ctr:null,ty:["East Blue","Navy"],at:[]},
+   {g:"Event",n:2,id:"OP14-096",nm:"Ground Death",u:17.42,e:12.06,cat:"Event",col:["Black"],cost:1,pow:null,ctr:null,ty:["The Seven Warlords of the Sea","Baroque Works"],at:[]}
+  ]
+}];
+/* NOTE: leader `cost` deliberately null — punk-records stores a value in that
+   field for Leaders, but its game meaning for the Leader zone is not verified
+   from data, so it is not displayed (no invented semantics). */
+
+/* top-cut field — labels + counts read/counted from the 64 published t431
+   standings rows (deck-link colour label + leader name span, verbatim). */
+const FIELD=[
+ {c:["Green","Blue"],   nm:"Luffy",       n:19},
+ {c:["Blue","Yellow"],  nm:"Nami",        n:18},
+ {c:["Purple"],         nm:"Enel",        n:9},
+ {c:["Purple","Yellow"],nm:"Rosinante",   n:4},
+ {c:["Red","Blue"],     nm:"Lucy",        n:3},
+ {c:["Black","Yellow"], nm:"Blackbeard",  n:2},
+ {c:["Black"],          nm:"Crocodile",   n:2},
+ {c:["Red","Black"],    nm:"Koby",        n:1},
+ {c:["Red","Green"],    nm:"Luffy & Ace", n:1},
+ {c:["Green"],          nm:"Mihawk",      n:1},
+ {c:["Purple"],         nm:"Sengoku",     n:1},
+ {c:["Black"],          nm:"Yamato",      n:1},
+ {c:["Red"],            nm:"Shanks",      n:1},
+ {c:["Red"],            nm:"Ace",         n:1}
+];
+const TOPCUT_N=64, ENTRIES=1541;
+
+/* ---------- OP registry vocabulary (game_ui_registry.games.onepiece) ---------- */
+const PAL={
+  Red:   {bg:'#d3492f', fg:'#0d0d12'},
+  Green: {bg:'#3e9c62', fg:'#0d0d12'},
+  Blue:  {bg:'#3b7bd0', fg:'#0d0d12'},
+  Purple:{bg:'#7b4fa6', fg:'#f3eafd'},
+  Black: {bg:'#2b2b33', fg:'#c9c4d2', rim:'#a6a1a0'},   /* near-black needs the bright rim */
+  Yellow:{bg:'#e0b73a', fg:'#0d0d12'}
+};
+const LET={Red:'R',Green:'G',Blue:'B',Purple:'P',Black:'K',Yellow:'Y'};   /* K = key plate */
+const ORDER=['Red','Green','Blue','Purple','Black','Yellow'];
+const GROUPS=['Leader','Character','Event','Stage'];   /* registry typeGroupOrder (Other unused here) */
+
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const sortCols=cols=>cols.slice().sort((a,b)=>ORDER.indexOf(a)-ORDER.indexOf(b));
+
+/* octagon pip — cut-corner silhouette; scale M (16px, lettered) / S (12px) */
+function octa(color,scale){
+  const p=PAL[color];
+  const rim=p.rim||'rgba(242,242,247,.25)';
+  return `<span class="opip ${scale==='m'?'m':''}" style="--prim:${rim};--pbg:${p.bg};--pfg:${p.fg}"><i>${scale==='m'?LET[color]:''}</i></span>`;
+}
+/* dual-colour deck atom: dense contexts get ONE split octagon (hard 50/50 diagonal,
+   first colour by pipOrder upper-left); identity slots get the fused lettered pair */
+function splitOcta(cols){
+  const cs=sortCols(cols);
+  if(cs.length<2) return octa(cs[0],'s');
+  const a=PAL[cs[0]].bg, b=PAL[cs[1]].bg;
+  return `<span class="opip" style="--prim:rgba(242,242,247,.35)"><i style="background:linear-gradient(135deg, ${a} 0 50%, ${b} 50% 100%)"></i></span>`;
+}
+function fusedPair(cols){
+  const cs=sortCols(cols);
+  return `<span class="octapair" role="img" aria-label="colors: ${cs.join(', ').toLowerCase()}">${cs.map(c=>octa(c,'m')).join('')}</span>`;
+}
+
+/* pip key legend — mandatory on OP pages; collapsed behind COLOR KEY ▸
+   (attention-art-spec §1.4.1 — the op-matchup-matrix KEY toggle is the
+   sanctioned pattern). The strip itself is unchanged. */
+document.getElementById('pipkey').innerHTML =
+  ORDER.map(c=>`<span>${octa(c,'m')} ${c.toUpperCase()}</span>`).join('');
+const keyToggle=document.getElementById('keyToggle'), pipkeyEl=document.getElementById('pipkey');
+keyToggle.addEventListener('click',()=>{
+  const open=pipkeyEl.hidden;
+  pipkeyEl.hidden=!open;
+  keyToggle.setAttribute('aria-expanded', open?'true':'false');
+  keyToggle.textContent=open?'COLOR KEY ▾':'COLOR KEY ▸';
+});
+
+/* ---------- price helpers: integer cents; row = source-printed row total ---------- */
+const CC=v=>Math.round(v*100);
+const rowC=(c,cur)=>CC(cur==='usd'?c.u:c.e);
+const eaC =(c,cur)=>Math.round(rowC(c,cur)/c.n);       /* unit derived: row ÷ count */
+const sumC=(cards,cur)=>cards.reduce((a,c)=>a+rowC(c,cur),0);
+function money(cents,cur){
+  const s=(cents/100).toFixed(2);
+  return cur==='usd' ? '$'+s : s+'€';
+}
+
+/* ---------- state ---------- */
+let DI=0;            /* active deck index */
+let CUR='usd';
+let ALL=[];          /* row registry for the active render */
+let lastDock=null, lastRow=null;
+const D=()=>DECKS[DI];
+
+/* ---------- quantized arcade roll-up (8 ticks, ≤600ms, snap exact) ---------- */
+function fmtVal(v,dec){ return dec===0 ? Math.round(v).toLocaleString('en-US') : v.toFixed(dec); }
+function rollup(el, target, dec){
+  if(RM){ el.textContent=fmtVal(target,dec); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/,/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v=start+(target-start)*(i/TICKS);
+    el.textContent=(i>=TICKS)?fmtVal(target,dec):v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      rollup(e.target, parseFloat(e.target.dataset.target), +e.target.dataset.dec);
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.4});
+
+/* ---------- color-framed card plate — the PRIMARY card rendering ----------
+   No card <img> anywhere on this page: OP posture is NO card images (no
+   recorded owner ToS decision on Bandai/Limitless hosting). Every card slot
+   (row / dock / hover / modal) renders this frame: name + set id on carbon,
+   rim = deck-color split. */
+function phHTML(card){
+  const cs=sortCols(card.col);
+  const a=PAL[cs[0]].bg, b=PAL[cs[1]||cs[0]].bg;
+  return `<span class="imgph" role="img" style="--pha:${a};--phb:${b}"
+    aria-label="${esc(card.nm)} ${card.id} — card image omitted, hosting decision pending">
+    <span class="phn">${esc(card.nm)}</span><span class="phi">${card.id}</span>
+    <span class="phx">IMAGE OMITTED — ToS PENDING</span></span>`;
+}
+function setCardPh(el,card){ el.innerHTML=phHTML(card); }
+
+/* ---------- one-shot glitch ---------- */
+function glitch(el){
+  if(RM) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+
+/* ---------- detail line (both currencies, current highlighted) ---------- */
+function detailHTML(c){
+  const line=cur=>`${c.n} × ${money(eaC(c,cur),cur)} EA = ${money(rowC(c,cur),cur)}`;
+  const cls=cur=>cur===CUR?'cur':'oth';
+  return `<span class="${cls('usd')}">${line('usd')}</span><br><span class="${cls('eur')}">${line('eur')}</span>`;
+}
+
+/* ---------- row + group builders ---------- */
+function costChip(c){
+  return c.cost==null
+    ? `<span class="cchip nul" title="no cost field in catalogue">–</span>`
+    : `<span class="cchip">${c.cost}</span>`;
+}
+function rowHTML(c){
+  const rid=ALL.push(c)-1;
+  const cs=sortCols(c.col);
+  return `<button class="crow" data-rid="${rid}"
+    aria-label="${c.n} ${esc(c.nm)} ${c.id} — colors: ${sortCols(c.col).join(', ').toLowerCase()} — show full card" aria-haspopup="dialog">
+    <span class="ct" aria-hidden="true">${c.n}</span>
+    <span class="thumbph" aria-hidden="true" style="--pha:${PAL[cs[0]].bg};--phb:${PAL[cs[1]||cs[0]].bg}"></span>
+    <span class="nm">${esc(c.nm)} <span class="cid">${c.id}</span></span>
+    <span class="pips" aria-hidden="true">${costChip(c)}${sortCols(c.col).map(x=>octa(x,'s')).join('')}</span>
+    <span class="pr" data-usd="${rowC(c,'usd')}" data-eur="${rowC(c,'eur')}"></span>
+  </button>`;
+}
+function grpHTML(label,cards){
+  const n=cards.reduce((a,c)=>a+c.n,0);
+  const body=cards.length
+    ? `<div class="rows">${cards.map(rowHTML).join('')}</div>`
+    : `<div class="grp-empty">— NO ${label.toUpperCase()} CARDS IN THIS LIST</div>`;
+  return `<div class="grp">
+    <div class="grp-head"><span>${label.toUpperCase()}</span><span class="gct">${n}</span>${cards.length?`<span class="gsub" data-usd="${sumC(cards,'usd')}" data-eur="${sumC(cards,'eur')}"></span>`:''}</div>
+    ${body}</div>`;
+}
+
+/* registry-order sort inside groups: cost asc (nulls last), count desc, id asc */
+function costOrder(a,b){
+  const ca=a.cost==null?99:a.cost, cb=b.cost==null?99:b.cost;
+  return ca-cb || b.n-a.n || a.id.localeCompare(b.id);
+}
+
+/* ---------- currency ---------- */
+const btnUsd=document.getElementById('btnUsd'), btnEur=document.getElementById('btnEur');
+function renderCur(first){
+  document.querySelectorAll('.pr').forEach(el=>{
+    const cents=+el.dataset[CUR];
+    el.textContent = CUR==='usd' ? '$'+(cents/100).toFixed(2) : (cents/100).toFixed(2)+'€';
+  });
+  document.querySelectorAll('.gsub').forEach(el=>{ el.textContent=money(+el.dataset[CUR],CUR); });
+  document.getElementById('mbLegend').textContent=
+    (CUR==='usd'?'$':'€')+'/ROW = SOURCE ROW PRICE · EA = ROW ÷ CT · TAP = CARD';
+  const tot=sumC(D().cards,CUR);
+  const prEl=document.getElementById('prVal');
+  prEl.dataset.target=(tot/100).toFixed(2);
+  if(first){ io.observe(prEl); } else { rollup(prEl, tot/100, 2); }
+  document.getElementById('unitPre').textContent = CUR==='usd' ? '$' : '';
+  document.getElementById('unitSuf').textContent = CUR==='usd' ? '' : ' €';
+  document.getElementById('prSub').textContent =
+    `Σ OF ${D().cards.length} SOURCE ROWS — COMPUTED FROM LIST`;
+  btnUsd.setAttribute('aria-pressed', CUR==='usd');
+  btnEur.setAttribute('aria-pressed', CUR==='eur');
+  if(lastDock) showDock(lastDock);
+}
+btnUsd.addEventListener('click',()=>{ if(CUR!=='usd'){CUR='usd'; renderCur();} });
+btnEur.addEventListener('click',()=>{ if(CUR!=='eur'){CUR='eur'; renderCur();} });
+
+/* ---------- cost curve: crisp vector SVG from catalogue cost fields ---------- */
+const SVGNS='http://www.w3.org/2000/svg';
+function drawCurve(){
+  const svg=document.getElementById('curve');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const main=D().cards.filter(c=>c.g!=='Leader');
+  const charted=main.filter(c=>c.cost!=null);
+  const missing=main.filter(c=>c.cost==null).reduce((a,c)=>a+c.n,0);
+  const BUCKETS=['0','1','2','3','4','5','6','7','8+'];
+  const counts=BUCKETS.map(()=>0);
+  charted.forEach(c=>{ counts[Math.min(8,c.cost)]+=c.n; });
+  const chartedN=counts.reduce((a,b)=>a+b,0);
+  const W=328,H=148,padL=8,padR=8,padT=26,padB=20;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxV=Math.max(...counts,1), yMax=Math.ceil(maxV/5)*5;
+  const bw=Math.floor(plotW/BUCKETS.length)-8;
+  const el=(t,at)=>{const e=document.createElementNS(SVGNS,t);for(const k in at)e.setAttribute(k,at[k]);return e;};
+  for(let g=5; g<=yMax; g+=5){
+    const y=Math.round(padT+plotH-(g/yMax)*plotH)+.5;
+    svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:y,y2:y,class:'grid'}));
+  }
+  counts.forEach((v,i)=>{
+    const x=Math.round(padL+i*(plotW/BUCKETS.length)+4);
+    const h=Math.round((v/yMax)*plotH);
+    const y=padT+plotH-h;
+    svg.appendChild(el('rect',{x,y:v?y:padT+plotH-2,width:bw,height:v?h:2,class:'bar'+(v?'':' zero')}));
+    if(v){ const tv=el('text',{x:x+bw/2,y:y-7,class:'vlab'}); tv.textContent=v; svg.appendChild(tv); }
+    const tx=el('text',{x:x+bw/2,y:H-6,class:'xlab'}); tx.textContent=BUCKETS[i];
+    svg.appendChild(tx);
+  });
+  const by=Math.round(padT+plotH)+.5;
+  svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:by,y2:by,class:'base'}));
+  document.getElementById('curveCap').textContent=
+    `CHARTED: ${chartedN} OF ${main.reduce((a,c)=>a+c.n,0)} MAIN — COST FROM PUNK-RECORDS CATALOGUE`+
+    (missing?` · NOT CHARTED: ${missing} CARDS WITHOUT COST FIELD IN CATALOGUE`:'');
+}
+
+/* ---------- top-cut field panel (¹ top-cut share, not field share) ---------- */
+function drawField(){
+  const maxN=Math.max(...FIELD.map(f=>f.n));
+  /* match on the leader CARD name from the list (data), not on splitting the
+     deck label — labels like "Luffy & Ace" are multi-word */
+  const leadNm=D().cards.find(c=>c.g==='Leader').nm;
+  document.getElementById('fieldPanel').innerHTML=
+    /* canonical provenance microline WINDOW · N · AS-OF — extension-spec §4.2 */
+    `<div class="prov">WINDOW 2026-07-04 · N=${TOPCUT_N} · AS-OF 2026-07-08</div>`+
+    FIELD.map(f=>{
+      const me = f.nm===leadNm && sortCols(f.c).join('/')===sortCols(D().deckColors).join('/');
+      const share=(f.n/TOPCUT_N*100).toFixed(1);
+      return `<div class="frow${me?' me':''}">
+        ${splitOcta(f.c)}
+        <span class="fnm"><span class="fc">${sortCols(f.c).join('/').toUpperCase()}</span> ${esc(f.nm.toUpperCase())}</span>
+        <span class="fbar" aria-hidden="true"><i style="width:${(f.n/maxN*100).toFixed(0)}%"></i></span>
+        <span class="fct">${f.n}</span>
+        <span class="fsh">${share}%</span>
+      </div>`;
+    }).join('')+
+    `<div class="footnote">¹ TOP-CUT SHARE: SHARE OF THE ${TOPCUT_N} PUBLISHED LISTS — NOT FIELD SHARE (${ENTRIES.toLocaleString('en-US')} ENTRIES, STANDINGS BELOW TOP 64 UNPUBLISHED)</div>`;
+}
+
+/* ---------- dock / hover / modal ---------- */
+const FINE=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const DOCKMQ=matchMedia('(min-width:1100px)');
+const hoverPrev=document.getElementById('hoverPrev'), hoverFrame=document.getElementById('hoverFrame'), hoverCap=document.getElementById('hoverCap');
+const modal=document.getElementById('modal'), modalFrame=document.getElementById('modalFrame'), modalName=document.getElementById('modalName'), modalPrice=document.getElementById('modalPrice');
+const dockFrame=document.getElementById('dockFrame'), dockName=document.getElementById('dockName'), dockMeta=document.getElementById('dockMeta'), dockPrice=document.getElementById('dockPrice');
+
+function metaHTML(c){
+  /* identity slot → scale-M lettered fused pair (extension-spec §1.2), not scale-S dots */
+  const bits=[fusedPair(c.col),
+    `<span>${c.cat.toUpperCase()}</span>`];
+  if(c.cost!=null) bits.push(`<span>COST ${c.cost}</span>`);
+  if(c.pow!=null)  bits.push(`<span>POWER ${c.pow.toLocaleString('en-US')}</span>`);
+  if(c.ctr!=null)  bits.push(`<span>COUNTER ${c.ctr.toLocaleString('en-US')}</span>`);
+  if(c.at&&c.at.length) bits.push(`<span>${c.at.join(' / ').toUpperCase()}</span>`);
+  bits.push(`<span>${c.ty.map(esc).join(' · ').toUpperCase()}</span>`);
+  return bits.join('<span aria-hidden="true">·</span>');
+}
+function showDock(c){
+  lastDock=c;
+  setCardPh(dockFrame,c);
+  dockName.textContent=c.nm+' · '+c.id;
+  dockMeta.innerHTML=metaHTML(c);
+  dockPrice.innerHTML=detailHTML(c);
+}
+function placeHover(e){
+  const pw=254, ph=400, m=14;   /* 244px image + frame — tokens §5.7 */
+  let x=e.clientX+m, y=e.clientY-ph/2;
+  if(x+pw>innerWidth-6) x=e.clientX-pw-m;
+  y=Math.max(6, Math.min(innerHeight-ph-6, y));
+  hoverPrev.style.left=x+'px'; hoverPrev.style.top=y+'px';
+}
+function bindRows(){
+  document.querySelectorAll('.crow').forEach(row=>{
+    const card=ALL[+row.dataset.rid];
+    /* rows carry the 22×30 color-framed plate as their primary rendering —
+       name + id sit beside it in the row text; the full name+id frame
+       renders in dock/hover/modal */
+    if(FINE){
+      row.addEventListener('pointerenter',e=>{
+        if(DOCKMQ.matches){ showDock(card); return; }
+        setCardPh(hoverFrame,card);
+        hoverCap.innerHTML=`<b>${esc(card.nm)}</b> ${card.id}<br>`+detailHTML(card);
+        hoverPrev.classList.add('on');
+        placeHover(e);
+      });
+      row.addEventListener('pointermove',e=>{ if(!DOCKMQ.matches) placeHover(e); });
+      row.addEventListener('pointerleave',()=>hoverPrev.classList.remove('on'));
+    }
+    row.addEventListener('click',()=>{
+      hoverPrev.classList.remove('on');
+      if(DOCKMQ.matches) showDock(card);
+      setCardPh(modalFrame,card);
+      modalName.textContent=card.nm+' · '+card.id;
+      modalPrice.innerHTML=metaHTML(card)+'<br>'+detailHTML(card);
+      modal.classList.add('on');
+      lastRow=row;
+      glitch(modalName);
+    });
+  });
+}
+function closeModal(){
+  modal.classList.remove('on');
+  if(lastRow) lastRow.focus();
+}
+modal.addEventListener('click',closeModal);
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('on')) closeModal(); });
+function onDockMQ(){
+  if(DOCKMQ.matches && !lastDock) showDock(D().cards[0]);
+  if(DOCKMQ.matches) hoverPrev.classList.remove('on');
+}
+DOCKMQ.addEventListener('change',onDockMQ);
+addEventListener('resize',onDockMQ);
+
+/* ---------- deck render (hero + tiles + list + curve + field) ---------- */
+function renderDeck(first){
+  const d=D();
+  ALL=[];
+  const leader=d.cards.find(c=>c.g==='Leader');
+
+  /* hero plate — split color field from the deck's grounded identity hues
+     (deckColors, verbatim from the source's deck-link colour label). Dual
+     identities = hard 45° split, first color by registry pipOrder upper-left
+     (ext §1.2 scaled to a band); mono identities = flat field. */
+  const fcs=sortCols(d.deckColors);
+  const hf=document.getElementById('heroField');
+  hf.style.setProperty('--fa', PAL[fcs[0]].bg);
+  hf.style.setProperty('--fb', PAL[fcs[1]||fcs[0]].bg);
+  const t=document.getElementById('deckTitle');
+  t.textContent=d.title;                       /* deck label verbatim from source */
+  if(!first) glitch(t);
+  /* T2 chips: place + axis + dim set-id + fused lettered pair. The OP16
+     format chip was cut from the plate (chip budget §1.3) — the format
+     lives in the event line and footer. */
+  document.getElementById('chipRow').innerHTML=
+    `<span class="chip${d.first?' first':''}">${d.place}</span>`+
+    `<span class="chip axis">LEADER</span>`+
+    `<span class="chip cid">${leader.id}</span>`+
+    fusedPair(leader.col);
+  document.getElementById('leaderMeta').innerHTML=
+    `LEADER CARD: <b>${esc(leader.nm)}</b> (${leader.id}) · POWER <b>${leader.pow.toLocaleString('en-US')}</b> · `+
+    `${leader.at.join('/').toUpperCase()} · ${leader.ty.map(esc).join(' · ').toUpperCase()} — PUNK-RECORDS CATALOGUE`;
+  /* livery = the static 4px grainband only (CSS ::after) — deck identity is
+     carried ONLY by the rimmed octagon chips above (extension-spec §1.4 firewall) */
+
+  /* pilot line */
+  document.getElementById('pilotLine').innerHTML=
+    `· PILOT <b>${esc(d.pilot)}</b> · ${d.place} · <a class="credit" href="${d.listUri}" target="_blank" rel="noopener">LIST ↗</a>`;
+
+  /* list — registry group order Leader → Character → Event → Stage */
+  const by={};
+  d.cards.forEach(c=>{ (by[c.g] ||= []).push(c); });
+  document.getElementById('mainCol').innerHTML=
+    GROUPS.map(gname=>grpHTML(gname,(by[gname]||[]).sort(costOrder))).join('');
+
+  /* tiles */
+  const mainN=d.cards.filter(c=>c.g!=='Leader').reduce((a,c)=>a+c.n,0);
+  const share=d.topcutCount/TOPCUT_N*100;
+  const set=(id,v,dec)=>{
+    const el=document.getElementById(id);
+    el.dataset.target=v;
+    if(first){ io.observe(el); } else { rollup(el, parseFloat(v), dec); }
+  };
+  set('shVal', share.toFixed(1), 1);
+  set('mbVal', mainN, 0);   /* leader count (always 1) demoted to the sub-line — §3 item 8 */
+  document.getElementById('shSub').textContent=
+    `${d.topcutCount}/${TOPCUT_N} LISTS · TOP-CUT ¹`;   /* short form — footnote ¹ explains */
+  document.getElementById('mbSect').textContent=mainN;
+
+  renderCur(first);
+  drawCurve();
+  drawField();
+  bindRows();
+  if(DOCKMQ.matches) showDock(leader);
+}
+
+/* ---------- deck switcher ---------- */
+const swBtns=[document.getElementById('swd0'),document.getElementById('swd1')];
+swBtns.forEach((b,i)=>{
+  const d=DECKS[i];
+  b.innerHTML=`${splitOcta(d.deckColors)} ${d.place.split(' ')[0]} · ${esc(d.title.toUpperCase())}`;
+  b.addEventListener('click',()=>{
+    if(DI===i) return;
+    DI=i;
+    swBtns.forEach((x,j)=>x.setAttribute('aria-pressed', j===i ? 'true':'false'));
+    renderDeck(false);
+  });
+});
+
+/* ---------- copy decklist (cards cited by set+number id) ---------- */
+function listText(){
+  const d=D();
+  const lead=d.cards.find(c=>c.g==='Leader');
+  const lines=[`// ${d.title} — ${d.place}, Regional Bielefeld 2026-07-04 (onepiece.limitlesstcg.com/tournaments/431)`,
+    `${lead.n} ${lead.nm} (${lead.id})  [Leader]`];
+  GROUPS.slice(1).forEach(g=>{
+    d.cards.filter(c=>c.g===g).forEach(c=>lines.push(`${c.n} ${c.nm} (${c.id})`));
+  });
+  return lines.join('\n')+'\n';
+}
+const copyBtn=document.getElementById('copyBtn');
+copyBtn.addEventListener('click',async()=>{
+  let ok=false;
+  try{ await navigator.clipboard.writeText(listText()); ok=true; }
+  catch(_){
+    const ta=document.createElement('textarea');
+    ta.value=listText(); document.body.appendChild(ta); ta.select();
+    try{ ok=document.execCommand('copy'); }catch(__){}
+    ta.remove();
+  }
+  const n=D().cards.reduce((a,c)=>a+c.n,0);
+  copyBtn.textContent = ok ? '✓ COPIED — '+n+' CARDS' : '✗ COPY BLOCKED';
+  glitch(copyBtn);
+  setTimeout(()=>{ copyBtn.textContent='⧉ COPY DECKLIST'; }, 1800);
+});
+const exportBtn=document.getElementById('exportBtn');
+exportBtn.addEventListener('click',()=>{
+  exportBtn.textContent='▼ EXPORT (MOCKUP)';
+  glitch(exportBtn);
+  setTimeout(()=>{ exportBtn.textContent='▼ EXPORT .TXT'; }, 1400);
+});
+
+/* ---------- DSEG clock ---------- */
+function tickClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent=
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 15000);
+
+/* ---------- ticker: duplicated track, ~35px/s, tap-to-pause ---------- */
+const tickerBar=document.getElementById('tickerbar');
+const tickerTrack=document.getElementById('tickertrack');
+const tickSeq=document.getElementById('tickseq');
+function syncTicker(){
+  tickSeq.nextElementSibling.innerHTML=tickSeq.innerHTML;
+  const w=tickSeq.getBoundingClientRect().width;
+  if(w>0) tickerTrack.style.animationDuration=(w/35).toFixed(2)+'s';
+}
+syncTicker();
+document.fonts.ready.then(syncTicker);
+const wirePause=document.getElementById('wirePause');
+function toggleTicker(){
+  const paused=tickerBar.classList.toggle('paused');
+  tickerBar.setAttribute('aria-pressed', paused?'true':'false');
+  wirePause.textContent = paused ? '▶' : '❚❚';   /* §5.1 glyph flip — visible, not aria-only */
+}
+tickerBar.addEventListener('click',toggleTicker);
+tickerBar.addEventListener('keydown',e=>{           /* Tap/Enter/Space — tokens §5.1 */
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleTicker(); }
+});
+
+/* ---------- boot ---------- */
+renderDeck(true);
+</script>
+</body>
+</html>

@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Events Browser — Pit-Wall Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PIT-WALL CONSOLE — EVENTS BROWSER (/events) — 2026-07-09
+   Built from docs/design-research/2026-07-09/pit-wall-tokens.md
+   + extension-spec.md. REVISED 2026-07-10 per attention-art-spec.md
+   (§3 fix #2): featured-event HERO PLATE (L0), filter console
+   collapsed behind FILT ▸, stat tiles cut 4→2 and merged into the
+   hero's lower band, feed rows calmed to meet the density budget
+   (≤6 DSEG above the fold at 390px). GROUNDING:
+   · MTG event rows: archetype-page-data.json (12 distinct real
+     MTGO events from the 717-deck Murktide sample, deduped by URI;
+     podiums = the Murktide finishes on file, never full standings).
+   · One Piece event rows: docs/notes/onepiece-limitless-observed-
+     schema.md (Regional Bielefeld t431: 1,541 players / Top 64
+     published; World Finals 2026 t424: 34 players / Top 8; play
+     fixture 6a462d78: 64 players, 33 drops, 4 byes).
+   · Riftbound: riftbound-games-ground.json — NO events exist;
+     the tab renders honest catalogue-only chrome, nothing faked.
+   Every number on this page is from those files or labeled
+   PLACEHOLDER / NOT CAPTURED. No Riot assets anywhere.
+   ============================================================ */
+
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --panel:#14141a;       /* raised surface */
+  --panel2:#191921;      /* second-step surface */
+  --line:#2b2b35;        /* hairlines */
+  --ink:#f2f2f7;         /* cool white */
+  --dim:#8a8a96;         /* secondary */
+  --win:#3b9dff;         /* favorable — blue side of CVD-safe diverging */
+  --loss:#ff7a1a;        /* signal orange — plaque stars, caveat keel */
+  --acc:#b45bff;         /* sector purple — 1st place / focus only */
+  --shadow:#000000;
+  /* riso grain — white-overlay variant (tokens §4.3); accent only */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{box-sizing:border-box; margin:0; padding:0; border-radius:0 !important;}
+html{background:var(--bg);}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23f2f2f7'%3E%3Crect x='7' width='3' height='6'/%3E%3Crect x='7' y='11' width='3' height='6'/%3E%3Crect y='7' width='6' height='3'/%3E%3Crect x='11' y='7' width='6' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23b45bff'/%3E%3C/svg%3E") 8 8, auto;}
+  /* interactive elements get the purple crosshair variant (tokens §3.5):
+     arms flip to --acc, center pip to ink white */
+  a, button, [role="button"]{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23b45bff'%3E%3Crect x='7' width='3' height='6'/%3E%3Crect x='7' y='11' width='3' height='6'/%3E%3Crect y='7' width='6' height='3'/%3E%3Crect x='11' y='7' width='6' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23f2f2f7'/%3E%3C/svg%3E") 8 8, pointer;}
+}
+:focus-visible{outline:2px solid var(--acc); outline-offset:2px;}
+
+.wrap{max-width:680px; margin:0 auto; padding:0 12px;}
+
+/* ============ mechanical press physics (tokens §3.3) ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  color:var(--ink);
+  font-family:inherit;
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;
+}
+
+/* ============ riso grainband (tokens §4.3) ============ */
+.grainband{
+  height:8px; position:relative; margin:0 0 14px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win));
+  opacity:.22; z-index:-1;
+}
+
+/* ============ wire ticker (tokens §5.1) ============
+   Structure per spec: fixed WIRE badge (Press Start 8px on --acc) as
+   static left chrome, scrolling track in the middle lane, and a
+   visible ❚❚/▶ pause affordance pinned right. */
+.tickerbar{
+  position:sticky; top:0; z-index:50;
+  background:#101017;
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:stretch;
+  /* no cursor:pointer here — [role="button"] picks up the purple
+     crosshair variant (tokens §3.5); ditto .gbtn/.sw/.erow below */
+}
+.wire-badge{
+  flex:none; display:flex; align-items:center;
+  font-family:'Press Start 2P',monospace; font-size:8px; line-height:1;
+  color:var(--bg); background:var(--acc);
+  padding:0 8px; letter-spacing:.05em;
+}
+.ticker-clip{flex:1; min-width:0; overflow:hidden; white-space:nowrap;}
+.wire-pause{
+  flex:none; display:flex; align-items:center;
+  font-size:9px; line-height:1; color:var(--dim);
+  padding:0 10px; border-left:1px solid var(--line);
+}
+.tickerbar.paused .wire-pause{color:var(--acc);}
+.ticker-track{
+  display:inline-flex; width:max-content;
+  animation:tick 42s linear infinite;
+  will-change:transform;
+}
+.tickerbar.paused .ticker-track{animation-play-state:paused;}
+.ticker-seq{
+  display:inline-block; padding:7px 0 7px 10px;
+  font-size:11px; letter-spacing:.04em; color:var(--dim);
+}
+.ticker-seq b{color:var(--ink); font-weight:700;}
+.ticker-seq .up{color:var(--win);}
+.ticker-seq .dn{color:var(--loss);}
+.ticker-seq .pu{color:var(--acc);}
+@keyframes tick{to{transform:translateX(-50%);}}
+
+/* ============ header ============ */
+.tophdr{
+  display:flex; align-items:flex-end; justify-content:space-between;
+  gap:8px; padding:14px 0 6px;
+}
+/* attention-spec §1.1: a page never has display type in two places
+   above the fold — the hero plate's event name carries the ONE
+   display statement now, so the page title demotes to compact mono
+   chrome (the deck-viewer back-row pattern). */
+.page-title{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700; font-size:13px; line-height:1.2; letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.page-title small{
+  display:block; font-size:10px; font-weight:400; letter-spacing:.14em;
+  color:var(--dim); margin-bottom:4px;
+}
+.clock{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;
+  font-size:22px; color:var(--ink); line-height:1;
+}
+
+/* ============ game picker (format picker pattern, tokens §5.11) ============ */
+.gamespicker{
+  display:flex; gap:8px; overflow-x:auto; padding:10px 0 4px;
+  scrollbar-width:none;
+}
+.gamespicker::-webkit-scrollbar{display:none;}
+.gbtn{
+  flex:none; min-height:44px; padding:8px 12px;
+  display:inline-flex; flex-direction:column; justify-content:center; gap:4px;
+  text-align:left;
+}
+.gbtn .gl{
+  font-family:'Press Start 2P',monospace; font-size:8px; line-height:1;
+  color:var(--dim);
+}
+.gbtn .gm{
+  font-size:8px; letter-spacing:.08em; color:var(--dim);
+}
+.gbtn.on{border-color:var(--ink);}
+.gbtn.on .gl{color:var(--ink);}
+/* maturity ink (ext-spec §0 / §1.4): trust chrome carries ZERO
+   performance ink — FULL reads in plain ink, not --win blue. The
+   orange on LIMITED is caveat ink (same hue as the caveat keel),
+   not a performance reading, so it stays. */
+.gbtn .gm.full{color:var(--ink);}
+.gbtn .gm.lim{color:var(--loss);}
+.gbtn .gm.cat{color:var(--dim);}
+/* ext-spec §0 livery slot #1: the switcher tile is the ONE liveried
+   surface — accent-hue keel per game (One Piece #e0b73a, Riftbound
+   #3aa7a3; MTG hue not specified in grounding, stays unliveried).
+   Wordmark + riso gradient recolor omitted in this mockup; maturity/
+   provenance chrome stays unliveried per §0. */
+.gbtn[data-game="onepiece"]{border-left:3px solid #e0b73a;}
+.gbtn[data-game="riftbound"]{border-left:3px solid #3aa7a3;}
+.gbtn.on[data-game="onepiece"]{border-left-color:#e0b73a;}
+.gbtn.on[data-game="riftbound"]{border-left-color:#3aa7a3;}
+
+/* ============ caveat chrome (extension spec §3) ============
+   inline-block, NOT inline-flex: the message is mixed text + <b>
+   nodes, and a flex container turns each into its own flex item —
+   long caveats fragmented into misaligned columns at 390px. */
+.caveat{
+  display:inline-block;
+  font:400 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; line-height:1.5;
+}
+.caveat b{color:var(--ink); font-weight:700;}
+.caveatrow{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 2px;}
+
+/* ============ provenance microline (extension spec §4.2) ============ */
+.prov{
+  font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  line-height:1.7; margin:6px 0 14px;
+}
+
+/* ============ featured-event HERO PLATE (attention-spec §2.4, §2.5) ============
+   L0 — the page's one hero zone. Typographic: events aren't cards, so
+   no borrowed card art — the riso color-field (win→acc gradient) with
+   overlay grain and the misregistered second pass gives the plate its
+   print-object depth. Scrim rule §2.2: the gradient hits the full
+   rgba(13,13,18,.88) carbon stop by 92px and the name/readout zone
+   starts at 96px, so no text or numeral ever sits on raw field. */
+.heroplate{
+  position:relative; overflow:hidden;
+  border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow);
+  background:var(--bg); min-height:200px;
+}
+.heroplate::before{
+  content:""; position:absolute; inset:0;
+  background-image:var(--grain), linear-gradient(115deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.heroplate::after{  /* misregistered second pass (tokens §4.3) */
+  content:""; position:absolute; inset:0; transform:translate(3px,3px);
+  background:linear-gradient(115deg, var(--acc), var(--win));
+  opacity:.18; mix-blend-mode:screen;
+}
+.hero-scrim{
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,
+    rgba(13,13,18,.12) 0px, rgba(13,13,18,.45) 46px,
+    rgba(13,13,18,.88) 92px, rgba(13,13,18,.93) 100%);
+}
+.hero-body{position:relative; z-index:2; padding:96px 14px 12px;}
+.hero-kick{font-size:9px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;}
+.hero-name{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 62; font-stretch:62%;
+  font-weight:900; font-size:40px; line-height:.92; letter-spacing:-.01em;
+  text-transform:uppercase; margin:4px 0 8px;
+}
+.hero-meta{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+}
+.hero-meta a{color:var(--win); text-decoration:none; border-bottom:1px dashed var(--win); white-space:nowrap;}
+.hero-read{display:flex; align-items:stretch; gap:8px; flex-wrap:wrap; margin-top:12px;}
+.hero-fieldcell{flex:1 1 140px; min-width:140px; width:auto;}
+.hero-fieldcell .seg{font-size:34px;}
+.hero-foot{margin-top:10px;}
+.hero-foot .prov{margin:6px 0 0;}
+/* calm strip between hero (L0) and console/feed (attention-spec §1.5):
+   one dim caption line, no chips, no DSEG, no borders */
+.hero-cap{font-size:9px; color:var(--dim); letter-spacing:.06em; margin:8px 0 14px;}
+
+/* ============ DSEG stat tiles (tokens §5.3) — cut 4→2 and merged
+   into the hero plate's lower band (attention-spec §3 fix #2).
+   Solid --panel plates over the scrimmed field, per §2.2. ============ */
+.tiles{display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:2 1 240px; min-width:0;}
+.cell{padding:10px 10px 9px; text-align:left; width:100%;}
+.cell .lbl{
+  font-size:9px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:6px;
+}
+.cell .seg{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;
+  font-size:24px; line-height:1.15; display:inline-block; margin-top:5px;
+}
+.cell .seg .lit{color:var(--ink);}
+.cell .seg .unlit{color:#3a3a48;}
+.cell .unit{font-size:11px; color:var(--dim); font-family:'JetBrains Mono',monospace;}
+.cell .sub{font-size:9px; color:var(--dim); margin-top:2px; display:block; letter-spacing:.04em;}
+/* tokens §2.2: value ink follows the metric's semantic role — a player
+   count is neutral, so the hero FIELD SIZE readout stays ink-white
+   (--loss orange is reserved for price/unfavorable readings). */
+
+/* ============ console filter/sort bar (tokens §5.4) ============
+   attention-spec §1.4.2: collapsed to ONE visible row (FILT ▸ + the
+   active-filter count chip); TYPE/MIN/SRC/SORT seg-groups disclose
+   in place inside .conmore. */
+.console{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:2px 2px 8px;
+  margin-bottom:8px;
+}
+.console[hidden]{display:none;}  /* riftbound: nothing to filter, console hides */
+.conmore{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  flex-basis:100%; padding-top:6px;
+}
+.conmore[hidden]{display:none;}
+/* ▾ is outside Press Start 2P's glyph coverage — render it in
+   JetBrains Mono, same pattern the tokens use elsewhere */
+.sw .dg{font-family:'JetBrains Mono',monospace; font-size:10px; line-height:1;}
+.conlbl{
+  flex:none; font-size:9px; letter-spacing:.1em; color:var(--dim);
+  text-transform:uppercase; padding:0 2px 0 6px;
+}
+.conlbl:first-child{padding-left:0;}
+.sw{
+  flex:none;
+  font-family:'Press Start 2P',monospace; font-size:8px; line-height:1;
+  min-height:38px; padding:0 9px; display:inline-flex; align-items:center; gap:5px;
+  color:var(--dim);
+}
+.sw.on{color:var(--bg); background:var(--ink); border-color:var(--ink);}
+.sw[hidden]{display:none;}
+.sw.clr{color:var(--loss);}
+.seggrp{display:inline-flex; flex:none;}
+.seggrp .sw:not(:first-child){border-left-width:0;}
+.con-count{
+  flex:none; font-size:9px; letter-spacing:1px; color:var(--acc); padding:0 6px;
+}
+
+/* ============ section headers / credits ============ */
+.sect{
+  font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  margin:8px 0 8px; display:flex; justify-content:space-between; align-items:center;
+  gap:8px; flex-wrap:wrap;
+}
+.sect .hd{color:var(--ink); font-weight:700;}
+.creditrow{display:inline-flex; gap:6px; flex-wrap:wrap;}
+.credit{
+  font-size:9px; font-weight:700; letter-spacing:.06em;
+  background:var(--panel2); border:1px solid var(--line);
+  padding:4px 7px; color:var(--ink); text-decoration:none;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.credit span{color:var(--dim); font-weight:400;}
+.credit:hover{border-color:var(--ink);}
+
+/* ============ star plaque + league badge (tokens §5.5) ============ */
+.plaque{
+  font-size:11px; letter-spacing:3px; white-space:nowrap;
+  padding:3px 4px 3px 7px; border:1px solid var(--line); background:var(--panel2);
+  line-height:1;
+}
+.plaque .on{color:var(--loss);}
+.plaque .off{color:#3a3a48;}   /* unlit segments stay visible — plaque, not ghost */
+.badge-league{
+  font-family:'Press Start 2P',monospace; font-size:7px; white-space:nowrap;
+  padding:5px 6px; border:1px solid #1f4e80; background:var(--panel2); color:var(--win);
+}
+.starlegend{font-size:9px; color:var(--dim); letter-spacing:.05em; margin:0 0 10px;}
+.starlegend .on{color:var(--loss);}
+
+/* ============ One Piece octagon pips (extension spec §1) ============
+   scale-M 16px (14px sat between the sanctioned 10px-S / 16px-M
+   steps). Rim is a real octagonal ring: outer clipped span carries
+   the rim color, inner clipped span carries the fill — an inset
+   box-shadow got clipped off at the four corner cuts, which mattered
+   most on the near-black K chip. */
+.opip{
+  display:inline-flex; width:16px; height:16px; padding:1px; flex:none;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+  vertical-align:-3px;
+}
+.opin{
+  display:flex; align-items:center; justify-content:center;
+  width:100%; height:100%;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+  font-family:'Press Start 2P',monospace; font-size:6px; line-height:1;
+}
+.pipkey{
+  font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px;
+}
+.pipkey .k{display:inline-flex; align-items:center; gap:4px;}
+
+/* ============ event feed rows (deck-feed grammar, tokens §5.11) ============ */
+.feedwrap{margin-bottom:18px;}
+.evt{margin-bottom:8px;}
+.erow{
+  width:100%; text-align:left;
+  display:grid; grid-template-columns:46px minmax(0,1fr) auto;
+  gap:4px 10px; align-items:center;
+  padding:9px 10px; font-size:12px; min-height:44px;
+}
+.erow.sel{border-color:var(--ink);}
+.erow .ed{line-height:1.25;}
+.erow .ed b{display:block; font-size:12px;}
+.erow .ed span{display:block; color:var(--dim); font-size:9px;}
+.erow .emid{min-width:0;}
+.erow .ename{
+  display:block; font-weight:700; font-size:12px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.erow .esub{
+  display:flex; align-items:center; gap:6px; margin-top:3px;
+  color:var(--dim); font-size:9px; letter-spacing:.05em; text-transform:uppercase;
+  white-space:nowrap; overflow:hidden;
+}
+.erow .esub span:not(.ttag){min-width:0; overflow:hidden; text-overflow:ellipsis;}
+/* attention-spec §1.5: feed rows are calm zones. The former Press
+   Start type chip prints as plain bold text (same data, no chip
+   chrome) so per-row chips stay ≤1 (the LEAGUE badge / star plaque)
+   and the 390px chip budget (§1.3) holds. */
+.ttag{color:var(--ink); font-weight:700; flex:none;}
+.erow .eright{display:flex; align-items:center; gap:8px; justify-content:flex-end;}
+.erow .en{text-align:right; line-height:1;}
+/* attention-spec §1.3/§1.5: row player counts print in JetBrains bold,
+   not DSEG — DSEG is rationed to the hero readout, the two tiles and
+   the clock so the ≤6-above-the-fold budget holds at 390px. */
+.erow .en .nval{font-weight:700; font-size:13px; color:var(--ink); display:block; line-height:1.1;}
+.erow .en .nval.unlit{color:#3a3a48;}
+.erow .en .nlbl{display:block; font-size:8px; color:var(--dim); letter-spacing:.1em; margin-top:2px;}
+.erow .caret{color:var(--dim); font-size:10px; flex:none;}
+.wideonly{display:none;}
+
+/* ============ podium (top finishes) panel ============ */
+.podium{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:0 0 10px; margin:-4px 0 12px; position:relative;
+}
+.podium::before{  /* riso accent strip */
+  content:""; position:absolute; top:0; left:0; right:0; height:4px; z-index:1;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  pointer-events:none;
+}
+.podium .p-h{
+  display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+  padding:12px 12px 6px;
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+}
+.podium .p-h b{color:var(--ink);}
+.podium .p-h a{color:var(--win); text-decoration:none; border-bottom:1px dashed var(--win); white-space:nowrap; font-size:10px;}
+.podium .p-scope{margin:2px 12px 8px; display:flex;}
+.prow{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto;
+  gap:4px 10px; align-items:center;
+  padding:8px 12px; border-top:1px dashed var(--line); font-size:12px;
+}
+.prow .place{
+  font-family:'Press Start 2P',monospace; font-size:7px; line-height:1;
+  padding:5px 6px; border:1px solid var(--line); background:var(--panel2);
+  color:var(--ink); white-space:nowrap; min-width:44px; text-align:center;
+}
+.prow .place.first{color:var(--acc); border-color:var(--acc);}
+.prow .pmid{min-width:0;}
+.prow .pp{font-weight:700; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.prow .pd{
+  color:var(--dim); font-size:10px; display:flex; align-items:center; gap:5px;
+  white-space:nowrap; overflow:hidden; margin-top:2px;
+}
+.prow .pd b{color:var(--ink); font-weight:700;}
+.prow .pd .idchip{color:var(--dim); font-size:9px;}
+.axchip{
+  font-family:'Press Start 2P',monospace; font-size:7px; line-height:1;
+  padding:3px 4px; border:1px solid var(--line); background:var(--panel2);
+  color:var(--dim); flex:none;
+}
+.prow .pres{
+  font-family:'Press Start 2P',monospace; font-size:7px; white-space:nowrap;
+  padding:5px 6px; border:1px solid var(--line); background:var(--panel2);
+}
+.prow .pres.first{color:var(--acc); border-color:var(--acc);}
+.prow.placeholder{border-left:1px dashed #3a3a48;}
+.prow.placeholder .pp, .prow.placeholder .pd{color:var(--dim); font-weight:400;}
+.phchip{
+  font-family:'Press Start 2P',monospace; font-size:7px; line-height:1;
+  padding:3px 4px; border:1px dashed #3a3a48; background:var(--panel2);
+  color:var(--dim); flex:none;
+}
+/* — is outside Press Start 2P's coverage — render it in JetBrains Mono
+   inside the place chip (same workaround as the ▾ .dg in the console) */
+.prow .place .dg{font-family:'JetBrains Mono',monospace; font-size:10px; line-height:1;}
+.pnotes{
+  margin:8px 12px 0; font-size:9px; color:var(--dim); letter-spacing:.06em;
+  text-transform:uppercase; line-height:1.7;
+  border-top:1px dashed var(--line); padding-top:8px;
+}
+
+/* ============ empty state (riftbound) — full chrome, unlit ============ */
+.emptyfeed{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:14px 12px; margin-bottom:18px;
+}
+.emptyfeed .eseg{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;
+  font-size:34px; color:#3a3a48; display:block; margin:6px 0 2px;
+}
+.emptyfeed .ecap{font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; line-height:1.7;}
+.catplate{
+  margin-top:12px; padding:10px; background:var(--panel2); border:1px solid var(--line);
+  font-size:10px; color:var(--dim); letter-spacing:.05em; text-transform:uppercase; line-height:1.8;
+}
+.catplate b{color:var(--ink);}
+
+/* ============ rail dock (>=1100px) ============ */
+.rail{display:none;}
+.dockempty{
+  border:1px dashed #3a3a48; padding:18px 14px;
+  font-size:10px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase;
+  text-align:center; line-height:1.8;
+}
+
+/* ============ one-shot RGB-split glitch (tokens §6.3) ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{animation:glitch 240ms steps(2,jump-none) 1;}
+
+/* ============ footer ============ */
+footer{margin:34px 0 26px;}
+.wordmark{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 62; font-stretch:62%;
+  font-weight:900; text-transform:uppercase;
+  font-size:46px; line-height:.9; letter-spacing:-.01em;
+}
+.wordmark .l2{color:#3a3a46;}
+.finecap{font-size:10px; color:var(--dim); margin-top:12px; letter-spacing:.08em; line-height:1.7;}
+.finecap a{color:var(--win); text-decoration:none; border-bottom:1px dashed var(--win);}
+
+/* ============ mid widening ============ */
+@media (min-width:720px){
+  .hero-name{font-size:56px;}
+  .wordmark{font-size:72px;}
+}
+
+/* ============ widescreen console (>=1100px, tokens §7.3) ============
+   Main feed keeps the left lane; the podium docks into a sticky
+   right instrument rail so tapped telemetry is always visible. */
+@media (min-width:1100px){
+  .wrap{
+    max-width:1440px; padding:0 32px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 400px;
+    column-gap:24px;
+    grid-template-areas:
+      "top    top"
+      "pick   pick"
+      "hero   hero"
+      "cap    cap"
+      "main   rail"
+      "foot   foot";
+  }
+  .tophdr{grid-area:top;}
+  .gamespicker{grid-area:pick;}
+  .heroplate{grid-area:hero;}
+  .hero-cap{grid-area:cap;}
+  .hero-name{font-size:64px;}
+  .hero-body{padding:110px 20px 16px;}
+  .hero-fieldcell{flex:0 1 260px;}
+  .hero-fieldcell .seg{font-size:40px;}
+  .tiles{gap:12px; flex:0 1 460px;}
+  .cell{padding:14px 14px 12px;}
+  .cell .seg{font-size:32px;}
+  .zone-main{grid-area:main; min-width:0;}
+  footer{grid-area:foot;}
+  .rail{
+    grid-area:rail; display:block;
+    border-left:1px solid var(--line); padding-left:24px;
+    position:sticky; top:38px; align-self:start;
+    max-height:calc(100dvh - 48px); overflow-y:auto; scrollbar-width:none;
+  }
+  .rail::-webkit-scrollbar{display:none;}
+  .wideonly{display:inline;}
+  .erow{grid-template-columns:52px minmax(0,1fr) auto; padding:11px 12px;}
+}
+
+/* ============ reduced-motion contract (tokens §6.6, §5.1) ============
+   §5.1: the pause hint hides under RM — a static ticker has nothing
+   to pause, so the ❚❚ affordance would be a dead control. The JS
+   also strips the tickerbar's button semantics under RM. */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;}
+  .wire-pause{display:none;}
+  .glitch{animation:none;}
+  .press, .press:active{transition:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ results wire ticker — real grounded results only ============
+     tokens §5.1: WIRE badge is static left chrome (Press Start 8px on --acc),
+     pause state shows as a visible ❚❚/▶ glyph flip on the right. -->
+<div class="tickerbar" id="tickerbar" role="button" tabindex="0" aria-pressed="false" aria-label="events wire feed — tap to pause">
+  <span class="wire-badge" aria-hidden="true">WIRE</span>
+  <div class="ticker-clip">
+    <div class="ticker-track" id="tickertrack">
+      <span class="ticker-seq" id="tickseq">
+        <!-- tokens §1.2: --acc is best-in-class only ("scarcity is the
+             point") — the games count is generic chrome, so it rides dim;
+             purple below is reserved for the 1st-place result.
+             JetBrains surfaces (ticker/caveats/scope) print thousands
+             with commas; DSEG readouts stay comma-free (no comma glyph). -->
+        3 GAMES ON CONSOLE &nbsp;·&nbsp; REGIONAL BIELEFELD 2026-07-04 · <b>1,541 PLAYERS</b> · <span class="pu">1ST LUKA FORJAN — PURPLE ENEL</span> &nbsp;·&nbsp; MODERN CHALLENGE 32 2024-06-14 · <b>1ST O_DANIELAKOS</b> &nbsp;·&nbsp; MODERN CHALLENGE 64 2024-05-13 · <b>1ST MOGGED</b> &nbsp;·&nbsp; MODERN LEAGUE 2024-06-19 · <span class="up">5-0 MORRISON90</span> &nbsp;·&nbsp; WORLD FINALS 2026 · 34 PLAYERS · TOP 8 PUBLISHED &nbsp;·&nbsp; <span class="dn">RIFTBOUND · CATALOGUE ONLY — NO MATCH DATA</span> &nbsp;·&nbsp;
+      </span>
+      <span class="ticker-seq" aria-hidden="true"></span>
+    </div>
+  </div>
+  <span class="wire-pause" id="wirePause" aria-hidden="true">❚❚</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ header ============ -->
+  <div class="tophdr">
+    <h1 class="page-title"><small>METASURF · /EVENTS</small>Events</h1>
+    <div class="clock" aria-label="local time"><span id="clock">--:--</span></div>
+  </div>
+
+  <!-- ============ game switcher w/ maturity chips (ext spec §0) ============
+       plain button group, NOT role=tablist: there is no discrete tabpanel
+       per game (the whole page re-renders), and tablist without arrow-key
+       roving-tabindex is a broken contract — aria-pressed buttons are the
+       honest semantics here. -->
+  <div class="gamespicker" role="group" aria-label="game and format">
+    <button class="press gbtn on" aria-pressed="true" data-game="mtg">
+      <span class="gl">MTG · MODERN</span>
+      <span class="gm full">FULL TELEMETRY</span>
+    </button>
+    <button class="press gbtn" aria-pressed="false" data-game="onepiece">
+      <span class="gl">ONE PIECE</span>
+      <span class="gm lim">LIMITED SAMPLE — 849 ONLINE MATCHES</span>
+    </button>
+    <button class="press gbtn" aria-pressed="false" data-game="riftbound">
+      <span class="gl">RIFTBOUND</span>
+      <span class="gm cat">CATALOGUE ONLY — NO MATCH DATA</span>
+    </button>
+  </div>
+
+  <!-- ============ FEATURED EVENT — HERO PLATE (attention-spec §2.5, §3 fix #2) ============
+       L0. Typographic hero: events aren't cards, so no borrowed art —
+       the riso color-field carries the featured event's name (the
+       page's one display-type statement), its star plaque, and its
+       field size as the lead DSEG readout. Featured = largest
+       published field in the current game's FULL feed (most recent on
+       ties), computed at render time from the same grounded data as
+       the rows — never hardcoded, never invented. Stat tiles are cut
+       4→2 and merged into the lower band; page caveats + provenance
+       ride the plate's foot per §2.4 ("the plate is still honest
+       chrome"). Riftbound renders the unlit NO-EVENTS variant. -->
+  <section class="heroplate" id="hero" aria-label="featured event">
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <div class="hero-body">
+      <div class="hero-kick" id="heroKick">FEATURED EVENT</div>
+      <h2 class="hero-name" id="heroName">—</h2>
+      <div class="hero-meta" id="heroMeta"></div>
+      <div class="hero-read">
+        <div class="press cell hero-fieldcell">
+          <span class="lbl">FIELD SIZE</span>
+          <span class="seg" id="heroSeg"><span class="unlit">--</span></span>
+          <span class="sub" id="heroSub">—</span>
+        </div>
+        <div class="tiles">
+          <div class="press cell">
+            <span class="lbl">EVENTS SHOWN</span>
+            <span class="seg" id="tEvents"><span class="lit">0</span></span>
+            <span class="sub">COMPUTED FROM FEED</span>
+          </div>
+          <div class="press cell">
+            <span class="lbl">PLAYERS TOTAL</span>
+            <span class="seg" id="tPlayers"><span class="lit">0</span></span>
+            <span class="sub">SUM OF PUBLISHED FIELDS</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-foot">
+        <div class="caveatrow" id="caveats"></div>
+        <div class="prov" id="prov"></div>
+      </div>
+    </div>
+  </section>
+  <!-- calm strip (attention-spec §1.5): one dim line, chip- and DSEG-free -->
+  <div class="hero-cap">HERO = LARGEST PUBLISHED FIELD ON FILE · TILES RECOMPUTE FROM THE FILTERED LIST AT RENDER TIME — NEVER HARDCODED</div>
+
+  <!-- ============ main column: console + feed ============ -->
+  <div class="zone-main">
+
+    <!-- console filter/sort bar — collapsed to ONE row (attention-spec
+         §1.4.2): FILT ▸ discloses the full seg-group console in place;
+         the active-filter count chip stays visible when collapsed. -->
+    <div class="console" id="console" role="group" aria-label="event filters and sort">
+      <button class="press sw" id="filtBtn" aria-expanded="false" aria-controls="conMore">FILT <span class="dg">▸</span></button>
+      <span class="con-count" id="conCount" aria-live="polite"></span>
+      <div class="conmore" id="conMore" hidden>
+        <span class="conlbl">TYPE</span>
+        <span class="seggrp" id="typeGrp"></span>
+        <span class="conlbl">MIN FIELD</span>
+        <span class="seggrp" id="minGrp"></span>
+        <span class="conlbl">SRC</span>
+        <span class="seggrp" id="srcGrp"></span>
+        <span class="conlbl">SORT</span>
+        <span class="seggrp" id="sortGrp">
+          <button class="press sw on" data-sort="date" aria-pressed="true">DATE <span class="dg">▾</span></button>
+          <button class="press sw" data-sort="players" aria-pressed="false">PLAYERS <span class="dg">▾</span></button>
+        </span>
+        <button class="press sw clr" id="clrBtn" hidden>CLR</button>
+      </div>
+    </div>
+
+    <!-- feed header + attribution slots (ext spec §4.1) -->
+    <div class="sect">
+      <span class="hd">EVENT FEED</span>
+      <span class="creditrow" id="credits"></span>
+    </div>
+    <div class="starlegend">GRADE = FIELD SIZE · <span class="on">★</span>&lt;32 · <span class="on">★★</span>32–63 · <span class="on">★★★</span>64–127 · <span class="on">★★★★</span>128–255 · <span class="on">★★★★★</span>256+ · LEAGUE = 5-0, SIZE UNREPORTED</div>
+    <div class="pipkey" id="pipkey" hidden></div>
+
+    <!-- no aria-live here: the whole list re-renders on every filter change
+         and would re-announce in full. Live regions are scoped to the
+         con-count readout and the podium instead. -->
+    <div class="feedwrap" id="feed"></div>
+
+  </div>
+
+  <!-- ============ sticky instrument rail (>=1100px) ============ -->
+  <aside class="rail" aria-label="event telemetry dock">
+    <div class="sect"><span class="hd">EVENT TELEMETRY</span><span>DOCK</span></div>
+    <div id="dock">
+      <div class="dockempty" id="dockEmpty">TAP AN EVENT ROW —<br>TOP FINISHES DOCK HERE</div>
+    </div>
+  </aside>
+
+  <!-- ============ footer ============ -->
+  <footer>
+    <div class="grainband" role="presentation" style="margin-bottom:18px"></div>
+    <div class="wordmark">METASURF<br><span class="l2">EVENTS WIRE</span></div>
+    <div class="finecap" id="finecap">
+      PIT-WALL CONSOLE · EVENTS BROWSER MOCKUP · 2026-07-09 · ATTENTION-HIERARCHY REVISION 2026-07-10 PER ATTENTION-ART-SPEC.MD (FEATURED-EVENT HERO PLATE · FILT ▸ CONSOLE · 2 MERGED TILES) ·
+      MTG ROWS: 12 REAL MTGO EVENTS FROM THE MURKTIDE SAMPLE (717 DECKS / 234 EVENTS, 2024-04-01 → 2024-06-19) — <a href="https://www.mtgo.com/decklists" target="_blank" rel="noopener">DECKLISTS FROM MAGIC ONLINE (MTGO.COM)</a> ·
+      ONE PIECE ROWS: OBSERVED 2026-07-08 FROM <a href="https://onepiece.limitlesstcg.com" target="_blank" rel="noopener">ONEPIECE.LIMITLESSTCG.COM</a> (OFFLINE MAJORS DB) AND <a href="https://play.limitlesstcg.com" target="_blank" rel="noopener">PLAY.LIMITLESSTCG.COM</a> (ONLINE API) ·
+      RIFTBOUND: NO EVENT DATA EXISTS — CATALOGUE FACTS FROM THE RIFTCODEX CAPTURE OF 2026-07-08; NO RIOT ASSETS ·
+      NO TOPDECK.GG-SOURCED EVENTS IN THIS FEED — WHEN PRESENT, THE REQUIRED "DATA PROVIDED BY TOPDECK.GG" CHIP RENDERS IN THE FEED HEADER WITH A LINK ·
+      PODIUMS SHOW ONLY FINISHES ON FILE; MISSING NAMES/DATES ARE PRINTED AS NOT CAPTURED, NEVER GUESSED ·
+      PRODUCTION PODIUMS RENDER FULL EVENT TOP-8S FROM STANDINGS — THE SINGLE-ARCHETYPE (MURKTIDE-ONLY) PODIUM HERE IS A GROUNDING CONSTRAINT OF THIS MOCKUP, NOT THE PRODUCT INTENT
+    </div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ============================================================
+   GROUNDED DATA.
+   · mtg.events: deduped by URI from archetype-page-data.json
+     (notable + latest). finishes[] = the Izzet Murktide rows on
+     file for that event — real players, real results.
+   · onepiece.events: from docs/notes/onepiece-limitless-observed-
+     schema.md. Missing fields carry null and are PRINTED as not
+     captured — never invented.
+   · riftbound: no events exist (riftbound-games-ground.json,
+     gaps_and_honest_limits[0]).
+   OP pip hues verbatim from game_ui_registry.games.onepiece.
+   ============================================================ */
+const OP_PIPS = {
+  Red:    {bg:'#d3492f', fg:'#0d0d12', k:'R'},
+  Green:  {bg:'#3e9c62', fg:'#0d0d12', k:'G'},
+  Blue:   {bg:'#3b7bd0', fg:'#0d0d12', k:'B'},
+  Purple: {bg:'#7b4fa6', fg:'#f3eafd', k:'P'},
+  Black:  {bg:'#2b2b33', fg:'#c9c4d2', k:'K', rim:'#a6a1a0'},
+  Yellow: {bg:'#e0b73a', fg:'#0d0d12', k:'Y'}
+};
+
+const GAMES = {
+  mtg: {
+    types: ['CHALLENGE','PRELIM','LEAGUE'],
+    caveats: [],
+    /* extension-spec §4.2 canonical order: WINDOW · N · AS-OF (+ source) */
+    prov: 'WINDOW 2024-05-13 → 2024-06-19 · 12 EVENTS ON FILE · AS-OF 2026-07-09 · SRC MTGO.COM · MINED FROM THE MURKTIDE SAMPLE — 717 DECKS / 234 EVENTS',
+    /* extension-spec §4.1: mtgo.com is required:false in the ground
+       api_shapes — non-required credits appear in the footnote only
+       (see footer finecap), never as header credit chips. */
+    credits: [],
+    podiumScope: 'IZZET MURKTIDE FINISHES ON FILE — FULL EVENT STANDINGS NOT IN THIS MOCKUP’S GROUNDING',
+    events: [
+      {name:'Modern League', date:'2024-06-19', type:'LEAGUE', players:null, league:true, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-league-2024-06-198225',
+       finishes:[
+         {player:'Morrison90', deck:'Izzet Murktide', result:'5-0'},
+         {player:'i_b_TRUE',   deck:'Izzet Murktide', result:'5-0'}
+       ],
+       notes:['MTGO LEAGUE — FIELD SIZE UNREPORTED · ONLY 5-0 LISTS PUBLISHED']},
+      {name:'Modern Preliminary', date:'2024-06-19', type:'PRELIM', players:12, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647523',
+       finishes:[ {player:'Jkutici', deck:'Izzet Murktide', result:'0-2'} ]},
+      {name:'Modern Preliminary', date:'2024-06-19', type:'PRELIM', players:20, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647527',
+       finishes:[
+         {player:'ohN',    deck:'Izzet Murktide', result:'2-2'},
+         {player:'ara231', deck:'Izzet Murktide', result:'0-3'}
+       ]},
+      {name:'Modern Preliminary', date:'2024-06-19', type:'PRELIM', players:42, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647531',
+       finishes:[
+         {player:'416FrowningTable', deck:'Izzet Murktide', result:'3-1'},
+         {player:'Nanovo',           deck:'Izzet Murktide', result:null}
+       ]},
+      {name:'Modern Challenge 32', date:'2024-06-18', type:'CHALLENGE', players:66, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520',
+       finishes:[
+         {player:'CrazyMorango', deck:'Izzet Murktide', result:'5th Place'},
+         {player:'Joryago',      deck:'Izzet Murktide', result:'23th Place'},
+         {player:'Alan07',       deck:'Izzet Murktide', result:'30th Place'},
+         {player:'Ale_Mtg',      deck:'Izzet Murktide', result:'33th Place'},
+         {player:'O_danielakos', deck:'Izzet Murktide', result:'35th Place'}
+       ]},
+      {name:'Modern Challenge 64', date:'2024-06-15', type:'CHALLENGE', players:64, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1512647467',
+       finishes:[ {player:'Shadowz2005', deck:'Izzet Murktide', result:'5th Place'} ]},
+      {name:'Modern Challenge 64', date:'2024-06-15', type:'CHALLENGE', players:121, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1512647476',
+       finishes:[ {player:'Senzacolpa', deck:'Izzet Murktide', result:'7th Place'} ]},
+      {name:'Modern Challenge 32', date:'2024-06-14', type:'CHALLENGE', players:81, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1412647457',
+       finishes:[ {player:'O_danielakos', deck:'Izzet Murktide', result:'1st Place'} ]},
+      {name:'Modern Challenge 32', date:'2024-06-14', type:'CHALLENGE', players:83, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1412647447',
+       finishes:[ {player:'Parrit', deck:'Izzet Murktide', result:'5th Place'} ]},
+      {name:'Modern Challenge 64', date:'2024-06-04', type:'CHALLENGE', players:68, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-64-2024-06-0412643104',
+       finishes:[ {player:'FerMTG', deck:'Izzet Murktide', result:'5th Place'} ]},
+      {name:'Modern Challenge 64', date:'2024-05-21', type:'CHALLENGE', players:70, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-64-2024-05-2112638735',
+       finishes:[ {player:'O_danielakos', deck:'Izzet Murktide', result:'2nd Place'} ]},
+      {name:'Modern Challenge 64', date:'2024-05-13', type:'CHALLENGE', players:68, source:'MTGO.COM',
+       url:'https://www.mtgo.com/decklist/modern-challenge-64-2024-05-1312637347',
+       finishes:[ {player:'Mogged', deck:'Izzet Murktide', result:'1st Place'} ]}
+    ]
+  },
+
+  onepiece: {
+    types: ['REGIONAL','FINALS','ONLINE'],
+    caveats: [
+      'ONLINE POPULATION ONLY · <b>N=849 MATCHES</b> — MATCH/WR DATA IS PLAY.LIMITLESSTCG ONLY',
+      'OFFLINE MAJORS PUBLISH TOP CUT ONLY — <b>NO PAIRINGS</b>, RANK+PLAYER STANDINGS'
+    ],
+    prov: 'MAJORS DB COVERAGE FROM 2025-12-13 · 3 EVENTS EMBEDDED IN THIS MOCKUP · CAPTURED 2026-07-08',
+    credits: [
+      {label:'DATA: ONEPIECE.LIMITLESSTCG.COM', url:'https://onepiece.limitlesstcg.com', title:'Offline majors DB — robots.txt wide open, owner-cleared source'},
+      {label:'DATA: PLAY.LIMITLESSTCG.COM', url:'https://play.limitlesstcg.com', title:'Online + platform-run events API — keyless, owner-cleared source'}
+    ],
+    pipkey: true,
+    events: [
+      {name:'Regional Bielefeld', date:'2026-07-04', type:'REGIONAL', players:1541, source:'ONEPIECE.LIMITLESSTCG.COM',
+       url:'https://onepiece.limitlesstcg.com/tournaments', urlLabel:'SOURCE INDEX ↗', era:'OP16', fid:'t431',
+       scope:'TOP-CUT SHARE — TOP 64 PUBLISHED OF 1,541 ENTRIES',
+       finishes:[
+         {player:'Luka Forjan', deckOP:{colors:['Purple'], leader:'Enel', label:'Purple Enel', id:'OP15-058'}, result:'1st'},
+         {player:'Marc@@@1', deckNote:'DECK NOT IN GROUNDING', result:'2nd'}
+       ],
+       notes:['RANKS 3–64 PUBLISHED ON SOURCE — NOT EMBEDDED IN THIS MOCKUP',
+              'OFFLINE EVENT: NO POINTS / RECORDS / PAIRINGS PUBLISHED — RANK+PLAYER ONLY',
+              'DECKS OBSERVED AT LEADER 1 + MAIN 50']},
+      {name:'World Finals 2026', date:null, type:'FINALS', players:34, source:'ONEPIECE.LIMITLESSTCG.COM',
+       url:'https://onepiece.limitlesstcg.com/tournaments', urlLabel:'SOURCE INDEX ↗', fid:'t424',
+       scope:'TOP 8 PUBLISHED OF 34 · 7 DECKLISTS FOR 8 STANDINGS ROWS — RANK 6 LIST MISSING',
+       finishes:[],
+       placeholder:'TOP-8 PLAYER NAMES NOT CAPTURED IN THIS MOCKUP — PLACEHOLDER SLOT',
+       notes:['EVENT DATE NOT CAPTURED IN GROUNDING — SORTS LAST']},
+      {name:'Online event — fixture 6a462d78', date:null, type:'ONLINE', players:64, source:'PLAY.LIMITLESSTCG.COM',
+       url:null, fid:'6a462d78',
+       scope:'PLATFORM SIM · SWISS · 64 PLAYERS — 33 DROPS, PLACINGS 1–31 ON THE 31 NON-DROPS',
+       finishes:[],
+       placeholder:'STANDINGS CAPTURED (PLACINGS 1–31) — PLAYER NAMES NOT EMBEDDED IN THIS MOCKUP · PLACEHOLDER SLOT',
+       notes:['DROPPED PLAYERS KEEP THEIR REAL W/L RECORD BUT NO RANK — ROW ORDER ≠ FINISH ORDER',
+              '4 BYES OBSERVED · EVENT NAME/DATE NOT CAPTURED — FIXTURE ID SHOWN INSTEAD',
+              'ALL 64 DECKLISTS SUM TO LEADER 1 + MAIN 50']}
+    ]
+  },
+
+  riftbound: {
+    types: [],
+    caveats: ['NO MATCH DATA FEED — <b>CATALOGUE ONLY</b> · NO RIFTBOUND EVENT SOURCE IS INGESTED'],
+    prov: 'CATALOGUE SNAPSHOT 2026-07-08 · RIFTCODEX COMMUNITY API (NOT THE RIOT API) · NO EVENTS, DECKLISTS OR WINRATES EXIST IN THE REPO',
+    credits: [],
+    events: []
+  }
+};
+
+/* ---------- star plaque / league badge (tokens §5.5) ---------- */
+const STAR_SCALE = {1:'<32 players',2:'32–63',3:'64–127',4:'128–255',5:'256+'};
+function starsFor(p){ return p<32?1 : p<64?2 : p<128?3 : p<256?4 : 5; }
+function gradeHTML(e){
+  if(e.league) return `<span class="badge-league" title="MTGO League (size unreported) — badge, not stars">LEAGUE 5-0</span>`;
+  if(e.players==null) return '';
+  const n=starsFor(e.players);
+  let g='';
+  for(let i=1;i<=5;i++) g+=`<span class="${i<=n?'on':'off'}">★</span>`;
+  return `<span class="plaque" role="img" aria-label="event grade ${n} of 5" title="GRADE ${n}/5 · FIELD ${STAR_SCALE[n]} · ${e.players} PLAYERS">${g}</span>`;
+}
+
+/* ---------- quantized arcade roll-up (tokens §6.1) ----------
+   §6.1 gates roll-ups on BOTH reduced-motion AND on-screen presence:
+   an IntersectionObserver tracks the hero readout + two stat-tile seg
+   hosts, and off-screen tiles snap to the value with no animation. */
+const segsOnScreen=new WeakSet();
+const segIO=('IntersectionObserver' in window)
+  ? new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting) segsOnScreen.add(en.target);
+        else segsOnScreen.delete(en.target);
+      });
+    })
+  : null;
+if(segIO) ['heroSeg','tEvents','tPlayers'].forEach(id=>segIO.observe(document.getElementById(id)));
+
+function fmtVal(v,dec){ return dec===0 ? String(Math.round(v)) : v.toFixed(dec); }
+function rollup(el, target, dec){
+  const host=el.parentElement; /* .lit sits inside the observed .seg */
+  if(RM || (segIO && !segsOnScreen.has(host))){
+    clearInterval(el._roll);
+    el.textContent = fmtVal(target,dec);
+    return;
+  }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/,/g,''))||0;
+  /* clear any in-flight roll BEFORE the no-op check: two renders in the
+     same tick (e.g. filter → clear) read the un-ticked textContent as
+     already-at-target and left the stale interval driving the tile to
+     the OLD target */
+  if(start===target){ clearInterval(el._roll); el.textContent=fmtVal(target,dec); return; }
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);
+    el.textContent = (i>=TICKS) ? fmtVal(target,dec) : v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+
+/* ---------- one-shot glitch (tokens §6.3) ---------- */
+function glitch(el){
+  if(RM) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+
+/* ---------- DSEG header clock ---------- */
+function tickClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent =
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 15000);
+
+/* ---------- ticker: duplicated track, ~35px/s, tap/Enter/Space pause ---------- */
+const tickerBar=document.getElementById('tickerbar');
+const tickerTrack=document.getElementById('tickertrack');
+const tickSeq=document.getElementById('tickseq');
+function syncTicker(){
+  tickSeq.nextElementSibling.innerHTML=tickSeq.innerHTML;
+  const w=tickSeq.getBoundingClientRect().width;
+  if(w>0) tickerTrack.style.animationDuration=(w/35).toFixed(2)+'s';
+}
+syncTicker();
+document.fonts.ready.then(syncTicker);
+function toggleTicker(){
+  const p=tickerBar.classList.toggle('paused');
+  tickerBar.setAttribute('aria-pressed', p?'true':'false');
+  /* visible pause affordance: glyph flips ❚❚ <-> ▶ (tokens §5.1) */
+  document.getElementById('wirePause').textContent = p ? '▶' : '❚❚';
+}
+if(RM){
+  /* §5.1 RM contract: static ticker → no pause control. CSS hides the
+     ❚❚ hint; here the bar drops its button semantics + focusability so
+     it never reads or looks interactive. */
+  tickerBar.removeAttribute('role');
+  tickerBar.removeAttribute('tabindex');
+  tickerBar.removeAttribute('aria-pressed');
+  tickerBar.setAttribute('aria-label','events wire feed');
+}else{
+  tickerBar.addEventListener('click', toggleTicker);
+  tickerBar.addEventListener('keydown', e=>{
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleTicker(); }
+  });
+}
+
+/* ============================================================
+   STATE + RENDER
+   ============================================================ */
+const MIN_OPTS=[{k:0,label:'ALL'},{k:32,label:'32+'},{k:64,label:'64+'},{k:128,label:'128+'}];
+/* state.sel is a STABLE event key (fixture id / URI), never an index
+   into the filtered view — an index made the podium silently jump to
+   a different event when the sort order changed under it.
+   fid FIRST: the two OP majors share the same source-index url. */
+const evKey = e => e.fid || e.url || (e.name+'|'+(e.date||''));
+let state={ game:'mtg', type:'ALL', min:0, src:'ALL', sort:'date', sel:null, filtOpen:false };
+
+const feedEl=document.getElementById('feed');
+const dockEl=document.getElementById('dock');
+const dockEmpty=document.getElementById('dockEmpty');
+const wideMQ=matchMedia('(min-width:1100px)');
+
+/* single podium node, reparented mobile<->rail (tokens §7.4) */
+const podiumEl=document.createElement('div');
+podiumEl.className='podium';
+podiumEl.id='podium';
+podiumEl.setAttribute('role','region');
+podiumEl.setAttribute('aria-label','top finishes');
+/* live region scoped here (and to con-count) instead of the whole feed */
+podiumEl.setAttribute('aria-live','polite');
+
+function G(){ return GAMES[state.game]; }
+function srcList(g){ return [...new Set(g.events.map(e=>e.source))]; }
+
+function fmtDate(d){ // '2024-06-18' -> {big:'06-18', yr:'2024'}
+  if(!d) return {big:'----', yr:'N/A'};
+  return {big:d.slice(5), yr:d.slice(0,4)};
+}
+
+function opPipHTML(color){
+  const p=OP_PIPS[color];
+  if(!p) return '';
+  /* rim = outer octagon's background showing through a 1px padding
+     ring around the inner octagon — survives the corner cuts */
+  const rim=p.rim||'rgba(242,242,247,.25)';
+  return `<span class="opip" role="img" aria-label="color: ${esc(color.toLowerCase())}" style="background:${rim}"><span class="opin" style="background:${p.bg};color:${p.fg}">${p.k}</span></span>`;
+}
+
+/* ---------- filtered + sorted view of the current game's feed ---------- */
+function view(){
+  const g=G();
+  let rows=g.events.filter(e=>{
+    if(state.type!=='ALL' && e.type!==state.type) return false;
+    if(state.src!=='ALL' && e.source!==state.src) return false;
+    if(state.min>0){
+      if(e.players==null) return false;      /* leagues/unknown hidden under a field-size floor */
+      if(e.players<state.min) return false;
+    }
+    return true;
+  });
+  rows.sort((a,b)=>{
+    if(state.sort==='players'){
+      const pa=a.players==null?-1:a.players, pb=b.players==null?-1:b.players;
+      if(pb!==pa) return pb-pa;
+    }
+    const da=a.date||'', db=b.date||'';
+    return db.localeCompare(da);            /* null dates sort last */
+  });
+  return rows;
+}
+
+/* ---------- console chips ---------- */
+function buildConsole(){
+  const g=G();
+  /* riftbound has 0 events — a filter console with nothing to filter
+     is dishonest chrome; the empty state carries the message alone */
+  const consoleEl=document.getElementById('console');
+  consoleEl.hidden = g.events.length===0;
+  if(consoleEl.hidden) return;
+  const typeGrp=document.getElementById('typeGrp');
+  const srcGrp=document.getElementById('srcGrp');
+  const minGrp=document.getElementById('minGrp');
+  typeGrp.innerHTML='';
+  ['ALL',...g.types].forEach(t=>{
+    const b=document.createElement('button');
+    b.className='press sw'+(state.type===t?' on':'');
+    b.setAttribute('aria-pressed', state.type===t?'true':'false');
+    b.textContent=t;
+    b.addEventListener('click',()=>{ state.type=t; state.sel=null; render(); });
+    typeGrp.appendChild(b);
+  });
+  minGrp.innerHTML='';
+  MIN_OPTS.forEach(o=>{
+    const b=document.createElement('button');
+    b.className='press sw'+(state.min===o.k?' on':'');
+    b.setAttribute('aria-pressed', state.min===o.k?'true':'false');
+    b.textContent=o.label;
+    b.addEventListener('click',()=>{ state.min=o.k; state.sel=null; render(); });
+    minGrp.appendChild(b);
+  });
+  srcGrp.innerHTML='';
+  const srcs=srcList(g);
+  ['ALL',...srcs].forEach(s=>{
+    const b=document.createElement('button');
+    b.className='press sw'+(state.src===s?' on':'');
+    b.setAttribute('aria-pressed', state.src===s?'true':'false');
+    b.textContent = s==='ALL' ? 'ALL' : s.split('.')[0].toUpperCase();
+    b.title = s==='ALL' ? 'all sources' : s;
+    b.addEventListener('click',()=>{ state.src=s; state.sel=null; render(); });
+    srcGrp.appendChild(b);
+  });
+  document.querySelectorAll('#sortGrp .sw').forEach(b=>{
+    const on=b.dataset.sort===state.sort;
+    b.classList.toggle('on',on);
+    b.setAttribute('aria-pressed',on?'true':'false');
+  });
+  const filtersActive = !(state.type==='ALL' && state.min===0 && state.src==='ALL');
+  document.getElementById('clrBtn').hidden = !filtersActive;
+  /* FILT ▸ disclosure (attention-spec §1.4.2): the button inverts when
+     open OR when filters are active behind the fold, so a filtered
+     collapsed console never reads as untouched */
+  const fb=document.getElementById('filtBtn');
+  fb.classList.toggle('on', state.filtOpen || filtersActive);
+  fb.setAttribute('aria-expanded', state.filtOpen?'true':'false');
+  fb.innerHTML = 'FILT <span class="dg">'+(state.filtOpen?'▾':'▸')+'</span>';
+  document.getElementById('conMore').hidden = !state.filtOpen;
+}
+document.getElementById('filtBtn').addEventListener('click',()=>{
+  state.filtOpen=!state.filtOpen;
+  buildConsole();
+});
+document.querySelectorAll('#sortGrp .sw').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(state.sort===b.dataset.sort) return;
+    state.sort=b.dataset.sort;
+    render();
+    /* re-sort fires a one-shot glitch on the date blocks (changed positions) */
+    feedEl.querySelectorAll('.ed b').forEach(glitch);
+  });
+});
+document.getElementById('clrBtn').addEventListener('click',()=>{
+  state.type='ALL'; state.min=0; state.src='ALL'; state.sel=null; render();
+});
+
+/* ---------- caveats / provenance / credits / pipkey per game ---------- */
+function renderChrome(){
+  const g=G();
+  const cav=document.getElementById('caveats');
+  cav.innerHTML = g.caveats.map(c=>`<span class="caveat">${c}</span>`).join('');
+  document.getElementById('prov').textContent=g.prov;
+  const cr=document.getElementById('credits');
+  cr.innerHTML = g.credits.map(c=>
+    `<a class="credit" href="${esc(c.url)}" target="_blank" rel="noopener" title="${esc(c.title)}">${esc(c.label)} <span>↗</span></a>`
+  ).join('');
+  const pk=document.getElementById('pipkey');
+  if(g.pipkey){
+    pk.hidden=false;
+    pk.innerHTML = 'LEADER COLORS: ' + Object.keys(OP_PIPS).map(c=>
+      `<span class="k">${opPipHTML(c)} ${c.toUpperCase()}</span>`
+    ).join(' ');
+  } else { pk.hidden=true; pk.innerHTML=''; }
+}
+
+/* ---------- stat tiles (recomputed from the filtered list) ----------
+   cut 4→2 per attention-spec §3 fix #2 — FIELDS PUBLISHED dropped,
+   LARGEST FIELD promoted to the hero plate's lead readout. */
+function renderTiles(rows){
+  const withN=rows.filter(e=>e.players!=null);
+  const total=withN.reduce((s,e)=>s+e.players,0);
+  setTile('tEvents', rows.length);
+  setTile('tPlayers', total);
+}
+
+/* ---------- featured-event hero plate (attention-spec §2.4/§2.5) ----------
+   Featured = largest published field in the game's FULL feed (most
+   recent date on ties) — computed from the same grounded events array
+   as the rows, so the hero can never show an event that isn't real.
+   Filters do not move the hero; the two tiles follow the filters. */
+function featured(){
+  const withN=G().events.filter(e=>e.players!=null);
+  if(!withN.length) return null;
+  return withN.reduce((a,b)=>{
+    if(b.players!==a.players) return b.players>a.players ? b : a;
+    return ((b.date||'') > (a.date||'')) ? b : a;
+  });
+}
+function renderHero(){
+  const e=featured();
+  const kick=document.getElementById('heroKick');
+  const nameEl=document.getElementById('heroName');
+  const meta=document.getElementById('heroMeta');
+  const seg=document.getElementById('heroSeg');
+  const sub=document.getElementById('heroSub');
+  if(!e){
+    /* riftbound: unlit hero — honest chrome, nothing faked */
+    kick.textContent='FEATURED EVENT — NONE ON FILE';
+    nameEl.textContent='NO EVENTS ON FILE';
+    meta.innerHTML='<span>CATALOGUE ONLY — NO EVENT SOURCE INGESTED · NOTHING TO GRADE, NOTHING FAKED</span>';
+    const old=seg.querySelector('.lit');
+    if(old) clearInterval(old._roll);
+    seg.innerHTML='<span class="unlit">--</span>';
+    sub.textContent='NO PUBLISHED FIELDS';
+    return;
+  }
+  kick.textContent='FEATURED EVENT — LARGEST PUBLISHED FIELD ON FILE';
+  nameEl.textContent=e.name;
+  const bits=[e.date, e.type, e.source].filter(Boolean).join(' · ');
+  const link = e.url
+    ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${e.urlLabel||'EVENT ↗'}</a>`
+    : `<span>NO CAPTURED URL</span>`;
+  meta.innerHTML=`<span>${esc(bits)}</span> ${gradeHTML(e)} ${link}`;
+  let lit=seg.querySelector('.lit');
+  if(!lit){ seg.innerHTML='<span class="lit">0</span>'; lit=seg.querySelector('.lit'); }
+  rollup(lit, e.players, 0);   /* DSEG stays comma-free — no comma glyph */
+  sub.textContent='PLAYERS · TAP THE ROW IN THE FEED FOR FINISHES';
+}
+function setTile(id, val){
+  const seg=document.getElementById(id);
+  if(val==null){
+    seg.innerHTML='<span class="unlit">--</span>';
+    return;
+  }
+  let lit=seg.querySelector('.lit');
+  if(!lit){ seg.innerHTML='<span class="lit">0</span>'; lit=seg.querySelector('.lit'); }
+  rollup(lit, val, 0);
+}
+
+/* ---------- podium (top finishes) ----------
+   MOCKUP NOTE: production podiums render the FULL event top-8 from
+   standings. The single-archetype (Murktide-only) podium here is a
+   grounding constraint of this mockup's data, not the product intent
+   — hence the FINISHES ON FILE framing + scope caveat below. */
+function podiumHTML(e){
+  const g=G();
+  const scope = e.scope || g.podiumScope || '';
+  /* archetype-limited scope (MTG: only the Murktide rows on file) must
+     not be framed as a podium — 0-2 and 35th Place are not TOP FINISHES */
+  const archetypeScoped = !e.scope && !!g.podiumScope;
+  const hTitle = archetypeScoped ? 'FINISHES ON FILE' : 'TOP FINISHES';
+  const link = e.url
+    ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${e.urlLabel||'EVENT ↗'}</a>`
+    : `<span style="color:var(--dim)">NO CAPTURED URL</span>`;
+  let rows='';
+  e.finishes.forEach(f=>{
+    /* grounding carries both null and '' for uncaptured results —
+       both render as the NOT CAPTURED pattern, never a bare glyph */
+    const missing = f.result==null || String(f.result).trim()==='';
+    const res = missing ? '—' : f.result;
+    const first = !missing && /^1(st)?\b|^5-0$/i.test(res.trim());
+    let deckCell='';
+    if(f.deckOP){
+      const pips=f.deckOP.colors.map(opPipHTML).join('');
+      deckCell = `${pips} <b>${esc(f.deckOP.label)}</b> <span class="idchip">(${esc(f.deckOP.id)})</span> <span class="axchip">LEADER</span>`;
+    } else if(f.deck){
+      deckCell = `<b>${esc(f.deck)}</b>`;
+    } else if(f.deckNote){
+      deckCell = `<span>${esc(f.deckNote)}</span> <span class="phchip">NOT CAPTURED</span>`;
+    }
+    /* — is outside Press Start 2P coverage → JetBrains .dg span */
+    const placeCell = missing
+      ? `<span class="dg" aria-hidden="true">—</span>`
+      : esc(res.replace(/ Place$/i,'').toUpperCase());
+    rows += `
+      <div class="prow">
+        <span class="place${first?' first':''}" title="${missing?'result not captured':esc(res)}">${placeCell}</span>
+        <span class="pmid">
+          <span class="pp">${esc(f.player)}</span>
+          <span class="pd">${deckCell}</span>
+        </span>
+        ${first?'<span class="pres first">TOP</span>':''}
+        ${missing?'<span class="phchip">NOT CAPTURED</span>':''}
+      </div>`;
+  });
+  if(e.placeholder){
+    rows += `
+      <div class="prow placeholder">
+        <span class="place">--</span>
+        <span class="pmid">
+          <span class="pp">${esc(e.placeholder)}</span>
+        </span>
+        <span class="phchip">PLACEHOLDER</span>
+      </div>`;
+  }
+  const notes=(e.notes||[]).map(n=>`· ${esc(n)}`).join('<br>');
+  return `
+    <div class="p-h"><span>${hTitle} — <b>${esc(e.name)}</b>${e.date?' · '+e.date:''}</span>${link}</div>
+    ${scope?`<div class="p-scope"><span class="caveat">${esc(scope)}</span></div>`:''}
+    ${rows || ''}
+    ${notes?`<div class="pnotes">${notes}</div>`:''}`;
+}
+
+function placePodium(){
+  const rows=view();
+  /* resolve the selected key against the CURRENT view — if the event
+     was filtered out, the podium simply retracts (no silent swap) */
+  const e = state.sel!=null ? rows.find(r=>evKey(r)===state.sel) : null;
+  if(!e){
+    podiumEl.remove();
+    dockEmpty.style.display='';
+    return;
+  }
+  podiumEl.innerHTML=podiumHTML(e);
+  if(wideMQ.matches){
+    dockEmpty.style.display='none';
+    dockEl.appendChild(podiumEl);
+  }else{
+    dockEmpty.style.display='';
+    const host=feedEl.querySelector(`.evt[data-k="${CSS.escape(state.sel)}"]`);
+    if(host) host.appendChild(podiumEl);
+  }
+}
+
+/* ---------- feed ---------- */
+function render(){
+  buildConsole();
+  renderChrome();
+  renderHero();
+  const g=G();
+  const rows=view();
+  renderTiles(rows);
+
+  const cnt=document.getElementById('conCount');
+  /* a min-field floor silently hides leagues/unknown-size events even
+     when rows remain — echo the note here, not only in the empty state */
+  const nullHidden = state.min>0 && g.events.some(e=>e.players==null);
+  cnt.textContent=`${rows.length}/${g.events.length} SHOWN`
+    + (nullHidden ? ' · LEAGUE/UNKNOWN-SIZE HIDDEN' : '');
+
+  feedEl.innerHTML='';
+  if(g.events.length===0){
+    /* Riftbound: wired-up chrome, unlit readouts, nothing faked */
+    feedEl.innerHTML=`
+      <div class="emptyfeed">
+        <span class="ecap">EVENTS ON FILE</span>
+        <span class="eseg" aria-label="no events">0</span>
+        <span class="ecap">FEED WIRED AND WAITING — NO RIFTBOUND EVENT SOURCE IS INGESTED · NOTHING TO GRADE, NOTHING FAKED</span>
+        <div class="catplate">
+          WHAT EXISTS TODAY (RIFTCODEX CAPTURE 2026-07-08): <b>1,064</b> PRINTINGS ·
+          <b>36</b> BASE NON-PROMO LEGENDS · SETS <b>OGN</b> ORIGINS · <b>SFD</b> SPIRITFORGED ·
+          <b>UNL</b> UNLEASHED (VEN ANNOUNCED 2026-07-31, NO CARDS YET) ·
+          DECK SHAPE: LEGEND 1 + MAIN 40+ + RUNES 12 + BATTLEFIELDS 3 ·
+          CARD IMAGES: DOMAIN-COLORED PLACEHOLDER FRAMES ONLY — NO RIOT CDN HOTLINKS (OWNER TOS DECISION)
+        </div>
+      </div>`;
+    placePodium();
+    return;
+  }
+  if(rows.length===0){
+    const leaguesHidden = state.min>0 && g.events.some(e=>e.players==null);
+    feedEl.innerHTML=`
+      <div class="emptyfeed">
+        <span class="ecap">NO EVENTS MATCH THE CONSOLE FILTERS</span>
+        <span class="eseg">0</span>
+        <span class="ecap">${leaguesHidden?'NOTE: LEAGUE / UNKNOWN-SIZE EVENTS ARE HIDDEN UNDER A MIN-FIELD FLOOR — SIZE UNREPORTED':'CLEAR FILTERS TO RESTORE THE FEED'}</span>
+      </div>`;
+    placePodium();
+    return;
+  }
+
+  rows.forEach(e=>{
+    const k=evKey(e);
+    const d=fmtDate(e.date);
+    const wrap=document.createElement('div');
+    wrap.className='evt';
+    wrap.dataset.k=k;
+    const nCell = e.players!=null
+      ? `<span class="nval">${e.players}</span><span class="nlbl">PLAYERS</span>`
+      : `<span class="nval unlit" title="field size unreported">--</span><span class="nlbl">SIZE N/R</span>`;
+    const sel = state.sel===k;
+    const extra = [e.era, e.fid?('ID '+e.fid):null].filter(Boolean).join(' · ');
+    wrap.innerHTML=`
+      <button class="press erow${sel?' sel':''}" aria-expanded="${sel?'true':'false'}">
+        <span class="ed"><b>${d.big}</b><span>${d.yr}</span></span>
+        <span class="emid">
+          <span class="ename">${esc(e.name)}</span>
+          <span class="esub">
+            <span class="ttag">${esc(e.type)}</span>
+            <span>${esc(e.source)}</span>
+            ${extra?`<span class="wideonly">· ${esc(extra)}</span>`:''}
+          </span>
+        </span>
+        <span class="eright">
+          <span class="en">${nCell}</span>
+          ${gradeHTML(e)}
+          <span class="caret" aria-hidden="true">${sel?'▾':'▸'}</span>
+        </span>
+      </button>`;
+    wrap.querySelector('.erow').addEventListener('click',()=>{
+      state.sel = (state.sel===k) ? null : k;
+      render();
+      if(state.sel!=null && !wideMQ.matches){
+        const host=feedEl.querySelector(`.evt[data-k="${CSS.escape(state.sel)}"]`);
+        if(host) host.scrollIntoView({block:'nearest', behavior:RM?'auto':'smooth'});
+      }
+    });
+    feedEl.appendChild(wrap);
+  });
+  placePodium();
+}
+
+/* ---------- game switching ---------- */
+document.querySelectorAll('.gbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(state.game===b.dataset.game) return;
+    state={ game:b.dataset.game, type:'ALL', min:0, src:'ALL', sort:'date', sel:null, filtOpen:false };
+    document.querySelectorAll('.gbtn').forEach(x=>{
+      const on=x===b;
+      x.classList.toggle('on',on);
+      x.setAttribute('aria-pressed',on?'true':'false');
+    });
+    render();
+    /* the hero name is the display statement now — it takes the
+       one-shot glitch on game switch (was the old 44px page title) */
+    glitch(document.getElementById('heroName'));
+  });
+});
+
+/* ---------- breakpoint reparenting (tokens §7.4) ---------- */
+let wideApplied=null;
+function layoutWide(){
+  const w=wideMQ.matches;
+  if(w===wideApplied) return;
+  wideApplied=w;
+  placePodium();
+}
+layoutWide();
+wideMQ.addEventListener('change',layoutWide);
+window.addEventListener('resize',layoutWide);
+
+render();
+</script>
+</body>
+</html>

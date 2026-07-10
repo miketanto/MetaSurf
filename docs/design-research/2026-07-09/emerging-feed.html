@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Emerging Scanner (Pit-Wall Console)</title>
+<!--
+  EMERGING-DECK FEED — S10 (premium flagship) · Pit-Wall Console v3 system
+  Built from docs/design-research/2026-07-09/pit-wall-tokens.md + extension-spec.md (§2 T3, §5 V-FEED, §6 S10).
+
+  GROUNDING / HONESTY LEDGER
+  - API shape: GET /v1/{game}/{format}/emerging — riftbound-games-ground.json → api_shapes
+    (cluster_key, named:false always, provisional_descriptor "colour group + top signature card,
+    flagged 'Unnamed:'", n_decks, first_seen, recent_decks, winrate|null, n_match_games,
+    signature_cards[{name, in_cluster_freq, out_cluster_freq, lift}]).
+  - Card names + Scryfall art URLs: s1-archetype-visuals.json (2026-07-09 mine), MODERN section ONLY,
+    copied verbatim. Card images (c) Wizards of the Coast, served via Scryfall — credited in footer.
+  - Colour group = the TOP signature card's archetype colour set as recorded (pip-mined) in the
+    same JSON (Grief→Rakdos Scam BR, Living End→UBG, Colossus Hammer→Hammer Time W, etc.).
+  - EVERY count, date, winrate, lift and growth figure on this page is PLACEHOLDER — no emerging
+    rollup was run this session. Labeled on-page, in the provenance footnote, and here.
+  - PROPOSED API EXTENSIONS (NOT in the grounded EmergingCluster shape): `events` (per-cluster
+    event count shown in the tier chips) and `prior` (prior-7D baseline behind the growth %
+    readout). Flagged in the on-page legend and the footer footnote. Everything else renders
+    only real shape fields (n_decks, first_seen, recent_decks, winrate, n_match_games,
+    signature_cards); winrate/n_match_games are used as supplied — no raw-wins field exists
+    or is modeled.
+  - OPEN ITEM — SPEC CONFLICT (owner decision needed): extension-spec §5 V-FEED says "first 3
+    rows crisp and fully interactive" and §6 S10 "free face shows the top-3 clusters"; the
+    build brief for this page specifies exactly 1 free teaser row. The brief overrides the
+    spec here — deviation flagged, not silently absorbed.
+  - Attribution: sources_config_values (topdeck.gg required:true; mtgo.com required:false) —
+    visible chip in the feed header + verbatim string in the footnote per extension-spec §4.1.
+
+  PRODUCTION GATE NOTE (mock-only caveat, tokens §5.6): the lock/unlock demo toggle is
+  presentation-only. In production the gate is server-side (entitlements module); the free tier
+  receives masked payloads (values as "--", "+?"), never true values in the DOM.
+
+  T3 RULE (extension-spec §2): unnamed clusters NEVER render like curated archetypes — dashed
+  frames, no hard 2px shadow, mono-400 provisional descriptor, no art identity tile, no CODE badge.
+  NAME & PROMOTE only opens a rule-file draft for owner review; the row stays T3 until a rule
+  file lands (CLAUDE.md rule 4 — definitions are never authored by the model).
+
+  ATTENTION REVISION 2026-07-10 (attention-art-spec.md §1–§3, fix #4):
+  - L0 TYPOGRAPHIC HERO: the top 7-day riser renders as the single focal card — 2px dashed T3
+    frame, provisional descriptor at clamp(44px,13vw,84px) mono-400 (biggest text on the page,
+    still machine-register: NEVER Archivo display, NEVER 700), growth DSEG prominent. T3 stays
+    art-anchor-free (spec §2.3): signature cards remain small evidence exhibits only.
+  - DEV CHROME DEMOTED (spec §1.4.4): endpoint plate + demo entitlement bar moved BELOW the
+    feed into the DEV CHROME plate (rail at ≥1100px). Same controls, same server-side-gate note.
+  - CLUSTER CARDS SHED (spec §1.4.5): tail cards show 1 tag (the tier/promotion-rule chip) +
+    2 DSEG reads (RISING·7D, CLUSTER WR w/ CI+N); EMERGING/BREAKOUT chips, LISTS·TOTAL read,
+    signature exhibits, and NAME & PROMOTE live inside the row's DETAIL expand.
+  - FLOOR KEY collapsed behind KEY ▸ (spec §1.4.1). Trust chrome (.prov/.caveat/.credit) untouched.
+  - Density budget (spec §1.3): ≤6 DSEG above the fold @390, ≤10 @1440 — measured in-browser
+    at revision time.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NO "88:88" ghost underlay anywhere — lit segments only (tokens §2.2). */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+/* ============ TOKENS (canonical :root, tokens §1.1) ============ */
+:root{
+  --bg:#0d0d12;
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;
+  --loss:#ff7a1a;
+  --acc:#b45bff;
+  --shadow:#000000;
+  --provisional:#b9b9c3;   /* T3 descriptor register — extension-spec §2 T3 */
+  --dash:#3a3a48;          /* chart-framing gray for dashed T3 frames */
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --pix:'Press Start 2P',monospace;
+  --mono:'JetBrains Mono',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  /* riso grain — white overlay band (tokens §4.3) */
+  --grainW:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* riso grain — dark multiply plate + coarse misprint blobs (tokens §4.2, veil) */
+  --grainD:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.06  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noiseC:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.32' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1 0 0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0 0.05  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='56' height='56' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* ============ RESET (tokens §3.1 — no rounded corners, ever) ============ */
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  background:var(--bg);
+  background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+  color:var(--ink);
+  font:400 13px/1.45 var(--mono);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{ color:inherit; }
+button{ font:inherit; color:inherit; background:none; border:0; }
+img{ max-width:100%; display:block; }
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+
+/* pixel crosshair garnish — desktop only (tokens §3.5) */
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, .ticker, a{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+
+/* ============ PRESS PHYSICS (tokens §3.3) ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;
+}
+
+/* ============ WIRE TICKER (tokens §5.1) ============ */
+.ticker{
+  position:sticky; top:0; z-index:50;
+  height:30px; background:var(--panel);
+  border-bottom:1px solid var(--line);
+  font-size:11px; letter-spacing:.04em;
+  white-space:nowrap; user-select:none;
+}
+.ticker:focus-visible{ outline:2px solid var(--acc); outline-offset:-2px; }
+.ticker .wire-badge{
+  position:absolute; left:0; top:0; bottom:0; z-index:2;
+  display:flex; align-items:center; padding:0 8px;
+  font-family:var(--pix); font-size:8px; line-height:1;
+  color:var(--bg); background:var(--loss);
+}
+.ticker-clip{ position:absolute; left:52px; right:36px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{
+  display:inline-flex; align-items:center; height:30px;
+  white-space:nowrap; will-change:transform;
+  animation:tickscroll 42s linear infinite;
+}
+.ticker-track span{ padding-right:48px; }
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.ticker-pause{
+  position:absolute; right:0; top:0; bottom:0;
+  display:flex; align-items:center; padding:0 10px;
+  color:var(--dim); font-size:9px;
+}
+.ticker .up{color:var(--win);} .ticker .dn{color:var(--loss);} .ticker .sec{color:var(--acc);} .ticker .mut{color:var(--dim);}
+
+/* ============ LAYOUT ============ */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+.layout{ max-width:680px; margin:0 auto; padding:0 12px; }
+main{ min-width:0; }
+.rail{ display:none; }
+@media (min-width:640px){ .wrap,.layout{ max-width:none; padding:0 20px; } }
+@media (min-width:1100px){
+  .wrap{ max-width:1440px; padding:0 32px; }
+  .layout{
+    max-width:1440px; padding:0 32px;
+    display:grid; grid-template-columns:minmax(0,1fr) 400px; column-gap:20px;
+  }
+  .rail{
+    display:block; min-width:0;
+    position:sticky; top:42px; align-self:start;
+    max-height:calc(100dvh - 42px); overflow-y:auto; scrollbar-width:none;
+    border-left:1px solid var(--line); padding-left:20px; padding-bottom:24px;
+  }
+  .rail::-webkit-scrollbar{ display:none; }
+}
+
+/* ============ HEADER ============ */
+header.page{ padding-top:16px; }
+.brandrow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wordmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.9;
+  font-size:22px;
+}
+.pro{ padding:2px; background:var(--chrome); display:inline-block; }
+.pro i{
+  display:block; font-style:normal; font-family:var(--pix); font-size:8px; line-height:1;
+  padding:6px 8px; background:#1a1a22; color:var(--ink);
+}
+.gamechip{
+  font-family:var(--pix); font-size:7px; line-height:1.6;
+  padding:5px 7px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+}
+.gamechip b{ color:var(--ink); font-weight:400; }
+h1.title{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.92;
+  font-size:44px; margin-top:14px;
+}
+h1.title .hollow{
+  color:transparent;
+  -webkit-text-stroke:1px #3a3a46;
+}
+@media (min-width:768px){ h1.title{ font-size:58px; } .wordmark{ font-size:26px; } }
+.grainband{
+  height:8px; position:relative; margin:10px 0 12px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win));
+  opacity:.22; z-index:-1;
+}
+.endpoint{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:11px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+  padding:5px 8px; letter-spacing:.04em;
+}
+.endpoint b{ color:var(--ink); font-weight:700; }
+.endpoint .pixtag{ font-family:var(--pix); font-size:7px; color:var(--acc); }
+.prov{
+  font-size:10px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.08em; line-height:1.7; margin-top:10px;
+}
+.prov b{ color:var(--ink); font-weight:700; }
+.caveat{
+  display:inline-block;                    /* block flow — multi-line safe at 390px */
+  font:400 9px/1.7 var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; margin-top:8px;
+}
+.caveat b{ color:var(--ink); font-weight:700; }
+
+/* ============ DEMO STATE BAR — dev chrome (L3): lives INSIDE the dev plate BELOW the feed
+   (attention spec §1.4.4 — mockup scaffolding, never L1 furniture) ============ */
+.demobar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.plate .demobar{ margin:0; }
+.plate .endpoint{ margin-top:10px; }
+.demobar .lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+.seg{ display:inline-flex; }
+.seg .sw:not(:first-child){ border-left-width:0; }
+.sw{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 12px; display:inline-flex; align-items:center;
+  color:var(--dim); background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.sw:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.sw.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+
+/* ============ DSEG STAT TILES (tokens §5.3) ============ */
+.stats{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; } /* tokens §5.3: 2-up on phones */
+@media (min-width:720px){ .stats{ grid-template-columns:repeat(3,1fr); } }
+.cell{ padding:12px 12px 10px; text-align:left; min-width:0; }
+.cell .lbl{
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:6px;
+}
+.cell .seg7{
+  font-family:var(--seg); font-weight:700;
+  font-size:24px; line-height:1.15; display:inline-block; margin-top:6px;
+}
+.cell .unit{ font-size:11px; color:var(--dim); font-family:var(--mono); }
+.cell .sub{ font-size:9px; color:var(--dim); margin-top:3px; display:block; letter-spacing:.04em; }
+.cell.win .lit{ color:var(--win); }
+@media (min-width:768px){ .cell .seg7{ font-size:30px; } }
+
+/* ============ FEED ============ */
+.feedhead{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  margin:22px 0 8px;
+}
+.sectionlbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.sectionlbl b{ color:var(--ink); }
+.credit{
+  font:700 9px var(--mono); letter-spacing:.06em;
+  color:var(--ink); background:var(--panel2);
+  border:1px solid var(--line); padding:4px 7px;
+  text-decoration:none; text-transform:uppercase;
+}
+.credit span{ color:var(--dim); font-weight:400; }
+.floorkey{
+  font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.06em;
+  line-height:1.7; margin:0 0 10px;
+}
+.floorkey b{ color:var(--ink); }
+
+/* --- T3 cluster card: dashed frame, NO hard shadow (unearned solidity) --- */
+.cluster{
+  position:relative;
+  border:1px dashed var(--dash);
+  background:var(--panel);
+  padding:12px;
+  margin-bottom:10px;
+  min-width:0;
+}
+
+/* --- L0 TYPOGRAPHIC HERO — the top cluster as the single focal card (attention spec §2.5).
+       Larger dashed T3 frame; still NO hard shadow, still machine-register. --- */
+.cluster.hero{
+  border:2px dashed var(--dash);
+  padding:16px 14px 14px;
+  margin:16px 0 0;
+}
+.hero-kicker{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  margin-top:12px; line-height:1.6;
+}
+.hero-desc{
+  /* biggest text on the page — but mono 400 + --provisional, NEVER Archivo display,
+     NEVER 700: the size is loud, the register stays visibly machine-generated (T3) */
+  font:400 clamp(44px,13vw,84px)/1.02 var(--mono);
+  color:var(--provisional); text-transform:uppercase; letter-spacing:-.02em;
+  margin-top:8px; overflow-wrap:anywhere;
+}
+.hero .cl-reads{ grid-template-columns:1fr 1fr; margin-top:12px; }
+.hero .read.hero-grow .seg7{ font-size:38px; }
+@media (min-width:768px){ .hero .read.hero-grow .seg7{ font-size:46px; } }
+.hero .sigs{ margin-top:12px; }
+
+/* --- collapsed-card expand (attention spec §1.4.5 — the rest of the stack lives here) --- */
+.btn-expand{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 10px; margin-top:10px;
+  display:inline-flex; align-items:center; gap:6px;
+  color:var(--dim);
+}
+.btn-expand[aria-expanded="true"]{ color:var(--ink); }
+.cl-expand{ margin-top:10px; padding-top:10px; border-top:1px dashed var(--dash); }
+.cl-expand[hidden]{ display:none; }
+.cl-expand > .read{ max-width:240px; margin-bottom:2px; }
+.cl-expand .cl-tags{ margin-bottom:10px; }
+.cl-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.tag-emerging{
+  font-family:var(--pix); font-size:7px; line-height:1;
+  padding:5px 6px; color:var(--dim);
+  background:var(--panel2); border:1px dashed var(--dash);
+}
+.tag-tier{
+  font-family:var(--pix); font-size:7px; line-height:1.7;
+  padding:4px 6px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+}
+.tag-tier.t-confirmed{ color:var(--ink); }
+.tag-tier b{ font-weight:400; color:var(--ink); }
+.tag-breakout{
+  font-family:var(--pix); font-size:7px; line-height:1.7;
+  padding:4px 6px; color:var(--loss);
+  background:var(--panel2); border:1px solid var(--loss);
+}
+.cl-desc{
+  font:400 15px/1.35 var(--mono);   /* mono 400, NEVER 700 — provisional register */
+  color:var(--provisional);
+  text-transform:uppercase; letter-spacing:.02em;
+  margin-top:9px;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.pips{ display:inline-flex; gap:3px; align-items:center; }
+.pip{ width:9px; height:9px; border:1px solid #565664; border-radius:50% !important; }
+.pip-W{background:#f8f6d8;} .pip-U{background:#b9d4ec;}
+.pip-B{background:#7d7673;border-color:#a6a1a0;}
+.pip-R{background:#e49977;} .pip-G{background:#a3c095;}
+.cl-prov{
+  font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em;
+  margin-top:6px; line-height:1.7;
+}
+.cl-prov b{ color:var(--ink); font-weight:700; }
+
+/* readouts — collapsed cards show 2 reads (RISING·7D + WR); the third lives in the expand */
+.cl-reads{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px; }
+.read{ background:var(--panel2); border:1px solid var(--line); padding:8px 9px 7px; min-width:0; }
+.read .rlbl{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; display:block; }
+.read .seg7{
+  font-family:var(--seg); font-weight:700; font-size:20px; line-height:1.2;
+  display:inline-block; margin-top:4px; min-width:2ch; text-align:right;
+}
+.read .unit{ font-size:9px; color:var(--dim); }
+.read .rsub{ font-size:9px; color:var(--dim); display:block; margin-top:3px; letter-spacing:.03em; }
+.read .rsub .up{ color:var(--win); } .read .rsub .dn{ color:var(--loss); }
+.read .rsub .bo{ color:var(--loss); }
+.read.rising .seg7{ color:var(--win); }
+.read.wr .seg7.pos{ color:var(--win); } .read.wr .seg7.neg{ color:var(--loss); } .read.wr .seg7.neu{ color:var(--ink); }
+.read.wr .seg7.floor{ color:var(--dash); }
+.read .seg7.masked{ color:var(--dash); } /* masked values never carry performance ink (after .rising rule — wins the tie) */
+.read .ci{ font-size:10px; color:var(--dim); }
+
+/* signature cards */
+.sigs{ margin-top:10px; }
+.sigs .sglbl{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:6px; }
+.sigrow{
+  display:flex; gap:8px; overflow-x:auto; scrollbar-width:none;
+  scroll-snap-type:x proximity; padding-bottom:2px;
+}
+.sigrow::-webkit-scrollbar{ display:none; }
+.sig{
+  flex:0 0 auto; scroll-snap-align:start;
+  width:118px; border:1px solid var(--line); background:var(--panel2);
+}
+.sig img{
+  width:100%; height:64px; object-fit:cover;
+  filter:saturate(.78) contrast(1.05);
+  border-bottom:1px solid var(--line);
+}
+.sig figcaption{ padding:5px 6px 6px; }
+.sig .signame{
+  display:block; font-size:9px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--provisional);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.sig .lift{ display:block; font-size:9px; color:var(--dim); margin-top:2px; }
+.sig .lift b{ color:var(--ink); font-weight:700; }
+
+/* promote action */
+.cl-act{ margin-top:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.btn-promote{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:44px; padding:0 12px; display:inline-flex; align-items:center; gap:8px;
+  color:var(--ink);
+}
+.act-note{ font-size:9px; color:var(--dim); letter-spacing:.05em; text-transform:uppercase; line-height:1.6; }
+
+/* promote drawer */
+.drawer{ margin-top:10px; border:1px dashed var(--dash); background:var(--panel2); padding:10px; }
+.drawer[hidden]{ display:none; }
+.drawer .dlbl{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:6px; }
+.drawer input{
+  width:100%; font:700 13px var(--mono); color:var(--ink);
+  background:var(--bg); border:1px solid var(--line); padding:10px;
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.drawer input:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+.drawer .drow{ display:flex; gap:8px; margin-top:8px; align-items:center; flex-wrap:wrap; }
+.btn-mini{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 10px; display:inline-flex; align-items:center;
+}
+.btn-mini.go{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.drawer .dnote{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.7; margin-top:8px; }
+.drawer .dnote b{ color:var(--ink); }
+.draftchip{
+  /* ink-on-panel, NOT purple — accent scarcity (tokens: --acc is best-in-class only) */
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--pix); font-size:7px; line-height:1.7;
+  padding:5px 7px; color:var(--ink);
+  background:var(--panel2); border:1px solid var(--line);
+}
+.proposed{ color:var(--provisional); font-weight:700; }
+
+/* ============ V-FEED VEIL (tokens §5.6 · extension-spec §5) ============ */
+.veilzone{ position:relative; }
+.tailinner{ transition:filter 600ms steps(6,end); }
+.veilzone.locked .tailinner{ filter:blur(3.5px) saturate(.75); }
+.riso-veil{
+  position:absolute; inset:0; z-index:2;
+  padding:24px 16px; text-align:center;
+  background-image:var(--noiseC), var(--grainD),
+    linear-gradient(105deg, rgba(59,157,255,.50), rgba(13,13,18,.30) 46%, rgba(255,122,26,.46));
+  background-blend-mode:multiply, multiply, normal;
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 700ms steps(12,end);
+}
+/* gate chrome rides sticky inside the veil — always in view while the veil is on screen
+   (30px wire ticker + 24px breathing room), instead of parked mid-blur on tall tails */
+.veil-gate{
+  position:sticky; top:54px;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+}
+.veilzone.unlocked .riso-veil{ clip-path:inset(0 0 0 100%); pointer-events:none; }
+.veilzone.noanim .riso-veil, .veilzone.noanim .tailinner{ transition:none; }
+.veil-chip{
+  font-family:var(--pix); font-size:8px; line-height:1.7; letter-spacing:1px;
+  padding:8px 10px 7px; color:var(--ink);
+  background:rgba(13,13,18,.88); border:1px solid #3c3c46;
+}
+.veil-sub{
+  font-size:9px; color:var(--ink); text-transform:uppercase; letter-spacing:.08em;
+  background:rgba(13,13,18,.88); padding:4px 8px; border:1px solid #3c3c46;
+}
+.btn-unlock{
+  font-family:var(--pix); font-size:8px; line-height:1; color:var(--bg);
+  min-height:44px; padding:0 14px; display:inline-flex; align-items:center;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  border:1px solid var(--acc);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+}
+.btn-unlock:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+
+/* ============ RAIL / INFRA PLATES ============ */
+.plate{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:12px; margin-top:14px; min-width:0;
+}
+.plate .plbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:8px; }
+.plate .plbl b{ color:var(--ink); }
+.ladder{ list-style:none; }
+.ladder li{
+  display:flex; align-items:center; gap:8px;
+  padding:7px 0; border-top:1px dashed var(--dash);
+  font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em;
+}
+.ladder li:first-child{ border-top:0; }
+.ladder .tname{ font-family:var(--pix); font-size:7px; color:var(--ink); min-width:92px; line-height:1.6; }
+.plate p{ font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.8; }
+.plate p b{ color:var(--ink); }
+.plate p + p{ margin-top:6px; }
+
+/* ============ GLITCH (tokens §6.3, one-shot only) ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+
+/* ============ FOOTER ============ */
+footer{ margin-top:28px; padding-bottom:34px; }
+.riso-divider{
+  height:10px;
+  background-image:var(--grainD), linear-gradient(90deg, var(--win), var(--loss));
+  background-blend-mode:multiply, normal;
+  opacity:.55;
+}
+.foot-inner{ padding-top:16px; }
+.footmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; line-height:.9; letter-spacing:-.01em;
+  font-size:46px;
+}
+.footmark .hollow{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+@media (min-width:768px){ .footmark{ font-size:72px; } }
+.fine{
+  font-size:9px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.07em; line-height:1.8; margin-top:12px;
+}
+.fine a{ color:var(--ink); }
+.fine b{ color:var(--ink); }
+.fine .verbatim{ text-transform:none; } /* Credit.attribution strings render exactly as configured */
+
+/* ============ WIDE (≥1100px): cluster card spreads horizontal ============ */
+@media (min-width:1100px){
+  .cluster{ display:grid; grid-template-columns:minmax(0,1fr) 330px; column-gap:18px; padding:14px; }
+  .cl-side{ border-left:1px dashed var(--dash); padding-left:18px; display:flex; flex-direction:column; gap:10px; }
+  .cl-expand{ grid-column:1 / -1; }
+  .cl-reads{ margin-top:0; grid-template-columns:1fr; gap:8px; }
+  .hero .cl-reads{ grid-template-columns:1fr; }
+  .read{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .read .rlbl{ flex:1 1 100%; }
+  .cl-act{ margin-top:auto; }
+  .sig{ width:150px; }
+  .sig img{ height:82px; }
+  .cluster.hero{ padding:18px 16px 16px; }
+  h1.title{ font-size:64px; }
+}
+
+/* ============ REDUCED MOTION CONTRACT (tokens §6.6) ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .ticker-pause{ display:none; }
+  .glitch{ animation:none; }
+  .press, .press:active, .sw, .sw:active, .btn-unlock, .btn-unlock:active{ transition:none; }
+  .riso-veil, .tailinner{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= WIRE TICKER ================= -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+     aria-label="Results wire ticker — placeholder items. Tap to pause.">
+  <span class="wire-badge" aria-hidden="true">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+  <span class="ticker-pause" id="tickerPause" aria-hidden="true">&#10074;&#10074;</span>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header class="page wrap">
+  <div class="brandrow">
+    <span class="wordmark">MetaSurf</span>
+    <span class="pro"><i>PRO</i></span>
+    <span class="gamechip">GAME <b>MTG</b> · FORMAT <b>MODERN</b> · FULL TELEMETRY</span>
+  </div>
+  <h1 class="title">Emerging<br><span class="hollow">Scanner</span></h1>
+  <div class="grainband" aria-hidden="true"></div>
+  <!-- endpoint plate demoted to the DEV CHROME plate below the feed (attention spec §1.4.4) -->
+  <p class="prov" id="pageProv">
+    WINDOW <b>2026-06-08 → 2026-07-08</b> · <b id="provClusters">—</b> UNNAMED CLUSTERS ·
+    <b id="provLists">—</b> LISTS CLUSTERED · AS-OF <b>2026-07-08</b>
+  </p>
+  <div class="caveat" role="note">
+    MOCKUP FEED — ALL CLUSTER TELEMETRY <b>PLACEHOLDER</b> · NOT MEASURED · CARD NAMES &amp; ART REAL (SCRYFALL)
+  </div>
+</header>
+
+<!-- ================= BODY GRID ================= -->
+<div class="layout">
+  <main>
+    <!-- L0 TYPOGRAPHIC HERO — top 7-day riser as the single focal card (free teaser).
+         T3: no art anchor — signature cards stay small evidence exhibits (spec §2.3). -->
+    <section id="heroSlot" aria-label="Top emerging cluster — free teaser"></section>
+
+    <!-- scanner stat tiles — the ONE L1 DSEG grid (reparented into rail ≥1100px) -->
+    <section class="stats" id="statsSec" aria-label="Scanner totals (placeholder)">
+      <div class="press cell">
+        <span class="lbl">Clusters</span>
+        <span class="seg7 lit" id="segClusters" data-dec="0">0</span>
+        <span class="sub">THIS SWEEP · PLACEHOLDER</span>
+      </div>
+      <div class="press cell win">
+        <span class="lbl">Rising·7D</span>
+        <span class="seg7 lit" id="segRising" data-dec="0">0</span><span class="unit"> LISTS</span>
+        <span class="sub">Σ COMPUTED FROM FEED</span>
+      </div>
+      <div class="press cell">
+        <span class="lbl">Clustered</span>
+        <span class="seg7 lit" id="segLists" data-dec="0">0</span><span class="unit"> LISTS</span>
+        <span class="sub">Σ COMPUTED FROM FEED</span>
+      </div>
+    </section>
+
+    <!-- feed (tail — the hero/teaser lives above the stats grid) -->
+    <section aria-label="Emerging cluster feed" id="feedSec">
+      <div class="feedhead">
+        <span class="sectionlbl">DETECTED <b>CLUSTERS</b> · <span id="feedCount"></span></span>
+        <button class="sw" id="keyBtn" aria-expanded="false" aria-controls="floorkey">KEY ▸</button>
+        <a class="credit" href="https://topdeck.gg" target="_blank" rel="noopener">
+          <span>DATA:</span> TOPDECK.GG <span>(SLOT DEMO)</span> ↗
+        </a>
+      </div>
+      <!-- legend collapsed behind KEY ▸ (attention spec §1.4.1 — floor keys must collapse) -->
+      <p class="floorkey" id="floorkey" hidden>
+        WR FLOOR <b>N≥40</b> DECIDED GAMES — BELOW FLOOR PRINTS <b>--.-</b> (NOISE FLOOR) ·
+        CI = 95% NORMAL APPROX, COMPUTED AT RENDER · TIERS: <b>SCOUTED</b> N&lt;20 · <b>PROVISIONAL</b> 20–49 · <b>CONFIRMED</b> N≥50 ·<br>
+        EVENT COUNTS &amp; PRIOR-7D BASELINE: <b>PROPOSED API EXTENSIONS</b> — NOT IN THE CURRENT EMERGING SHAPE
+      </p>
+
+      <div class="veilzone locked" id="veilzone">
+        <div class="tailinner" id="tailinner"></div>
+        <div class="riso-veil" id="veil">
+          <div class="veil-gate">
+            <span class="veil-chip" id="veilChip">PRO · LOCKED</span>
+            <span class="veil-sub">SCANNER DEPTH IS A PRO SURFACE — TOP CLUSTER STAYS FREE</span>
+            <button class="btn-unlock" id="unlockBtn">UNLOCK FULL FEED ▸</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- infra plates (reparented into rail ≥1100px) -->
+    <div id="infraSlot">
+      <section class="plate" id="ladderPlate" aria-label="Tier ladder">
+        <span class="plbl">TIER <b>LADDER</b> — COMPUTED FROM N, NEVER EDITORIAL</span>
+        <ul class="ladder">
+          <li><span class="tname">SCOUTED</span> N &lt; 20 LISTS — RADAR CONTACT ONLY</li>
+          <li><span class="tname">PROVISIONAL</span> 20–49 LISTS — TRACKED EVERY SWEEP</li>
+          <li><span class="tname">CONFIRMED</span> N ≥ 50 LISTS — RULE-FILE PORT QUEUED</li>
+        </ul>
+        <p style="margin-top:8px">PROMOTION IS HUMAN-GATED: <b>NAME &amp; PROMOTE</b> OPENS A RULE-FILE DRAFT FOR OWNER REVIEW. DEFINITIONS ARE NEVER AUTO-AUTHORED.</p>
+      </section>
+      <section class="plate" id="methodPlate" aria-label="Method">
+        <span class="plbl">HOW <b>CLUSTERS</b> ARE FOUND</span>
+        <p>NIGHTLY SWEEP: DECK VECTORIZER → HDBSCAN CLUSTERING OVER UNCLASSIFIED LISTS (M1 PIPELINE).</p>
+        <p>PROVISIONAL DESCRIPTOR = <b>COLOUR GROUP + TOP SIGNATURE CARD</b>, FLAGGED “UNNAMED:” — NEVER A CURATED NAME.</p>
+        <p><b>CLUSTER_KEY IS NOT A STABLE ID</b> — ROWS CAN MERGE OR SPLIT BETWEEN SWEEPS. LIFT = IN-CLUSTER FREQ / MAX(OUT-CLUSTER FREQ, FLOOR).</p>
+      </section>
+      <!-- DEV CHROME — L3, below the feed by spec §1.4.4 (was above the fold pre-revision) -->
+      <section class="plate" id="devPlate" aria-label="Dev chrome — demo entitlement toggle and proposed endpoint (mock only)">
+        <span class="plbl">DEV <b>CHROME</b> — MOCK SCAFFOLDING</span>
+        <div class="demobar">
+          <span class="lbl">Demo state</span>
+          <span class="seg" role="group" aria-label="Demo entitlement state">
+            <button class="sw on" id="swLocked" aria-pressed="true">LOCKED</button>
+            <button class="sw" id="swUnlocked" aria-pressed="false">UNLOCKED</button>
+          </span>
+        </div>
+        <p style="margin-top:10px">MOCK ONLY — PRODUCTION GATE IS SERVER-SIDE (ENTITLEMENTS MODULE); FREE TIER RECEIVES <b>MASKED PAYLOADS</b>, NEVER TRUE VALUES.</p>
+        <div class="endpoint">
+          <b>GET /v1/mtg/modern/emerging</b>
+          <span class="pixtag">PREMIUM</span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <aside class="rail" id="rail" aria-label="Scanner instrument rail"></aside>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="riso-divider" aria-hidden="true"></div>
+  <div class="wrap foot-inner">
+    <div class="footmark">MetaSurf<br><span class="hollow">Emerging</span></div>
+    <p class="fine">
+      MOCKUP · EMERGING SCANNER (S10) · ALL CLUSTER COUNTS, DATES, GROWTH, WINRATES AND LIFTS ARE
+      <b>PLACEHOLDER — NOT MEASURED FROM REAL EVENTS</b>. FEED SHAPE MIRRORS GET /V1/MTG/MODERN/EMERGING
+      (EMERGINGCLUSTER / SIGNATURECARD, NAMED=FALSE ALWAYS) PLUS TWO <b>PROPOSED API EXTENSIONS</b> NOT IN
+      THE GROUNDED SHAPE: PER-CLUSTER EVENT COUNTS AND THE PRIOR-7D BASELINE BEHIND THE GROWTH %.<br>
+      SIGNATURE-CARD NAMES &amp; ART: REAL SCRYFALL RECORDS FROM THE 2026-07-09 GROUNDING MINE (MODERN SET ONLY) ·
+      COLOUR GROUP = TOP SIGNATURE CARD'S ARCHETYPE COLOUR SET, PIP-MINED, FROM THE SAME FILE.<br>
+      <a class="verbatim" href="https://topdeck.gg" target="_blank" rel="noopener">Data provided by TopDeck.gg</a> ·
+      <span class="verbatim">Decklists from Magic Online (mtgo.com)</span> ·
+      CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL.<br>
+      PRODUCTION GATE IS SERVER-SIDE — THE FREE TIER NEVER RECEIVES TRUE VALUES IN THE DOM.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* ================================================================
+   EMERGING SCANNER — all data below is PLACEHOLDER except card
+   names, Scryfall art URLs, and colour groups (grounding JSON).
+   ================================================================ */
+'use strict';
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const GAMES_FLOOR = 40;   /* WR noise floor, printed in the legend */
+
+/* Scryfall art_crop URLs — copied VERBATIM from s1-archetype-visuals.json (MODERN section) */
+const ART = {
+  'Grief':                     'https://cards.scryfall.io/art_crop/front/e/6/e6befbc4-1320-4f26-bd9f-b1814fedda10.jpg?1782704685',
+  "Urza's Saga":               'https://cards.scryfall.io/art_crop/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1782704580',
+  'Living End':                'https://cards.scryfall.io/art_crop/front/b/1/b1eede29-17a4-437f-a5c2-e24cccbc6a33.jpg?1782741862',
+  'Crashing Footfalls':        'https://cards.scryfall.io/art_crop/front/a/8/a8cca2a2-69e3-4136-936c-7a2774c19351.jpg?1782708457',
+  'Colossus Hammer':           'https://cards.scryfall.io/art_crop/front/8/9/897a134e-7e61-4fe1-bbae-23ef1fe5c0cf.jpg?1782704085',
+  'Lava Spike':                'https://cards.scryfall.io/art_crop/front/7/9/79c21c1f-eaa4-454d-a1c7-b41466d0a428.jpg?1782747024',
+  'Yawgmoth, Thran Physician': 'https://cards.scryfall.io/art_crop/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1782735245',
+  'Karn Liberated':            'https://cards.scryfall.io/art_crop/front/4/b/4b0c6662-4dde-40a2-97e0-0318478c0367.jpg?1782744061',
+  'Murktide Regent':           'https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708',
+  'Amulet of Vigor':           'https://cards.scryfall.io/art_crop/front/9/9/997bc933-ac30-477b-a4e1-5333b796a99d.jpg?1782715540'
+};
+
+/* EmergingCluster-shaped rows (api_shapes). named:false ALWAYS.
+   Colour group = the TOP signature card's archetype colour set as recorded
+   (pip-mined) in s1-archetype-visuals.json — Grief→Rakdos Scam [B,R],
+   Living End→[U,B,G], Colossus Hammer→Hammer Time [W], Yawgmoth→[B,G],
+   Murktide Regent→Izzet Murktide [U,R], Amulet of Vigor→Amulet Titan [G].
+   ALL NUMBERS PLACEHOLDER.
+   Field map: n→n_decks · first→first_seen · recent→recent_decks · wr→winrate (float|null,
+   as supplied — no raw-wins field) · games→n_match_games.
+   `events` + `prior` are PROPOSED API EXTENSIONS — NOT in the grounded shape (see ledger). */
+const CLUSTERS = [
+  { key:412, named:false, color:'BR',   top:'Grief',
+    n:23, events:2, first:'2026-07-01', recent:15, prior:3,
+    games:31, wr:0.516,
+    sigs:[ {name:'Grief', lift:8.2}, {name:"Urza's Saga", lift:3.1} ] },
+  { key:277, named:false, color:'UBG',  top:'Living End',
+    n:37, events:5, first:'2026-06-24', recent:14, prior:9,
+    games:47, wr:0.553,
+    sigs:[ {name:'Living End', lift:7.4}, {name:'Crashing Footfalls', lift:5.9} ] },
+  { key:590, named:false, color:'W',    top:'Colossus Hammer',
+    n:12, events:1, first:'2026-07-04', recent:12, prior:0,
+    games:12, wr:0.583,
+    sigs:[ {name:'Colossus Hammer', lift:9.1}, {name:'Lava Spike', lift:2.2} ] },
+  { key:118, named:false, color:'BG',   top:'Yawgmoth, Thran Physician',
+    n:51, events:9, first:'2026-06-14', recent:9, prior:12,
+    games:88, wr:0.545,
+    sigs:[ {name:'Yawgmoth, Thran Physician', lift:6.6}, {name:'Karn Liberated', lift:2.4} ] },
+  { key:203, named:false, color:'UR',   top:'Murktide Regent',
+    n:34, events:6, first:'2026-06-18', recent:9, prior:11,
+    games:44, wr:0.477,
+    sigs:[ {name:'Murktide Regent', lift:5.3} ] },
+  { key:466, named:false, color:'G',    top:'Amulet of Vigor',
+    n:19, events:3, first:'2026-06-29', recent:6, prior:5,
+    games:24, wr:0.542,
+    sigs:[ {name:'Amulet of Vigor', lift:8.8} ] }
+];
+/* feed order: biggest/newest first — rising lists desc, then n desc (api: "ordered biggest/newest first") */
+CLUSTERS.sort((a,b)=> b.recent - a.recent || b.n - a.n);
+
+let locked = true;
+const promoted = {};        /* key -> proposed name (demo drafts) */
+const expanded = new Set(); /* keys with an open DETAIL expand — survives re-renders */
+
+/* ---------------- helpers ---------------- */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function tier(c){
+  /* "N>=" not "N≥" — Press Start 2P has no ≥ glyph (fallback-font mix in pix chips) */
+  const ev = `${c.events} EVENT${c.events===1?'':'S'}`;
+  if(c.n >= 50) return {id:'confirmed', label:`CONFIRMED — N=${c.n} · RULE-FILE PENDING`};
+  if(c.n >= 20) return {id:'provisional', label:`PROVISIONAL — N=${c.n} / ${ev} · CONFIRMS AT N>=50`};
+  return {id:'scouted', label:`SCOUTED — N=${c.n} / ${ev} · TRACKS AT N>=20`};
+}
+function wrStats(c){
+  if(c.wr === null || c.games < GAMES_FLOOR) return null;   /* null winrate, or below noise floor */
+  const p = c.wr;                                            /* API-supplied winrate — no raw wins */
+  const ci = 1.96 * Math.sqrt(p*(1-p)/c.games) * 100;        /* 95% normal approx, computed at render */
+  return { wr: p*100, ci };
+}
+const wrClass = wr => wr > 52 ? 'pos' : (wr < 48 ? 'neg' : 'neu');
+const isBreakout = c => c.prior < 5;                          /* near-zero baseline → suppress % */
+
+/* quantized arcade roll-up — 8 ticks, snap exact (tokens §6.1) */
+function fmtVal(v,dec){ return Number(v).toFixed(dec); }
+function rollup(el, target, dec){
+  if(RM){ el.textContent = fmtVal(target,dec); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/[^0-9.\-]/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);
+    el.textContent = (i>=TICKS) ? fmtVal(target,dec) : v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+function glitch(el){
+  if(RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+
+/* ---------------- card renderer ---------------- */
+function pipHTML(color){
+  const order='WUBRG';
+  const cs=[...color].filter(ch=>order.includes(ch)).sort((a,b)=>order.indexOf(a)-order.indexOf(b));
+  return `<span class="pips" role="img" aria-label="colors: ${cs.join(', ')}">`+
+    cs.map(ch=>`<i class="pip pip-${ch}"></i>`).join('')+`</span>`;
+}
+function clusterHTML(c, masked, hero){
+  const t = tier(c);
+  const w = wrStats(c);
+  const bo = isBreakout(c);
+  const draft = promoted[c.key];
+  const growthPct = (!bo && c.prior>0) ? Math.round((c.recent-c.prior)/c.prior*100) : null;
+  const m = v => masked ? '--' : v;
+  const open = expanded.has(String(c.key));
+
+  const wrBlock = masked
+    ? `<span class="seg7 floor">--.-</span><span class="unit"> %</span>
+       <span class="rsub">LOCKED — MASKED PAYLOAD</span>`
+    : (w
+      ? `<span class="seg7 ${wrClass(w.wr)}">${w.wr.toFixed(1)}</span><span class="unit"> %</span>
+         <span class="rsub"><span class="ci">±${w.ci.toFixed(1)}</span> · N=<b>${c.games}</b> GAMES</span>`
+      : `<span class="seg7 floor">--.-</span><span class="unit"> %</span>
+         <span class="rsub">NOISE FLOOR — N=${c.games} &lt; ${GAMES_FLOOR} GAMES</span>`);
+
+  const growSub = masked
+    ? `<span class="rsub">PRIOR 7D: -- LISTS</span>`
+    : (bo
+      ? `<span class="rsub"><span class="bo">BREAKOUT</span> · BASELINE ${c.prior} LISTS</span>`
+      : `<span class="rsub">PRIOR 7D: ${c.prior} LISTS · <span class="${growthPct>=0?'up':'dn'}">${growthPct>=0?'+':'−'}${Math.abs(growthPct)}%${growthPct>=0?'▲':'▼'}</span></span>`);
+
+  /* MASKED ROWS CARRY NO TRUE NUMBERS — no data-target, no .roll hook, dash ink only.
+     True values enter the DOM solely via the unmasked re-render after unlock
+     (mirrors the server-side gate: free tier gets masked payloads, period). */
+  const risingRead = masked
+    ? `<span class="seg7 masked">--</span>`
+    : `<span class="seg7 roll" data-target="${c.recent}" data-dec="0">0</span>`;
+  const nRead = masked
+    ? `<span class="seg7 masked">--</span>`
+    : `<span class="seg7 roll" data-target="${c.n}" data-dec="0">0</span>`;
+
+  const sigTiles = c.sigs.map((s,i)=>`
+    <figure class="sig">
+      <img src="${ART[s.name]}" alt="Art crop: ${esc(s.name)}" width="118" height="64"
+           ${i>0?'loading="lazy"':''} decoding="async">
+      <figcaption>
+        <span class="signame" title="${esc(s.name)}">${esc(s.name)}</span>
+        <span class="lift">LIFT <b>${masked ? '?.?' : s.lift.toFixed(1)}</b></span>
+      </figcaption>
+    </figure>`).join('');
+
+  /* shared blocks — the 2 always-visible reads (RISING·7D + WR w/ CI+N), the third
+     read, the evidence exhibits, and the promotion action (spec §1.4.5 shed) */
+  const readsCore = `
+      <div class="cl-reads">
+        <div class="read rising${hero?' hero-grow':''}">
+          <span class="rlbl">Rising · 7D</span>
+          <span>${risingRead}<span class="unit"> LISTS</span></span>
+          ${growSub}
+        </div>
+        <div class="read wr">
+          <span class="rlbl">Cluster WR</span>
+          <span>${wrBlock}</span>
+        </div>
+      </div>`;
+  const listsRead = `
+      <div class="read">
+        <span class="rlbl">Lists · Total</span>
+        <span>${nRead}<span class="unit"> N</span></span>
+        <span class="rsub">${masked?'--':c.events} EVENT${c.events===1&&!masked?'':'S'} · PROPOSED EXT</span>
+      </div>`;
+  const sigsBlock = `
+      <div class="sigs">
+        <span class="sglbl">TOP SIGNAL — SIGNATURE CARDS (LIFT = IN/OUT FREQ · LIFTS PLACEHOLDER)</span>
+        <div class="sigrow">${sigTiles}</div>
+      </div>`;
+  const actBlock = `
+      <div class="cl-act">
+        ${draft
+          ? `<span class="draftchip">DRAFT SUBMITTED — PENDING OWNER REVIEW</span>
+             <span class="act-note">PROPOSED: <span class="proposed">${esc(draft)}</span> · ROW STAYS EMERGING UNTIL A RULE FILE LANDS</span>`
+          : `<button class="press btn-promote" data-promote="${c.key}" aria-expanded="false">
+               NAME &amp; PROMOTE
+             </button>
+             <span class="act-note">OPENS A RULE-FILE DRAFT — OWNER REVIEW REQUIRED</span>`}
+      </div>
+      <div class="drawer" data-drawer="${c.key}" hidden>
+        <span class="dlbl">PROPOSED ARCHETYPE NAME (HUMAN CALL — NEVER AUTO-NAMED)</span>
+        <input type="text" maxlength="40" placeholder="TYPE A NAME…" aria-label="Proposed archetype name">
+        <div class="drow">
+          <button class="sw btn-mini go" data-draft="${c.key}">DRAFT ▸</button>
+          <button class="sw btn-mini" data-cancel="${c.key}">CANCEL</button>
+        </div>
+        <p class="dnote">DEMO ONLY. PRODUCTION: CREATES A RULE-FILE DRAFT (MTGOFORMATDATA PORT FLOW) FOR OWNER SIGN-OFF. THE CLUSTER KEEPS ITS <b>EMERGING</b> REGISTER UNTIL THE RULE FILE SHIPS.</p>
+      </div>`;
+
+  if(hero){
+    /* L0 typographic hero — never masked (top cluster stays free). Provisional descriptor
+       at page-max size but mono-400/--provisional: loud, still machine-generated. NO art
+       anchor — sig exhibits stay thumb-scale evidence (spec §2.3). */
+    return `
+  <article class="cluster hero" data-key="${c.key}" aria-label="Top emerging cluster (free): unnamed, ${esc(c.top)}">
+    <div class="cl-main">
+      <div class="cl-tags">
+        <span class="tag-tier t-${t.id}">${t.label}</span>
+      </div>
+      <p class="hero-kicker">${pipHTML(c.color)} TOP 7-DAY RISER · PROVISIONAL DESCRIPTOR = COLOUR GROUP + TOP SIGNATURE CARD</p>
+      <p class="hero-desc">UNNAMED: ${esc(c.color)} — ${esc(c.top)}</p>
+      <p class="cl-prov">AUTO-CLUSTERED · <b>${c.n}</b> LISTS · FIRST SEEN <b>${c.first}</b> · CLUSTER_KEY ${c.key} (NOT A STABLE ID)</p>
+      ${sigsBlock}
+    </div>
+    <div class="cl-side">
+      ${readsCore}
+      ${actBlock}
+    </div>
+  </article>`;
+  }
+
+  /* tail card — shed to 1 tag (the tier/promotion-rule chip) + 2 reads; everything
+     else (EMERGING/BREAKOUT chips, third read, exhibits, promote) inside the expand */
+  return `
+  <article class="cluster" data-key="${c.key}" aria-label="${masked ? 'Locked emerging cluster — PRO' : `Unnamed emerging cluster: ${esc(c.top)}`}">
+    <div class="cl-main">
+      <div class="cl-tags">
+        <span class="tag-tier t-${t.id}">${masked ? t.id.toUpperCase()+' — N=--' : t.label}</span>
+      </div>
+      <p class="cl-desc">${pipHTML(c.color)} UNNAMED: ${esc(c.color)} — ${esc(c.top)}</p>
+      <p class="cl-prov">AUTO-CLUSTERED · <b>${m(c.n)}</b> LISTS · FIRST SEEN <b>${masked?'‑‑‑‑‑‑‑‑‑‑':c.first}</b> · CLUSTER_KEY ${c.key} (NOT A STABLE ID)</p>
+    </div>
+    <div class="cl-side">
+      ${readsCore}
+      <button class="press btn-expand" data-expand="${c.key}" aria-expanded="${open}" aria-controls="xp-${c.key}">${open?'DETAIL ▾':'DETAIL ▸'}</button>
+    </div>
+    <div class="cl-expand" id="xp-${c.key}" data-xpanel="${c.key}" ${open?'':'hidden'}>
+      <div class="cl-tags">
+        <span class="tag-emerging">EMERGING</span>
+        ${(!masked && bo) ? `<span class="tag-breakout">BREAKOUT · ${c.recent} LISTS · LAST 7D</span>` : ''}
+      </div>
+      ${listsRead}
+      ${sigsBlock}
+      ${actBlock}
+    </div>
+  </article>`;
+}
+
+/* ---------------- render feed ---------------- */
+const teaser = CLUSTERS[0];
+const tail   = CLUSTERS.slice(1);
+
+function armRollups(scope){
+  const els = Array.from(scope.querySelectorAll('.roll'));
+  if(!els.length) return;
+  const fire = el=>{
+    if(el._armed) return; el._armed = true;
+    rollup(el, parseFloat(el.dataset.target), parseInt(el.dataset.dec||'0',10));
+  };
+  if(!('IntersectionObserver' in window)){ els.forEach(fire); return; }
+  const io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ fire(e.target); io.unobserve(e.target); } });
+  },{threshold:.15});
+  els.forEach(el=>{
+    const r = el.getBoundingClientRect();          /* sync fallback: already on screen */
+    if(r.top < innerHeight && r.bottom > 0){ fire(el); }
+    else io.observe(el);
+  });
+}
+function wirePromote(scope){
+  scope.querySelectorAll('[data-promote]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.promote;
+      const dr = scope.querySelector(`[data-drawer="${key}"]`);
+      const open = dr.hidden;
+      dr.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      if(open) dr.querySelector('input').focus();
+    });
+  });
+  scope.querySelectorAll('[data-cancel]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const dr = scope.querySelector(`[data-drawer="${btn.dataset.cancel}"]`);
+      dr.hidden = true;
+      const p = scope.querySelector(`[data-promote="${btn.dataset.cancel}"]`);
+      if(p){ p.setAttribute('aria-expanded','false'); p.focus(); }
+    });
+  });
+  /* Escape closes the drawer and returns focus to the source control (deck-viewer modal precedent, tokens §5.7) */
+  scope.querySelectorAll('[data-drawer]').forEach(dr=>{
+    dr.addEventListener('keydown', e=>{
+      if(e.key !== 'Escape') return;
+      e.stopPropagation();
+      dr.hidden = true;
+      const p = scope.querySelector(`[data-promote="${dr.dataset.drawer}"]`);
+      if(p){ p.setAttribute('aria-expanded','false'); p.focus(); }
+    });
+  });
+  scope.querySelectorAll('[data-draft]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.draft;
+      const dr = scope.querySelector(`[data-drawer="${key}"]`);
+      const name = dr.querySelector('input').value.trim();
+      if(!name) { dr.querySelector('input').focus(); return; }
+      promoted[key] = name.toUpperCase();
+      expanded.add(String(key));                      /* keep the expand open so the draft chip is visible */
+      renderAll();                                    /* re-render: chip appears, still T3 */
+      const chip = document.querySelector(`.cluster[data-key="${key}"] .draftchip`);
+      glitch(chip);
+      if(chip) chip.closest('.cluster').scrollIntoView({block:'nearest', behavior:RM?'auto':'smooth'});
+    });
+  });
+}
+/* DETAIL expand — toggles hidden + arrow; state persists across re-renders via `expanded` */
+function wireExpand(scope){
+  scope.querySelectorAll('[data-expand]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.dataset.expand;
+      const xp = scope.querySelector(`[data-xpanel="${key}"]`);
+      const opening = xp.hidden;
+      xp.hidden = !opening;
+      btn.setAttribute('aria-expanded', String(opening));
+      btn.textContent = opening ? 'DETAIL ▾' : 'DETAIL ▸';
+      if(opening) expanded.add(String(key)); else expanded.delete(String(key));
+    });
+  });
+}
+function renderAll(){
+  $('#heroSlot').innerHTML  = clusterHTML(teaser, false, true);   /* L0 hero — always free */
+  $('#tailinner').innerHTML = tail.map(c=>clusterHTML(c, locked)).join('');
+  $('#feedCount').textContent = `${CLUSTERS.length} UNNAMED · 0 CURATED`;
+  $('#veilChip').textContent = `PRO · ${tail.length} MORE CLUSTERS — LOCKED`;
+  const tin = $('#tailinner');
+  try{ tin.inert = locked; }catch(e){ /* older engines: veil still blocks pointers */ }
+  armRollups($('#heroSlot'));
+  if(!locked) armRollups(tin);
+  wirePromote($('#heroSlot'));
+  if(!locked) wirePromote(tin);
+  wireExpand(tin);                                    /* inert while locked; usable after unlock */
+}
+
+/* totals — computed from the feed at render time (tokens §8) */
+(function totals(){
+  const rising = CLUSTERS.reduce((a,c)=>a+c.recent,0);
+  const lists  = CLUSTERS.reduce((a,c)=>a+c.n,0);
+  $('#segClusters').dataset.target = CLUSTERS.length;
+  $('#segRising').dataset.target = rising;
+  $('#segLists').dataset.target  = lists;
+  $('#statsSec').querySelectorAll('.seg7[data-target]').forEach(el=>el.classList.add('roll'));
+  $('#provClusters').textContent = CLUSTERS.length;
+  $('#provLists').textContent = lists + ' (PLACEHOLDER)';
+  armRollups($('#statsSec'));
+})();
+
+/* ---------------- lock / unlock choreography ---------------- */
+function setLocked(next, animate){
+  if(next === locked) return;
+  locked = next;
+  $('#swLocked').classList.toggle('on', locked);
+  $('#swLocked').setAttribute('aria-pressed', String(locked));
+  $('#swUnlocked').classList.toggle('on', !locked);
+  $('#swUnlocked').setAttribute('aria-pressed', String(!locked));
+  const vz = $('#veilzone');
+  if(!animate || RM){
+    vz.classList.add('noanim');
+    vz.classList.toggle('locked', locked);
+    vz.classList.toggle('unlocked', !locked);
+    renderAll();
+    void vz.offsetWidth;
+    requestAnimationFrame(()=>vz.classList.remove('noanim'));
+    return;
+  }
+  if(!locked){
+    /* squeegee wipe (12 steps) + defocus lift, then real values roll up */
+    vz.classList.remove('locked'); vz.classList.add('unlocked');
+    setTimeout(()=>{
+      renderAll();
+      $('#tailinner').querySelectorAll('.seg7.roll').forEach(glitch);
+    }, 720);
+  }else{
+    vz.classList.remove('unlocked'); vz.classList.add('locked');
+    renderAll();
+  }
+}
+$('#swLocked').addEventListener('click', ()=>setLocked(true, true));
+$('#swUnlocked').addEventListener('click', ()=>setLocked(false, true));
+$('#unlockBtn').addEventListener('click', ()=>{ glitch($('#veilChip')); setLocked(false, true); });
+
+/* ---------------- KEY ▸ legend toggle (attention spec §1.4.1) ---------------- */
+$('#keyBtn').addEventListener('click', ()=>{
+  const fk = $('#floorkey'), b = $('#keyBtn');
+  const opening = fk.hidden;
+  fk.hidden = !opening;
+  b.setAttribute('aria-expanded', String(opening));
+  b.textContent = opening ? 'KEY ▾' : 'KEY ▸';
+});
+
+/* ---------------- ticker ---------------- */
+/* Items derive from THIS placeholder feed (labeled); no invented event results.
+   Prefix is "EMERGING:" not "UNNAMED:" — the marquee clip can truncate any leading
+   characters, and "UNNAMED" must never truncate into "NAMED" (its own negation).
+   CI renders dim (--dim via .mut), never semantic ink — tokens §2.2/§5.2. */
+const FEED_ITEMS = [
+  `SCANNER SWEEP 2026-07-08 · <span class="sec">${CLUSTERS.length} CLUSTERS</span> · MODERN`,
+  `EMERGING: BR — GRIEF <span class="up">+15 LISTS ▲ 7D</span>`,
+  `EMERGING: W — COLOSSUS HAMMER <span class="dn">BREAKOUT</span> · 12 LISTS`,
+  `EMERGING: BG — YAWGMOTH WR 54.5 <span class="mut">±10.4</span> N=88`,
+  `EMERGING: UBG — LIVING END <span class="up">+14 LISTS ▲ 7D</span>`,
+  `<span class="mut">PLACEHOLDER WIRE — NOT MEASURED · SOURCE: SAMPLE</span>`
+];
+(function initTicker(){
+  const tk = $('#ticker'), track = $('#tickerTrack');
+  const half = FEED_ITEMS.map(s=>`<span>${s}</span>`).join('');
+  track.innerHTML = half + half;                    /* duplicated once → -50% seamless loop */
+  const setSpeed = ()=>{ track.style.animationDuration = ((track.scrollWidth/2)/35) + 's'; };
+  setSpeed();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(setSpeed);
+  const toggle = ()=>{
+    const p = tk.classList.toggle('paused');
+    tk.setAttribute('aria-pressed', String(p));
+    $('#tickerPause').innerHTML = p ? '&#9654;' : '&#10074;&#10074;';
+  };
+  tk.addEventListener('click', toggle);
+  tk.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); }
+  });
+})();
+
+/* ---------------- wide reparenting (tokens §7.4) ---------------- */
+const wideMQ = matchMedia('(min-width:1100px)');
+let wideApplied = null;
+const mainEl = document.querySelector('main');
+function layoutWide(){
+  const w = wideMQ.matches;
+  if(w === wideApplied) return;
+  wideApplied = w;
+  const rail = $('#rail'), stats = $('#statsSec'), infra = $('#infraSlot');
+  if(w){
+    rail.appendChild(stats);
+    rail.appendChild(infra);
+    stats.style.gridTemplateColumns = '1fr';
+  }else{
+    mainEl.insertBefore(stats, $('#feedSec'));   /* stats return BELOW the hero (L0 first) */
+    mainEl.appendChild(infra);
+    stats.style.gridTemplateColumns = '';
+  }
+}
+layoutWide();
+wideMQ.addEventListener('change', layoutWide);
+window.addEventListener('resize', layoutWide);
+
+/* ---------------- initial paint ---------------- */
+renderAll();
+</script>
+</body>
+</html>

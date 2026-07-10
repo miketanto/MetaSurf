@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS-04 // DECK VIEWER — IZZET WIZARDS · AZJA — MetaSurf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!--
+  PRODUCTION NOTE: self-host DepartureMono-Regular.woff2 under /assets/fonts/ and
+  point the @font-face src there. The jsdelivr URL below exists only so this static
+  mockup renders standalone.
+
+  DATA PROVENANCE: decklist from docs/design-research/2026-07-09/deck-viewer-data.json
+  (1st place, Modern Challenge 64, 2024-06-18, pilot Azja — real MTGO list).
+  Four entries in that file resolve to Art Series printings whose Scryfall records
+  carry type_line "Card // Card" and empty mana_cost; their gameplay type/cost/mv
+  below were fetched from api.scryfall.com/cards/named on 2026-07-09:
+    Dress Down                  -> Enchantment, {1}{U}, mv 2
+    Hall of Storm Giants        -> Land
+    Subtlety                    -> Creature — Elemental Incarnation, {2}{U}{U}, mv 4
+    Tamiyo, Inquisitive Student -> Legendary Creature — Moonfolk Wizard, {U}, mv 1
+  Winrate / meta-share figures in the header are SAMPLE placeholders and labeled so.
+-->
+<style>
+  @font-face {
+    font-family: 'Departure Mono';
+    src: url('https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@1.500/public/assets/DepartureMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #0a0a0a;
+    --paper: #f2f0e6;
+    --amber: #ffb000;
+    --amber-dim: #8a6200;
+    --win: #33ff66;
+    --win-dim: #1a8038;
+    --loss: #ff665e;
+    --blue: #6fb8ff;          /* {U} pip — legible on --bg */
+    --lh: 1.2rem;             /* 19.2px line grid */
+    --display: 'Departure Mono', monospace;
+    --body: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { background: var(--bg); }
+
+  body {
+    background: var(--bg);
+    color: var(--paper);
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: var(--lh);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 2ch calc(var(--lh) * 2);
+  }
+
+  .disp {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+  }
+
+  .wrap { max-width: 86ch; margin: 0 auto; }
+
+  a { color: var(--paper); text-decoration: none; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .up  { color: var(--win); }
+  .dn  { color: var(--loss); }
+  .amb { color: var(--amber); }
+  .dim { color: var(--amber-dim); }
+  .mut { color: #6f6d64; }
+
+  /* ============ header chrome ============ */
+
+  header {
+    position: relative;
+    padding-top: var(--lh);
+    border-bottom: 1px solid var(--paper);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    header::after {
+      content: "";
+      position: absolute; inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(242, 240, 230, 0.5) 0px, rgba(242, 240, 230, 0.5) 1px,
+        transparent 1px, transparent 4px
+      );
+      opacity: 0.045;
+    }
+  }
+
+  nav { display: flex; flex-wrap: wrap; gap: 1ch; margin-bottom: var(--lh); }
+  nav a {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 0.5ch;
+  }
+  nav a.active { background: var(--amber); color: var(--bg); }
+  nav a:hover:not(.active) { color: var(--amber); }
+  nav .spacer { flex: 1; }
+  nav .acct { color: var(--amber-dim); }
+
+  .faceplate {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+    padding-bottom: calc(var(--lh) / 4);
+  }
+  .faceplate b { font-weight: 400; color: var(--paper); }
+
+  .rule {
+    color: #4a4840;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    line-height: var(--lh);
+  }
+
+  .crumb { color: #6f6d64; padding: calc(var(--lh)/2) 0 0; }
+  .crumb a:hover { color: var(--amber); }
+
+  .termline { color: #6f6d64; margin-bottom: calc(var(--lh)/2); }
+  .termline::before { content: "> "; color: var(--amber-dim); }
+
+  /* ============ featured art band ============ */
+
+  .artband {
+    position: relative;
+    margin-top: calc(var(--lh)/2);
+    border: 1px solid #35332c;
+    height: clamp(150px, 34vw, 220px);
+    overflow: hidden;
+  }
+  .artband img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    /* phosphor treatment: desaturate a notch, keep the art recognizable */
+    filter: saturate(0.68) contrast(1.06) brightness(0.9);
+  }
+  .artband .tint {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.25) 45%, rgba(10,10,10,0.15) 100%),
+      linear-gradient(to right, rgba(255,176,0,0.10), rgba(255,176,0,0) 55%);
+  }
+  .artband .scan {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(10,10,10,0.55) 0px, rgba(10,10,10,0.55) 1px,
+      transparent 1px, transparent 3px
+    );
+    opacity: 0.35;
+  }
+  .artband .caption {
+    position: absolute; left: 1ch; right: 1ch; bottom: calc(var(--lh)/3);
+  }
+  .artband h1 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: calc(var(--lh) * 1.5);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 0 #0a0a0a, 0 0 12px rgba(10,10,10,0.9);
+  }
+  .artband .byline { color: #c9c7bb; text-shadow: 0 1px 0 #0a0a0a; }
+  .artband .byline b { color: var(--paper); font-weight: 500; }
+  .artband .artcredit {
+    position: absolute; top: calc(var(--lh)/4); right: 1ch;
+    color: #9a988e; font-size: 11px;
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 #0a0a0a;
+  }
+
+  /* ============ hero stats ============ */
+
+  .herostats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18ch, 1fr));
+    border: 1px solid #35332c;
+    border-top: 0;
+    margin-bottom: var(--lh);
+  }
+  .herostats > div {
+    padding: calc(var(--lh)/2) 1.5ch;
+    border-right: 1px solid #35332c;
+  }
+  .herostats > div:last-child { border-right: 0; }
+  .hs-label {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    letter-spacing: 0.06em;
+  }
+  .hs-val {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 22px;
+    line-height: calc(var(--lh) * 1.5);
+  }
+  .hs-sub { font-size: 13px; }
+
+  /* ============ toolbar (copy / export) ============ */
+
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 1ch 2ch;
+    margin-bottom: var(--lh);
+  }
+  .tbtn {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid #35332c;
+    padding: calc(var(--lh)/4) 1.5ch;
+    cursor: pointer;
+  }
+  .tbtn:hover { border-color: var(--amber); color: var(--amber); }
+  .tbtn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .tbtn.primary { background: var(--amber); color: var(--bg); border-color: var(--amber); }
+  .tbtn.primary:hover { background: var(--paper); border-color: var(--paper); color: var(--bg); }
+  #copystatus { color: #6f6d64; }
+  #copystatus .ok { color: var(--win); }
+
+  /* ============ sections ============ */
+
+  section { margin-top: var(--lh); }
+  .sect-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2ch;
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    margin-bottom: calc(var(--lh)/2);
+  }
+  .sect-head h2 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+  }
+  .sect-head .meta { color: #6f6d64; font-size: 13px; margin-left: auto; white-space: nowrap; }
+
+  /* ============ two columns on wide ============ */
+
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 3ch; }
+  @media (min-width: 820px) {
+    .cols { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: start; }
+    .col-side { position: sticky; top: var(--lh); }
+  }
+
+  /* ============ card rows ============ */
+
+  .group { margin-bottom: calc(var(--lh)/2); }
+  .group-head {
+    display: flex; align-items: baseline; gap: 1ch;
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber-dim);
+    line-height: var(--lh);
+    margin-bottom: calc(var(--lh)/4);
+  }
+  .group-head .n { color: var(--paper); }
+  .group-head::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid #26251f;
+    transform: translateY(-3px);
+  }
+
+  ul.cards { list-style: none; }
+  .cardrow {
+    display: flex; align-items: center; gap: 1ch;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #1e1d19;
+    color: var(--paper);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: left;
+    padding: 3px 0;
+    cursor: pointer;
+  }
+  .cardrow:hover, .cardrow:focus-visible { background: #171610; outline: none; }
+  .cardrow:focus-visible .cname { color: var(--amber); }
+  .cardrow:hover .cname { color: var(--amber); }
+  .cardrow .qty { flex: none; width: 2ch; color: var(--amber-dim); }
+  .cardrow .thumb {
+    flex: none;
+    width: 30px; height: 22px;
+    border: 1px solid #35332c;
+    overflow: hidden;
+    position: relative;
+    background: #171610;
+  }
+  .cardrow .thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 18%;   /* aim at the art box of the card frame */
+    filter: saturate(0.7) contrast(1.05) brightness(0.92);
+    display: block;
+  }
+  .cardrow .thumb::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(10,10,10,0.5) 0px, rgba(10,10,10,0.5) 1px,
+      transparent 1px, transparent 3px
+    );
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .cardrow:hover .thumb { border-color: var(--amber-dim); }
+  .cardrow .cname {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cardrow .cost { flex: none; white-space: nowrap; letter-spacing: 1px; }
+  .pip-u { color: var(--blue); }
+  .pip-r { color: var(--loss); }
+  .pip-n { color: #9a988e; }
+  .cost .nil { color: #4a4840; }
+
+  /* ============ mana curve ============ */
+
+  .chartbox { border: 1px solid #35332c; padding: calc(var(--lh)/2) 1ch; }
+  .chartbox svg { display: block; width: 100%; height: 150px; shape-rendering: crispEdges; }
+  .legend { display: flex; flex-wrap: wrap; gap: 2ch; padding-top: calc(var(--lh)/2); font-size: 13px; }
+  .legend .key { color: #9a988e; }
+  .legend .swatch { display: inline-block; width: 2ch; text-align: center; }
+
+  /* ============ sideboard buffer ============ */
+
+  .sbpane {
+    border: 1px double var(--amber-dim);
+    outline: 1px solid #26251f;
+    outline-offset: 3px;
+  }
+  .sbpane .sb-head {
+    display: flex; justify-content: space-between; gap: 1ch;
+    border-bottom: 1px solid #35332c;
+    padding: calc(var(--lh)/4) 1ch;
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    background: #12110c;
+  }
+  .sbpane .sb-head .mut { color: #6f6d64; text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 13px; }
+  .sbpane .sb-body { padding: calc(var(--lh)/4) 1ch calc(var(--lh)/2); }
+
+  /* ============ hover peek + tap lightbox ============ */
+
+  #peek {
+    position: fixed;
+    z-index: 60;
+    width: 244px;
+    pointer-events: none;
+    display: none;
+  }
+  #peek img {
+    display: block; width: 100%;
+    border: 1px solid var(--amber-dim);
+    box-shadow: 0 0 0 3px #0a0a0a, 0 0 24px rgba(255,176,0,0.12);
+    filter: saturate(0.85) contrast(1.03);
+  }
+  #peek .peekcap {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: #0a0a0a;
+    border: 1px solid #35332c;
+    border-top: 0;
+    padding: 2px 1ch;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  @media (pointer: coarse) { #peek { display: none !important; } }
+
+  #lightbox {
+    position: fixed; inset: 0; z-index: 90;
+    display: none;
+    align-items: center; justify-content: center;
+    background: rgba(10,10,10,0.88);
+    padding: var(--lh) 2ch;
+    cursor: pointer;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox figure { max-width: min(90vw, 336px); width: 100%; cursor: default; }
+  #lightbox img {
+    display: block; width: 100%;
+    border: 1px solid var(--amber-dim);
+    box-shadow: 0 0 0 4px #0a0a0a, 0 0 40px rgba(255,176,0,0.18);
+  }
+  #lightbox figcaption {
+    display: flex; justify-content: space-between; gap: 2ch;
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: #0a0a0a;
+    border: 1px solid #35332c;
+    border-top: 0;
+    padding: calc(var(--lh)/4) 1ch;
+  }
+  #lightbox .close-hint { color: #6f6d64; }
+
+  /* ============ footer ============ */
+
+  footer {
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    display: flex; flex-wrap: wrap; gap: 2ch;
+    color: #6f6d64;
+  }
+  .foot-rule { margin-top: calc(var(--lh) * 2); }
+  .cursor {
+    display: inline-block;
+    width: 1ch;
+    background: var(--amber);
+    color: var(--amber);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor { animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { 50% { background: transparent; color: transparent; } }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <nav aria-label="Primary">
+    <a href="#">[meta]</a>
+    <a href="#">[matrix]</a>
+    <a href="#" class="active" aria-current="page">[decks]</a>
+    <a href="#">[alerts]</a>
+    <span class="spacer"></span>
+    <a href="#" class="acct">[free tier]</a>
+  </nav>
+  <div class="faceplate">MS-04 // DECK VIEWER &nbsp;·&nbsp; FORMAT: <b>MODERN</b> &nbsp;·&nbsp; SRC: <b>MTGO</b> &nbsp;·&nbsp; LIST: <b>60</b> MAIN / <b>14</b> SB</div>
+  <div class="rule" aria-hidden="true">================================================================================================================</div>
+</header>
+
+<p class="crumb"><a href="#">meta</a> / <a href="#">modern</a> / <a href="#">izzet-wizards</a> / azja--challenge-64</p>
+
+<p class="termline" style="margin-top: calc(var(--lh)/2);">open deck azja --event modern-challenge-64 --date 2024-06-18 ... ok</p>
+
+<div class="artband">
+  <img src="https://cards.scryfall.io/art_crop/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477" alt="" loading="eager">
+  <div class="tint" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+  <span class="artcredit">// feat: snapcaster mage</span>
+  <div class="caption">
+    <h1>Izzet Wizards</h1>
+    <div class="byline">pilot <b>Azja</b> &middot; Modern Challenge 64 &middot; 2024-06-18 &middot; <span class="amb">1st place</span></div>
+  </div>
+</div>
+
+<div class="herostats">
+  <div>
+    <div class="hs-label">Finish</div>
+    <div class="hs-val disp amb">1ST</div>
+    <div class="hs-sub"><span class="mut">Challenge 64 &middot; MTGO</span></div>
+  </div>
+  <div>
+    <div class="hs-label">List</div>
+    <div class="hs-val disp"><span id="hs-main">60</span><span class="dim">/</span><span id="hs-side">14</span></div>
+    <div class="hs-sub"><span class="mut">main / sideboard</span></div>
+  </div>
+  <div>
+    <div class="hs-label">Arch winrate</div>
+    <div class="hs-val disp">54.1%</div>
+    <div class="hs-sub"><span class="mut">sample &middot; placeholder</span></div>
+  </div>
+  <div>
+    <div class="hs-label">Meta share</div>
+    <div class="hs-val disp">3.2%</div>
+    <div class="hs-sub"><span class="mut">sample &middot; placeholder</span></div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="tbtn primary" type="button" id="copybtn">[ copy :75 ]</button>
+  <button class="tbtn" type="button" onclick="alert('Mockup: this would download izzet-wizards_azja_2024-06-18.txt')">[ export .txt ]</button>
+  <span id="copystatus" aria-live="polite"></span>
+</div>
+
+<div class="cols">
+
+  <div class="col-main">
+    <section aria-labelledby="h-main">
+      <div class="sect-head">
+        <h2 id="h-main">Mainboard</h2>
+        <span class="meta" id="main-meta">60 cards</span>
+      </div>
+      <p class="termline">parsing list... 24 unique / 60 total &middot; ok &middot; <span class="dim">tap a row for full card</span></p>
+      <div id="maingroups"></div>
+    </section>
+  </div>
+
+  <div class="col-side">
+    <section aria-labelledby="h-curve">
+      <div class="sect-head">
+        <h2 id="h-curve">Mana curve</h2>
+        <span class="meta" id="curve-meta"></span>
+      </div>
+      <div class="chartbox">
+        <svg id="curve" role="img" aria-label=""></svg>
+      </div>
+      <div class="legend">
+        <span class="key"><span class="swatch amb">&#9608;</span> spells at mana value</span>
+        <span class="key"><span class="swatch mut">&#9508;</span> lands excluded (21)</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-side">
+      <div class="sect-head">
+        <h2 id="h-side">Sideboard</h2>
+        <span class="meta" id="side-meta">14 cards</span>
+      </div>
+      <div class="sbpane">
+        <div class="sb-head"><span>ALT BUFFER :sb</span><span class="mut">14 / 15 slots</span></div>
+        <div class="sb-body">
+          <ul class="cards" id="sblist"></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<div class="rule foot-rule" aria-hidden="true">================================================================================================================</div>
+<footer>
+  <span>SRC mtgo.com/decklist &middot; 2024-06-18</span>
+  <span><span class="cursor" aria-hidden="true">&#9646;</span> LIVE</span>
+  <span style="margin-left:auto">metasurf v0.1 &middot; data: MTGO scrape, 1 req/s</span>
+</footer>
+
+</div>
+
+<!-- hover peek (fine pointers only) -->
+<div id="peek" aria-hidden="true">
+  <img id="peekimg" alt="">
+  <div class="peekcap" id="peekcap"></div>
+</div>
+
+<!-- tap/click lightbox -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Card image">
+  <figure>
+    <img id="lbimg" alt="">
+    <figcaption><span id="lbcap"></span><span class="close-hint">[esc / tap to close]</span></figcaption>
+  </figure>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- single source of truth ----------
+     Every card row, every count, the curve, and the copy-to-clipboard text
+     derive from DECK below, so nothing on screen can drift from the list.
+     List: 1st place, Modern Challenge 64, 2024-06-18, pilot Azja (MTGO).
+     grp: cre | ins | sor | ae (artifacts+enchantments) | lnd
+     cost: Scryfall mana-cost syntax; mv: mana value.
+     IMG base: cards.scryfall.io — small for thumbs, normal for peek/lightbox. */
+
+  var IMG = 'https://cards.scryfall.io/';
+
+  function C(qty, name, cost, mv, grp, path) {
+    return { qty: qty, name: name, cost: cost, mv: mv, grp: grp,
+             small:  IMG + 'small/front/'  + path,
+             normal: IMG + 'normal/front/' + path };
+  }
+
+  var DECK = {
+    main: [
+      /* creatures */
+      C(4, 'Tamiyo, Inquisitive Student', '{U}',       1, 'cre', '9/c/9c7ae95f-fb8b-4edb-9a4e-fcb708a00311.jpg?1782729846'),
+      C(4, 'Snapcaster Mage',             '{1}{U}',    2, 'cre', '2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477'),
+      C(3, 'Subtlety',                    '{2}{U}{U}', 4, 'cre', '8/8/884f778a-32b8-4a78-8964-e4eb09a4e0e1.jpg?1782741029'),
+      /* instants */
+      C(4, 'Lightning Bolt',              '{R}',       1, 'ins', '7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979'),
+      C(3, 'Galvanic Discharge',          '{R}',       1, 'ins', '3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296'),
+      C(1, 'Spell Snare',                 '{U}',       1, 'ins', 'b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089'),
+      C(1, 'Stern Scolding',              '{U}',       1, 'ins', '3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207'),
+      C(4, 'Counterspell',                '{U}{U}',    2, 'ins', '4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884'),
+      C(4, 'Flame of Anor',               '{1}{U}{R}', 3, 'ins', '0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120'),
+      C(2, 'Force of Negation',           '{1}{U}{U}', 3, 'ins', '1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934'),
+      C(2, 'Invert Polarity',             '{U}{U}{R}', 3, 'ins', 'd/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225'),
+      C(1, 'Sink into Stupor // Soporific Springs', '{1}{U}{U}', 3, 'ins', '5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170'),
+      /* sorceries */
+      C(4, 'Preordain',                   '{U}',       1, 'sor', 'd/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813'),
+      /* artifacts + enchantments */
+      C(2, 'Dress Down',                  '{1}{U}',    2, 'ae',  'd/0/d0f92907-606f-4cdf-b0fd-3d452193a988.jpg?1782741049'),
+      /* lands */
+      C(4, 'Island',                      '',          0, 'lnd', '5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662'),
+      C(3, 'Spirebluff Canal',            '',          0, 'lnd', '5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926'),
+      C(3, 'Steam Vents',                 '',          0, 'lnd', 'b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912'),
+      C(2, 'Misty Rainforest',            '',          0, 'lnd', '8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585'),
+      C(2, 'Polluted Delta',              '',          0, 'lnd', '6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195'),
+      C(2, 'Scalding Tarn',               '',          0, 'lnd', '7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583'),
+      C(2, 'Thundering Falls',            '',          0, 'lnd', '1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773'),
+      C(1, 'Flooded Strand',              '',          0, 'lnd', '8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197'),
+      C(1, 'Hall of Storm Giants',        '',          0, 'lnd', 'f/2/f28d528a-3481-49e3-a18d-a05e03705111.jpg?1782740718'),
+      C(1, 'Otawara, Soaring City',       '',          0, 'lnd', '4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159')
+    ],
+    side: [
+      C(2, 'Consign to Memory',           '{U}',       1, 'ins', 'b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362'),
+      C(1, 'Spell Snare',                 '{U}',       1, 'ins', 'b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089'),
+      C(2, 'Stern Scolding',              '{U}',       1, 'ins', '3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207'),
+      C(2, 'Unlicensed Hearse',           '{2}',       2, 'ae',  '9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515'),
+      C(2, 'Magus of the Moon',           '{2}{R}',    3, 'cre', '7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825'),
+      C(2, "Tishana's Tidebinder",        '{2}{U}',    3, 'cre', '9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545'),
+      C(3, 'Obsidian Charmaw',            '{3}{R}{R}', 5, 'cre', 'e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654')
+    ]
+  };
+
+  var GROUPS = [
+    ['cre', 'Creatures'],
+    ['ins', 'Instants'],
+    ['sor', 'Sorceries'],
+    ['ae',  'Artifacts + Enchantments'],
+    ['lnd', 'Lands']
+  ];
+
+  function sum(cards) {
+    var t = 0;
+    for (var i = 0; i < cards.length; i++) t += cards[i].qty;
+    return t;
+  }
+
+  /* ---------- mana cost -> colored pips (legible monospace text) ---------- */
+
+  function costHTML(cost) {
+    if (!cost) return '<span class="nil">&mdash;</span>';
+    var out = '', m, re = /\{([^}]+)\}/g;
+    while ((m = re.exec(cost))) {
+      var s = m[1];
+      var cls = s === 'U' ? 'pip-u' : s === 'R' ? 'pip-r' : 'pip-n';
+      out += '<span class="' + cls + '">' + s + '</span>';
+    }
+    return out;
+  }
+  function costText(cost) {
+    return cost ? cost.replace(/[{}]/g, '') : 'no mana cost';
+  }
+
+  /* ---------- card rows ---------- */
+
+  function rowHTML(c) {
+    return '<button class="cardrow" type="button" aria-haspopup="dialog"' +
+      ' data-img="' + c.normal + '" data-name="' + c.name.replace(/"/g, '&quot;') + '"' +
+      ' aria-label="' + c.qty + ' × ' + c.name.replace(/"/g, '&quot;') + ', ' + costText(c.cost) + ', show card image">' +
+      '<span class="qty" aria-hidden="true">' + c.qty + '</span>' +
+      '<span class="thumb" aria-hidden="true"><img src="' + c.small + '" alt="" loading="lazy"></span>' +
+      '<span class="cname" aria-hidden="true">' + c.name + '</span>' +
+      '<span class="cost" aria-hidden="true">' + costHTML(c.cost) + '</span>' +
+      '</button>';
+  }
+
+  (function renderMain() {
+    var host = document.getElementById('maingroups');
+    var html = '';
+    GROUPS.forEach(function (grp) {
+      var cards = DECK.main.filter(function (c) { return c.grp === grp[0]; });
+      if (!cards.length) return;
+      html += '<div class="group"><div class="group-head">' + grp[1] +
+              ' <span class="n">' + sum(cards) + '</span></div><ul class="cards">';
+      cards.forEach(function (c) { html += '<li>' + rowHTML(c) + '</li>'; });
+      html += '</ul></div>';
+    });
+    host.innerHTML = html;
+    var total = sum(DECK.main);
+    document.getElementById('main-meta').textContent = total + ' cards';
+    document.getElementById('hs-main').textContent = total;
+  })();
+
+  (function renderSide() {
+    var host = document.getElementById('sblist');
+    var html = '';
+    DECK.side.forEach(function (c) { html += '<li>' + rowHTML(c) + '</li>'; });
+    host.innerHTML = html;
+    var total = sum(DECK.side);
+    document.getElementById('side-meta').textContent = total + ' cards';
+    document.getElementById('hs-side').textContent = total;
+  })();
+
+  /* ---------- copy :75 — the actual list, from the same DECK object ---------- */
+
+  function deckText() {
+    var lines = [];
+    DECK.main.forEach(function (c) { lines.push(c.qty + ' ' + c.name); });
+    lines.push('');
+    lines.push('Sideboard');
+    DECK.side.forEach(function (c) { lines.push(c.qty + ' ' + c.name); });
+    return lines.join('\n');
+  }
+
+  document.getElementById('copybtn').addEventListener('click', function () {
+    var status = document.getElementById('copystatus');
+    var done = function (ok) {
+      status.innerHTML = ok
+        ? '<span class="ok">ok</span> &middot; ' + (sum(DECK.main) + sum(DECK.side)) + ' cards &rarr; clipboard'
+        : 'clipboard blocked &middot; select text manually';
+      setTimeout(function () { status.textContent = ''; }, 4000);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(deckText()).then(function () { done(true); },
+                                                     function () { done(false); });
+    } else { done(false); }
+  });
+
+  /* ---------- mana curve: crisp vector bars, terminal framing only ----------
+     Buckets computed from DECK (spells only, lands excluded). viewBox sized to
+     rendered width so 1 SVG unit == 1 CSS px and crispEdges stays honest. */
+
+  var svg = document.getElementById('curve');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function curveData() {
+    var buckets = {}, maxMv = 0, spells = 0, weighted = 0;
+    DECK.main.forEach(function (c) {
+      if (c.grp === 'lnd') return;
+      var b = Math.min(c.mv, 7);
+      buckets[b] = (buckets[b] || 0) + c.qty;
+      if (b > maxMv) maxMv = b;
+      spells += c.qty;
+      weighted += c.mv * c.qty;
+    });
+    var arr = [];
+    for (var i = 1; i <= maxMv; i++) arr.push({ mv: i, n: buckets[i] || 0 });
+    return { bars: arr, spells: spells, avg: weighted / spells };
+  }
+
+  function drawCurve() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var cd = curveData();
+    var W = Math.max(240, Math.round(svg.getBoundingClientRect().width));
+    var H = 150;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+    var padL = 26, padR = 8, padT = 16, padB = 20;
+    var iw = W - padL - padR, ih = H - padT - padB;
+    var n = cd.bars.length, slot = iw / n;
+    var max = 0, i;
+    for (i = 0; i < n; i++) if (cd.bars[i].n > max) max = cd.bars[i].n;
+    var yMax = Math.ceil(max / 5) * 5;
+
+    function el(name, attrs, text) {
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text) e.textContent = text;
+      svg.appendChild(e);
+      return e;
+    }
+    function label(x, y, anchor, fill, text) {
+      el('text', { x: x, y: y, 'text-anchor': anchor, fill: fill,
+                   'font-family': 'IBM Plex Mono, monospace', 'font-size': '10' }, text);
+    }
+    function yAt(v) { return Math.round(padT + ih - (v / yMax) * ih); }
+
+    /* framing: dashed gridlines + solid baseline (terminal flavor lives here) */
+    for (i = 0; i <= yMax; i += 5) {
+      var gy = yAt(i);
+      el('line', { x1: padL, y1: gy, x2: W - padR, y2: gy,
+                   stroke: i === 0 ? '#4a4840' : '#26251f', 'stroke-width': 1,
+                   'stroke-dasharray': i === 0 ? '' : '2 3' });
+      label(padL - 4, gy + 3, 'end', '#6f6d64', String(i));
+    }
+
+    /* data-ink: solid crisp bars */
+    for (i = 0; i < n; i++) {
+      var bw = Math.max(6, Math.round(slot * 0.56));
+      var bx = Math.round(padL + i * slot + (slot - bw) / 2);
+      var by = yAt(cd.bars[i].n);
+      if (cd.bars[i].n > 0) {
+        el('rect', { x: bx, y: by, width: bw, height: yAt(0) - by, fill: '#ffb000' });
+        label(bx + bw / 2, by - 4, 'middle', '#f2f0e6', String(cd.bars[i].n));
+      }
+      label(bx + bw / 2, H - 6, 'middle', '#6f6d64', String(cd.bars[i].mv) + (cd.bars[i].mv === 7 ? '+' : ''));
+    }
+
+    /* aria: describe the real numbers */
+    var parts = cd.bars.map(function (b) { return b.n + ' at mana value ' + b.mv; });
+    svg.setAttribute('aria-label', 'Mana curve, ' + cd.spells + ' spells, lands excluded: ' +
+                     parts.join(', ') + '. Average mana value ' + cd.avg.toFixed(2) + '.');
+    document.getElementById('curve-meta').textContent =
+      cd.spells + ' spells · avg mv ' + cd.avg.toFixed(2);
+  }
+
+  drawCurve();
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawCurve, 120);
+  });
+
+  /* ---------- interaction: hover peek (fine pointer) + tap lightbox ---------- */
+
+  var peek = document.getElementById('peek');
+  var peekimg = document.getElementById('peekimg');
+  var peekcap = document.getElementById('peekcap');
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  function positionPeek(ev) {
+    var pw = 244, ph = 340 + 22;
+    var x = ev.clientX + 18, y = ev.clientY - ph / 2;
+    if (x + pw > window.innerWidth - 8) x = ev.clientX - pw - 18;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+    if (y + ph > window.innerHeight - 8) y = window.innerHeight - ph - 8;
+    peek.style.left = x + 'px';
+    peek.style.top = y + 'px';
+  }
+
+  var lightbox = document.getElementById('lightbox');
+  var lbimg = document.getElementById('lbimg');
+  var lbcap = document.getElementById('lbcap');
+  var lastFocus = null;
+
+  function openLightbox(img, name) {
+    lbimg.src = img;
+    lbimg.alt = name + ' — full card';
+    lbcap.textContent = name;
+    lastFocus = document.activeElement;
+    lightbox.classList.add('open');
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lbimg.removeAttribute('src');
+    if (lastFocus) lastFocus.focus();
+  }
+  lightbox.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+  });
+
+  document.addEventListener('click', function (e) {
+    var row = e.target.closest ? e.target.closest('.cardrow') : null;
+    if (!row) return;
+    peek.style.display = 'none';
+    openLightbox(row.getAttribute('data-img'), row.getAttribute('data-name'));
+  });
+
+  if (finePointer) {
+    document.addEventListener('mouseover', function (e) {
+      var row = e.target.closest ? e.target.closest('.cardrow') : null;
+      if (!row) return;
+      peekimg.src = row.getAttribute('data-img');
+      peekcap.textContent = row.getAttribute('data-name');
+      peek.style.display = 'block';
+    });
+    document.addEventListener('mousemove', function (e) {
+      if (peek.style.display !== 'block') return;
+      if (!(e.target.closest && e.target.closest('.cardrow'))) { peek.style.display = 'none'; return; }
+      positionPeek(e);
+    });
+    document.addEventListener('mouseout', function (e) {
+      var row = e.target.closest ? e.target.closest('.cardrow') : null;
+      if (row && !(e.relatedTarget && row.contains(e.relatedTarget))) peek.style.display = 'none';
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

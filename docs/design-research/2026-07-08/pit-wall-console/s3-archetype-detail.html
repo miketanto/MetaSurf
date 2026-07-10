@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — S3 Archetype Detail — Pit-Wall Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --ink:#f2f2f7;         /* cool white */
+  --win:#3b9dff;         /* favorable WR — blue side of CVD-safe diverging */
+  --loss:#ff7a1a;        /* unfavorable WR — orange side, never red/green */
+  --acc:#b45bff;         /* sector purple — biggest movers only */
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --dim:#8a8a96;
+  --shadow:#000000;
+}
+
+*{box-sizing:border-box; margin:0; padding:0; border-radius:0;}
+html{background:var(--bg);}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+/* pixel crosshair cursor — desktop garnish only */
+@media (pointer:fine){
+  body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23f2f2f7'%3E%3Crect x='7' width='3' height='6'/%3E%3Crect x='7' y='11' width='3' height='6'/%3E%3Crect y='7' width='6' height='3'/%3E%3Crect x='11' y='7' width='6' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23b45bff'/%3E%3C/svg%3E") 8 8, auto;}
+}
+
+.wrap{max-width:680px; margin:0 auto; padding:0 12px 0;}
+
+/* ============ SIGNATURE 1: mechanical press physics ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  color:var(--ink);
+  font-family:inherit;
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end); /* release */
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);          /* mechanical depress */
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;                        /* 0ms on press */
+}
+
+/* ============ wire-feed ticker ============ */
+.tickerbar{
+  position:sticky; top:0; z-index:50;
+  background:#101017;
+  border-bottom:1px solid var(--line);
+  overflow:hidden; white-space:nowrap;
+  cursor:pointer;
+}
+.ticker-track{
+  display:inline-flex; width:max-content;
+  animation:tick 42s linear infinite;   /* duration recomputed in JS: trackWidth / 35px-per-s */
+  will-change:transform;
+}
+.tickerbar.paused .ticker-track{animation-play-state:paused;}
+.ticker-seq{
+  display:inline-block;
+  padding:7px 0;
+  font-size:11px; letter-spacing:.04em;
+  color:var(--dim);
+}
+.ticker-seq b{color:var(--ink); font-weight:700;}
+.ticker-seq .up{color:var(--win);}
+.ticker-seq .dn{color:var(--loss);}
+.ticker-seq .pu{color:var(--acc);}
+@keyframes tick{to{transform:translateX(-50%);}}
+
+/* ============ header ============ */
+.tophdr{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px; padding:12px 0 10px;
+}
+.backbtn{
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  padding:10px 14px; letter-spacing:0;
+  min-height:44px; display:inline-flex; align-items:center;  /* >=44px tap target */
+  cursor:pointer;
+}
+.clock{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;
+  font-size:22px; position:relative; color:var(--ink);
+  line-height:1;
+}
+.ghost{ /* unlit seven-segment ghost behind live value */
+  position:absolute; inset:0; color:var(--ink); opacity:.10;
+  pointer-events:none; z-index:0;
+}
+.lit{position:relative; z-index:1;}
+
+.arch-title{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 62;
+  font-stretch:62%;
+  font-weight:900;
+  font-size:40px; line-height:.95; letter-spacing:-.01em;
+  text-transform:uppercase;
+  margin:2px 0 8px;
+}
+.chiprow{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+.chip{
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  padding:6px 8px; border:1px solid var(--line); background:var(--panel);
+}
+.chip.code{color:var(--ink);}
+.chip.mover{color:var(--acc); border-color:var(--acc);}  /* sector purple = best-in-class */
+.chip.fmt{color:var(--dim);}
+
+/* ============ hero stat cells ============ */
+/* Non-interactive readout tiles (divs, not buttons) — press garnish only, no dead affordance. */
+.hero{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;
+}
+.cell{
+  padding:12px 12px 10px; text-align:left; width:100%;
+}
+.cell .lbl{
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:6px;
+}
+.cell .seg{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;
+  font-size:30px; line-height:1.15; position:relative; display:inline-block;
+  margin-top:6px;
+}
+.cell .sub{font-size:11px; color:var(--dim); margin-top:2px;}
+.cell.win .lit{color:var(--win);}
+.cell.share .lit{color:var(--ink);}
+.cell.n .lit{color:var(--ink);}
+.cell.delta .lit{color:var(--acc);}
+.cell.wide{grid-column:1 / -1; display:flex; align-items:flex-end; justify-content:space-between; gap:12px;}
+.cell.wide .seg{font-size:24px;}
+.pro-inline{
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  background:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* ============ range toggle ============ */
+.ranges{display:flex; gap:8px; margin:14px 0 10px;}
+.rbtn{
+  flex:1; min-height:44px;                       /* >=44px tap target at 390px */
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  cursor:pointer; color:var(--dim);
+}
+.rbtn[aria-pressed="true"]{color:var(--bg); background:var(--ink); border-color:var(--ink);}
+.rbtn[aria-pressed="true"] .pro-inline{-webkit-text-fill-color:initial; background:none; color:var(--bg);}
+
+/* ============ chart panel ============ */
+.panel{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:12px; margin-bottom:18px;
+}
+.panel h2{
+  font-size:10px; letter-spacing:.14em; color:var(--dim);
+  text-transform:uppercase; font-weight:400; margin-bottom:10px;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+/* axis-owned chart grid: left y-axis = SHARE (purple), right y-axis = WR (blue), x = dates */
+.chart-grid{display:grid; grid-template-columns:auto 1fr auto; column-gap:6px;}
+.yax{display:flex; flex-direction:column; font-size:9px; line-height:1;}
+.yax .axname{
+  font-size:8px; letter-spacing:.08em; margin-bottom:3px;
+  font-family:'Press Start 2P',monospace;
+}
+.yax .ticks{flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:1px 0;}
+.yax.yl{color:var(--acc); text-align:right;}
+.yax.yr{color:var(--win); text-align:left;}
+.xax{
+  grid-column:2; display:flex; justify-content:space-between;
+  font-size:9px; color:var(--dim); padding-top:4px;
+}
+.chart-frame{position:relative; cursor:crosshair;}
+#chart{
+  width:100%; display:block; aspect-ratio:96/36;
+  image-rendering:pixelated;
+  background:#0f0f15;
+  border:1px solid var(--line);
+}
+.readout{
+  margin-top:8px; padding:7px 9px;
+  font-size:11px; background:#0f0f15; border:1px dashed var(--line);
+  min-height:30px;
+}
+.readout .roS{color:var(--acc);}
+.readout .roW{color:var(--win);}
+.readout .roL{color:var(--dim);}
+.legend{display:flex; gap:14px; margin-top:8px; font-size:10px; color:var(--dim); flex-wrap:wrap;}
+.legend .swatch{display:inline-block; width:10px; height:10px; vertical-align:-1px; margin-right:5px;}
+
+/* ============ decklist cards ============ */
+.sect{
+  font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  margin:4px 0 10px; display:flex; justify-content:space-between; align-items:center;
+}
+/* deck card = wrapper div with the 8px tile frame PERMANENTLY reserved (no reflow on select),
+   header <button> carries press physics, decklist body is non-interactive + selectable/copyable */
+.deck{
+  display:block;
+  border:8px solid transparent;   /* reserved — selection swaps in border-image, zero layout jump */
+  margin:-8px -8px -6px;          /* negative margins keep visible card aligned with the column */
+}
+.deck.selected{
+  border-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cg fill='%23b45bff'%3E%3Crect x='8' width='8' height='4'/%3E%3Crect x='4' y='4' width='4' height='4'/%3E%3Crect x='16' y='4' width='4' height='4'/%3E%3Crect y='8' width='4' height='8'/%3E%3Crect x='20' y='8' width='4' height='8'/%3E%3Crect x='4' y='16' width='4' height='4'/%3E%3Crect x='16' y='16' width='4' height='4'/%3E%3Crect x='8' y='20' width='8' height='4'/%3E%3C/g%3E%3C/svg%3E") 8 repeat; /* picked game tile */
+}
+.deck-head{
+  width:100%; text-align:left; padding:12px; display:block;
+  cursor:pointer;
+}
+.deck .event{font-weight:700; font-size:13px;}
+.deck .meta{color:var(--dim); font-size:11px; margin-top:2px;}
+.deck-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+.finish{
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  padding:6px 7px; border:1px solid var(--line); background:var(--panel2);
+  white-space:nowrap;
+}
+.finish.first{color:var(--acc); border-color:var(--acc);}
+.deck-spark{margin-top:10px; display:flex; align-items:center; gap:10px;}
+.deck-spark canvas{width:120px; height:36px; image-rendering:pixelated; border:1px solid var(--line); background:#0f0f15;}
+.deck-spark .cap{font-size:10px; color:var(--dim);}
+.decklist{
+  display:none;
+  background:var(--panel); border:1px solid var(--line); border-top:1px dashed var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:10px 12px;
+  font-size:12px; white-space:pre; overflow-x:auto; line-height:1.5;
+  user-select:text; -webkit-user-select:text; cursor:text;   /* copyable — tournament prep */
+}
+.deck.selected .decklist{display:block;}
+.deck.selected .deck-head{box-shadow:none; border-bottom-style:dashed;} /* head + list read as one tile */
+
+/* ============ premium: card-choice drift ============ */
+.pro-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 8px; background:#17171c; border:1px solid #3f3f4a;
+}
+.pro-chip span{
+  font-family:'Press Start 2P',monospace; font-size:8px;
+  background:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.drift-body{position:relative; border:1px solid var(--line); background:#0f0f15;}
+#driftVeil{
+  position:absolute; inset:0; width:100%; height:100%;
+  image-rendering:pixelated; z-index:2;
+  transition:opacity 200ms steps(2,end);
+}
+.drift-rows{padding:10px 12px; visibility:hidden;}
+.drift-body.unlocked #driftVeil{opacity:0; pointer-events:none;}
+.drift-body.unlocked .drift-rows{visibility:visible;}
+.drow{display:flex; align-items:center; gap:8px; padding:6px 0; font-size:12px;}
+.drow .dname{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.drow .dzone{color:var(--dim); font-size:10px;}
+.drow .dval{width:52px; text-align:right; font-weight:700;}
+.drow .dval.add{color:var(--acc);}
+.drow .dval.cut{color:var(--dim);}
+.drow .dbar{height:8px;}
+.drow .dbar.add{background:var(--acc);}
+.drow .dbar.cut{background:#4a4a56;}
+.unlock-row{display:flex; gap:10px; align-items:stretch; margin-top:10px;}
+.unlockbtn{
+  flex:1; padding:12px; min-height:44px; text-align:center; cursor:pointer;
+  font-family:'Press Start 2P',monospace; font-size:8px; letter-spacing:0;
+  color:var(--ink);
+}
+.gatecap{font-size:10px; color:var(--dim); margin-top:8px;}
+
+/* ============ SIGNATURE 2b: single-fire RGB-split glitch ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{animation:glitch 240ms steps(2,jump-none) 1;}  /* 2-frame, never loops */
+
+/* ============ footer wordmark ============ */
+footer{margin:34px 0 26px;}
+.wordmark{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 62; font-stretch:62%;
+  font-weight:900; text-transform:uppercase;
+  font-size:46px; line-height:.9; letter-spacing:-.01em;
+}
+.wordmark .l2{color:#3a3a46;}
+.finecap{font-size:10px; color:var(--dim); margin-top:12px; letter-spacing:.08em;}
+
+/* ============ desktop widening ============ */
+@media (min-width:720px){
+  .hero{grid-template-columns:repeat(3,1fr);}
+  .cell.wide{grid-column:auto;}
+  .arch-title{font-size:56px;}
+  .wordmark{font-size:72px;}
+}
+
+/* ============ reduced motion: everything event-driven dies quietly ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;}          /* static first-N fallback */
+  .glitch{animation:none;}
+  .press, .press:active{transition:none;}
+  #driftVeil{transition:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= results wire-feed ticker ================= -->
+<div class="tickerbar" id="tickerbar" role="marquee" aria-live="off" aria-label="results wire feed — tap to pause">
+  <div class="ticker-track" id="tickertrack">
+    <span class="ticker-seq" id="tickseq">
+      &nbsp;MODERN CHALLENGE 64 · <b>1st RAKDOS SCAM</b> &nbsp;·&nbsp; <span class="pu">LIVING END +2.3% ▲</span> &nbsp;·&nbsp; IZZET MURKTIDE <span class="up">54.2% WR</span> &nbsp;·&nbsp; MODERN PRELIM 2026-07-07 · <b>5-0 AMULET TITAN</b> &nbsp;·&nbsp; YAWGMOTH <span class="dn">−0.8% ▼</span> &nbsp;·&nbsp; BURN N=612 &nbsp;·&nbsp; HAMMER TIME <span class="dn">46.9% WR</span> &nbsp;·&nbsp; TRON <span class="up">52.7% WR</span> &nbsp;·&nbsp; WIRE 27-081 &nbsp;·&nbsp;
+    </span>
+    <span class="ticker-seq" aria-hidden="true"></span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= header ================= -->
+  <div class="tophdr">
+    <button class="press backbtn" onclick="return false" aria-label="back to meta snapshot">◀ META</button>
+    <div class="clock" aria-label="local time">
+      <span class="ghost" aria-hidden="true">88:88</span><span class="lit" id="clock">--:--</span>
+    </div>
+  </div>
+
+  <h1 class="arch-title">Izzet Murktide</h1>
+  <div class="chiprow">
+    <span class="chip code">MURK</span>
+    <span class="chip fmt">MODERN</span>
+    <span class="chip mover">▲ BEST MOVER 7D</span>
+  </div>
+
+  <!-- ================= hero stat cells (DSEG readouts — non-interactive) ================= -->
+  <div class="hero">
+    <div class="press cell win">
+      <span class="lbl">WIN RATE <span id="ciLbl">±1.9 CI95</span></span>
+      <span class="seg"><span class="ghost" aria-hidden="true">88.8</span><span class="lit roll" id="wrVal" data-target="54.2" data-dec="1">0.0</span></span>
+      <span class="sub">% · GAME-WEIGHTED</span>
+    </div>
+    <div class="press cell share">
+      <span class="lbl">META SHARE</span>
+      <span class="seg"><span class="ghost" aria-hidden="true">88.8</span><span class="lit roll" id="shVal" data-target="11.8" data-dec="1">0.0</span></span>
+      <span class="sub">% OF FIELD</span>
+    </div>
+    <div class="press cell n wide">
+      <div>
+        <span class="lbl">SAMPLE</span><br>
+        <span class="seg"><span class="ghost" aria-hidden="true">8888</span><span class="lit roll" id="nVal" data-target="1482" data-dec="0">0</span></span>
+        <span class="sub" id="nCap">MATCHES · 30D</span>
+      </div>
+      <div style="text-align:right">
+        <span class="lbl">Δ SHARE 7D</span><br>
+        <span class="seg" style="font-size:22px"><span class="ghost" aria-hidden="true">8.8</span><span class="lit roll" id="dVal" data-target="1.4" data-dec="1" style="color:var(--acc)">0.0</span></span>
+        <span class="sub" style="color:var(--acc)">▲ 7D PTS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= range toggle ================= -->
+  <div class="ranges" role="group" aria-label="time range">
+    <button class="press rbtn" id="r7"  aria-pressed="false">7D</button>
+    <button class="press rbtn" id="r30" aria-pressed="true">30D</button>
+    <button class="press rbtn" id="r90" aria-pressed="false">90D <span class="pro-inline">PRO</span></button>
+  </div>
+
+  <!-- ================= share / winrate chart ================= -->
+  <div class="panel">
+    <h2><span id="chartTitle">SHARE / WINRATE — 30 DAYS</span><span style="color:var(--dim)">MURK</span></h2>
+    <div class="chart-grid">
+      <div class="yax yl" aria-hidden="true">
+        <span class="axname">SHR</span>
+        <div class="ticks"><span>20%</span><span>10%</span><span>0%</span></div>
+      </div>
+      <div class="chart-frame" id="chartFrame">
+        <canvas id="chart" width="96" height="36"></canvas>
+      </div>
+      <div class="yax yr" aria-hidden="true">
+        <span class="axname">WR</span>
+        <div class="ticks"><span>60</span><span>52</span><span>44</span></div>
+      </div>
+      <div class="xax" id="xax" aria-hidden="true"></div>
+    </div>
+    <div class="readout" id="readout" aria-live="polite">▸ —</div>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--acc); opacity:.55"></span>SHARE (LEFT AXIS, DITHER FILL)</span>
+      <span><span class="swatch" style="background:var(--win)"></span>WR &gt;52 (RIGHT AXIS)</span>
+      <span><span class="swatch" style="background:#8a8a96"></span>WR 48–52</span>
+      <span><span class="swatch" style="background:var(--loss)"></span>WR &lt;48</span>
+    </div>
+  </div>
+
+  <!-- ================= recent decklists =================
+       deck = wrapper div (reserved 8px tile frame) + press <button> header + selectable list body.
+       Screen readers get a short button label, not 10 lines of cards; text is copyable. -->
+  <div class="sect"><span>RECENT LISTS</span><span>TAP TO EXPAND</span></div>
+
+  <div class="deck" data-deck>
+    <button class="press deck-head" aria-expanded="false" aria-controls="dl1">
+      <div class="deck-top">
+        <div>
+          <div class="event">MODERN CHALLENGE 64</div>
+          <div class="meta">2026-07-05 · PILOT_2041 · 75 CARDS</div>
+        </div>
+        <span class="finish first">1ST</span>
+      </div>
+      <div class="deck-spark">
+        <canvas width="40" height="12" data-spark="7,6,7,8,8,9,10,9,11,12"></canvas>
+        <span class="cap">PILOT FORM · LAST 10 EVENTS</span>
+      </div>
+    </button>
+    <div class="decklist" id="dl1">4 Ragavan, Nimble Pilferer
+4 Dragon's Rage Channeler
+4 Murktide Regent
+4 Counterspell
+4 Unholy Heat
+3 Consider
+2 Spell Pierce
+│ SB: 2 Blood Moon · 2 Brotherhood's End
+└ ▸ FULL 75 →</div>
+  </div>
+
+  <div class="deck" data-deck>
+    <button class="press deck-head" aria-expanded="false" aria-controls="dl2">
+      <div class="deck-top">
+        <div>
+          <div class="event">MODERN CHALLENGE 32</div>
+          <div class="meta">2026-07-04 · WZRD_TTV · 75 CARDS</div>
+        </div>
+        <span class="finish">3RD</span>
+      </div>
+      <div class="deck-spark">
+        <canvas width="40" height="12" data-spark="4,5,5,6,5,7,8,7,9,8"></canvas>
+        <span class="cap">PILOT FORM · LAST 10 EVENTS</span>
+      </div>
+    </button>
+    <div class="decklist" id="dl2">4 Ragavan, Nimble Pilferer
+4 Dragon's Rage Channeler
+4 Murktide Regent
+3 Counterspell
+4 Unholy Heat
+4 Consider
+1 Spell Pierce
+│ SB: 3 Blood Moon · 1 Jegantha
+└ ▸ FULL 75 →</div>
+  </div>
+
+  <div class="deck" data-deck>
+    <button class="press deck-head" aria-expanded="false" aria-controls="dl3">
+      <div class="deck-top">
+        <div>
+          <div class="event">MODERN PRELIMINARY</div>
+          <div class="meta">2026-07-02 · N0RTHPILOT · 75 CARDS</div>
+        </div>
+        <span class="finish">4-1</span>
+      </div>
+      <div class="deck-spark">
+        <canvas width="40" height="12" data-spark="6,6,5,7,7,6,8,9,9,10"></canvas>
+        <span class="cap">PILOT FORM · LAST 10 EVENTS</span>
+      </div>
+    </button>
+    <div class="decklist" id="dl3">4 Ragavan, Nimble Pilferer
+4 Dragon's Rage Channeler
+4 Murktide Regent
+4 Counterspell
+3 Unholy Heat
+3 Consider
+2 Flame of Anor
+│ SB: 2 Blood Moon · 2 Engineered Explosives
+└ ▸ FULL 75 →</div>
+  </div>
+
+  <!-- ================= premium: card-choice drift ================= -->
+  <div class="sect" style="margin-top:22px">
+    <span>CARD-CHOICE DRIFT — 14D</span>
+    <span class="pro-chip"><span>PRO</span></span>
+  </div>
+
+  <!-- PRODUCTION NOTE: this mosaic veil is a MOCKUP-ONLY client-side occlusion.
+       In production the free tier must never receive the underlying drift rows or 90D series
+       in the payload at all — the gate is server-side (entitlements module); the server sends
+       either the pre-rasterized 1/8-res mosaic or the full data, never both. -->
+  <div class="drift-body" id="driftBody">
+    <canvas id="driftVeil"></canvas>
+    <div class="drift-rows" id="driftRows"><!-- rows injected by JS --></div>
+  </div>
+
+  <div class="unlock-row">
+    <button class="press unlockbtn" id="unlockBtn">UNLOCK FULL RESOLUTION ▸</button>
+  </div>
+  <div class="gatecap">FREE TIER RENDERS AT 1/8 RES · PRO RESTORES FULL SIGNAL · <span style="color:var(--dim)">(MOCKUP: TAP TO PREVIEW UNLOCK)</span></div>
+
+  <!-- ================= footer wordmark ================= -->
+  <footer>
+    <div class="wordmark">METASURF<br><span class="l2">MODERN — WEEK 27</span></div>
+    <div class="finecap">PIT-WALL CONSOLE · S3 ARCHETYPE DETAIL · PLACEHOLDER DATA · NOT LIVE TIMING</div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+/* ---------- placeholder series (clearly fake, deterministic) ---------- */
+const SHARE30=[9.1,9.4,9.2,9.8,10.1,9.9,10.4,10.2,10.6,10.9,10.7,11.2,11.0,11.4,11.1,11.6,11.3,11.8,11.5,11.9,12.2,11.8,12.0,11.6,11.9,12.1,11.7,12.0,11.9,11.8];
+const WR30=[49.8,50.4,51.2,50.6,51.8,52.4,51.9,52.8,53.1,52.6,53.4,52.9,53.8,54.2,53.6,54.5,53.9,54.8,54.1,53.7,54.6,55.1,54.4,53.9,54.7,55.2,54.6,54.0,54.5,54.2];
+
+/* deterministic PRNG (fixed seed) to synthesize the 60 pre-history days for the 90D PRO view */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rnd=mulberry32(27);
+const SHARE90=[], WR90=[];
+{
+  let s=SHARE30[0], w=WR30[0];
+  const sPre=[], wPre=[];
+  for(let i=0;i<60;i++){
+    s=Math.min(20,Math.max(4, s-(rnd()-.45)*0.5));
+    w=Math.min(60,Math.max(44, w-(rnd()-.48)*0.9));
+    sPre.unshift(+s.toFixed(1)); wPre.unshift(+w.toFixed(1));
+  }
+  SHARE90.push(...sPre,...SHARE30); WR90.push(...wPre,...WR30);
+}
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+
+/* MM-DD date axis ending at the mock "today" */
+function datesBack(n){
+  const out=[], end=new Date(Date.UTC(2026,6,7));
+  for(let i=n-1;i>=0;i--){
+    const d=new Date(end); d.setUTCDate(d.getUTCDate()-i);
+    out.push(String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'));
+  }
+  return out;
+}
+const STATS={
+  '30':{wr:54.2, ci:'±1.9 CI95', sh:11.8, n:1482, d:1.4, cap:'MATCHES · 30D', title:'SHARE / WINRATE — 30 DAYS', share:SHARE30, wrs:WR30, dates:datesBack(30)},
+  '7' :{wr:54.5, ci:'±3.4 CI95', sh:11.9, n:318,  d:1.4, cap:'MATCHES · 7D',  title:'SHARE / WINRATE — 7 DAYS',  share:SHARE30.slice(-7), wrs:WR30.slice(-7), dates:datesBack(7)},
+  '90':{wr:+avg(WR90).toFixed(1), ci:'±1.1 CI95', sh:+avg(SHARE90).toFixed(1), n:4446, d:1.4, cap:'MATCHES · 90D', title:'SHARE / WINRATE — 90 DAYS', share:SHARE90, wrs:WR90, dates:datesBack(90)}
+};
+let activeRange='30', cur=STATS['30'], cursorIdx=SHARE30.length-1, PRO=false;
+
+/* ---------- SIGNATURE 2a: quantized arcade roll-up (8 ticks, <=600ms) ----------
+   SPEC DEVIATION (documented): the direction spec names CountUp.js; this mockup hand-rolls the
+   same observable behavior (8 discrete ticks, 600ms, IntersectionObserver-gated, reduced-motion
+   checked) in ~12 lines to keep the mockup dependency-free/offline. Production may swap in
+   CountUp.js with useEasing:false + equivalent frame quantization. */
+function fmtVal(v,dec){ return dec===0 ? Math.round(v).toLocaleString('en-US') : v.toFixed(dec); } /* grouped at final tick */
+function rollup(el, target, dec){
+  if(RM){ el.textContent = fmtVal(target,dec); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/,/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);       // linear, quantized to 8 frames
+    el.textContent = (i>=TICKS) ? fmtVal(target,dec) : v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+
+/* first paint: IntersectionObserver-gated */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      rollup(el, parseFloat(el.dataset.target), +el.dataset.dec);
+      io.unobserve(el);
+    }
+  });
+},{threshold:.4});
+document.querySelectorAll('.roll').forEach(el=>io.observe(el));
+
+/* ---------- SIGNATURE 2b: one-shot glitch on changed cells ---------- */
+function glitch(el){
+  if(RM) return;
+  el.classList.remove('glitch'); void el.offsetWidth;   // restart
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+
+/* ---------- DSEG header clock ---------- */
+function tickClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent =
+    String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 15000);
+
+/* ---------- ticker: duplicate track + tap-to-pause + measured 35px/s ---------- */
+const tickerBar=document.getElementById('tickerbar');
+const tickerTrack=document.getElementById('tickertrack');
+const tickSeq=document.getElementById('tickseq');
+function syncTicker(){
+  tickSeq.nextElementSibling.innerHTML=tickSeq.innerHTML;   // duplicated track => seamless -50% loop
+  /* duration derived from rendered width, not guessed: one loop travels exactly one seq width */
+  const w=tickSeq.getBoundingClientRect().width;
+  if(w>0) tickerTrack.style.animationDuration=(w/35).toFixed(2)+'s';   // spec: ~35px/s
+}
+syncTicker();
+document.fonts.ready.then(syncTicker);   // remeasure once webfonts settle
+tickerBar.addEventListener('click',()=>tickerBar.classList.toggle('paused'));
+
+/* ---------- pixel chart: low-res canvas, CSS-upscaled ---------- */
+const chart=document.getElementById('chart'), cctx=chart.getContext('2d');
+function drawChart(share, wrs, cursor){
+  const W=chart.width, H=chart.height;
+  cctx.imageSmoothingEnabled=false;
+  cctx.clearRect(0,0,W,H);
+  cctx.fillStyle='#0f0f15'; cctx.fillRect(0,0,W,H);
+
+  const n=share.length, step=(W-2)/n;
+
+  // tapped-day cursor column (under the series)
+  if(cursor!=null){
+    const cx=Math.round(1+cursor*step);
+    cctx.fillStyle='#3a3a48';
+    cctx.fillRect(cx,0,Math.max(1,Math.round(step)),H);
+  }
+
+  // dotted 50% WR reference row
+  const y50=Math.round(H-1-((50-44)/(60-44))*(H-2));
+  cctx.fillStyle='#33333e';
+  for(let x=0;x<W;x+=3) cctx.fillRect(x,y50,1,1);
+
+  // share: dithered area fill (checkerboard), LEFT axis 0..20%
+  cctx.fillStyle=css('--acc');
+  for(let i=0;i<n;i++){
+    const x0=Math.round(1+i*step), x1=Math.round(1+(i+1)*step);
+    const yTop=Math.round(H-1-(share[i]/20)*(H-2));
+    for(let x=x0;x<x1;x++){
+      cctx.globalAlpha=1; cctx.fillRect(x,yTop,1,1);           // solid crest pixel
+      cctx.globalAlpha=.45;
+      for(let y=yTop+1;y<H-1;y++) if(((x+y)&1)===0) cctx.fillRect(x,y,1,1); // dither body
+    }
+  }
+  cctx.globalAlpha=1;
+
+  // winrate: stepped line, diverging blue/orange (CVD-safe), RIGHT axis 44..60
+  const yOf=v=>Math.round(H-1-((Math.min(60,Math.max(44,v))-44)/(60-44))*(H-2));
+  let prevY=null;
+  for(let i=0;i<n;i++){
+    const x0=Math.round(1+i*step), x1=Math.round(1+(i+1)*step);
+    const y=yOf(wrs[i]);
+    cctx.fillStyle = wrs[i]>52 ? css('--win') : (wrs[i]<48 ? css('--loss') : '#8a8a96');
+    cctx.fillRect(x0, y, Math.max(1,x1-x0), 1);                // horizontal tread
+    if(prevY!==null && prevY!==y){                              // vertical riser
+      cctx.fillRect(x0, Math.min(prevY,y), 1, Math.abs(prevY-y)+1);
+    }
+    prevY=y;
+  }
+}
+
+/* 1/8-res mosaic pass over whatever is on the chart canvas (SIGNATURE 3 for the 90D gate).
+   MOCKUP-ONLY occlusion — see production note above the drift section. */
+function mosaicChart(f){
+  if(f<=1) return;
+  const t=document.createElement('canvas');
+  t.width=Math.max(1,Math.round(chart.width/f)); t.height=Math.max(1,Math.round(chart.height/f));
+  const tc=t.getContext('2d');
+  tc.imageSmoothingEnabled=true;
+  tc.drawImage(chart,0,0,t.width,t.height);
+  cctx.imageSmoothingEnabled=false;
+  cctx.clearRect(0,0,chart.width,chart.height);
+  cctx.drawImage(t,0,0,t.width,t.height,0,0,chart.width,chart.height);
+}
+const chartLocked=()=>activeRange==='90' && !PRO;
+
+/* x-axis date ticks: first / middle / last of the visible window */
+function drawXAxis(){
+  const d=cur.dates;
+  document.getElementById('xax').innerHTML =
+    `<span>${d[0]}</span><span>${d[Math.floor(d.length/2)]}</span><span>${d[d.length-1]}</span>`;
+}
+
+/* tap / last-value readout — exact numbers per series, axis ownership spelled out */
+const readoutEl=document.getElementById('readout');
+function updateReadout(){
+  if(chartLocked()){
+    readoutEl.innerHTML='▸ 90D DAY DETAIL <span class="roL">— 1/8 RES · PRO UNLOCKS EXACT VALUES</span>';
+    return;
+  }
+  const i=cursorIdx;
+  readoutEl.innerHTML =
+    `▸ ${cur.dates[i]} · <span class="roS">SHARE ${cur.share[i].toFixed(1)}%</span>`+
+    ` · <span class="roW">WR ${cur.wrs[i].toFixed(1)}</span>`+
+    ` <span class="roL">· TAP CHART FOR ANY DAY</span>`;
+}
+function renderChart(){
+  drawChart(cur.share, cur.wrs, chartLocked()?null:cursorIdx);
+  if(chartLocked()) mosaicChart(8);
+  drawXAxis(); updateReadout();
+}
+document.getElementById('chartFrame').addEventListener('click', e=>{
+  if(chartLocked()){ glitch(document.getElementById('unlockBtn')); updateReadout(); return; }
+  const r=chart.getBoundingClientRect();
+  cursorIdx=Math.min(cur.share.length-1, Math.max(0, Math.floor(((e.clientX-r.left)/r.width)*cur.share.length)));
+  renderChart();
+});
+renderChart();
+
+/* ---------- range toggle: reroll + glitch + redraw (90D = mosaic-gated historical chart) ---------- */
+function setRange(key){
+  const s=STATS[key];
+  activeRange=key; cur=s; cursorIdx=s.share.length-1;
+  ['r7','r30','r90'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed', id==='r'+key));
+  document.getElementById('chartTitle').textContent = s.title + (key==='90'&&!PRO ? ' · 1/8 RES' : '');
+  document.getElementById('ciLbl').textContent=s.ci;
+  document.getElementById('nCap').textContent=s.cap;
+  [['wrVal',s.wr,1],['shVal',s.sh,1],['nVal',s.n,0],['dVal',s.d,1]].forEach(([id,v,dec])=>{
+    const el=document.getElementById(id);
+    if(parseFloat((el.textContent||'0').replace(/,/g,''))!==v){ rollup(el,v,dec); glitch(el.parentElement); }
+  });
+  renderChart();
+  glitch(document.getElementById('chartTitle'));
+  if(key==='90'&&!PRO) glitch(document.getElementById('unlockBtn'));
+}
+document.getElementById('r7').addEventListener('click',()=>setRange('7'));
+document.getElementById('r30').addEventListener('click',()=>setRange('30'));
+document.getElementById('r90').addEventListener('click',()=>setRange('90'));
+
+/* ---------- simulated wire-feed refresh: new ticker item arrives -> ONE glitch on changed cells ---------- */
+const WIRE=[
+  {at:14000, html:'<span class="pu">WIRE 27-082</span> · MODERN LEAGUE · <b>5-0 IZZET MURKTIDE</b> &nbsp;·&nbsp; ', dwr:0.1, dn:6},
+  {at:34000, html:'<span class="pu">WIRE 27-083</span> · MODERN CHALLENGE 32 · <b>2ND IZZET MURKTIDE</b> &nbsp;·&nbsp; ', dwr:0.1, dn:9}
+];
+WIRE.forEach(w=>setTimeout(()=>{
+  tickSeq.insertAdjacentHTML('beforeend', w.html);
+  syncTicker();                                             // remeasure -> keep ~35px/s
+  const s=STATS['30'];
+  s.wr=+(s.wr+w.dwr).toFixed(1); s.n+=w.dn;                 // deterministic mock increments
+  if(activeRange==='30'){                                   // only cells that actually changed
+    const wrEl=document.getElementById('wrVal'), nEl=document.getElementById('nVal');
+    rollup(wrEl, s.wr, 1); glitch(wrEl.parentElement);
+    rollup(nEl,  s.n,  0); glitch(nEl.parentElement);
+  }
+}, w.at));
+
+/* ---------- sparklines: 40x12 staircase, upscaled 3x ---------- */
+document.querySelectorAll('[data-spark]').forEach(cv=>{
+  const ctx=cv.getContext('2d');
+  const pts=cv.dataset.spark.split(',').map(Number);
+  const max=Math.max(...pts), w=cv.width, h=cv.height, step=w/pts.length;
+  ctx.fillStyle='#0f0f15'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle=css('--win');
+  pts.forEach((p,i)=>{
+    const y=Math.round(h-1-(p/max)*(h-2));
+    ctx.fillRect(Math.round(i*step), y, Math.max(1,Math.round(step)-1), 1);
+    ctx.globalAlpha=.3;
+    ctx.fillRect(Math.round(i*step), y+1, Math.max(1,Math.round(step)-1), h-y-1);
+    ctx.globalAlpha=1;
+  });
+});
+
+/* ---------- decklist select: header button toggles; 8px frame pre-reserved => no reflow ---------- */
+document.querySelectorAll('[data-deck]').forEach(d=>{
+  const head=d.querySelector('.deck-head');
+  head.addEventListener('click',()=>{
+    const was=d.classList.contains('selected');
+    document.querySelectorAll('[data-deck]').forEach(x=>{
+      x.classList.remove('selected');
+      x.querySelector('.deck-head').setAttribute('aria-expanded','false');
+    });
+    if(!was){
+      d.classList.add('selected');
+      head.setAttribute('aria-expanded','true');
+      glitch(d.querySelector('.event'));
+    }
+  });
+});
+
+/* ---------- SIGNATURE 3: resolution-unlock freemium ---------- */
+const DRIFT=[
+  {name:'Consider',              zone:'MD 3.1→3.8', v:+2.1},
+  {name:'Blood Moon',            zone:'SB 1.2→1.9', v:+1.4},
+  {name:"Brotherhood's End",     zone:'SB 0.8→1.3', v:+0.9},
+  {name:'Spell Pierce',          zone:'MD 2.4→1.7', v:-1.2},
+  {name:'Jegantha, the Wellspring', zone:'SB 0.9→0.4', v:-0.8}
+];
+const rowsEl=document.getElementById('driftRows');
+DRIFT.forEach(d=>{
+  const add=d.v>0, mag=Math.abs(d.v);
+  rowsEl.insertAdjacentHTML('beforeend',
+    `<div class="drow">
+       <span class="dval ${add?'add':'cut'}">${add?'+':'−'}${mag.toFixed(1)}</span>
+       <span class="dbar ${add?'add':'cut'}" style="width:${Math.round(mag*26)}px"></span>
+       <span class="dname">${d.name}</span>
+       <span class="dzone">${d.zone}</span>
+     </div>`);
+});
+
+const veil=document.getElementById('driftVeil');
+let off=null;
+function buildDriftOffscreen(w,h,dpr){
+  off=document.createElement('canvas'); off.width=w*dpr; off.height=h*dpr;
+  const o=off.getContext('2d'); o.scale(dpr,dpr);
+  o.fillStyle='#0f0f15'; o.fillRect(0,0,w,h);
+  const rowH=(h-20)/DRIFT.length;
+  DRIFT.forEach((d,i)=>{
+    const y=12+i*rowH+rowH/2, add=d.v>0, mag=Math.abs(d.v);
+    o.font='700 12px "JetBrains Mono", monospace';
+    o.fillStyle=add?css('--acc'):'#8a8a96';
+    o.textBaseline='middle';
+    o.fillText((add?'+':'−')+mag.toFixed(1), 12, y);
+    o.fillRect(64, y-4, Math.round(mag*26), 8);
+    o.fillStyle=css('--ink');
+    o.font='400 12px "JetBrains Mono", monospace';
+    o.fillText(d.name, 74+Math.round(mag*26), y);
+    o.fillStyle='#8a8a96'; o.font='400 10px "JetBrains Mono", monospace';
+    o.fillText(d.zone, w-92, y);
+  });
+}
+function renderVeil(f){ // draw offscreen at 1/f, upscale, smoothing off => chunky mosaic
+  const w=veil.width, h=veil.height, v=veil.getContext('2d');
+  const t=document.createElement('canvas');
+  t.width=Math.max(1,Math.round(w/f)); t.height=Math.max(1,Math.round(h/f));
+  const tc=t.getContext('2d');
+  tc.imageSmoothingEnabled=true;
+  tc.drawImage(off,0,0,t.width,t.height);
+  v.imageSmoothingEnabled=false;
+  v.clearRect(0,0,w,h);
+  v.drawImage(t,0,0,t.width,t.height,0,0,w,h);
+}
+function sizeVeil(){
+  const r=document.getElementById('driftRows').getBoundingClientRect();
+  const dpr=Math.min(2, window.devicePixelRatio||1);
+  veil.width=Math.round(r.width*dpr); veil.height=Math.round(r.height*dpr);
+  buildDriftOffscreen(r.width, r.height, dpr);
+  renderVeil(8);
+}
+document.fonts.ready.then(sizeVeil);
+addEventListener('resize',()=>{ if(!document.getElementById('driftBody').classList.contains('unlocked')) sizeVeil(); });
+
+/* unlock tweens pixel size 8→1 on the drift veil AND (if 90D active) the gated chart */
+document.getElementById('unlockBtn').addEventListener('click',()=>{
+  const body=document.getElementById('driftBody');
+  if(PRO) return;
+  const finish=()=>{
+    PRO=true;
+    body.classList.add('unlocked');
+    if(activeRange==='90'){
+      document.getElementById('chartTitle').textContent=STATS['90'].title;
+      renderChart();
+    }
+  };
+  if(RM){ finish(); return; }
+  const steps=[8,7,6,5,4,3,2,1];  // literal 'unlock full resolution'
+  let i=0;
+  const t=setInterval(()=>{
+    renderVeil(steps[i]);
+    if(activeRange==='90'){ drawChart(cur.share, cur.wrs, null); mosaicChart(steps[i]); }
+    i++;
+    if(i>=steps.length){
+      clearInterval(t);
+      finish();
+      body.querySelectorAll('.dname').forEach(glitch);
+    }
+  }, 110);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MetaSurf — Visual Deck · Izzet Wizards</title>
+<!--
+  PIT-WALL CONSOLE · VISUAL DECK VIEW (mockup, 2026-07-10)
+  Built from pit-wall-tokens.md + attention-art-spec.md + research-deck-import-visual.md §B (patterns 8–11).
+  Data: deck-viewer-data.json (Modern Challenge 64, 2024-06-18, P1 Azja — Izzet Wizards), embedded verbatim below.
+  Three-position mode switch: POSTER / CONSOLE (default) / TEXT.
+  PRODUCTION NOTES: export-img is presentation-only; premium gating (none on this page) would be
+  server-side via the entitlements module.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+:root{
+  --bg:#0d0d12; --panel:#14141a; --panel2:#191921; --line:#2b2b35;
+  --ink:#f2f2f7; --dim:#8a8a96; --win:#3b9dff; --loss:#ff7a1a; --acc:#b45bff;
+  --shadow:#000000;
+  --pix:'Press Start 2P',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  /* white overlay grain (tokens §4.3) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0 !important;}
+html{background:var(--bg);}
+body{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px),
+    var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px; line-height:1.45;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button,a,[role="button"]{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;}
+img{max-width:100%;}
+.dim{color:var(--dim);}
+.hd{color:var(--ink);}
+
+/* ---------- press physics (tokens §3.3) ---------- */
+.press{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+  color:var(--ink);
+}
+.press:active{transform:translate(2px,2px);box-shadow:0 0 0 0 var(--shadow);transition:none;}
+
+/* ---------- ticker (tokens §5.1) ---------- */
+.ticker{
+  position:sticky; top:0; z-index:50; height:30px;
+  background:var(--bg); border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.wirebadge{
+  position:absolute; left:0; top:0; bottom:0; z-index:2;
+  display:flex; align-items:center; padding:0 8px;
+  font-family:var(--pix); font-size:8px; line-height:1;
+  color:var(--bg); background:var(--loss);
+}
+.ticker-clip{position:absolute; left:52px; right:34px; top:0; bottom:0; overflow:hidden;}
+.ticker-track{
+  display:inline-flex; align-items:center; height:30px; white-space:nowrap;
+  will-change:transform; animation:tickscroll 42s linear infinite;
+}
+@keyframes tickscroll{to{transform:translateX(-50%);}}
+.ticker.paused .ticker-track{animation-play-state:paused;}
+.ticker-track span{font-size:11px; letter-spacing:.04em; color:var(--dim); margin-right:30px;}
+.ticker-track b{font-weight:700;}
+.ticker-track .up{color:var(--win);} .ticker-track .dn{color:var(--loss);} .ticker-track .pu{color:var(--acc);}
+.pauseglyph{
+  position:absolute; right:0; top:0; bottom:0; width:32px; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; color:var(--dim); border-left:1px solid var(--line); background:var(--bg);
+}
+
+/* ---------- page frame ---------- */
+.wrap{max-width:680px; margin:0 auto; padding:0 12px 40px;}
+.toprow{display:flex; align-items:center; justify-content:space-between; margin:10px 0 14px;}
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--pix); font-size:8px; line-height:1;
+  padding:9px 10px; min-height:32px; text-decoration:none;
+}
+.chip.first{color:var(--acc); border-color:var(--acc);}
+.clockbox{display:flex; align-items:baseline; gap:8px;}
+.clockbox .lbl{font-size:9px; letter-spacing:.12em; color:var(--dim);}
+.seg{font-family:var(--seg); font-weight:700;}
+#clock{font-size:20px;}
+
+/* ---------- header (identity zone — mat is the hero, header stays compact) ---------- */
+.head{margin-bottom:4px;}
+.headrow{display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; justify-content:space-between;}
+.chips{display:flex; gap:6px; margin-bottom:8px;}
+h1{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.92;
+  font-size:42px;
+}
+.eventline{
+  font-size:10px; letter-spacing:.08em; color:var(--dim);
+  text-transform:uppercase; margin-top:8px; line-height:1.7;
+}
+.cell{padding:12px 12px 10px; text-align:left; max-width:250px; min-width:210px;}
+.cell .lbl{
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:6px;
+}
+.cell .segrow{display:flex; align-items:baseline; gap:4px; margin-top:6px;}
+.cell .unit{font-size:11px; color:var(--dim);}
+.cell .seg{font-size:26px; line-height:1.15; display:inline-block; text-align:right;}
+.cell .sub{font-size:9px; color:var(--dim); margin-top:4px; display:block; letter-spacing:.05em;}
+.cell.price .lit{color:var(--loss);}
+.grainband{
+  height:8px; position:relative; margin:16px 0 0;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win));
+  opacity:.22; z-index:-1;
+}
+
+/* ---------- mode switch (three-position: POSTER / CONSOLE / TEXT) ---------- */
+.moderow{
+  display:flex; align-items:center; gap:10px; margin:14px 0 18px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.moderow::-webkit-scrollbar{display:none;}
+.modelbl{font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; white-space:nowrap;}
+.seg3{display:inline-flex;}
+.seg3 .sw{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:44px; padding:0 12px; display:inline-flex; align-items:center;
+  color:var(--dim);
+}
+.seg3 .sw:not(:first-child){border-left-width:0;}
+.seg3 .sw.on{color:var(--bg); background:var(--ink); border-color:var(--ink);}
+
+/* ---------- layout: main + PIT BOX rail ---------- */
+.layout{display:block;}
+#mainview{min-width:0;}
+@media (min-width:1100px){
+  .wrap{max-width:1380px; padding:0 24px 48px;}
+  h1{font-size:56px;}
+  .layout{display:grid; grid-template-columns:minmax(0,1fr) 300px; column-gap:22px; align-items:start;}
+  body.mode-poster .layout{grid-template-columns:minmax(0,1fr);}
+  #pitbox{position:sticky; top:44px;}
+}
+body.mode-poster #pitbox{display:none;}
+
+/* ---------- CONSOLE mode (default — Untapped ×N-badge dialect, pattern 10) ---------- */
+.cgrid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr));
+  gap:16px 14px; align-items:start;
+}
+.ccol-head{
+  display:flex; align-items:baseline; justify-content:space-between;
+  font-size:9px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  padding:7px 8px; background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); margin-bottom:10px;
+}
+.ccol-head b.seg{font-size:12px; color:var(--ink);}
+.cstack{position:relative; padding:0 5px 5px 0;}
+.slot{
+  position:relative; display:block; width:100%; height:32px;
+  background:none; border:0; padding:0;
+}
+.slot:last-child{height:auto;}
+.slot .face{
+  position:relative; display:block; width:100%; aspect-ratio:488/680;
+  border:1px solid var(--line); background:var(--panel2);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+}
+.slot .face img{display:block; width:100%; height:100%; object-fit:cover;}
+.slot:hover, .slot:focus-visible, .slot.lift{z-index:60 !important;}
+.slot:hover .face, .slot:focus-visible .face, .slot.lift .face{
+  transform:translate(-5px,-5px);
+  box-shadow:5px 5px 0 0 var(--shadow);
+}
+.xn{
+  position:absolute; top:5px; right:5px; z-index:2;
+  display:inline-flex; align-items:baseline; gap:2px;
+  padding:3px 4px 2px; line-height:1;
+  background:rgba(13,13,18,.9); border:1px solid var(--line);
+}
+.xn i{font-style:normal; font-size:9px; color:var(--dim);}
+.xn b{font-family:var(--seg); font-weight:700; font-size:11px; color:var(--loss);}
+
+/* ---------- POSTER mode (Goldfish stacked-pile dialect, pattern 8) ---------- */
+.postwrap{overflow-x:auto; scrollbar-width:thin; padding-bottom:8px;}
+.poster{
+  width:1216px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px),
+    var(--bg);
+  border:1px solid var(--line); box-shadow:4px 4px 0 0 var(--shadow);
+}
+.pband{
+  position:relative; padding:16px 18px 14px; border-bottom:1px solid var(--line);
+  background:var(--panel);
+}
+.pband::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.pband-row{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:nowrap;}
+.pband h2{
+  font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; line-height:.92;
+  font-size:34px;
+}
+.pband .pmeta{font-size:9px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase; margin-top:6px; line-height:1.7;}
+.pcounts{display:flex; gap:16px; align-items:baseline;}
+.pcounts .pc{text-align:center;}
+.pcounts .pc .plbl{display:block; font-family:var(--pix); font-size:6px; color:var(--dim); letter-spacing:1px; margin-bottom:5px;}
+.pcounts .pc b.seg{font-size:16px; color:var(--ink);}
+.curvebox{display:flex; flex-direction:column; align-items:center; gap:2px;}
+.curvebox svg{display:block;}
+.curvebox .ccap{font-size:8px; letter-spacing:.06em; color:var(--dim); text-transform:uppercase;}
+.cv{font-family:'DSEG7Classic','JetBrains Mono',monospace; font-weight:700; font-size:9px; fill:var(--ink); text-anchor:middle;}
+.cx{font-family:'Press Start 2P',monospace; font-size:6px; fill:#8a8a96; text-anchor:middle;}
+.key{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:44px; padding:0 12px; display:inline-flex; align-items:center; gap:6px;
+  color:var(--ink); white-space:nowrap;
+}
+.pbody{display:grid; grid-template-columns:minmax(0,1fr) 196px; column-gap:16px; padding:16px 18px;}
+.prow{margin-bottom:18px;}
+.prow-head{
+  display:flex; align-items:baseline; gap:10px;
+  font-size:9px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  border-bottom:1px dashed #26262f; padding-bottom:5px; margin-bottom:10px;
+}
+.prow-head b.seg{font-size:12px; color:var(--ink);}
+.piles{display:flex; flex-wrap:wrap; gap:12px 10px; align-items:flex-start;}
+.pile{position:relative; width:148px;}
+.pile .copy{position:absolute; left:0; width:148px; height:206px;}
+.pile .copy img{display:block; width:100%; height:100%; object-fit:cover;}
+.pside{
+  position:relative; border:1px solid var(--loss); background:var(--panel);
+  padding:10px 10px 12px 24px; align-self:start;
+}
+.pside::before{ /* riso-orange edge gasket */
+  content:""; position:absolute; left:0; top:0; bottom:0; width:14px;
+  background-image:var(--grain), linear-gradient(180deg, var(--loss), rgba(255,122,26,.35));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.pside-vlabel{
+  position:absolute; left:0; top:0; bottom:0; width:14px; z-index:2;
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:7px; letter-spacing:2px; color:var(--bg);
+}
+.pside-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
+.pside-head .t{font-size:9px; letter-spacing:.14em; color:var(--loss); text-transform:uppercase;}
+.pside-head b.seg{font-size:14px; color:var(--loss);}
+.pcascade{position:relative;}
+.pcascade .copy{position:relative; display:block; width:148px; height:32px;}
+.pcascade .copy:last-child{height:206px;}
+.pcascade .copy img{position:absolute; top:0; left:0; width:148px; height:206px; object-fit:cover; display:block;}
+.pfoot{
+  padding:10px 18px 14px; border-top:1px solid var(--line);
+  font-size:9px; letter-spacing:.06em; color:var(--dim); text-transform:uppercase; line-height:1.7;
+}
+
+/* ---------- TEXT mode (grouped list — deck-viewer .crow reuse) ---------- */
+.tpane{max-width:760px;}
+.tsec{margin-bottom:18px;}
+.tsec-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  font-size:9px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  padding:7px 8px; background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); margin-bottom:6px;
+}
+.tsec-head b.seg{font-size:12px; color:var(--ink); margin-left:8px;}
+.tsec-head .leg{font-size:8px; letter-spacing:.08em;}
+.crow{
+  display:grid; grid-template-columns:30px 40px minmax(0,1fr) auto auto;
+  gap:8px; align-items:center;
+  min-height:40px; padding:5px 6px; border-bottom:1px solid #1c1c24;
+}
+.crow:hover .nm, .crow:focus-visible .nm{color:var(--win);}
+.crow .cnt{font-family:var(--seg); font-weight:700; font-size:14px; color:var(--win); text-align:right;}
+.crow.sb .cnt{color:var(--loss);}
+.crow .thumb{
+  width:40px; height:26px; object-fit:cover; display:block;
+  border:1px solid var(--line); filter:saturate(.78) contrast(1.05);
+  background:var(--panel2);
+}
+.crow .nm{
+  display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-weight:700; font-size:12px;
+}
+.crow .pips{display:inline-flex; gap:2px;}
+.pipc{
+  width:13px; height:13px; display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:6px; color:var(--bg); background:#8a8a96;
+}
+.pipc.u{background:var(--win);} .pipc.r{background:var(--loss);} .pipc.g{background:#a3c095;}
+.crow .pr{font-size:10px; color:var(--dim); text-align:right; white-space:nowrap;}
+
+/* ---------- PIT BOX (sideboard rail / drawer, pattern 11) ---------- */
+#pitbox{
+  position:relative; margin-top:22px;
+  border:1px solid var(--loss); background:var(--panel);
+  box-shadow:2px 2px 0 0 var(--shadow);
+}
+@media (min-width:1100px){ #pitbox{margin-top:0; position:sticky; top:44px;} }
+#pitbox .gasket{
+  position:absolute; left:0; top:0; bottom:0; width:14px;
+  background-image:var(--grain), linear-gradient(180deg, var(--loss), rgba(255,122,26,.35));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.pb-vlabel{
+  display:none; position:absolute; left:0; top:0; bottom:0; width:14px; z-index:2;
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:7px; letter-spacing:2px; color:var(--bg);
+}
+.pb-inner{margin-left:14px; padding:10px;}
+.pb-toggle{
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  min-height:44px; padding:6px 10px; text-align:left;
+}
+.pb-title{font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;}
+.pb-count{display:inline-flex; align-items:baseline; gap:5px;}
+.pb-count b.seg{font-size:18px; color:var(--loss);}
+.pb-count .unit{font-size:9px; color:var(--dim);}
+.pb-caret{font-size:10px; color:var(--dim);}
+.pb-sub{font-size:9px; letter-spacing:.06em; color:var(--dim); text-transform:uppercase; margin:8px 2px 0; line-height:1.7;}
+.pb-body{margin-top:12px;}
+.pb-body[hidden]{display:none;}
+.pb-body .cgrid{grid-template-columns:1fr;}
+@media (min-width:1100px){
+  .pb-vlabel{display:flex;}
+  .pb-caret{display:none;}
+}
+
+/* ---------- footer ---------- */
+footer{margin-top:34px;}
+.riso-divider{
+  height:10px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  opacity:.55;
+}
+.wordmark{
+  font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; line-height:.9;
+  font-size:46px; margin:16px 0 10px;
+}
+.wordmark span{display:block; color:transparent; -webkit-text-stroke:1px #2e2e3a;}
+@media (min-width:1100px){ .wordmark{font-size:72px;} }
+.fine{
+  font-size:9px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.07em; line-height:1.7; max-width:760px;
+}
+
+/* ---------- one-shot glitch (tokens §6.3) ---------- */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{animation:glitch 240ms steps(2,jump-none) 1;}
+
+/* ---------- reduced motion contract (tokens §6.6) ---------- */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;}
+  .glitch{animation:none;}
+  .press, .press:active{transition:none;}
+  .slot .face{transition:none;}
+}
+</style>
+</head>
+<body class="mode-console">
+
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false" aria-label="results wire — tap to pause">
+  <span class="wirebadge">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="tickTrack"></div></div>
+  <span class="pauseglyph" id="pauseGlyph">❚❚</span>
+</div>
+
+<div class="wrap">
+  <div class="toprow">
+    <a class="press chip" href="#" aria-label="back to deck feed">◂ BACK</a>
+    <div class="clockbox"><span class="lbl">LOCAL</span><b class="seg" id="clock">--:--</b></div>
+  </div>
+
+  <header class="head">
+    <div class="headrow">
+      <div>
+        <div class="chips"><span class="press chip first" role="img" aria-label="first place finish">★ 1ST PLACE</span></div>
+        <h1 id="deckName">—</h1>
+        <p class="eventline" id="eventLine"></p>
+      </div>
+      <div class="cell press price">
+        <span class="lbl">DECK PRICE <span>USD · 75</span></span>
+        <span class="segrow"><span class="unit">$</span><b class="seg lit" id="priceVal" style="min-width:6ch">0</b></span>
+        <span class="sub">Σ COUNT×UNIT — COMPUTED FROM LIST · SCRYFALL 2026-07-08</span>
+      </div>
+    </div>
+    <div class="grainband"></div>
+  </header>
+
+  <div class="moderow">
+    <span class="modelbl">VIEW <b class="hd">MODE</b></span>
+    <div class="seg3" role="group" aria-label="deck view mode">
+      <button class="sw press" data-mode="poster"  aria-pressed="false">POSTER</button>
+      <button class="sw press on" data-mode="console" aria-pressed="true">CONSOLE</button>
+      <button class="sw press" data-mode="text"    aria-pressed="false">TEXT</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <main id="mainview" aria-live="polite"></main>
+
+    <!-- PIT BOX: sideboard rail ≥1100px / collapsible drawer below (pattern 11).
+         In POSTER mode the sideboard cascade lives inside the poster mat itself
+         (Goldfish-faithful) and this rail is hidden. -->
+    <aside id="pitbox" aria-label="sideboard — pit box">
+      <div class="gasket" aria-hidden="true"></div>
+      <div class="pb-vlabel" aria-hidden="true">PIT BOX — SIDEBOARD</div>
+      <div class="pb-inner">
+        <button class="pb-toggle press" id="pbToggle" aria-expanded="false" aria-controls="pbBody">
+          <span class="pb-title">PIT BOX <b class="hd">SIDEBOARD</b></span>
+          <span class="pb-count"><b class="seg" id="pbCount">0</b><span class="unit">CARDS</span></span>
+          <span class="pb-caret" id="pbCaret">▸</span>
+        </button>
+        <div class="pb-sub" id="pbSub"></div>
+        <div class="pb-body" id="pbBody" hidden></div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="riso-divider"></div>
+    <div class="wordmark">METASURF<span>VISUAL DECK</span></div>
+    <p class="fine" id="finePrint"></p>
+  </footer>
+</div>
+
+<script id="deckdata" type="application/json">{
+ "event": "Modern Challenge 64",
+ "date": "2024-06-18",
+ "source_uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1812647519",
+ "player": "Azja",
+ "result": "1st Place",
+ "archetype_hint": "Izzet Wizards",
+ "format": "Modern",
+ "mainboard": [
+  {
+   "count": 4,
+   "name": "Counterspell",
+   "mana_cost": "{U}{U}",
+   "type_line": "Instant",
+   "cmc": 2.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "img_normal": "https://cards.scryfall.io/normal/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "price_usd": 3.71,
+   "price_tix": 1.09
+  },
+  {
+   "count": 2,
+   "name": "Dress Down",
+   "mana_cost": "{1}{U}",
+   "type_line": "Enchantment",
+   "cmc": 2.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/0/4/04f9f061-67b8-4427-9fcb-b3ccfee8fc5d.jpg?1782704716",
+   "img_normal": "https://cards.scryfall.io/normal/front/0/4/04f9f061-67b8-4427-9fcb-b3ccfee8fc5d.jpg?1782704716",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/0/4/04f9f061-67b8-4427-9fcb-b3ccfee8fc5d.jpg?1782704716",
+   "price_usd": 0.53,
+   "price_tix": 0.54
+  },
+  {
+   "count": 4,
+   "name": "Flame of Anor",
+   "mana_cost": "{1}{U}{R}",
+   "type_line": "Instant",
+   "cmc": 3.0,
+   "colors": [
+    "R",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120",
+   "img_normal": "https://cards.scryfall.io/normal/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120",
+   "price_usd": 4.34,
+   "price_tix": 0.07
+  },
+  {
+   "count": 1,
+   "name": "Flooded Strand",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [],
+   "img_small": "https://cards.scryfall.io/small/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197",
+   "img_normal": "https://cards.scryfall.io/normal/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197",
+   "price_usd": 15.64,
+   "price_tix": 2.3
+  },
+  {
+   "count": 2,
+   "name": "Force of Negation",
+   "mana_cost": "{1}{U}{U}",
+   "type_line": "Instant",
+   "cmc": 3.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934",
+   "img_normal": "https://cards.scryfall.io/normal/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934",
+   "price_usd": 52.82,
+   "price_tix": 19.2
+  },
+  {
+   "count": 3,
+   "name": "Galvanic Discharge",
+   "mana_cost": "{R}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "R"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296",
+   "img_normal": "https://cards.scryfall.io/normal/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296",
+   "price_usd": 0.3,
+   "price_tix": 0.03
+  },
+  {
+   "count": 1,
+   "name": "Hall of Storm Giants",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/b/f/bf8f052d-8840-4905-a807-9a305f4fd8f7.jpg?1782704291",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/f/bf8f052d-8840-4905-a807-9a305f4fd8f7.jpg?1782704291",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/f/bf8f052d-8840-4905-a807-9a305f4fd8f7.jpg?1782704291",
+   "price_usd": 0.42,
+   "price_tix": 0.03
+  },
+  {
+   "count": 2,
+   "name": "Invert Polarity",
+   "mana_cost": "{U}{U}{R}",
+   "type_line": "Instant",
+   "cmc": 3.0,
+   "colors": [
+    "R",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225",
+   "img_normal": "https://cards.scryfall.io/normal/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225",
+   "price_usd": 0.52,
+   "price_tix": 0.02
+  },
+  {
+   "count": 4,
+   "name": "Island",
+   "mana_cost": "",
+   "type_line": "Basic Land \u2014 Island",
+   "cmc": 0.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "img_normal": "https://cards.scryfall.io/normal/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "price_usd": 0.18,
+   "price_tix": 0.01
+  },
+  {
+   "count": 4,
+   "name": "Lightning Bolt",
+   "mana_cost": "{R}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "R"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "price_usd": 0.83,
+   "price_tix": 0.02
+  },
+  {
+   "count": 2,
+   "name": "Misty Rainforest",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [],
+   "img_small": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "img_normal": "https://cards.scryfall.io/normal/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "price_usd": 36.17,
+   "price_tix": 1.74
+  },
+  {
+   "count": 1,
+   "name": "Otawara, Soaring City",
+   "mana_cost": "",
+   "type_line": "Legendary Land",
+   "cmc": 0.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+   "img_normal": "https://cards.scryfall.io/normal/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+   "price_usd": 27.49,
+   "price_tix": 2.08
+  },
+  {
+   "count": 2,
+   "name": "Polluted Delta",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [],
+   "img_small": "https://cards.scryfall.io/small/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195",
+   "img_normal": "https://cards.scryfall.io/normal/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195",
+   "price_usd": 19.27,
+   "price_tix": 2.5
+  },
+  {
+   "count": 4,
+   "name": "Preordain",
+   "mana_cost": "{U}",
+   "type_line": "Sorcery",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "img_normal": "https://cards.scryfall.io/normal/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "price_usd": 0.42,
+   "price_tix": 11.59
+  },
+  {
+   "count": 2,
+   "name": "Scalding Tarn",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [],
+   "img_small": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "price_usd": 40.4,
+   "price_tix": 3.88
+  },
+  {
+   "count": 1,
+   "name": "Sink into Stupor // Soporific Springs",
+   "mana_cost": "{1}{U}{U}",
+   "type_line": "Instant // Land",
+   "cmc": 3.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170",
+   "img_normal": "https://cards.scryfall.io/normal/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170",
+   "price_usd": 5.45,
+   "price_tix": 8.9
+  },
+  {
+   "count": 4,
+   "name": "Snapcaster Mage",
+   "mana_cost": "{1}{U}",
+   "type_line": "Creature \u2014 Human Wizard",
+   "cmc": 2.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477",
+   "img_normal": "https://cards.scryfall.io/normal/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477",
+   "price_usd": 18.52,
+   "price_tix": 25.99
+  },
+  {
+   "count": 1,
+   "name": "Spell Snare",
+   "mana_cost": "{U}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "price_usd": 0.3,
+   "price_tix": 0.26
+  },
+  {
+   "count": 3,
+   "name": "Spirebluff Canal",
+   "mana_cost": "",
+   "type_line": "Land",
+   "cmc": 0.0,
+   "colors": [
+    "R",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "img_normal": "https://cards.scryfall.io/normal/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "price_usd": 5.25,
+   "price_tix": 0.83
+  },
+  {
+   "count": 3,
+   "name": "Steam Vents",
+   "mana_cost": "",
+   "type_line": "Land \u2014 Island Mountain",
+   "cmc": 0.0,
+   "colors": [
+    "R",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "price_usd": 12.96,
+   "price_tix": 0.17
+  },
+  {
+   "count": 1,
+   "name": "Stern Scolding",
+   "mana_cost": "{U}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "img_normal": "https://cards.scryfall.io/normal/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "price_usd": 0.3,
+   "price_tix": 0.29
+  },
+  {
+   "count": 3,
+   "name": "Subtlety",
+   "mana_cost": "{2}{U}{U}",
+   "type_line": "Creature \u2014 Elemental Incarnation",
+   "cmc": 4.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "price_usd": 15.06,
+   "price_tix": 8.47
+  },
+  {
+   "count": 4,
+   "name": "Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar",
+   "mana_cost": "{U}",
+   "type_line": "Legendary Creature \u2014 Moonfolk Wizard // Legendary Planeswalker \u2014 Tamiyo",
+   "cmc": 1.0,
+   "colors": [
+    "G",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+   "img_normal": "https://cards.scryfall.io/normal/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+   "price_usd": 15.14,
+   "price_tix": 17.05
+  },
+  {
+   "count": 2,
+   "name": "Thundering Falls",
+   "mana_cost": "",
+   "type_line": "Land \u2014 Island Mountain",
+   "cmc": 0.0,
+   "colors": [
+    "R",
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "img_normal": "https://cards.scryfall.io/normal/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "price_usd": 14.43,
+   "price_tix": 7.2
+  }
+ ],
+ "sideboard": [
+  {
+   "count": 2,
+   "name": "Consign to Memory",
+   "mana_cost": "{U}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362",
+   "price_usd": 3.46,
+   "price_tix": 28.42
+  },
+  {
+   "count": 2,
+   "name": "Magus of the Moon",
+   "mana_cost": "{2}{R}",
+   "type_line": "Creature \u2014 Human Wizard",
+   "cmc": 3.0,
+   "colors": [
+    "R"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825",
+   "price_usd": 3.95,
+   "price_tix": 2.86
+  },
+  {
+   "count": 3,
+   "name": "Obsidian Charmaw",
+   "mana_cost": "{3}{R}{R}",
+   "type_line": "Creature \u2014 Dragon",
+   "cmc": 5.0,
+   "colors": [
+    "R"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654",
+   "img_normal": "https://cards.scryfall.io/normal/front/e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654",
+   "price_usd": 1.56,
+   "price_tix": 2.05
+  },
+  {
+   "count": 1,
+   "name": "Spell Snare",
+   "mana_cost": "{U}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+   "price_usd": 0.3,
+   "price_tix": 0.26
+  },
+  {
+   "count": 2,
+   "name": "Stern Scolding",
+   "mana_cost": "{U}",
+   "type_line": "Instant",
+   "cmc": 1.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "img_normal": "https://cards.scryfall.io/normal/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+   "price_usd": 0.3,
+   "price_tix": 0.29
+  },
+  {
+   "count": 2,
+   "name": "Tishana's Tidebinder",
+   "mana_cost": "{2}{U}",
+   "type_line": "Creature \u2014 Merfolk Wizard",
+   "cmc": 3.0,
+   "colors": [
+    "U"
+   ],
+   "img_small": "https://cards.scryfall.io/small/front/9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545",
+   "img_normal": "https://cards.scryfall.io/normal/front/9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545",
+   "price_usd": 2.47,
+   "price_tix": 0.87
+  },
+  {
+   "count": 2,
+   "name": "Unlicensed Hearse",
+   "mana_cost": "{2}",
+   "type_line": "Artifact \u2014 Vehicle",
+   "cmc": 2.0,
+   "colors": [],
+   "img_small": "https://cards.scryfall.io/small/front/9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515",
+   "img_normal": "https://cards.scryfall.io/normal/front/9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515",
+   "price_usd": 0.38,
+   "price_tix": 0.28
+  }
+ ],
+ "price_note": "Prices from Scryfall oracle-cards bulk (2026-07-08 snapshot), one canonical printing per card; printings vary.",
+ "totals": {
+  "main_usd": 651.15,
+  "side_usd": 26.1,
+  "main_tix": 335.8,
+  "side_tix": 71.85
+ }
+}</script>
+<script>
+'use strict';
+const DATA = JSON.parse(document.getElementById('deckdata').textContent);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wideMQ = matchMedia('(min-width:1100px)');
+
+/* ---------- grouping (deck-viewer conventions) ---------- */
+const GROUPS = [
+  {id:'creatures', label:'CREATURES'},
+  {id:'instants',  label:'INSTANTS'},
+  {id:'sorceries', label:'SORCERIES'},
+  {id:'artench',   label:'ARTIFACTS & ENCH.'},
+  {id:'lands',     label:'LANDS'}
+];
+function groupOf(c){
+  const t = c.type_line;
+  if (t.includes('Creature'))    return 'creatures';   /* Tamiyo front face = creature */
+  if (t.includes('Instant'))     return 'instants';    /* Sink into Stupor // Land = instant */
+  if (t.includes('Sorcery'))     return 'sorceries';
+  if (t.includes('Artifact') || t.includes('Enchantment')) return 'artench'; /* Dress Down here */
+  if (t.includes('Land'))        return 'lands';       /* Hall of Storm Giants here */
+  return 'artench';
+}
+function grouped(list){
+  const m = {};
+  GROUPS.forEach(g => m[g.id] = []);
+  list.forEach(c => m[groupOf(c)].push(c));
+  GROUPS.forEach(g => m[g.id].sort((a,b) => a.cmc - b.cmc || a.name.localeCompare(b.name)));
+  return m;
+}
+const MAIN = grouped(DATA.mainboard);
+const SIDE = DATA.sideboard.slice().sort((a,b) => a.cmc - b.cmc || a.name.localeCompare(b.name));
+const copies = arr => arr.reduce((s,c) => s + c.count, 0);
+const mainCount = copies(DATA.mainboard);
+const sideCount = copies(DATA.sideboard);
+const usd  = arr => arr.reduce((s,c) => s + c.count * c.price_usd, 0);
+const tix  = arr => arr.reduce((s,c) => s + c.count * c.price_tix, 0);
+const deckUsd = usd(DATA.mainboard) + usd(DATA.sideboard);
+const deckTix = tix(DATA.mainboard) + tix(DATA.sideboard);
+const money = v => v.toFixed(2);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ---------- motion helpers ---------- */
+function glitch(el){
+  if (RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend', () => el.classList.remove('glitch'), {once:true});
+}
+function rollup(el, target, dec){
+  if (RM){ el.textContent = target.toFixed(dec); return; }
+  const TICKS = 8, DUR = 600, start = parseFloat(el.textContent) || 0;
+  let i = 0;
+  clearInterval(el._roll);
+  el._roll = setInterval(() => {
+    i++;
+    const v = start + (target - start) * (i / TICKS);
+    el.textContent = v.toFixed(dec);
+    if (i >= TICKS) clearInterval(el._roll);
+  }, DUR / TICKS);
+}
+
+/* ---------- header fill (all values from DATA / computed) ---------- */
+document.getElementById('deckName').textContent = DATA.archetype_hint.toUpperCase();
+document.getElementById('eventLine').textContent =
+  `${DATA.event} · ${DATA.date} · PILOT ${DATA.player} · ${DATA.format} · ${DATA.result} · SRC MTGO.COM`.toUpperCase();
+rollup(document.getElementById('priceVal'), deckUsd, 2);
+document.getElementById('finePrint').textContent = (
+  'MOCKUP — MODE SWITCH RENDERS LOCALLY; EXPORT IMG IS PRESENTATION-ONLY · ' +
+  `LIST: ${DATA.event} ${DATA.date} — ${DATA.result} ${DATA.player} · SOURCE MTGO.COM · ` +
+  DATA.price_note + ' · ' +
+  'CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL'
+).toUpperCase();
+
+/* ---------- ticker (content computed from DATA only) ---------- */
+(function(){
+  const items = [
+    `${esc(DATA.event.toUpperCase())} · ${DATA.date} — <b class="pu">P1 ${esc(DATA.player.toUpperCase())}</b> · ${esc(DATA.archetype_hint.toUpperCase())}`,
+    `MAIN <b class="up">${mainCount}</b> · SIDE <b class="dn">${sideCount}</b> — COMPUTED FROM LIST`,
+    `DECK <b class="dn">$${money(deckUsd)}</b> · <b class="dn">${money(deckTix)} TIX</b> — SCRYFALL 2026-07-08 SNAPSHOT`,
+    `SRC MTGO.COM DECKLIST · ${esc(DATA.format.toUpperCase())}`
+  ];
+  const half = items.map(t => `<span>${t}</span>`).join('');
+  const track = document.getElementById('tickTrack');
+  track.innerHTML = half + half;   /* duplicated once: -50% = one copy width */
+  function speed(){ track.style.animationDuration = (track.scrollWidth / 2 / 35) + 's'; }
+  speed();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(speed);
+  const tick = document.getElementById('ticker');
+  function toggle(){
+    const p = tick.classList.toggle('paused');
+    tick.setAttribute('aria-pressed', String(p));
+    document.getElementById('pauseGlyph').textContent = p ? '▶' : '❚❚';
+  }
+  tick.addEventListener('click', toggle);
+  tick.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+  });
+  if (RM) document.getElementById('pauseGlyph').style.display = 'none';
+})();
+
+/* ---------- clock ---------- */
+(function(){
+  const el = document.getElementById('clock');
+  function tick(){
+    const d = new Date();
+    const sep = (RM || d.getSeconds() % 2 === 0) ? ':' : ' ';
+    el.textContent = String(d.getHours()).padStart(2,'0') + sep + String(d.getMinutes()).padStart(2,'0');
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ---------- shared render bits ---------- */
+function slotHTML(c, i){
+  const plural = c.count > 1 ? 'copies' : 'copy';
+  return `<button class="slot" style="z-index:${i+1}" aria-label="${esc(c.name)}, ${c.count} ${plural} — activate to lift card">
+    <span class="face">
+      <img src="${c.img_normal}" alt="" loading="lazy" decoding="async">
+      <span class="xn"><i>×</i><b>${c.count}</b></span>
+    </span>
+  </button>`;
+}
+function consoleStack(cards){
+  return `<div class="cstack">${cards.map(slotHTML).join('')}</div>`;
+}
+function pipsHTML(cost){
+  if (!cost) return '';
+  const toks = cost.match(/\{([^}]+)\}/g) || [];
+  return '<span class="pips" aria-hidden="true">' + toks.map(t => {
+    const s = t.slice(1,-1);
+    const cls = s === 'U' ? ' u' : s === 'R' ? ' r' : s === 'G' ? ' g' : '';
+    return `<span class="pipc${cls}">${esc(s)}</span>`;
+  }).join('') + '</span>';
+}
+function textRow(c, sb){
+  return `<div class="crow${sb ? ' sb' : ''}" tabindex="0">
+    <b class="cnt">${c.count}</b>
+    <img class="thumb" src="${c.img_art_crop}" alt="" loading="lazy" decoding="async">
+    <span class="nm">${esc(c.name)}</span>
+    ${pipsHTML(c.mana_cost)}
+    <span class="pr">${c.count} × $${money(c.price_usd)}</span>
+  </div>`;
+}
+
+/* ---------- CONSOLE mode (default) ---------- */
+function renderConsole(){
+  let h = '<div class="cgrid">';
+  GROUPS.forEach(g => {
+    const cards = MAIN[g.id];
+    if (!cards.length) return;
+    h += `<section class="ccol">
+      <header class="ccol-head"><span>${g.label}</span><b class="seg">${copies(cards)}</b></header>
+      ${consoleStack(cards)}
+    </section>`;
+  });
+  h += '</div>';
+  document.getElementById('mainview').innerHTML = h;
+}
+
+/* ---------- POSTER mode (fixed-width, internal h-scroll sanctioned) ---------- */
+function curveSVG(){
+  const b = [0,0,0,0,0,0];
+  let charted = 0, lands = 0;
+  DATA.mainboard.forEach(c => {
+    if (groupOf(c) === 'lands'){ lands += c.count; return; }
+    b[Math.min(5, Math.round(c.cmc))] += c.count;
+    charted += c.count;
+  });
+  const max = Math.max.apply(null, b.concat([1]));
+  const bw = 22, gap = 9, x0 = 6, base = 56, hMax = 40;
+  const w = x0 * 2 + 6 * (bw + gap) - gap;
+  let inner = '';
+  for (let gl = 5; gl < max; gl += 5){
+    const y = base - Math.round(gl / max * hMax);
+    inner += `<line x1="${x0}" y1="${y}" x2="${w - x0}" y2="${y}" stroke="#26262f" stroke-width="1" stroke-dasharray="2 3"/>`;
+  }
+  b.forEach((v,i) => {
+    const x = x0 + i * (bw + gap);
+    const bh = v ? Math.max(2, Math.round(v / max * hMax)) : 2;
+    inner += `<rect x="${x}" y="${base - bh}" width="${bw}" height="${bh}" fill="${v ? 'var(--win)' : '#2b2b35'}" shape-rendering="crispEdges"/>`;
+    if (v) inner += `<text x="${x + bw/2}" y="${base - bh - 4}" class="cv">${v}</text>`;
+    inner += `<text x="${x + bw/2}" y="${base + 13}" class="cx">${i === 5 ? '5+' : i}</text>`;
+  });
+  return {
+    svg:`<svg viewBox="0 0 ${w} 72" width="${w}" height="72" role="img" aria-label="mana curve, ${charted} nonland cards">${inner}</svg>`,
+    cap:`CURVE · ${charted} NONLAND CHARTED · ${lands} LANDS EXCL. — COMPUTED FROM LIST`
+  };
+}
+function pileHTML(c){
+  const CH = 206, PEEK = 32;
+  const h = CH + (c.count - 1) * PEEK;
+  let copies = '';
+  for (let k = 0; k < c.count; k++){
+    copies += `<span class="copy" style="top:${k * PEEK}px; z-index:${k + 1}">
+      <img src="${c.img_normal}" alt="${k === c.count - 1 ? esc(c.name) : ''}" loading="lazy" decoding="async">
+    </span>`;
+  }
+  return `<div class="pile" style="height:${h}px" title="${esc(c.name)} ×${c.count}">${copies}</div>`;
+}
+function renderPoster(){
+  const curve = curveSVG();
+  const shortLbl = {creatures:'CRE', instants:'INS', sorceries:'SOR', artench:'ART+EN', lands:'LND'};
+  let counts = '';
+  GROUPS.forEach(g => {
+    counts += `<span class="pc"><span class="plbl">${shortLbl[g.id]}</span><b class="seg">${copies(MAIN[g.id])}</b></span>`;
+  });
+  let rows = '';
+  GROUPS.forEach(g => {
+    const cards = MAIN[g.id];
+    if (!cards.length) return;
+    rows += `<section class="prow">
+      <div class="prow-head"><span>${g.label}</span><b class="seg">${copies(cards)}</b></div>
+      <div class="piles">${cards.map(pileHTML).join('')}</div>
+    </section>`;
+  });
+  let cascade = '';
+  let z = 0, total = SIDE.reduce((s,c) => s + c.count, 0), done = 0;
+  SIDE.forEach(c => {
+    for (let k = 0; k < c.count; k++){
+      z++; done++;
+      cascade += `<span class="copy" style="z-index:${z}">
+        <img src="${c.img_normal}" alt="${done === total ? esc(c.name) : ''}" loading="lazy" decoding="async">
+      </span>`;
+    }
+  });
+  document.getElementById('mainview').innerHTML = `
+  <div class="postwrap" tabindex="0" aria-label="deck poster — scrolls horizontally on narrow screens">
+    <div class="poster">
+      <header class="pband">
+        <div class="pband-row">
+          <div>
+            <h2>${esc(DATA.archetype_hint.toUpperCase())}</h2>
+            <p class="pmeta">${esc((DATA.result + ' — ' + DATA.player + ' · ' + DATA.event + ' · ' + DATA.date).toUpperCase())}</p>
+          </div>
+          <div class="pcounts">${counts}</div>
+          <div class="curvebox">${curve.svg}<span class="ccap">${curve.cap}</span></div>
+          <button class="press key" id="exportKey">▣ EXPORT IMG</button>
+        </div>
+      </header>
+      <div class="pbody">
+        <div class="pmain">${rows}</div>
+        <aside class="pside" aria-label="sideboard">
+          <div class="pside-vlabel" aria-hidden="true">PIT BOX — SIDEBOARD</div>
+          <div class="pside-head"><span class="t">SIDEBOARD</span><b class="seg">${sideCount}</b></div>
+          <div class="pcascade">${cascade}</div>
+        </aside>
+      </div>
+      <footer class="pfoot">${esc(DATA.event)} · ${DATA.date} · ${esc(DATA.result)} ${esc(DATA.player)} · SRC MTGO.COM · PRICES SCRYFALL 2026-07-08 · CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL</footer>
+    </div>
+  </div>`;
+  const key = document.getElementById('exportKey');
+  key.addEventListener('click', () => {
+    glitch(key);
+    const old = key.textContent;
+    key.textContent = '▣ VISUAL ONLY — MOCK';
+    setTimeout(() => { key.textContent = old; }, 1600);
+  });
+}
+
+/* ---------- TEXT mode ---------- */
+function renderText(){
+  let h = '<div class="tpane">';
+  GROUPS.forEach(g => {
+    const cards = MAIN[g.id];
+    if (!cards.length) return;
+    h += `<section class="tsec">
+      <header class="tsec-head"><span>${g.label}<b class="seg">${copies(cards)}</b></span><span class="leg">COUNT × UNIT USD</span></header>
+      ${cards.map(c => textRow(c, false)).join('')}
+    </section>`;
+  });
+  h += '</div>';
+  document.getElementById('mainview').innerHTML = h;
+}
+
+/* ---------- PIT BOX (rail / drawer) ---------- */
+function renderPitbox(){
+  const body = document.getElementById('pbBody');
+  document.getElementById('pbCount').textContent = String(sideCount);
+  document.getElementById('pbSub').textContent =
+    `SIDE $${money(usd(DATA.sideboard))} · ${money(tix(DATA.sideboard))} TIX — COMPUTED FROM LIST`;
+  if (mode === 'text'){
+    body.innerHTML = SIDE.map(c => textRow(c, true)).join('');
+  } else {
+    body.innerHTML = `<div class="cgrid"><section class="ccol">${consoleStack(SIDE)}</section></div>`;
+  }
+}
+let pbOpen = false;
+const pbToggle = document.getElementById('pbToggle');
+function pbSync(){
+  const open = wideMQ.matches ? true : pbOpen;   /* rail is always open ≥1100px */
+  document.getElementById('pbBody').hidden = !open;
+  pbToggle.setAttribute('aria-expanded', String(open));
+  document.getElementById('pbCaret').textContent = pbOpen ? '▾' : '▸';
+  promoteEager();
+}
+pbToggle.addEventListener('click', () => {
+  if (wideMQ.matches) return;                    /* no-op when docked as rail */
+  pbOpen = !pbOpen;
+  pbSync();
+});
+wideMQ.addEventListener('change', pbSync);
+window.addEventListener('resize', pbSync);       /* embedded viewports may skip MQ events */
+
+/* ---------- image loading: in/near-viewport promoted to eager (tokens §7.5) ---------- */
+function promoteEager(){
+  document.querySelectorAll('#mainview img, #pitbox img').forEach(img => {
+    if (img.loading !== 'lazy') return;
+    const r = img.getBoundingClientRect();
+    if (r.top < innerHeight + 200 && r.bottom > -200) img.loading = 'eager';
+  });
+}
+
+/* ---------- mode switch ---------- */
+let mode = 'console';
+const modeKeys = Array.from(document.querySelectorAll('.seg3 .sw'));
+function render(){
+  if (mode === 'poster') renderPoster();
+  else if (mode === 'text') renderText();
+  else renderConsole();
+  renderPitbox();
+  pbSync();
+  promoteEager();
+}
+function setMode(m){
+  if (m === mode) return;
+  mode = m;
+  document.body.className = 'mode-' + m;
+  modeKeys.forEach(k => {
+    const on = k.dataset.mode === m;
+    k.classList.toggle('on', on);
+    k.setAttribute('aria-pressed', String(on));
+  });
+  render();
+  glitch(document.getElementById('deckName'));
+}
+modeKeys.forEach(k => k.addEventListener('click', () => setMode(k.dataset.mode)));
+
+/* ---------- console-mode lift (tap latches, hover springs) ---------- */
+document.addEventListener('click', e => {
+  const slot = e.target.closest('.slot');
+  if (!slot) {
+    document.querySelectorAll('.slot.lift').forEach(s => s.classList.remove('lift'));
+    return;
+  }
+  const was = slot.classList.contains('lift');
+  document.querySelectorAll('.slot.lift').forEach(s => s.classList.remove('lift'));
+  if (!was) slot.classList.add('lift');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.slot.lift').forEach(s => s.classList.remove('lift'));
+});
+window.addEventListener('scroll', promoteEager, {passive:true});
+
+render();
+</script>
+</body>
+</html>

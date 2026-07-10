@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>METASURF · PIT-WALL · S1 META SNAPSHOT</title>
+
+<!-- Fonts: JetBrains Mono (tables), Press Start 2P (badges), Archivo Narrow (wordmark) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo+Narrow:wght@700&display=swap" rel="stylesheet">
+
+<style>
+/* DSEG7 Classic — seven-segment LED numerals (SIL OFL, served from npm CDN; self-host in prod) */
+@font-face{
+  font-family:'DSEG7';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --bg2:#13131a;
+  --line:#23232e;
+  --txt:#f2f2f7;         /* cool white */
+  --dim:#8b8b99;
+  --win:#3b9dff;         /* favorable WR — blue side of CVD-safe diverging scale */
+  --loss:#ff7a1a;        /* unfavorable WR — orange side, never red/green */
+  --sector:#b45bff;      /* F1 purple — best-in-class movers only */
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --shadow:#000;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pix:'Press Start 2P',monospace;
+  --led:'DSEG7','JetBrains Mono',monospace;
+  --cond:'Archivo Narrow','Archivo',sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important;}
+html{background:var(--bg);}
+body{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px),
+    var(--bg);
+  color:var(--txt);
+  font-family:var(--mono);
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+
+/* pixel crosshair cursor — desktop garnish only */
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, .row, .fmt, .ticker, .mover{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+
+.shell{max-width:620px;margin:0 auto;}
+
+/* ============ WIRE-FEED TICKER ============ */
+/* 44px tall = touch-min pause target; keyboard-operable (role=button + tabindex) */
+.ticker{
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+  font-size:11px;line-height:44px;height:44px;
+  user-select:none;
+  position:relative;
+}
+.ticker:focus-visible{outline:2px solid var(--sector);outline-offset:-2px;}
+.ticker::before{
+  content:'WIRE';
+  position:absolute;left:0;top:0;bottom:0;z-index:2;
+  background:var(--sector);color:var(--bg);
+  font-family:var(--pix);font-size:8px;line-height:44px;
+  padding:0 8px;
+}
+/* WIRE-badge offset lives on this non-animating clip wrapper — NOT inside the
+   translating track — so translateX(-50%) equals exactly one copy width (no seam). */
+.ticker-clip{
+  position:absolute;left:52px;right:36px;top:0;bottom:0;
+  overflow:hidden;white-space:nowrap;
+}
+.ticker-track{
+  display:inline-flex;
+  animation:tickscroll 55s linear infinite; /* duration recomputed by JS to ~35px/s */
+}
+.ticker-track span{padding-right:48px;}
+.ticker.paused .ticker-track{animation-play-state:paused;}
+.ticker-pause{
+  position:absolute;right:0;top:0;bottom:0;width:36px;z-index:2;
+  text-align:center;font-size:10px;color:var(--dim);
+  border-left:1px solid var(--line);background:var(--bg2);
+}
+.ticker .up{color:var(--win);} .ticker .dn{color:var(--loss);} .ticker .sec{color:var(--sector);}
+@keyframes tickscroll{to{transform:translateX(-50%);}}
+
+/* ============ HEADER ============ */
+header{padding:14px 12px 0;}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
+.wordmark{font-family:var(--cond);font-weight:700;font-size:30px;line-height:.9;
+  letter-spacing:-.5px;text-transform:uppercase;}
+.wordmark .wm{display:inline-block;transform:scaleY(1.25);transform-origin:left bottom;}
+.wordmark small{display:block;font-family:var(--mono);font-size:9px;font-weight:400;
+  letter-spacing:3px;color:var(--dim);margin-top:4px;}
+.clock{text-align:right;font-size:22px;color:var(--txt);}
+/* LED readout: '888.8' unlit-segment ghost sits in flow, live value overlays right-aligned */
+.led-wrap{position:relative;display:inline-block;font-family:var(--led);}
+.led-wrap .ghost{opacity:.10;color:var(--txt);pointer-events:none;}
+.led-wrap .live{position:absolute;right:0;top:0;}
+.clock-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;text-align:right;margin-bottom:3px;}
+
+/* format picker */
+.fmts{display:flex;gap:6px;margin:14px 0 0;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.fmts::-webkit-scrollbar{display:none;}
+.fmt{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  min-height:44px;display:inline-flex;align-items:center; /* touch minimum */
+  padding:0 12px;
+  color:var(--dim);
+  background:var(--bg2);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  white-space:nowrap;
+}
+.fmt:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.fmt.on{color:var(--bg);background:var(--txt);border-color:var(--txt);}
+
+/* section labels */
+.seclabel{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 12px 8px;
+  font-size:10px;letter-spacing:2px;color:var(--dim);
+}
+.seclabel b{color:var(--txt);font-weight:700;}
+
+/* ============ PRO / chrome ============ */
+/* chrome gradient applied as a 2px frame — at 8px Press Start 2P a gradient text
+   fill reads as flat grey, so the chip border carries the chrome instead */
+.pro{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  display:inline-block;padding:2px;
+  background:var(--chrome);
+  box-shadow:2px 2px 0 var(--shadow);
+}
+.pro i{
+  font-style:normal;display:block;
+  padding:6px 8px;
+  background:#1a1a22;color:var(--txt);
+}
+
+/* ============ MOVERS CAROUSEL (free-tier tease) ============ */
+.movers{
+  display:flex;gap:8px;overflow-x:auto;padding:2px 12px 12px;
+  scrollbar-width:none;scroll-snap-type:x mandatory;
+}
+.movers::-webkit-scrollbar{display:none;}
+.mover{
+  flex:0 0 148px;scroll-snap-align:start;
+  background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  padding:8px;position:relative;
+}
+.mover:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.mover-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.mover-code{font-family:var(--pix);font-size:8px;}
+.mover-delta{font-weight:700;font-size:12px;}
+.mover canvas{display:block;width:132px;height:52px;image-rendering:pixelated;}
+/* static block below the canvas — never overlaps the chart line */
+.mover-lock{
+  display:block;margin-top:6px;
+  font-size:9px;color:var(--dim);letter-spacing:1px;
+}
+.unlockbar{
+  margin:0 12px 4px;display:flex;align-items:center;gap:10px;
+  border:1px solid var(--line);background:var(--bg2);
+  padding:8px 10px;
+  box-shadow:2px 2px 0 var(--shadow);
+}
+.unlockbar .txt1{flex:1;font-size:10px;color:var(--dim);letter-spacing:1px;}
+.btn-unlock{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  padding:9px 10px;color:var(--txt);
+  background:#1a1a22;border:1px solid var(--sector);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+}
+.btn-unlock:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+
+/* ============ TIMING TOWER ============ */
+.tower{padding:0 12px;}
+.thead{
+  display:grid;grid-template-columns:20px 44px 1fr 120px 60px 46px;gap:8px;
+  padding:4px 8px 6px;font-size:9px;letter-spacing:1px;color:var(--dim);
+}
+.thead :nth-child(4){text-align:center;}
+.thead :nth-child(5),.thead :nth-child(6){text-align:right;}
+.row{
+  display:grid;grid-template-columns:20px 44px 1fr 120px 60px 46px;gap:8px;align-items:center;
+  width:100%;text-align:left;
+  background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  padding:8px;margin-bottom:6px;
+  color:var(--txt);font-family:var(--mono);font-size:13px;
+  transition:transform 80ms, box-shadow 80ms;
+}
+.row:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.row.sel{border-color:var(--txt);}
+.pos{font-weight:800;color:var(--dim);}
+.pos.p1{color:var(--txt);}
+.code{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  padding:6px 0;text-align:center;
+  background:#1c1c26;border:1px solid var(--line);color:var(--txt);
+}
+.code.sector{border-color:var(--sector);color:var(--sector);}
+.namecell{min-width:0;}
+/* display:block — ellipsis is dead CSS on an inline span (no width to overflow) */
+.aname{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;}
+.shareline{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.sharebar{width:56px;height:6px;background:#1c1c26;border:1px solid var(--line);flex:0 0 56px;}
+.sharebar i{display:block;height:100%;background:var(--txt);}
+.sharev{font-size:11px;color:var(--dim);}
+/* 40x12 buffer displayed at 120x36 CSS px = 3x upscale: guaranteed staircase
+   texture on 1x displays and a legible 7-day trend */
+.spark{width:120px;height:36px;image-rendering:pixelated;display:block;justify-self:center;}
+/* narrow phones: drop the Δ7D column (still shown in movers + drilldown) and
+   tighten fixed columns so the name column keeps usable width */
+@media (max-width:479px){
+  .thead,.row{grid-template-columns:16px 40px 1fr 120px 56px;gap:6px;}
+  .thead :nth-child(6),.dcell{display:none;}
+}
+.wrcell{text-align:right;}
+.wr{font-weight:800;font-size:14px;}
+.wr.good{color:var(--win);} .wr.bad{color:var(--loss);} .wr.mid{color:var(--txt);}
+.ci{font-size:10px;color:var(--dim);display:block;}
+.dcell{text-align:right;}
+.delta{
+  display:inline-block;font-size:11px;font-weight:700;
+  padding:3px 4px;border:1px solid var(--line);background:#1c1c26;
+}
+.delta.up{color:var(--win);} .delta.dn{color:var(--loss);}
+.delta.sector{color:var(--bg);background:var(--sector);border-color:var(--sector);}
+
+/* glitch — ONE 2-frame RGB-split, fired on changed cells only, never loops */
+.glitch{display:inline-block;animation:glitch 200ms steps(2,end) 1;}
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0);transform:translateX(-3px);
+       text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0);transform:translateX(3px);
+       text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none;transform:none;text-shadow:none;}
+}
+
+/* ============ DRILLDOWN POPOVER (picked game tile) ============ */
+.drill{
+  margin:-2px 0 8px;padding:12px 10px 10px;
+  background:#101018;
+  border:6px solid transparent;
+  border-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><g fill="%23f2f2f7"><rect x="2" y="0" width="4" height="1"/><rect x="2" y="7" width="4" height="1"/><rect x="0" y="2" width="1" height="4"/><rect x="7" y="2" width="1" height="4"/><rect x="1" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/></g></svg>') 3 stretch;
+}
+.drill-grid{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;}
+.led-wrap{position:relative;display:inline-block;font-family:var(--led);}
+.led-big{font-size:34px;}
+.led-mid{font-size:22px;}
+.led-label{font-size:9px;letter-spacing:2px;color:var(--dim);display:block;margin-bottom:4px;font-family:var(--mono);}
+.drill-meta{font-size:11px;color:var(--dim);line-height:1.8;}
+.drill-meta b{color:var(--txt);}
+.drill-hint{margin-top:8px;font-size:9px;letter-spacing:2px;color:var(--dim);}
+
+/* ============ FOOTER WORDMARK ============ */
+.foot{
+  padding:44px 12px 34px;overflow:hidden;
+  border-top:1px solid var(--line);margin-top:26px;
+}
+.foot .big{
+  font-family:var(--cond);font-weight:700;font-size:64px;line-height:.86;
+  text-transform:uppercase;letter-spacing:-1px;
+  transform:scaleY(1.5);transform-origin:left top;
+  margin-bottom:.46em; /* compensates scaleY overlap */
+  color:var(--txt);
+}
+.foot .big.hollow{
+  color:transparent;-webkit-text-stroke:1px #2e2e3a;
+}
+.foot .tag{margin-top:26px;font-size:10px;letter-spacing:2px;color:var(--dim);}
+@media (min-width:520px){ .foot .big{font-size:96px;} .wordmark{font-size:38px;} }
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  .ticker-track{animation:none;} /* static-first-N fallback */
+  .glitch{animation:none;}
+  .fmt,.row,.mover,.btn-unlock{transition:none;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- results wire-feed -->
+  <div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+       aria-label="results feed — tap or press Enter to pause">
+    <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+    <span class="ticker-pause" id="tickerPause" aria-hidden="true">&#10074;&#10074;</span>
+  </div>
+
+  <header>
+    <div class="masthead">
+      <div class="wordmark"><span class="wm">Metasurf</span><small>PIT-WALL · META SNAPSHOT</small></div>
+      <div>
+        <div class="clock-label">LOCAL TIME</div>
+        <div class="clock"><span class="led-wrap"><span class="ghost">88:88</span><span class="live" id="clock">--:--</span></span></div>
+      </div>
+    </div>
+    <nav class="fmts" id="fmts" aria-label="format picker"></nav>
+  </header>
+
+  <!-- biggest movers — free tier renders at 1/8 resolution -->
+  <div class="seclabel"><span><b>BIGGEST MOVERS</b> · 7D</span><span class="pro"><i>PRO</i></span></div>
+  <div class="movers" id="movers"></div>
+  <div class="unlockbar">
+    <span class="txt1" id="unlockTxt">FREE TIER — MOVERS RENDERED AT 1/8 RES</span>
+    <button class="btn-unlock" id="unlockBtn">UNLOCK FULL RES</button>
+  </div>
+
+  <!-- ranked timing tower -->
+  <div class="seclabel"><span><b>TIMING TOWER</b> · <span id="towerFmt">MODERN</span></span><span id="eventCount">— EVENTS · — DECKS</span></div>
+  <div class="tower">
+    <div class="thead"><span>P</span><span>CODE</span><span>ARCHETYPE / SHARE</span><span>7D</span><span>WR·CI</span><span>Δ7D</span></div>
+    <div id="rows"></div>
+  </div>
+
+  <footer class="foot">
+    <div class="big">Metasurf</div>
+    <div class="big hollow" id="footFmt">Modern</div>
+    <div class="tag">WEEK 27 · 2026 · SAMPLE DATA — MOCKUP ONLY</div>
+  </footer>
+</div>
+
+<script>
+'use strict';
+/* =================================================================
+   PIT-WALL CONSOLE — S1 META SNAPSHOT
+   All numbers are placeholder mock data for visual design only.
+   ================================================================= */
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = () => RM.matches;
+
+/* ---- mock datasets (placeholder numbers) ---- */
+const DATA = {
+  MODERN: [
+    {code:'MURK', name:'Izzet Murktide',     share:14.2, wr:52.8, ci:1.4, delta:+0.4, n:1204},
+    {code:'SCAM', name:'Rakdos Scam',        share:11.8, wr:53.6, ci:1.6, delta:-0.8, n:986},
+    {code:'TITN', name:'Amulet Titan',       share:8.9,  wr:55.1, ci:1.9, delta:+1.1, n:712},
+    {code:'YAWG', name:'Yawgmoth',           share:7.4,  wr:54.2, ci:2.1, delta:+0.2, n:598},
+    {code:'LEND', name:'Living End',         share:6.1,  wr:51.9, ci:2.3, delta:+2.3, n:487},
+    {code:'TRON', name:'Mono-Green Tron',    share:5.6,  wr:49.4, ci:2.2, delta:-0.5, n:451},
+    {code:'BURN', name:'Burn',               share:4.8,  wr:47.2, ci:2.4, delta:-1.2, n:390},
+    {code:'HAMR', name:'Hammer Time',        share:4.1,  wr:48.8, ci:2.6, delta:-0.3, n:332},
+    {code:'RHNO', name:'Crashing Footfalls', share:3.7,  wr:50.6, ci:2.7, delta:+0.6, n:298},
+    {code:'JUND', name:'Jund Saga',          share:3.2,  wr:46.9, ci:2.9, delta:-0.9, n:254},
+  ],
+  PIONEER: [
+    {code:'PHNX', name:'Izzet Phoenix',      share:13.5, wr:52.1, ci:1.5, delta:+0.9, n:1010},
+    {code:'VAMP', name:'Rakdos Vampires',    share:12.7, wr:54.8, ci:1.6, delta:-1.4, n:920},
+    {code:'AMLA', name:'Amalia Combo',       share:9.3,  wr:53.2, ci:1.9, delta:+1.8, n:745},
+    {code:'LOTS', name:'Lotus Field',        share:7.2,  wr:51.4, ci:2.2, delta:+0.3, n:566},
+    {code:'CNVK', name:'Boros Convoke',      share:6.4,  wr:49.8, ci:2.3, delta:-0.6, n:498},
+    {code:'AZCT', name:'Azorius Control',    share:5.8,  wr:48.1, ci:2.4, delta:-0.2, n:443},
+    {code:'DEVO', name:'Mono-G Devotion',    share:4.9,  wr:47.6, ci:2.6, delta:-1.1, n:371},
+    {code:'SPRT', name:'Mono-U Spirits',     share:4.2,  wr:50.2, ci:2.7, delta:+0.5, n:308},
+  ],
+  LEGACY: [
+    {code:'DLVR', name:'Temur Delver',       share:15.8, wr:51.7, ci:1.3, delta:-0.7, n:1322},
+    {code:'REAN', name:'Reanimator',         share:10.4, wr:54.4, ci:1.7, delta:+2.6, n:844},
+    {code:'DNT',  name:'Death & Taxes',      share:8.6,  wr:52.3, ci:1.9, delta:+0.4, n:690},
+    {code:'LNDS', name:'Lands',              share:6.2,  wr:49.1, ci:2.3, delta:-0.3, n:502},
+    {code:'DOOM', name:'Doomsday',           share:5.7,  wr:53.8, ci:2.4, delta:+1.2, n:461},
+    {code:'PNTR', name:'Painter',            share:4.9,  wr:48.6, ci:2.6, delta:-0.9, n:377},
+    {code:'CEPH', name:'Cephalid Breakfast', share:4.3,  wr:51.2, ci:2.7, delta:+0.8, n:319},
+    {code:'8CST', name:'8-Cast',             share:3.8,  wr:47.9, ci:2.8, delta:-1.5, n:280},
+  ],
+};
+const META = {
+  MODERN:  {events:12, decks:2143, week:'WEEK 27'},
+  PIONEER: {events:9,  decks:1688, week:'WEEK 27'},
+  LEGACY:  {events:7,  decks:1409, week:'WEEK 27'},
+};
+const FORMATS = Object.keys(DATA);
+let curFmt = 'MODERN';
+let openCode = null;               // drilldown state
+const shown = {};                  // last displayed values, keyed FORMAT:CODE
+const shownKey = (fmt, code) => fmt + ':' + code; // format-scoped — codes may collide across formats
+
+/* deterministic pseudo-random spark series per archetype code */
+function seedRand(str){ let h=2166136261; for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);} return ()=>{h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);return ((h^=h>>>16)>>>0)/4294967296;}; }
+function sparkSeries(a){
+  const r = seedRand(a.code+curFmt), pts=[];
+  let v = a.wr - a.delta;
+  for(let i=0;i<7;i++){ pts.push(v); v += a.delta/6 + (r()-0.5)*1.6; }
+  pts[6] = a.wr;
+  return pts;
+}
+
+/* ---- helpers ---- */
+const $ = s => document.querySelector(s);
+const wrClass = wr => wr>52 ? 'good' : wr<48 ? 'bad' : 'mid';
+const fmt1 = v => v.toFixed(1);
+function biggestMoverCode(list){ return list.reduce((a,b)=>Math.abs(b.delta)>Math.abs(a.delta)?b:a).code; }
+
+/* IntersectionObserver gate — only roll up numbers that are on screen.
+   Freshly-rendered rows haven't been reported by IO yet, so fall back to a
+   synchronous rect check for elements IO hasn't classified. */
+const visible = new WeakSet(), ioSeen = new WeakSet();
+const io = new IntersectionObserver(es=>{ for(const e of es){ ioSeen.add(e.target);
+  e.isIntersecting?visible.add(e.target):visible.delete(e.target);} },{threshold:0.1});
+function onScreen(el){
+  const host = el.closest('.row') || el;
+  if (ioSeen.has(host)) return visible.has(host);
+  const r = host.getBoundingClientRect();
+  return r.top < innerHeight && r.bottom > 0;
+}
+
+/* quantized arcade roll-up: 8 discrete ticks, <=600ms, reduced-motion gated.
+   DELIBERATE DEVIATION from the spec's CountUp.js: this hand-rolled ~15-line
+   equivalent keeps the mockup a single offline file with zero JS dependencies;
+   behavior matches the spec (8 discrete ticks, 480ms<=600ms, IO-gated,
+   matchMedia reduced-motion check). Swap for CountUp.js in production if the
+   dependency is acceptable. */
+function rollup(el, from, to, render){
+  if (reduced() || !onScreen(el)){ el.textContent = render(to); return; }
+  const TICKS=8, DUR=480; let i=0;
+  const step=()=>{
+    i++;
+    const v = from + (to-from)*(i/TICKS);
+    el.textContent = render(i===TICKS ? to : Math.round(v*10)/10);
+    if(i<TICKS) setTimeout(step, DUR/TICKS);
+  };
+  step();
+}
+
+/* one-shot glitch frame on a changed cell */
+function glitch(el){
+  if (reduced()) return;
+  el.classList.remove('glitch'); void el.offsetWidth; // restart
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+
+/* ---- sparkline: 40x12 canvas upscaled (free staircase texture) ---- */
+function drawSpark(cv, pts, color){
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0,0,40,12);
+  const mn=Math.min(...pts), mx=Math.max(...pts), rg=(mx-mn)||1;
+  ctx.fillStyle = color;
+  for(let i=0;i<7;i++){
+    const x = Math.round(i*(38/6));
+    const y = Math.round(10 - (pts[i]-mn)/rg*9);
+    ctx.fillRect(x, y, 2, 2);
+    if(i>0){ // stepped connector
+      const px = Math.round((i-1)*(38/6));
+      const py = Math.round(10 - (pts[i-1]-mn)/rg*9);
+      ctx.fillRect(Math.min(px,x), Math.min(py,y)+1, Math.abs(x-px)+1, 1);
+    }
+  }
+}
+
+/* ================= FORMAT PICKER ================= */
+function renderFmts(){
+  $('#fmts').innerHTML = FORMATS.map(f=>
+    `<button class="fmt ${f===curFmt?'on':''}" data-f="${f}">${f}</button>`).join('');
+  $('#fmts').querySelectorAll('.fmt').forEach(b=>b.addEventListener('click',()=>{
+    if(b.dataset.f===curFmt) return;
+    curFmt = b.dataset.f; openCode=null;
+    renderFmts(); renderTower(true); renderMovers(); renderChrome();
+  }));
+}
+
+function renderChrome(){
+  $('#towerFmt').textContent = curFmt;
+  $('#footFmt').textContent = curFmt;
+  const m = META[curFmt];
+  $('#eventCount').textContent = `${m.events} EVENTS · ${m.decks} DECKS`;
+}
+
+/* ================= TIMING TOWER ================= */
+function renderTower(animate){
+  const list = DATA[curFmt];
+  const maxShare = Math.max(...list.map(a=>a.share));
+  const hot = biggestMoverCode(list);
+  const box = $('#rows');
+  box.innerHTML = '';
+  list.forEach((a,i)=>{
+    const row = document.createElement('button');
+    row.className = 'row' + (openCode===a.code?' sel':'');
+    row.dataset.code = a.code;
+    row.setAttribute('aria-expanded', openCode===a.code ? 'true' : 'false'); // row is a disclosure toggle
+    const dc = a.code===hot ? 'sector' : (a.delta>=0?'up':'dn');
+    row.innerHTML = `
+      <span class="pos ${i===0?'p1':''}">${i+1}</span>
+      <span class="code ${a.code===hot?'sector':''}">${a.code}</span>
+      <span class="namecell">
+        <span class="aname">${a.name}</span>
+        <span class="shareline">
+          <span class="sharebar"><i style="width:${(a.share/maxShare*100).toFixed(0)}%"></i></span>
+          <span class="sharev"><span class="js-share">${fmt1(a.share)}</span>%</span>
+        </span>
+      </span>
+      <canvas class="spark" width="40" height="12" aria-hidden="true"></canvas>
+      <span class="wrcell">
+        <span class="wr ${wrClass(a.wr)} js-wr">${fmt1(a.wr)}</span>
+        <span class="ci">±${fmt1(a.ci)}</span>
+      </span>
+      <span class="dcell"><span class="delta ${dc}">${a.delta>=0?'+':''}${fmt1(a.delta)}${a.delta>=0?'▲':'▼'}</span></span>`;
+    box.appendChild(row);
+    io.observe(row);
+
+    const pts = sparkSeries(a);
+    drawSpark(row.querySelector('.spark'), pts,
+      a.code===hot ? '#b45bff' : (a.delta>=0 ? '#3b9dff' : '#ff7a1a'));
+
+    /* roll-up + single glitch on changed cells (cache keyed by format+code) */
+    const wrEl = row.querySelector('.js-wr'), shEl = row.querySelector('.js-share');
+    const prev = shown[shownKey(curFmt, a.code)];
+    if (animate){
+      requestAnimationFrame(()=>{ // let IO settle
+        rollup(wrEl, prev?prev.wr:a.wr-4, a.wr, fmt1);
+        rollup(shEl, prev?prev.share:0,   a.share, fmt1);
+        if (prev && prev.wr!==a.wr)    glitch(wrEl);
+        if (prev && prev.share!==a.share) glitch(shEl);
+      });
+    }
+    shown[shownKey(curFmt, a.code)] = {wr:a.wr, share:a.share};
+
+    row.addEventListener('click', ()=>toggleDrill(a));
+    if (openCode===a.code) box.appendChild(buildDrill(a));
+  });
+}
+
+/* drilldown popover — DSEG seven-segment readout with unlit-segment ghost */
+function buildDrill(a){
+  const d = document.createElement('div');
+  d.className = 'drill';
+  d.innerHTML = `
+    <div class="drill-grid">
+      <div>
+        <span class="led-label">WIN RATE %</span>
+        <span class="led-wrap led-big" style="color:${a.wr>52?'#3b9dff':a.wr<48?'#ff7a1a':'#f2f2f7'}">
+          <span class="ghost">888.8</span><span class="live js-ledwr">${fmt1(a.wr)}</span>
+        </span>
+      </div>
+      <div>
+        <span class="led-label">SAMPLE N</span>
+        <span class="led-wrap led-mid"><span class="ghost">8888</span><span class="live">${a.n}</span></span>
+      </div>
+      <div class="drill-meta">
+        CI 95% <b>±${fmt1(a.ci)}</b><br>
+        SHARE <b>${fmt1(a.share)}%</b> · Δ7D <b>${a.delta>=0?'+':''}${fmt1(a.delta)}</b>
+      </div>
+    </div>
+    <div class="drill-hint">TAP ROW AGAIN TO CLOSE · FULL SHEET IN S3 →</div>`;
+  const led = d.querySelector('.js-ledwr');
+  if(!reduced()){
+    const TICKS=8, DUR=480; let i=0, from=a.wr-6;
+    const step=()=>{ i++; const v=from+(a.wr-from)*(i/TICKS);
+      led.textContent = fmt1(i===TICKS?a.wr:Math.round(v*10)/10);
+      if(i<TICKS) setTimeout(step,DUR/TICKS); };
+    step();
+  }
+  return d;
+}
+function toggleDrill(a){
+  openCode = (openCode===a.code) ? null : a.code;
+  renderTower(false); // re-render sets .sel + aria-expanded on the new state
+}
+
+/* ================= MOVERS — resolution-locked free tier ================= */
+let pixelFactor = 8;      // 1/8 res mosaic for free tier
+let unlocked = false;
+const moverCharts = [];   // {cv, off, color}
+
+function moverList(){
+  return [...DATA[curFmt]].sort((x,y)=>Math.abs(y.delta)-Math.abs(x.delta)).slice(0,4);
+}
+function renderMovers(){
+  const box = $('#movers');
+  box.innerHTML=''; moverCharts.length=0;
+  const hot = biggestMoverCode(DATA[curFmt]);
+  moverList().forEach(a=>{
+    const card = document.createElement('button');
+    card.className='mover';
+    const col = a.code===hot ? '#b45bff' : (a.delta>=0?'#3b9dff':'#ff7a1a');
+    /* free tier masks the exact delta — direction only, value behind the paywall */
+    const deltaTxt = unlocked
+      ? `${a.delta>=0?'+':''}${fmt1(a.delta)}${a.delta>=0?'▲':'▼'}`
+      : `${a.delta>=0?'+':'−'}?.?${a.delta>=0?'▲':'▼'}`;
+    card.innerHTML = `
+      <span class="mover-top">
+        <span class="mover-code" style="color:${col}">${a.code}</span>
+        <span class="mover-delta" style="color:${col}">${deltaTxt}</span>
+      </span>
+      <canvas width="132" height="52"></canvas>
+      <span class="mover-lock">${unlocked?'FULL RES':'LOCKED · 1/8 RES'}</span>`;
+    box.appendChild(card);
+
+    /* full-res chart to offscreen, then pixelate through downscale pipeline */
+    const cv = card.querySelector('canvas');
+    const off = document.createElement('canvas'); off.width=132; off.height=52;
+    const c = off.getContext('2d');
+    const r = seedRand('mv'+a.code+curFmt); const pts=[];
+    let v=26 - a.delta*6;
+    for(let i=0;i<28;i++){ pts.push(Math.max(4,Math.min(48,v))); v -= a.delta*0.45 + (r()-0.5)*4; }
+    c.strokeStyle=col; c.lineWidth=2; c.beginPath();
+    pts.forEach((p,i)=>{ const x=i*(132/27); i?c.lineTo(x,p):c.moveTo(x,p); });
+    c.stroke();
+    c.fillStyle=col; c.globalAlpha=.15;
+    c.lineTo(132,52); c.lineTo(0,52); c.closePath(); c.fill(); c.globalAlpha=1;
+    moverCharts.push({cv,off});
+  });
+  paintMovers(pixelFactor);
+}
+function paintMovers(f){
+  for(const {cv,off} of moverCharts){
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0,0,132,52);
+    if(f<=1){ ctx.drawImage(off,0,0); continue; }
+    const t = document.createElement('canvas');
+    t.width=Math.max(1,Math.round(132/f)); t.height=Math.max(1,Math.round(52/f));
+    const tc=t.getContext('2d'); tc.imageSmoothingEnabled=false;
+    tc.drawImage(off,0,0,t.width,t.height);
+    ctx.drawImage(t,0,0,t.width,t.height,0,0,132,52);
+  }
+}
+/* the upgrade animation IS the mechanic: tween pixel size 8 -> 1 */
+$('#unlockBtn').addEventListener('click', ()=>{
+  if(unlocked) return;
+  unlocked = true;
+  const finish = ()=>{
+    pixelFactor=1;
+    renderMovers(); // re-render reveals the real deltas + FULL RES captions at 1x
+    $('#unlockTxt').innerHTML='PRO PREVIEW — FULL-RESOLUTION MOVERS';
+    $('#unlockBtn').textContent='PRO ✓';
+  };
+  if(reduced()){ finish(); return; }
+  const steps=[8,7,6,5,4,3,2,1]; let i=0;
+  const tick=()=>{ pixelFactor=steps[i]; paintMovers(pixelFactor);
+    if(++i<steps.length) setTimeout(tick,110); else finish(); };
+  tick();
+});
+
+/* ================= TICKER ================= */
+const FEED = [
+  `MODERN CHALLENGE 64 · 1st <span class="sec">RAKDOS SCAM</span>`,
+  `LIVING END <span class="up">+2.3% ▲</span>`,
+  `PIONEER CHALLENGE 32 · 1st IZZET PHOENIX`,
+  `REANIMATOR <span class="up">+2.6% ▲</span> LEGACY`,
+  `BURN <span class="dn">−1.2% ▼</span> MODERN`,
+  `AMULET TITAN WR 55.1 <span class="up">±1.9</span>`,
+  `NEXT DOWNLOAD <span class="js-eta sec">00:24</span> · SOURCE: SAMPLE WIRE`,
+];
+(function initTicker(){
+  const tk = $('#ticker'), track = $('#tickerTrack');
+  const half = FEED.map(s=>`<span>${s}</span>`).join('');
+  track.innerHTML = half + half; /* duplicated track for seamless loop */
+  /* pin speed to ~35px/s regardless of copy width */
+  requestAnimationFrame(()=>{
+    const w = track.scrollWidth/2;
+    if (w>0) track.style.animationDuration = (w/35).toFixed(1)+'s';
+  });
+  const setPaused = p=>{
+    tk.classList.toggle('paused', p);
+    tk.setAttribute('aria-pressed', String(p));
+    $('#tickerPause').textContent = p ? '▶' : '❚❚';
+  };
+  tk.addEventListener('click', ()=>setPaused(!tk.classList.contains('paused')));
+  tk.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setPaused(!tk.classList.contains('paused')); }
+  });
+})();
+
+/* ---- simulated wire refresh: the NEXT DOWNLOAD countdown actually fires ----
+   Perturbs a few rows of the current format so the one-shot RGB-split glitch
+   (fired only on changed cells) is reachable in the mockup. */
+const ETA_START = 24, ETA_RESET = 45;
+let eta = ETA_START;
+const wireRand = seedRand('wire-refresh-2026w27');
+function wireRefresh(){
+  const list = DATA[curFmt];
+  const idx = new Set();
+  while (idx.size < Math.min(3, list.length)) idx.add(Math.floor(wireRand()*list.length));
+  idx.forEach(i=>{
+    const a = list[i];
+    a.wr    = Math.round((a.wr    + (wireRand()>0.5?1:-1)*(0.1 + Math.round(wireRand()*3)/10))*10)/10;
+    a.share = Math.max(0.5, Math.round((a.share + (wireRand()-0.5)*0.4)*10)/10);
+  });
+  renderTower(true); // shown{} diff -> roll-ups + single glitch on the changed cells
+}
+setInterval(()=>{
+  eta--;
+  if (eta<=0){ wireRefresh(); eta = ETA_RESET; }
+  const t = String(Math.floor(eta/60)).padStart(2,'0')+':'+String(eta%60).padStart(2,'0');
+  document.querySelectorAll('.js-eta').forEach(e=>e.textContent=t);
+}, 1000);
+
+/* ================= CLOCK ================= */
+function tickClock(){
+  const d=new Date();
+  $('#clock').textContent = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 30000);
+
+/* ================= BOOT ================= */
+renderFmts(); renderChrome(); renderMovers(); renderTower(true);
+</script>
+</body>
+</html>

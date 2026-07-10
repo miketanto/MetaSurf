@@ -1,0 +1,1086 @@
+{
+ "archetype": "Izzet Murktide",
+ "format": "Modern",
+ "window": "2024-04-01 \u2192 2024-06-19",
+ "sample": {
+  "decks": 717,
+  "events": 234
+ },
+ "star_scale": {
+  "1": "<32 players",
+  "2": "32\u201363",
+  "3": "64\u2013127",
+  "4": "128\u2013255",
+  "5": "256+",
+  "league": "MTGO League (size unreported) \u2014 badge, not stars"
+ },
+ "avg_price": {
+  "usd": 730.0,
+  "usd_decks": 165,
+  "tix": 290.32,
+  "tix_decks": 388,
+  "note": "Mean full-deck (main+side) price over decks with complete price data; Scryfall bulk 2026-07-08 snapshot, one canonical printing per card."
+ },
+ "staples": [
+  {
+   "name": "Murktide Regent",
+   "in_pct": 100.0,
+   "avg_copies": 2.67,
+   "img_small": "https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+   "img_normal": "https://cards.scryfall.io/normal/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+   "mana_cost": "{5}{U}{U}",
+   "type_line": "Creature \u2014 Dragon",
+   "usd": 7.38
+  },
+  {
+   "name": "Counterspell",
+   "in_pct": 98.5,
+   "avg_copies": 3.84,
+   "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "img_normal": "https://cards.scryfall.io/normal/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+   "mana_cost": "{U}{U}",
+   "type_line": "Instant",
+   "usd": 3.71
+  },
+  {
+   "name": "Preordain",
+   "in_pct": 94.7,
+   "avg_copies": 3.5,
+   "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "img_normal": "https://cards.scryfall.io/normal/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+   "mana_cost": "{U}",
+   "type_line": "Sorcery",
+   "usd": 0.42
+  },
+  {
+   "name": "Steam Vents",
+   "in_pct": 87.0,
+   "avg_copies": 2.58,
+   "img_small": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "img_normal": "https://cards.scryfall.io/normal/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+   "mana_cost": "",
+   "type_line": "Land \u2014 Island Mountain",
+   "usd": 12.96
+  },
+  {
+   "name": "Scalding Tarn",
+   "in_pct": 84.2,
+   "avg_copies": 2.81,
+   "img_small": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+   "mana_cost": "",
+   "type_line": "Land",
+   "usd": 40.4
+  },
+  {
+   "name": "Lightning Bolt",
+   "in_pct": 83.5,
+   "avg_copies": 3.69,
+   "img_small": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+   "mana_cost": "{R}",
+   "type_line": "Instant",
+   "usd": 0.83
+  },
+  {
+   "name": "Misty Rainforest",
+   "in_pct": 78.4,
+   "avg_copies": 2.57,
+   "img_small": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "img_normal": "https://cards.scryfall.io/normal/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+   "mana_cost": "",
+   "type_line": "Land",
+   "usd": 36.17
+  },
+  {
+   "name": "Subtlety",
+   "in_pct": 77.0,
+   "avg_copies": 2.02,
+   "img_small": "https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "img_normal": "https://cards.scryfall.io/normal/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+   "mana_cost": "{2}{U}{U}",
+   "type_line": "Creature \u2014 Elemental Incarnation",
+   "usd": 15.06
+  },
+  {
+   "name": "Expressive Iteration",
+   "in_pct": 75.7,
+   "avg_copies": 3.88,
+   "img_small": "https://cards.scryfall.io/small/front/9/6/96f866ec-a163-4095-b088-d93fa0b6f6f7.jpg?1782682511",
+   "img_normal": "https://cards.scryfall.io/normal/front/9/6/96f866ec-a163-4095-b088-d93fa0b6f6f7.jpg?1782682511",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/9/6/96f866ec-a163-4095-b088-d93fa0b6f6f7.jpg?1782682511",
+   "mana_cost": "{U}{R}",
+   "type_line": "Sorcery",
+   "usd": null
+  },
+  {
+   "name": "Island",
+   "in_pct": 74.3,
+   "avg_copies": 2.5,
+   "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "img_normal": "https://cards.scryfall.io/normal/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+   "mana_cost": "",
+   "type_line": "Basic Land \u2014 Island",
+   "usd": 0.18
+  },
+  {
+   "name": "Thundering Falls",
+   "in_pct": 72.9,
+   "avg_copies": 1.07,
+   "img_small": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "img_normal": "https://cards.scryfall.io/normal/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+   "mana_cost": "",
+   "type_line": "Land \u2014 Island Mountain",
+   "usd": 14.43
+  },
+  {
+   "name": "Ragavan, Nimble Pilferer",
+   "in_pct": 71.5,
+   "avg_copies": 3.92,
+   "img_small": "https://cards.scryfall.io/small/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1782704654",
+   "img_normal": "https://cards.scryfall.io/normal/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1782704654",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1782704654",
+   "mana_cost": "{R}",
+   "type_line": "Legendary Creature \u2014 Monkey Pirate",
+   "usd": 44.17
+  },
+  {
+   "name": "Spirebluff Canal",
+   "in_pct": 71.4,
+   "avg_copies": 3.66,
+   "img_small": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "img_normal": "https://cards.scryfall.io/normal/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+   "mana_cost": "",
+   "type_line": "Land",
+   "usd": 5.25
+  },
+  {
+   "name": "Unholy Heat",
+   "in_pct": 67.2,
+   "avg_copies": 3.69,
+   "img_small": "https://cards.scryfall.io/small/front/4/e/4e879386-b1f8-4f2a-9820-6e1291746f88.jpg?1782692299",
+   "img_normal": "https://cards.scryfall.io/normal/front/4/e/4e879386-b1f8-4f2a-9820-6e1291746f88.jpg?1782692299",
+   "img_art_crop": "https://cards.scryfall.io/art_crop/front/4/e/4e879386-b1f8-4f2a-9820-6e1291746f88.jpg?1782692299",
+   "mana_cost": "{R}",
+   "type_line": "Instant",
+   "usd": 0.33
+  }
+ ],
+ "notable": [
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "CrazyMorango",
+   "result": "5th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 64",
+   "date": "2024-06-15",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1512647467",
+   "player": "Shadowz2005",
+   "result": "5th Place",
+   "players": 64,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 64",
+   "date": "2024-06-15",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1512647476",
+   "player": "Senzacolpa",
+   "result": "7th Place",
+   "players": 121,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-14",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1412647457",
+   "player": "O_danielakos",
+   "result": "1st Place",
+   "players": 81,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-14",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1412647447",
+   "player": "Parrit",
+   "result": "5th Place",
+   "players": 83,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 64",
+   "date": "2024-06-04",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-06-0412643104",
+   "player": "FerMTG",
+   "result": "5th Place",
+   "players": 68,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 64",
+   "date": "2024-05-21",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-05-2112638735",
+   "player": "O_danielakos",
+   "result": "2nd Place",
+   "players": 70,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 64",
+   "date": "2024-05-13",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-64-2024-05-1312637347",
+   "player": "Mogged",
+   "result": "1st Place",
+   "players": 68,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  }
+ ],
+ "latest": [
+  {
+   "event": "Modern League",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-league-2024-06-198225",
+   "player": "Morrison90",
+   "result": "5-0",
+   "players": null,
+   "stars": null,
+   "league": true,
+   "main": [
+    {
+     "count": 4,
+     "name": "Counterspell",
+     "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+     "mana_cost": "{U}{U}"
+    },
+    {
+     "count": 2,
+     "name": "Drown in the Loch",
+     "img_small": "https://cards.scryfall.io/small/front/e/b/eb7b9762-740b-4c1c-a411-20dbf023aea5.jpg?1782700781",
+     "mana_cost": "{U}{B}"
+    },
+    {
+     "count": 2,
+     "name": "Fatal Push",
+     "img_small": "https://cards.scryfall.io/small/front/6/e/6e9d8fe4-fd9b-4923-92bf-7dd6b8fa02e7.jpg?1782743988",
+     "mana_cost": "{B}"
+    },
+    {
+     "count": 4,
+     "name": "Grief",
+     "img_small": "https://cards.scryfall.io/small/front/e/6/e6befbc4-1320-4f26-bd9f-b1814fedda10.jpg?1782704685",
+     "mana_cost": "{2}{B}{B}"
+    },
+    {
+     "count": 2,
+     "name": "Island",
+     "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Mishra's Bauble",
+     "img_small": "https://cards.scryfall.io/small/front/4/5/45bbbf9b-8fee-4c32-a513-02dac6ac8a39.jpg?1782743854",
+     "mana_cost": "{0}"
+    },
+    {
+     "count": 4,
+     "name": "Misty Rainforest",
+     "img_small": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Murktide Regent",
+     "img_small": "https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+     "mana_cost": "{5}{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Not Dead After All",
+     "img_small": "https://cards.scryfall.io/small/front/d/0/d01a2b68-efe6-4027-846d-db7b19d9eef6.jpg?1782696585",
+     "mana_cost": "{B}"
+    },
+    {
+     "count": 2,
+     "name": "Orcish Bowmasters",
+     "img_small": "https://cards.scryfall.io/small/front/7/c/7c024bae-5631-4e20-ac69-df392ac9e109.jpg?1782697185",
+     "mana_cost": "{1}{B}"
+    },
+    {
+     "count": 1,
+     "name": "Otawara, Soaring City",
+     "img_small": "https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Polluted Delta",
+     "img_small": "https://cards.scryfall.io/small/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Preordain",
+     "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 4,
+     "name": "Psychic Frog",
+     "img_small": "https://cards.scryfall.io/small/front/6/8/68924203-c3d9-41ce-8ca8-c6dd491eb3ca.jpg?1782691216",
+     "mana_cost": "{U}{B}"
+    },
+    {
+     "count": 1,
+     "name": "Shadowspear",
+     "img_small": "https://cards.scryfall.io/small/front/9/3/939c6e19-4b27-4023-bb9c-ae440f91e21c.jpg?1782707504",
+     "mana_cost": "{1}"
+    },
+    {
+     "count": 1,
+     "name": "Soul-Guide Lantern",
+     "img_small": "https://cards.scryfall.io/small/front/f/4/f4907e7b-d6d5-4e9b-968f-bce34ae4a577.jpg?1782685618",
+     "mana_cost": "{1}"
+    },
+    {
+     "count": 2,
+     "name": "Spell Pierce",
+     "img_small": "https://cards.scryfall.io/small/front/8/d/8dd4374f-0301-4b2e-bc99-2cd19568cb3b.jpg?1782687910",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 2,
+     "name": "Swamp",
+     "img_small": "https://cards.scryfall.io/small/front/7/4/74414c62-4b68-4e1b-9241-feff3231b9ee.jpg?1782681661",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Tamiyo, Inquisitive Student",
+     "img_small": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 2,
+     "name": "Thoughtseize",
+     "img_small": "https://cards.scryfall.io/small/front/b/2/b281a308-ab6b-47b6-bec7-632c9aaecede.jpg?1782743977",
+     "mana_cost": "{B}"
+    },
+    {
+     "count": 2,
+     "name": "Undercity Sewers",
+     "img_small": "https://cards.scryfall.io/small/front/2/b/2b5801fb-2026-4f25-98bc-ebb2f99684b9.jpg?1782693772",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Urza's Saga",
+     "img_small": "https://cards.scryfall.io/small/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1782704580",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Watery Grave",
+     "img_small": "https://cards.scryfall.io/small/front/5/b/5b8170dc-6a90-46fc-9989-7575f3d402b5.jpg?1782685404",
+     "mana_cost": ""
+    }
+   ],
+   "side": [
+    {
+     "count": 1,
+     "name": "Ashiok, Dream Render"
+    },
+    {
+     "count": 1,
+     "name": "Break the Ice"
+    },
+    {
+     "count": 2,
+     "name": "Damping Sphere"
+    },
+    {
+     "count": 3,
+     "name": "Dauthi Voidwalker"
+    },
+    {
+     "count": 2,
+     "name": "Force of Negation"
+    },
+    {
+     "count": 2,
+     "name": "Narset, Parter of Veils"
+    },
+    {
+     "count": 1,
+     "name": "Pithing Needle"
+    },
+    {
+     "count": 2,
+     "name": "Toxic Deluge"
+    },
+    {
+     "count": 1,
+     "name": "Winter Moon"
+    }
+   ]
+  },
+  {
+   "event": "Modern League",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-league-2024-06-198225",
+   "player": "i_b_TRUE",
+   "result": "5-0",
+   "players": null,
+   "stars": null,
+   "league": true,
+   "main": [
+    {
+     "count": 4,
+     "name": "Counterspell",
+     "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+     "mana_cost": "{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Dragon's Rage Channeler",
+     "img_small": "https://cards.scryfall.io/small/front/4/c/4ced112a-e775-4f97-97b3-74877e9dce12.jpg?1782704665",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 4,
+     "name": "Expressive Iteration",
+     "img_small": "https://cards.scryfall.io/small/front/9/6/96f866ec-a163-4095-b088-d93fa0b6f6f7.jpg?1782682511",
+     "mana_cost": "{U}{R}"
+    },
+    {
+     "count": 1,
+     "name": "Flooded Strand",
+     "img_small": "https://cards.scryfall.io/small/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197",
+     "mana_cost": ""
+    },
+    {
+     "count": 1,
+     "name": "Force of Negation",
+     "img_small": "https://cards.scryfall.io/small/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934",
+     "mana_cost": "{1}{U}{U}"
+    },
+    {
+     "count": 3,
+     "name": "Island",
+     "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Lightning Bolt",
+     "img_small": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 4,
+     "name": "Mishra's Bauble",
+     "img_small": "https://cards.scryfall.io/small/front/4/5/45bbbf9b-8fee-4c32-a513-02dac6ac8a39.jpg?1782743854",
+     "mana_cost": "{0}"
+    },
+    {
+     "count": 2,
+     "name": "Misty Rainforest",
+     "img_small": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Murktide Regent",
+     "img_small": "https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+     "mana_cost": "{5}{U}{U}"
+    },
+    {
+     "count": 2,
+     "name": "Polluted Delta",
+     "img_small": "https://cards.scryfall.io/small/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Preordain",
+     "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 4,
+     "name": "Ragavan, Nimble Pilferer",
+     "img_small": "https://cards.scryfall.io/small/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1782704654",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 2,
+     "name": "Scalding Tarn",
+     "img_small": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+     "mana_cost": ""
+    },
+    {
+     "count": 1,
+     "name": "Sink into Stupor",
+     "img_small": "https://cards.scryfall.io/small/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170",
+     "mana_cost": "{1}{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Spirebluff Canal",
+     "img_small": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Steam Vents",
+     "img_small": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Subtlety",
+     "img_small": "https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+     "mana_cost": "{2}{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Tamiyo, Inquisitive Student",
+     "img_small": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 1,
+     "name": "Thundering Falls",
+     "img_small": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Unholy Heat",
+     "img_small": "https://cards.scryfall.io/small/front/4/e/4e879386-b1f8-4f2a-9820-6e1291746f88.jpg?1782692299",
+     "mana_cost": "{R}"
+    }
+   ],
+   "side": [
+    {
+     "count": 1,
+     "name": "Blood Moon"
+    },
+    {
+     "count": 1,
+     "name": "Brotherhood's End"
+    },
+    {
+     "count": 4,
+     "name": "Consign to Memory"
+    },
+    {
+     "count": 2,
+     "name": "Dress Down"
+    },
+    {
+     "count": 1,
+     "name": "Flusterstorm"
+    },
+    {
+     "count": 1,
+     "name": "Harbinger of the Seas"
+    },
+    {
+     "count": 3,
+     "name": "Stern Scolding"
+    },
+    {
+     "count": 2,
+     "name": "Unlicensed Hearse"
+    }
+   ]
+  },
+  {
+   "event": "Modern Preliminary",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647523",
+   "player": "Jkutici",
+   "result": "0-2",
+   "players": 12,
+   "stars": 1,
+   "league": false,
+   "main": [
+    {
+     "count": 4,
+     "name": "Counterspell",
+     "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+     "mana_cost": "{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Dragon's Rage Channeler",
+     "img_small": "https://cards.scryfall.io/small/front/4/c/4ced112a-e775-4f97-97b3-74877e9dce12.jpg?1782704665",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 4,
+     "name": "Expressive Iteration",
+     "img_small": "https://cards.scryfall.io/small/front/9/6/96f866ec-a163-4095-b088-d93fa0b6f6f7.jpg?1782682511",
+     "mana_cost": "{U}{R}"
+    },
+    {
+     "count": 2,
+     "name": "Flooded Strand",
+     "img_small": "https://cards.scryfall.io/small/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Invert Polarity",
+     "img_small": "https://cards.scryfall.io/small/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225",
+     "mana_cost": "{U}{U}{R}"
+    },
+    {
+     "count": 3,
+     "name": "Island",
+     "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Lightning Bolt",
+     "img_small": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 4,
+     "name": "Mishra's Bauble",
+     "img_small": "https://cards.scryfall.io/small/front/4/5/45bbbf9b-8fee-4c32-a513-02dac6ac8a39.jpg?1782743854",
+     "mana_cost": "{0}"
+    },
+    {
+     "count": 2,
+     "name": "Misty Rainforest",
+     "img_small": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Murktide Regent",
+     "img_small": "https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+     "mana_cost": "{5}{U}{U}"
+    },
+    {
+     "count": 1,
+     "name": "Otawara, Soaring City",
+     "img_small": "https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Preordain",
+     "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 2,
+     "name": "Ragavan, Nimble Pilferer",
+     "img_small": "https://cards.scryfall.io/small/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1782704654",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 3,
+     "name": "Scalding Tarn",
+     "img_small": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+     "mana_cost": ""
+    },
+    {
+     "count": 1,
+     "name": "Sink into Stupor",
+     "img_small": "https://cards.scryfall.io/small/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170",
+     "mana_cost": "{1}{U}{U}"
+    },
+    {
+     "count": 2,
+     "name": "Spell Pierce",
+     "img_small": "https://cards.scryfall.io/small/front/8/d/8dd4374f-0301-4b2e-bc99-2cd19568cb3b.jpg?1782687910",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 4,
+     "name": "Spirebluff Canal",
+     "img_small": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+     "mana_cost": ""
+    },
+    {
+     "count": 3,
+     "name": "Steam Vents",
+     "img_small": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Tamiyo, Inquisitive Student",
+     "img_small": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 1,
+     "name": "Thundering Falls",
+     "img_small": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Unholy Heat",
+     "img_small": "https://cards.scryfall.io/small/front/4/e/4e879386-b1f8-4f2a-9820-6e1291746f88.jpg?1782692299",
+     "mana_cost": "{R}"
+    }
+   ],
+   "side": [
+    {
+     "count": 2,
+     "name": "Blood Moon"
+    },
+    {
+     "count": 2,
+     "name": "Consign to Memory"
+    },
+    {
+     "count": 2,
+     "name": "Dress Down"
+    },
+    {
+     "count": 2,
+     "name": "Force of Negation"
+    },
+    {
+     "count": 3,
+     "name": "Stern Scolding"
+    },
+    {
+     "count": 2,
+     "name": "Subtlety"
+    },
+    {
+     "count": 1,
+     "name": "Surgical Extraction"
+    },
+    {
+     "count": 1,
+     "name": "Unlicensed Hearse"
+    }
+   ]
+  },
+  {
+   "event": "Modern Preliminary",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647527",
+   "player": "ohN",
+   "result": "2-2",
+   "players": 20,
+   "stars": 1,
+   "league": false,
+   "main": [
+    {
+     "count": 1,
+     "name": "Bloodstained Mire",
+     "img_small": "https://cards.scryfall.io/small/front/5/7/579743fe-f71e-4cb2-8629-d6b02ed1591d.jpg?1782691202",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Counterspell",
+     "img_small": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884",
+     "mana_cost": "{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Flame of Anor",
+     "img_small": "https://cards.scryfall.io/small/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120",
+     "mana_cost": "{1}{U}{R}"
+    },
+    {
+     "count": 4,
+     "name": "Galvanic Discharge",
+     "img_small": "https://cards.scryfall.io/small/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 2,
+     "name": "Harbinger of the Seas",
+     "img_small": "https://cards.scryfall.io/small/front/0/0/00212714-a410-4cbc-bf1c-f90d7d77378c.jpg?1782691352",
+     "mana_cost": "{1}{U}{U}"
+    },
+    {
+     "count": 2,
+     "name": "Invert Polarity",
+     "img_small": "https://cards.scryfall.io/small/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225",
+     "mana_cost": "{U}{U}{R}"
+    },
+    {
+     "count": 4,
+     "name": "Island",
+     "img_small": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Lightning Bolt",
+     "img_small": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979",
+     "mana_cost": "{R}"
+    },
+    {
+     "count": 1,
+     "name": "L\u00f3rien Revealed",
+     "img_small": "https://cards.scryfall.io/small/front/0/c/0ce44270-a684-4489-9077-521456e6dfaa.jpg?1782697214",
+     "mana_cost": "{3}{U}{U}"
+    },
+    {
+     "count": 1,
+     "name": "Mountain",
+     "img_small": "https://cards.scryfall.io/small/front/4/2/426b0211-3d5d-4e53-bcf6-21823c655ffd.jpg?1782681935",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Murktide Regent",
+     "img_small": "https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708",
+     "mana_cost": "{5}{U}{U}"
+    },
+    {
+     "count": 1,
+     "name": "Otawara, Soaring City",
+     "img_small": "https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Preordain",
+     "img_small": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 2,
+     "name": "Prismatic Vista",
+     "img_small": "https://cards.scryfall.io/small/front/e/3/e37da81e-be12-45a2-9128-376f1ad7b3e8.jpg?1782708400",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Scalding Tarn",
+     "img_small": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583",
+     "mana_cost": ""
+    },
+    {
+     "count": 4,
+     "name": "Snapcaster Mage",
+     "img_small": "https://cards.scryfall.io/small/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477",
+     "mana_cost": "{1}{U}"
+    },
+    {
+     "count": 1,
+     "name": "Spell Snare",
+     "img_small": "https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 4,
+     "name": "Spirebluff Canal",
+     "img_small": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926",
+     "mana_cost": ""
+    },
+    {
+     "count": 2,
+     "name": "Steam Vents",
+     "img_small": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912",
+     "mana_cost": ""
+    },
+    {
+     "count": 1,
+     "name": "Stern Scolding",
+     "img_small": "https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 2,
+     "name": "Subtlety",
+     "img_small": "https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086",
+     "mana_cost": "{2}{U}{U}"
+    },
+    {
+     "count": 4,
+     "name": "Tamiyo, Inquisitive Student",
+     "img_small": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169",
+     "mana_cost": "{U}"
+    },
+    {
+     "count": 1,
+     "name": "Thundering Falls",
+     "img_small": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773",
+     "mana_cost": ""
+    },
+    {
+     "count": 1,
+     "name": "Tune the Narrative",
+     "img_small": "https://cards.scryfall.io/small/front/4/0/40b13321-98f1-4e8c-802d-65498e43ec24.jpg?1782691341",
+     "mana_cost": "{U}"
+    }
+   ],
+   "side": [
+    {
+     "count": 1,
+     "name": "Brazen Borrower"
+    },
+    {
+     "count": 2,
+     "name": "Brotherhood's End"
+    },
+    {
+     "count": 3,
+     "name": "Consign to Memory"
+    },
+    {
+     "count": 2,
+     "name": "Dress Down"
+    },
+    {
+     "count": 1,
+     "name": "Flusterstorm"
+    },
+    {
+     "count": 1,
+     "name": "Force of Negation"
+    },
+    {
+     "count": 1,
+     "name": "Harbinger of the Seas"
+    },
+    {
+     "count": 2,
+     "name": "Tormod's Crypt"
+    },
+    {
+     "count": 2,
+     "name": "Unlicensed Hearse"
+    }
+   ]
+  },
+  {
+   "event": "Modern Preliminary",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647527",
+   "player": "ara231",
+   "result": "0-3",
+   "players": 20,
+   "stars": 1,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Preliminary",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647531",
+   "player": "416FrowningTable",
+   "result": "3-1",
+   "players": 42,
+   "stars": 2,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Preliminary",
+   "date": "2024-06-19",
+   "uri": "https://www.mtgo.com/decklist/modern-preliminary-2024-06-1912647531",
+   "player": "Nanovo",
+   "result": "",
+   "players": 42,
+   "stars": 2,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "CrazyMorango",
+   "result": "5th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "Joryago",
+   "result": "23th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "Alan07",
+   "result": "30th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "Ale_Mtg",
+   "result": "33th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  },
+  {
+   "event": "Modern Challenge 32",
+   "date": "2024-06-18",
+   "uri": "https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1812647520",
+   "player": "O_danielakos",
+   "result": "35th Place",
+   "players": 66,
+   "stars": 3,
+   "league": false,
+   "n_main": 60
+  }
+ ]
+}

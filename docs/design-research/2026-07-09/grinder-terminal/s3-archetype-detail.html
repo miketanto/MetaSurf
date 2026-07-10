@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS-03 // IZZET MURKTIDE — MetaSurf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!--
+  REFINEMENT PASS 2026-07-09 — legibility-first revision of 2026-07-08 s3.
+  Rule of the revision: BITMAP FOR CHROME, VECTOR FOR DATA.
+    - Departure Mono (bitmap) appears ONLY on headings, nav, badges, buttons,
+      section labels — never on a number the user must read.
+    - Every data value (hero stats, chart ink, tables, log stream) is IBM Plex
+      Mono with tabular-nums, antialiased.
+    - The 30d chart is split into two stacked panels (share / winrate) with a
+      shared x-axis — no dual-axis overlay. Terminal flavor lives in the frame
+      (grid, labels, crosshair, dump-to-table); the data marks are clean
+      antialiased vector lines.
+
+  PRODUCTION NOTE: self-host DepartureMono-Regular.woff2 under /assets/fonts/
+  and point the @font-face src there. The jsdelivr URL exists only so this
+  static mockup renders standalone.
+-->
+<style>
+  @font-face {
+    font-family: 'Departure Mono';
+    src: url('https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@1.500/public/assets/DepartureMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #0a0a0a;
+    --paper: #f2f0e6;
+    --amber: #ffb000;
+    --amber-dim: #8a6200;
+    --amber-ghost: rgba(255, 176, 0, 0.07);
+    --win: #33ff66;
+    --win-dim: #1a8038;
+    --loss: #ff665e;
+    --mut: #6f6d64;
+    --hairline: #35332c;
+    --hairline-soft: #1e1d19;
+    --lh: 1.2rem;           /* 19.2px line grid */
+    --display: 'Departure Mono', monospace;
+    --body: 'IBM Plex Mono', 'Courier New', monospace;
+    --glow-amber: 0 0 10px rgba(255, 176, 0, 0.35);
+    --bayer: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='4'%20height='4'%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='2'%20y='0'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='1'%20y='1'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='3'%20y='1'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='0'%20y='2'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='2'%20y='2'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='1'%20y='3'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='3'%20y='3'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3C/svg%3E");
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    background: radial-gradient(ellipse 120% 60% at 50% -10%, #101008, var(--bg) 70%) fixed var(--bg);
+  }
+
+  body {
+    background: transparent;
+    color: var(--paper);
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: var(--lh);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 2ch calc(var(--lh) * 2);
+  }
+
+  /* Full-viewport static scanlines: atmosphere is free where it never touches
+     data contrast. Static, so it survives prefers-reduced-motion untouched. */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    z-index: 97;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(242, 240, 230, 0.032) 0px, rgba(242, 240, 230, 0.032) 1px,
+      transparent 1px, transparent 3px
+    );
+  }
+  /* Slow CRT refresh band — motion, therefore gated. */
+  @media (prefers-reduced-motion: no-preference) {
+    body::after {
+      content: "";
+      position: fixed; left: 0; right: 0; top: -30vh;
+      height: 26vh;
+      z-index: 97;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 208, 96, 0.022) 45%,
+        rgba(255, 208, 96, 0.03) 50%,
+        rgba(255, 208, 96, 0.022) 55%,
+        transparent
+      );
+      animation: sweep 11s linear infinite;
+    }
+    @keyframes sweep { to { transform: translateY(160vh); } }
+  }
+
+  /* Bitmap type = chrome only. Never data. */
+  .disp {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+  }
+
+  .wrap { max-width: 86ch; margin: 0 auto; }
+
+  a { color: var(--paper); text-decoration: none; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .up   { color: var(--win); }
+  .dn   { color: var(--loss); }
+  .amb  { color: var(--amber); }
+  .dim  { color: var(--amber-dim); }
+  .mut  { color: var(--mut); }
+  /* CI qualifies the headline number — upright and readable, not a whisper */
+  .ci   { color: #c9c7bb; }
+
+  /* ============ header chrome ============ */
+
+  header {
+    position: relative;
+    padding-top: var(--lh);
+    border-bottom: 1px solid var(--paper);
+  }
+
+  nav { display: flex; flex-wrap: wrap; gap: 1ch; margin-bottom: var(--lh); }
+  nav a {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 0.5ch;
+  }
+  nav a.active { background: var(--amber); color: var(--bg); box-shadow: var(--glow-amber); }
+  nav a:hover:not(.active) { color: var(--amber); }
+  nav .spacer { flex: 1; }
+  nav .acct { color: var(--amber-dim); }
+
+  .faceplate {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+    padding-bottom: calc(var(--lh) / 4);
+  }
+  .faceplate b { font-weight: 400; color: var(--paper); }
+
+  .rule {
+    color: #4a4840;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    line-height: var(--lh);
+  }
+
+  /* ============ command bar ============ */
+
+  .cmdbar {
+    margin-top: calc(var(--lh) / 2);
+    color: var(--mut);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .cmdbar .prompt { color: var(--amber-dim); }
+  .cmdbar .cmd { color: var(--paper); }
+  .cursor {
+    display: inline-block;
+    width: 1ch;
+    background: var(--amber);
+    color: var(--amber);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor { animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { 50% { background: transparent; color: transparent; } }
+  }
+
+  /* ============ hero ============ */
+
+  h1 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: calc(var(--lh) * 2);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-shadow: var(--glow-amber);
+    margin-top: calc(var(--lh) / 2);
+  }
+
+  .herostats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border: 1px solid var(--hairline);
+    margin: var(--lh) 0;
+  }
+  @media (min-width: 700px) { .herostats { grid-template-columns: repeat(4, 1fr); } }
+  .herostats > div {
+    padding: calc(var(--lh)/2) 1.5ch;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .herostats > div:nth-child(2n) { border-right: 0; }
+  @media (min-width: 700px) {
+    .herostats > div { border-bottom: 0; }
+    .herostats > div:nth-child(2n) { border-right: 1px solid var(--hairline); }
+    .herostats > div:last-child { border-right: 0; }
+  }
+  .hs-label {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    letter-spacing: 0.06em;
+  }
+  /* Headline numbers: legible mono, NOT bitmap. This is the legibility fix. */
+  .hs-val {
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    line-height: calc(var(--lh) * 1.75);
+    font-variant-numeric: tabular-nums;
+  }
+  .hs-sub { font-size: 13px; }
+
+  /* ============ sections ============ */
+
+  section { margin-top: var(--lh); }
+  .sect-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2ch;
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    margin-bottom: calc(var(--lh)/2);
+  }
+  .sect-head h2 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    text-shadow: var(--glow-amber);
+  }
+  .sect-head h2::before { content: "\250C\2500 "; color: #4a4840; text-shadow: none; }
+  .sect-head .meta { color: var(--mut); font-size: 13px; margin-left: auto; white-space: nowrap; }
+
+  .termline { color: var(--mut); margin-bottom: calc(var(--lh)/2); }
+  .termline::before { content: "> "; color: var(--amber-dim); }
+
+  /* ============ chart ============ */
+
+  .chartbox { border: 1px solid var(--hairline); padding: calc(var(--lh)/2) 1ch; position: relative; }
+  /* JS sizes the viewBox to rendered width so 1 SVG unit == 1 CSS px: text
+     renders at declared size everywhere. crispEdges is applied per-element to
+     grid/frame only — DATA MARKS STAY ANTIALIASED so thin lines read cleanly. */
+  .chartbox svg { display: block; width: 100%; height: 236px; }
+  .chartbox .hitarea { cursor: crosshair; }
+
+  .tip {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    background: #0d0d0b;
+    border: 1px solid var(--amber-dim);
+    padding: calc(var(--lh)/4) 1ch;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 0 12px rgba(0,0,0,0.7);
+  }
+  .tip .t-date { color: var(--amber); }
+  .tip .t-warn { color: var(--amber); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 2ch; padding-top: calc(var(--lh)/2); font-size: 13px; }
+  .legend .key { color: #9a988e; }
+  .legend .swatch { display: inline-block; width: 2ch; text-align: center; }
+
+  /* dump-to-table: the terminal-native accessible fallback */
+  details.dump { margin-top: calc(var(--lh)/2); }
+  details.dump summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--mut);
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    padding: 2px 0.5ch;
+  }
+  details.dump summary::-webkit-details-marker { display: none; }
+  details.dump summary:hover { color: var(--amber); }
+  details.dump[open] summary { color: var(--amber); }
+  details.dump .dumpwrap { overflow-x: auto; }
+  table.dumptab { border-collapse: collapse; margin-top: calc(var(--lh)/2); min-width: 44ch; }
+  .dumptab th, .dumptab td { text-align: right; padding: 1px 2ch 1px 0; font-size: 12px; }
+  .dumptab th {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .dumptab td:first-child, .dumptab th:first-child { text-align: left; }
+  .dumptab td { color: #c9c7bb; border-bottom: 1px solid var(--hairline-soft); }
+  .dumptab td.amb { color: var(--amber); }
+
+  /* ============ recent lists as a log stream ============ */
+
+  .stream { list-style: none; }
+  .entry {
+    position: relative;
+    border-left: 2px solid var(--hairline);
+    padding: calc(var(--lh)/2) 0 calc(var(--lh)/2) 2ch;
+    transition: border-color 120ms linear, background-color 120ms linear;
+  }
+  .entry + .entry { margin-top: calc(var(--lh)/2); }
+  .entry:hover, .entry:focus-within {
+    border-left-color: var(--amber);
+    background: var(--amber-ghost);
+  }
+  .entry::before {
+    content: ">";
+    position: absolute;
+    left: 0.5ch; top: calc(var(--lh)/2);
+    color: var(--amber);
+    opacity: 0;
+    transition: opacity 120ms linear;
+  }
+  .entry:hover::before, .entry:focus-within::before { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .entry, .entry::before { transition: none; }
+  }
+  .entry .stamp { color: var(--mut); }
+  .entry .stamp .t { color: var(--amber-dim); }
+  .entry .ev { color: var(--paper); font-weight: 500; }
+  .entry .finish {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--bg);
+    background: var(--amber);
+    padding: 1px 0.5ch;
+    margin-left: 1ch;
+    white-space: nowrap;
+  }
+  .entry .finish.gold { background: var(--win); }
+  .entry .keys { list-style: none; padding-top: calc(var(--lh)/4); }
+  .entry .keys li { display: flex; }
+  .entry .keys .qty { width: 3ch; color: var(--amber-dim); flex: none; }
+  .entry .keys .more { color: var(--mut); }
+  .entry .view { display: inline-block; margin-top: calc(var(--lh)/4); }
+  .entry .view a { color: #c9c7bb; }
+  .entry .view a:hover, .entry .view a:focus-visible { color: var(--amber); }
+
+  /* ============ drift table + freemium scramble ============ */
+
+  /* Free and locked halves are two tables (the locked one sits under the
+     dither overlay); identical colgroups keep the column edges flush. */
+  table.drift { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .drift col.c-card { width: 44%; }
+  .drift col.c-num  { width: 14%; }
+  .drift th, .drift td { text-align: left; padding: calc(var(--lh)/4) 1ch calc(var(--lh)/4) 0; }
+  .drift td:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drift th {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber-dim);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .drift td { border-bottom: 1px solid var(--hairline-soft); font-size: 13px; }
+  .num { text-align: right; }
+  .drift th.num { text-align: right; }
+  .drift tbody tr { transition: background-color 120ms linear; }
+  .drift tbody tr:hover { background: var(--amber-ghost); }
+  @media (prefers-reduced-motion: reduce) { .drift tbody tr { transition: none; } }
+
+  .lockwrap { position: relative; }
+  .scramble {
+    filter: blur(3px) contrast(2);
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+  }
+  .dither {
+    position: absolute; inset: 0;
+    background-image: var(--bayer);
+    background-size: 4px 4px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .decode {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--amber);
+    color: var(--bg);
+    border: 0;
+    padding: calc(var(--lh)/4) 2ch;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: var(--glow-amber);
+  }
+  .decode:hover { background: var(--paper); }
+  .decode:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+    background: var(--paper);
+  }
+  .locknote { color: var(--mut); padding-top: calc(var(--lh)/2); }
+  .locknote .amb { color: var(--amber-dim); }
+
+  /* ============ footer / live clock ============ */
+
+  footer {
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    display: flex; flex-wrap: wrap; gap: 2ch;
+    color: var(--mut);
+  }
+  .foot-rule { margin-top: calc(var(--lh) * 2); }
+
+  /* ============ BIOS boot overlay ============ */
+
+  #boot {
+    position: fixed; inset: 0; z-index: 99;
+    background: var(--bg);
+    color: var(--paper);
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: var(--lh);
+    padding: calc(var(--lh) * 2) 3ch;
+    cursor: pointer;
+  }
+  #boot .b-amber { color: var(--amber); }
+  #boot .b-dim { color: var(--mut); }
+  #boot .skip {
+    position: absolute; bottom: var(--lh); right: 3ch;
+    color: var(--mut);
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  #boot[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<div id="boot" hidden aria-hidden="true">
+  <pre id="bootlines" style="font-family:inherit;white-space:pre-wrap;"></pre>
+  <span class="skip" id="skiplabel">[ press any key to skip ]</span>
+</div>
+
+<div class="wrap">
+
+<header>
+  <nav aria-label="Primary">
+    <a href="#">[meta]</a>
+    <a href="#">[matrix]</a>
+    <a href="#" class="active" aria-current="page">[decks]</a>
+    <a href="#">[alerts]</a>
+    <span class="spacer"></span>
+    <a href="#" class="acct">[free tier]</a>
+  </nav>
+  <div class="faceplate">MS-03 // ARCHETYPE DETAIL &nbsp;·&nbsp; FORMAT: <b>MODERN</b> &nbsp;·&nbsp; WINDOW: <b>30D</b> &nbsp;·&nbsp; N=<b id="fp-decks">—</b> DECKS / <b id="fp-matches">—</b> MATCHES</div>
+  <div class="rule" aria-hidden="true">================================================================================================================</div>
+</header>
+
+<p class="cmdbar" aria-label="Breadcrumb: meta, modern, izzet-murktide"><span class="prompt">msf:~/modern$</span> <span class="cmd" id="cmdtext"></span><span class="cursor" aria-hidden="true">&#9646;</span></p>
+
+<h1>Izzet Murktide</h1>
+
+<div class="herostats">
+  <div>
+    <div class="hs-label disp">Meta share</div>
+    <div class="hs-val">9.8%</div>
+    <div class="hs-sub"><span class="up">&#9650;1.2</span> <span class="mut">vs prior 30d</span></div>
+  </div>
+  <div>
+    <div class="hs-label disp">Winrate</div>
+    <div class="hs-val">52.4%</div>
+    <div class="hs-sub"><span class="ci">&plusmn;2.1 &middot; 95% CI</span> <span class="mut" id="hs-n">n=—</span></div>
+  </div>
+  <div>
+    <div class="hs-label disp">7d trend</div>
+    <div class="hs-val" id="spark" aria-hidden="true"></div>
+    <span class="sr-only" id="spark-sr"></span>
+    <div class="hs-sub"><span class="mut">share, daily</span></div>
+  </div>
+  <div>
+    <div class="hs-label disp">Tier</div>
+    <div class="hs-val">T1</div>
+    <div class="hs-sub"><span class="mut">rank #2 of 41</span></div>
+  </div>
+</div>
+
+<section aria-labelledby="h-chart">
+  <div class="sect-head">
+    <h2 id="h-chart">30-day telemetry</h2>
+    <span class="meta">2026-06-08 &rarr; 2026-07-07</span>
+  </div>
+  <p class="termline" id="chart-termline">aggregating 30d window...</p>
+  <div class="chartbox">
+    <svg id="chart" role="img" aria-label="30-day telemetry, two stacked panels sharing a date axis. Top panel: meta share, 0 to 12 percent, rising from 7.9 to 10.4 percent, amber line with shaded area. Bottom panel: winrate, 44 to 60 percent, holding between 50.1 and 53.9 percent, green line. Days with fewer than 30 matches are marked with amber dots labeled n under 30. Full data available in the table below the chart.">
+      <g id="chart-g"></g>
+    </svg>
+    <div class="tip" id="tip" aria-hidden="true"></div>
+  </div>
+  <div class="legend">
+    <span class="key"><span class="swatch amb">&#9644;</span> meta share % <span class="mut">(top panel)</span></span>
+    <span class="key"><span class="swatch up">&#9644;</span> winrate % <span class="mut">(bottom panel)</span></span>
+    <span class="key"><span class="swatch amb">&#9679;</span> n&lt;30 matches that day</span>
+  </div>
+  <details class="dump">
+    <summary>[dump 30d table &darr;]</summary>
+    <div class="dumpwrap">
+      <table class="dumptab" id="dumptab">
+        <thead><tr><th scope="col">date</th><th scope="col">share%</th><th scope="col">wr%</th><th scope="col">n</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<section aria-labelledby="h-decks">
+  <div class="sect-head">
+    <h2 id="h-decks">Result stream</h2>
+    <span class="meta">3 of 47 in window</span>
+  </div>
+  <p class="termline">tail -n 3 results.log --archetype izzet-murktide</p>
+
+  <ol class="stream">
+
+    <li class="entry">
+      <div class="stamp"><span class="t">[2026-07-05 17:03]</span> mtgo &middot; <span class="ev">Modern Challenge 64</span><span class="finish disp">2nd &middot; 6&ndash;1</span></div>
+      <div class="mut">pilot: sodek_</div>
+      <ul class="keys" aria-label="Key cards">
+        <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+        <li><span class="qty">4</span>Dragon's Rage Channeler</li>
+        <li><span class="qty">2</span>Murktide Regent</li>
+        <li><span class="qty">4</span>Counterspell</li>
+        <li class="more"><span class="qty"></span>+ 61 more &middot; 15 SB</li>
+      </ul>
+      <span class="view"><a href="#">[view 75 &rarr;]</a></span>
+    </li>
+
+    <li class="entry">
+      <div class="stamp"><span class="t">[2026-07-04 21:41]</span> mtgo &middot; <span class="ev">Modern Challenge 32</span><span class="finish disp">Top 8 &middot; 5&ndash;2</span></div>
+      <div class="mut">pilot: grinderB0T</div>
+      <ul class="keys" aria-label="Key cards">
+        <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+        <li><span class="qty">4</span>Expressive Iteration</li>
+        <li><span class="qty">3</span>Murktide Regent</li>
+        <li><span class="qty">3</span>Spell Pierce</li>
+        <li class="more"><span class="qty"></span>+ 61 more &middot; 15 SB</li>
+      </ul>
+      <span class="view"><a href="#">[view 75 &rarr;]</a></span>
+    </li>
+
+    <li class="entry">
+      <div class="stamp"><span class="t">[2026-07-02 19:12]</span> mtgo &middot; <span class="ev">Modern Preliminary</span><span class="finish disp gold">1st &middot; 7&ndash;0</span></div>
+      <div class="mut">pilot: kanister__</div>
+      <ul class="keys" aria-label="Key cards">
+        <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+        <li><span class="qty">4</span>Unholy Heat</li>
+        <li><span class="qty">4</span>Mishra's Bauble</li>
+        <li><span class="qty">2</span>Murktide Regent</li>
+        <li class="more"><span class="qty"></span>+ 61 more &middot; 15 SB</li>
+      </ul>
+      <span class="view"><a href="#">[view 75 &rarr;]</a></span>
+    </li>
+
+  </ol>
+</section>
+
+<section aria-labelledby="h-drift">
+  <div class="sect-head">
+    <h2 id="h-drift">Card-choice drift <span class="dim">// premium</span></h2>
+    <span class="meta">avg copies, 14d vs prior 14d</span>
+  </div>
+  <p class="termline">diffing 47 lists vs 52 prior... 9 cards moved &ge;0.3 copies</p>
+
+  <table class="drift">
+    <colgroup>
+      <col class="c-card"><col class="c-num"><col class="c-num"><col class="c-num"><col class="c-num">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Card</th>
+        <th class="num">Now</th>
+        <th class="num">Prev</th>
+        <th class="num">&Delta;</th>
+        <th class="num">Lists</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Spell Pierce</td>
+        <td class="num">2.6</td>
+        <td class="num">1.4</td>
+        <td class="num up">&#9650;1.2</td>
+        <td class="num amb">n=28</td>
+      </tr>
+      <tr>
+        <td>Murktide Regent</td>
+        <td class="num">2.9</td>
+        <td class="num">3.6</td>
+        <td class="num dn">&#9660;0.7</td>
+        <td class="num">44</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="lockwrap">
+    <div class="scramble" aria-hidden="true">
+      <table class="drift">
+        <colgroup>
+          <col class="c-card"><col class="c-num"><col class="c-num"><col class="c-num"><col class="c-num">
+        </colgroup>
+        <tbody>
+          <tr>
+            <td>Subtlety</td>
+            <td class="num">1.8</td>
+            <td class="num">1.1</td>
+            <td class="num up">&#9650;0.7</td>
+            <td class="num">39</td>
+          </tr>
+          <tr>
+            <td>Unholy Heat</td>
+            <td class="num">3.4</td>
+            <td class="num">4.0</td>
+            <td class="num dn">&#9660;0.6</td>
+            <td class="num">47</td>
+          </tr>
+          <tr>
+            <td>Brotherhood's End</td>
+            <td class="num">1.9</td>
+            <td class="num">1.3</td>
+            <td class="num up">&#9650;0.6</td>
+            <td class="num">31</td>
+          </tr>
+          <tr>
+            <td>Blood Moon</td>
+            <td class="num">1.2</td>
+            <td class="num">1.7</td>
+            <td class="num dn">&#9660;0.5</td>
+            <td class="num">26</td>
+          </tr>
+          <tr>
+            <td>Magmatic Sinkhole</td>
+            <td class="num">0.8</td>
+            <td class="num">0.4</td>
+            <td class="num up">&#9650;0.4</td>
+            <td class="num">18</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dither" aria-hidden="true"></div>
+    <button class="decode" type="button" onclick="alert('Mockup: this would open the premium upgrade flow.')">Decode 7 more movers &rarr;</button>
+  </div>
+  <p class="locknote"><span class="amb">// locked:</span> full drift table, per-card winrate deltas, and 90d history are premium depth. The screen itself is never walled.</p>
+</section>
+
+<div class="rule foot-rule" aria-hidden="true">================================================================================================================</div>
+<footer>
+  <span id="ingestline">LAST INGEST --:-- UTC</span>
+  <span><span class="cursor" aria-hidden="true">&#9646;</span> LIVE</span>
+  <span style="margin-left:auto">metasurf v0.1 &middot; data: MTGO scrape, 1 req/s</span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- single source of truth for every number on this screen ----------
+     Visible glyphs, sr-only labels, the faceplate, the boot readout, the dump
+     table, and the tooltip all derive from DATA, so no rendered number can
+     drift from any other rendering of it. */
+
+  var DATA = {
+    decksIndexed: 2341,
+    archetypeDecks: 412,
+    windowStart: '2026-06-08',
+    lastIngestUtc: '03:12',
+    /* daily meta share %, oldest -> newest, 30 days */
+    share: [7.9, 8.1, 8.0, 8.4, 8.2, 8.6, 8.9, 8.7, 9.1, 8.8,
+            9.0, 9.3, 9.1, 9.4, 9.2, 9.0, 9.5, 9.7, 9.4, 9.8,
+            9.6, 10.0, 9.9, 10.2, 9.8, 10.1, 10.4, 10.2, 10.3, 10.4],
+    /* daily winrate %, same window */
+    wr:    [50.1, 51.3, 50.6, 52.0, 51.1, 50.4, 52.6, 51.8, 52.2, 53.0,
+            51.5, 52.4, 53.9, 52.8, 51.9, 50.9, 52.1, 53.2, 52.5, 51.6,
+            52.9, 53.4, 52.0, 52.7, 53.1, 52.3, 51.8, 52.6, 53.0, 52.4],
+    /* matches recorded per day; thin days (n<30) are DERIVED, never hardcoded */
+    n:     [78, 82, 75, 80, 22, 84, 77, 81, 79, 83,
+            76, 18, 85, 80, 78, 82, 74, 79, 81, 77,
+            83, 80, 76, 84, 79, 26, 82, 78, 81, 74]
+  };
+
+  var THIN_LIMIT = 30;
+  var totalMatches = DATA.n.reduce(function (a, b) { return a + b; }, 0);
+
+  function dateOf(i) {
+    var d = new Date(DATA.windowStart + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + i);
+    var m = String(d.getUTCMonth() + 1); if (m.length < 2) m = '0' + m;
+    var dd = String(d.getUTCDate()); if (dd.length < 2) dd = '0' + dd;
+    return m + '-' + dd;
+  }
+
+  /* derived numbers pushed into static chrome */
+  document.getElementById('fp-decks').textContent = DATA.archetypeDecks;
+  document.getElementById('fp-matches').textContent = totalMatches.toLocaleString('en-US');
+  document.getElementById('hs-n').textContent = 'n=' + totalMatches.toLocaleString('en-US');
+  document.getElementById('chart-termline').textContent =
+    'aggregating 30d window... n=' + DATA.archetypeDecks + ' decks · ' +
+    totalMatches.toLocaleString('en-US') + ' matches · ok';
+  document.getElementById('ingestline').textContent =
+    'LAST INGEST ' + DATA.lastIngestUtc + ' UTC';
+
+  /* ---------- command bar: typed on load, instant under reduced motion ---------- */
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CMD = 'view izzet-murktide --window 30d';
+  var cmdEl = document.getElementById('cmdtext');
+  if (reduced) {
+    cmdEl.textContent = CMD;
+  } else {
+    var ci = 0;
+    var ctimer = setInterval(function () {
+      ci++;
+      cmdEl.textContent = CMD.slice(0, ci);
+      if (ci >= CMD.length) clearInterval(ctimer);
+    }, 18);
+  }
+
+  /* ---------- 7d sparkline: glyphs + sr-only label from the same slice ----------
+     Block-element glyphs in the body mono — vector outlines, not bitmap. */
+
+  (function renderSpark() {
+    var last7 = DATA.share.slice(-7);
+    var glyphs = '▁▂▃▄▅▆▇█';
+    var min = last7[0], max = last7[0], i;
+    for (i = 1; i < last7.length; i++) {
+      if (last7[i] < min) min = last7[i];
+      if (last7[i] > max) max = last7[i];
+    }
+    var span = (max - min) || 1;
+    var s = '';
+    for (i = 0; i < last7.length; i++) {
+      s += glyphs.charAt(Math.min(7, Math.round((last7[i] - min) / span * 7)));
+    }
+    var net = last7[last7.length - 1] - last7[0];
+    var sparkEl = document.getElementById('spark');
+    sparkEl.textContent = s;
+    sparkEl.classList.add(net > 0 ? 'up' : net < 0 ? 'dn' : 'mut');
+    document.getElementById('spark-sr').textContent =
+      '7-day meta share trend: ' +
+      (net > 0 ? 'rising' : net < 0 ? 'falling' : 'flat') +
+      ' from ' + last7[0].toFixed(1) + '% to ' + last7[last7.length - 1].toFixed(1) + '%';
+  })();
+
+  /* ---------- 30d chart: two stacked panels, one shared x-axis ----------
+     LEGIBILITY CONTRACT: the frame (grid, ticks, labels) may be dashed,
+     pixel-snapped, terminal-flavored. The data marks are clean antialiased
+     2px polylines with a soft phosphor under-glow. No dither, no stepping,
+     no bitmap type anywhere in the plot. One y-scale per panel — the old
+     dual-axis overlay is gone. */
+
+  var svg = document.getElementById('chart');
+  var g = document.getElementById('chart-g');
+  var tip = document.getElementById('tip');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  var SHARE_MIN = 0, SHARE_MAX = 12;
+  var WR_MIN = 44, WR_MAX = 60;
+
+  var geo = null;   /* recomputed each draw; used by the crosshair */
+
+  function drawChart() {
+    while (g.firstChild) g.removeChild(g.firstChild);
+
+    var W = Math.max(280, Math.round(svg.getBoundingClientRect().width));
+    var H = 236;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+    var padL = 38, padR = 10;
+    var p1 = { top: 16, h: 64 };                       /* share panel */
+    var p2 = { top: p1.top + p1.h + 34, h: 92 };       /* winrate panel */
+    var axisY = p2.top + p2.h;                          /* shared x baseline */
+    var iw = W - padL - padR;
+    var n = DATA.share.length;
+    var stepX = iw / (n - 1);
+
+    function xAt(i) { return padL + i * stepX; }
+    function yShare(v) { return p1.top + p1.h - ((v - SHARE_MIN) / (SHARE_MAX - SHARE_MIN)) * p1.h; }
+    function yWr(v) { return p2.top + p2.h - ((v - WR_MIN) / (WR_MAX - WR_MIN)) * p2.h; }
+
+    geo = { padL: padL, padR: padR, W: W, stepX: stepX, n: n,
+            xAt: xAt, yShare: yShare, yWr: yWr, p1: p1, p2: p2, axisY: axisY };
+
+    function el(name, attrs, text) {
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text) e.textContent = text;
+      g.appendChild(e);
+      return e;
+    }
+    function label(x, y, anchor, fill, text, size) {
+      el('text', { x: x, y: y, 'text-anchor': anchor, fill: fill,
+                   'font-family': 'IBM Plex Mono, monospace',
+                   'font-size': size || '10' }, text);
+    }
+    function polyline(vals, yFn) {
+      var d = '';
+      for (var i = 0; i < vals.length; i++) {
+        d += (i === 0 ? 'M' : 'L') + xAt(i).toFixed(1) + ' ' + yFn(vals[i]).toFixed(1);
+      }
+      return d;
+    }
+
+    /* --- frame: pixel-snapped, dashed, recessive --- */
+    function grid(y, strong) {
+      el('line', { x1: padL, y1: Math.round(y) + 0.5, x2: W - padR, y2: Math.round(y) + 0.5,
+                   stroke: strong ? '#4a4840' : '#26251f', 'stroke-width': 1,
+                   'shape-rendering': 'crispEdges',
+                   'stroke-dasharray': strong ? '' : '2 3' });
+    }
+
+    /* share panel: title, grid, y labels */
+    label(padL, p1.top - 5, 'start', '#8a6200', 'META SHARE %', '9');
+    [0, 6, 12].forEach(function (v) {
+      grid(yShare(v), v === 0);
+      label(padL - 5, yShare(v) + 3, 'end', '#6f6d64', String(v));
+    });
+
+    /* winrate panel: title, grid (52 = breakeven reference, solid), y labels */
+    label(padL, p2.top - 5, 'start', '#1a8038', 'WINRATE %', '9');
+    [44, 48, 52, 56, 60].forEach(function (v) {
+      grid(yWr(v), v === 52);
+      label(padL - 5, yWr(v) + 3, 'end', '#6f6d64', String(v));
+    });
+
+    /* --- data marks: antialiased vector ink only --- */
+
+    /* share: soft area + amber line with phosphor under-glow */
+    var areaD = polyline(DATA.share, yShare) +
+                'L' + xAt(n - 1).toFixed(1) + ' ' + yShare(0).toFixed(1) +
+                'L' + xAt(0).toFixed(1) + ' ' + yShare(0).toFixed(1) + 'Z';
+    el('path', { d: areaD, fill: 'rgba(255,176,0,0.10)', stroke: 'none' });
+    el('path', { d: polyline(DATA.share, yShare), fill: 'none',
+                 stroke: 'rgba(255,176,0,0.28)', 'stroke-width': 5,
+                 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    el('path', { d: polyline(DATA.share, yShare), fill: 'none',
+                 stroke: '#ffb000', 'stroke-width': 2,
+                 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+
+    /* winrate: green line with phosphor under-glow */
+    el('path', { d: polyline(DATA.wr, yWr), fill: 'none',
+                 stroke: 'rgba(51,255,102,0.22)', 'stroke-width': 5,
+                 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    el('path', { d: polyline(DATA.wr, yWr), fill: 'none',
+                 stroke: '#33ff66', 'stroke-width': 2,
+                 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+
+    /* thin-sample days: amber ring + text tag on the winrate line — never
+       color alone. Derived from DATA.n, not a hardcoded index list. */
+    DATA.n.forEach(function (m, idx) {
+      if (m >= THIN_LIMIT) return;
+      var mx = xAt(idx), my = yWr(DATA.wr[idx]);
+      el('circle', { cx: mx, cy: my, r: 3.5, fill: '#0a0a0a',
+                     stroke: '#ffb000', 'stroke-width': 2 });
+      label(Math.min(Math.max(mx, padL + 12), W - padR - 12), my - 9, 'middle', '#ffb000', 'n<30', '9');
+    });
+
+    /* shared x axis */
+    el('line', { x1: padL, y1: Math.round(axisY) + 0.5, x2: W - padR, y2: Math.round(axisY) + 0.5,
+                 stroke: '#4a4840', 'stroke-width': 1, 'shape-rendering': 'crispEdges' });
+    [[0, 'start'], [10, 'start'], [20, 'start'], [n - 1, 'end']].forEach(function (t) {
+      var tx = t[1] === 'end' ? W - padR : xAt(t[0]);
+      el('line', { x1: Math.round(tx) + 0.5, y1: axisY, x2: Math.round(tx) + 0.5, y2: axisY + 3,
+                   stroke: '#4a4840', 'stroke-width': 1, 'shape-rendering': 'crispEdges' });
+      label(tx + (t[1] === 'end' ? 0 : 2), axisY + 14, t[1], '#6f6d64', dateOf(t[0]));
+    });
+
+    /* crosshair group (populated on hover) + transparent hit area */
+    el('g', { id: 'xhair' });
+    var hit = el('rect', { x: padL, y: p1.top - 6, width: iw, height: axisY - p1.top + 6,
+                           fill: 'transparent', 'class': 'hitarea' });
+    hit.addEventListener('pointermove', onHover);
+    hit.addEventListener('pointerleave', hideHover);
+  }
+
+  /* ---------- crosshair + tooltip: terminal readout, values from DATA ---------- */
+
+  function onHover(evt) {
+    if (!geo) return;
+    var rect = svg.getBoundingClientRect();
+    var px = evt.clientX - rect.left;
+    var idx = Math.round((px - geo.padL) / geo.stepX);
+    if (idx < 0) idx = 0;
+    if (idx > geo.n - 1) idx = geo.n - 1;
+
+    var xh = document.getElementById('xhair');
+    while (xh.firstChild) xh.removeChild(xh.firstChild);
+
+    var x = geo.xAt(idx);
+    var mk = function (name, attrs) {
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      xh.appendChild(e);
+    };
+    mk('line', { x1: Math.round(x) + 0.5, y1: geo.p1.top, x2: Math.round(x) + 0.5, y2: geo.axisY,
+                 stroke: '#f2f0e6', 'stroke-width': 1, 'stroke-dasharray': '2 3',
+                 'shape-rendering': 'crispEdges', opacity: 0.55 });
+    mk('circle', { cx: x, cy: geo.yShare(DATA.share[idx]), r: 3, fill: '#ffb000' });
+    mk('circle', { cx: x, cy: geo.yWr(DATA.wr[idx]), r: 3, fill: '#33ff66' });
+
+    var thin = DATA.n[idx] < THIN_LIMIT;
+    tip.innerHTML =
+      '<span class="t-date">' + dateOf(idx) + '</span>' +
+      ' │ share <b>' + DATA.share[idx].toFixed(1) + '%</b>' +
+      ' │ wr <b>' + DATA.wr[idx].toFixed(1) + '%</b>' +
+      ' │ n=' + DATA.n[idx] +
+      (thin ? ' <span class="t-warn">⚠ thin</span>' : '');
+    tip.style.display = 'block';
+
+    var box = tip.getBoundingClientRect();
+    var host = svg.parentNode.getBoundingClientRect();
+    var lx = evt.clientX - host.left + 12;
+    if (lx + box.width > host.width - 8) lx = evt.clientX - host.left - box.width - 12;
+    if (lx < 8) lx = 8;
+    tip.style.left = lx + 'px';
+    tip.style.top = (geo.p1.top + 2) + 'px';
+  }
+
+  function hideHover() {
+    tip.style.display = 'none';
+    var xh = document.getElementById('xhair');
+    if (xh) while (xh.firstChild) xh.removeChild(xh.firstChild);
+  }
+
+  drawChart();
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawChart, 120);
+  });
+
+  /* ---------- dump-to-table: accessible fallback, generated from DATA ---------- */
+
+  (function renderDump() {
+    var tb = document.querySelector('#dumptab tbody');
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < DATA.share.length; i++) {
+      var tr = document.createElement('tr');
+      var cells = [dateOf(i), DATA.share[i].toFixed(1), DATA.wr[i].toFixed(1), String(DATA.n[i])];
+      for (var c = 0; c < cells.length; c++) {
+        var td = document.createElement('td');
+        td.textContent = cells[c];
+        if (c === 3 && DATA.n[i] < THIN_LIMIT) td.className = 'amb';
+        tr.appendChild(td);
+      }
+      frag.appendChild(tr);
+    }
+    tb.appendChild(frag);
+  })();
+
+  /* ---------- BIOS boot: sessionStorage-gated, ~500ms, skippable ----------
+     6 lines x 70ms + 80ms linger = 500ms budget. Readout numbers come from
+     DATA — the boot screen doubles as an honest freshness check. */
+
+  var boot = document.getElementById('boot');
+  var out = document.getElementById('bootlines');
+
+  if (!reduced && !sessionStorage.getItem('ms_boot_s3')) {
+    var lines = [
+      { t: 'METASURF BIOS v0.1', c: 'b-amber' },
+      { t: 'MEM CHECK .............. OK', c: 'b-dim' },
+      { t: 'LOADING MODERN SNAPSHOT...', c: '' },
+      { t: DATA.decksIndexed.toLocaleString('en-US') + ' DECKS INDEXED / ' +
+           DATA.archetypeDecks + ' IN ARCHETYPE', c: '' },
+      { t: 'LAST INGEST ' + DATA.lastIngestUtc + ' UTC', c: '' },
+      { t: '> view izzet-murktide --window 30d', c: 'b-amber' }
+    ];
+
+    document.getElementById('skiplabel').textContent =
+      window.matchMedia('(pointer: coarse)').matches
+        ? '[ tap anywhere to skip ]'
+        : '[ press any key to skip ]';
+
+    var timer;
+    var dismiss = function () {
+      clearInterval(timer);
+      boot.hidden = true;
+      boot.setAttribute('aria-hidden', 'true');   /* hidden again -> hide from AT */
+      sessionStorage.setItem('ms_boot_s3', '1');
+      document.removeEventListener('keydown', dismiss);
+      boot.removeEventListener('click', dismiss);
+    };
+
+    boot.hidden = false;
+    boot.removeAttribute('aria-hidden');          /* visible + clickable -> expose to AT */
+    var li = 0;
+    timer = setInterval(function () {
+      if (li >= lines.length) { clearInterval(timer); setTimeout(dismiss, 80); return; }
+      var span = document.createElement('span');
+      if (lines[li].c) span.className = lines[li].c;
+      span.textContent = lines[li].t + '\n';
+      out.appendChild(span);
+      li++;
+    }, 70);
+
+    boot.addEventListener('click', dismiss);
+    document.addEventListener('keydown', dismiss);
+  }
+})();
+</script>
+
+</body>
+</html>

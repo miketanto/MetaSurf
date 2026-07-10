@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS-02 // MATCHUP MATRIX — MetaSurf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+  /* ================================================================
+     GRINDER TERMINAL r2 — 2026-07-09
+     Legibility doctrine:
+       · ALL DATA (numbers, sample sizes, CIs) renders in IBM Plex Mono
+         with tabular figures. Never below 10px, never in VT323.
+       · VT323 (bitmap face) is CHROME ONLY: the unit faceplate ID.
+         Nothing the eye must *read for a value* uses it.
+       · Glow (text-shadow) is CHROME ONLY: faceplate + status line.
+         Data cells get zero glow — halation is what killed r1 scanning.
+       · Scanlines live on chrome surfaces only, never over the grid.
+     ================================================================ */
+  :root{
+    --bg:#0a0a0a;
+    --bg-raise:#111109;
+    --fg:#f2f0e6;
+    --amber:#ffb000;
+    --amber-dim:#8a6200;   /* borders / decorative only — fails AA for small text */
+    --amber-low:#d19b00;   /* low-confidence text: >=7:1 on --bg, AA at any size */
+    --win:#4dff7a;         /* brightened from r1 #33ff66 for small-size contrast */
+    --loss:#ff7a73;        /* brightened from r1 #ff665e for small-size contrast */
+    --win-bg-1:rgba(51,255,102,.07);
+    --win-bg-2:rgba(51,255,102,.14);
+    --win-bg-3:rgba(51,255,102,.22);
+    --loss-bg-1:rgba(255,102,94,.07);
+    --loss-bg-2:rgba(255,102,94,.14);
+    --loss-bg-3:rgba(255,102,94,.22);
+    --grid-line:rgba(242,240,230,.14);
+    --lh:1.2rem;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+    --disp:'VT323',monospace; /* display face: chrome only, >=20px only */
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:var(--lh);
+    font-variant-numeric:tabular-nums;
+    padding:0 2ch calc(var(--lh)*4); /* room for fixed status line */
+    max-width:96ch;
+    margin:0 auto;
+  }
+  .disp{font-family:var(--disp);-webkit-font-smoothing:none;text-transform:uppercase;letter-spacing:.02em}
+  .lbl{font-family:var(--mono);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  a{color:var(--amber);text-decoration:none}
+  .dim{color:var(--fg);opacity:.55}
+  .amber{color:var(--amber)}
+  .win{color:var(--win)}
+  .loss{color:var(--loss)}
+  .lowconf{color:var(--amber-low)}
+
+  /* box-drawing section rules — furniture, filled by JS, hidden from AT */
+  .rule{overflow:hidden;white-space:nowrap;opacity:.45;user-select:none;line-height:var(--lh);color:var(--amber-dim)}
+  .rule .cap{color:var(--amber);font-weight:600;letter-spacing:.05em;font-size:12px;opacity:1}
+
+  /* ── chrome: faceplate ─────────────────────────────────────────── */
+  header.chrome{position:relative;padding-top:var(--lh);margin-bottom:var(--lh)}
+  .faceplate{border:1px solid rgba(242,240,230,.35);padding:calc(var(--lh)*.5) 1.5ch;position:relative;overflow:hidden}
+  .faceplate::after{ /* scanlines: chrome only, static (no motion), kept off the grid */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(242,240,230,.045) 0 1px,transparent 1px 4px);
+  }
+  .fp-id{font-size:26px;line-height:calc(var(--lh)*1.5);color:var(--fg)}
+  .fp-id .unit{color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,.55)} /* glow: chrome only */
+  .fp-meta{font-family:var(--mono);font-weight:600;text-transform:uppercase;letter-spacing:.04em;font-size:11px;line-height:var(--lh);color:var(--amber)}
+  .fp-meta b{color:var(--fg);font-weight:400}
+
+  nav{margin-top:calc(var(--lh)*.5);font-size:13px}
+  nav a{color:var(--fg);opacity:.7;margin-right:1.5ch;white-space:nowrap}
+  nav a .fkey{color:var(--amber-low);font-size:11px}
+  nav a:hover{opacity:1}
+  nav a.active{background:var(--amber);color:var(--bg);opacity:1;font-weight:600;padding:0 .5ch}
+  nav a.active .fkey{color:var(--bg)}
+
+  /* ── legend with true swatches ─────────────────────────────────── */
+  .legend{font-size:11px;line-height:calc(var(--lh)*1.1);display:flex;flex-wrap:wrap;gap:2px 2.5ch}
+  .legend .sw{display:inline-block;width:2.4ch;text-align:center;border:1px solid var(--grid-line);
+    font-weight:600;font-size:10px;line-height:14px;vertical-align:-2px;margin-right:.6ch}
+  .legend .sw.w{background:var(--win-bg-2);color:var(--win)}
+  .legend .sw.l{background:var(--loss-bg-2);color:var(--loss)}
+  .legend .sw.e{color:var(--fg);opacity:.8}
+  .legend .sw.c{color:var(--amber-low);border-color:var(--amber-dim);
+    background:repeating-linear-gradient(45deg,transparent 0 3px,rgba(199,145,0,.14) 3px 6px)}
+  .legend-hint{font-size:11px;margin-top:2px}
+
+  /* ── the matrix ────────────────────────────────────────────────── */
+  .mx-outer{position:relative;margin:calc(var(--lh)*.5) 0 var(--lh)}
+  .mx-outer::after{ /* right-edge fade: more columns off-screen */
+    content:"";position:absolute;top:1px;right:1px;bottom:1px;width:5ch;pointer-events:none;
+    background:linear-gradient(90deg,rgba(10,10,10,0),var(--bg) 85%);
+    transition:opacity .15s linear;
+  }
+  .mx-outer.at-end::after{opacity:0}
+  .mx-more{
+    position:absolute;right:.75ch;top:50%;transform:translateY(-50%);pointer-events:none;
+    font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.04em;
+    color:var(--amber);background:var(--bg);border:1px solid var(--amber-dim);padding:1px .75ch;z-index:5;
+  }
+  .mx-outer.at-end .mx-more{display:none}
+
+  /* Two-axis scroll container: BOTH sticky axes engage inside it.
+     r1 could not sticky the column header (page-scroll scoping);
+     capping height and scrolling internally fixes that for real. */
+  .matrix-wrap{
+    overflow:auto;max-height:72vh;
+    border:1px solid rgba(242,240,230,.25);
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  table.matrix{border-collapse:separate;border-spacing:0;width:100%;min-width:62ch}
+  table.matrix th,table.matrix td{
+    border-bottom:1px solid var(--grid-line);
+    border-right:1px solid rgba(242,240,230,.09);
+    padding:2px 0;text-align:center;vertical-align:middle;
+    background:var(--bg);
+    background-clip:padding-box;
+  }
+  table.matrix thead th{
+    position:sticky;top:0;z-index:2;
+    font-family:var(--mono);font-weight:600;letter-spacing:.04em;
+    font-size:11px;color:var(--amber);
+    text-transform:uppercase;
+    border-bottom:1px solid rgba(255,176,0,.55);
+    height:calc(var(--lh)*1.5);
+    background:var(--bg);
+  }
+  table.matrix th.rowhead{
+    position:sticky;left:0;z-index:3;text-align:left;padding-left:1ch;
+    border-right:1px solid rgba(255,176,0,.55);
+    min-width:9ch;font-weight:400;background:var(--bg);
+  }
+  table.matrix thead th.corner{
+    position:sticky;left:0;top:0;z-index:4;
+    border-right:1px solid rgba(255,176,0,.55);
+    text-align:left;padding-left:1ch;color:var(--fg);opacity:.6;font-weight:400;text-transform:none;
+  }
+  .rh-abbr{font-family:var(--mono);font-weight:600;letter-spacing:.04em;font-size:12px;color:var(--amber);display:block;line-height:15px}
+  .rh-share{font-size:10px;color:var(--fg);opacity:.55;display:block;line-height:12px;white-space:nowrap}
+  .rh-share .bar{color:var(--amber-dim);letter-spacing:-.05em}
+
+  td.cell{cursor:pointer;min-width:7ch;height:48px;padding:4px 2px} /* >=44px tap target */
+  td.mirror{color:var(--fg);opacity:.25;cursor:default;font-size:11px}
+
+  /* number first, always Plex Mono, always >=15px, weight 600 */
+  .c-wr{display:block;font-family:var(--mono);font-weight:600;font-size:15px;line-height:17px;
+    font-variant-numeric:tabular-nums;letter-spacing:0}
+  .c-sub{display:block;font-size:10px;line-height:12px;font-weight:500}
+  .c-sub .n{color:var(--fg);opacity:.5;font-weight:400}
+
+  /* tone = background tint (3 magnitudes) + colored number + glyph.
+     No glow on any of it. */
+  td.t-w1{background:var(--win-bg-1)} td.t-w2{background:var(--win-bg-2)} td.t-w3{background:var(--win-bg-3)}
+  td.t-l1{background:var(--loss-bg-1)} td.t-l2{background:var(--loss-bg-2)} td.t-l3{background:var(--loss-bg-3)}
+  td.t-w1 .c-wr,td.t-w2 .c-wr,td.t-w3 .c-wr{color:var(--win)}
+  td.t-l1 .c-wr,td.t-l2 .c-wr,td.t-l3 .c-wr{color:var(--loss)}
+  td.t-e .c-wr{color:var(--fg);opacity:.82}
+  td.t-lc{background:repeating-linear-gradient(45deg,transparent 0 3px,rgba(199,145,0,.09) 3px 6px)}
+  td.t-lc .c-wr{color:var(--amber-low)}
+  td.t-lc .c-sub{color:var(--amber-low)}
+
+  @media (hover:hover){
+    td.cell:hover{outline:1px dashed var(--amber-dim);outline-offset:-1px}
+    /* crosshair: row+col wash while hovering */
+    td.xr,th.xr{background-color:var(--bg-raise)}
+    td.t-w1.xr{background:linear-gradient(var(--win-bg-1),var(--win-bg-1)) var(--bg-raise)}
+    td.t-w2.xr{background:linear-gradient(var(--win-bg-2),var(--win-bg-2)) var(--bg-raise)}
+    td.t-w3.xr{background:linear-gradient(var(--win-bg-3),var(--win-bg-3)) var(--bg-raise)}
+    td.t-l1.xr{background:linear-gradient(var(--loss-bg-1),var(--loss-bg-1)) var(--bg-raise)}
+    td.t-l2.xr{background:linear-gradient(var(--loss-bg-2),var(--loss-bg-2)) var(--bg-raise)}
+    td.t-l3.xr{background:linear-gradient(var(--loss-bg-3),var(--loss-bg-3)) var(--bg-raise)}
+  }
+  td.cell:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+
+  /* selected cell = inverse video, the terminal way */
+  td.cell.sel{background:var(--amber);outline:none}
+  td.cell.sel .c-wr,td.cell.sel .c-sub,td.cell.sel .c-sub .n{color:var(--bg);opacity:1}
+
+  .abbr-key{display:grid;grid-template-columns:1fr 1fr;gap:0 3ch;font-size:11px;line-height:var(--lh);margin-bottom:var(--lh);opacity:.8}
+  @media (min-width:600px){.abbr-key{grid-template-columns:repeat(4,1fr)}}
+  .abbr-key b{font-family:var(--mono);font-weight:600;letter-spacing:.04em;color:var(--amber);font-size:11px}
+
+  /* ── command line: selection is echoed as a typed query ────────── */
+  #cmdline{margin:calc(var(--lh)*.5) 0;font-size:12px;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #cmdline .prompt{color:var(--amber);font-weight:600}
+  #cmdline .ok{color:var(--win)}
+  .cursor{display:inline-block;width:.7ch;height:14px;background:var(--amber);vertical-align:-2px;margin-left:.25ch}
+  @media (prefers-reduced-motion: no-preference){
+    .cursor{animation:blink 1s steps(1) infinite}
+  }
+  @keyframes blink{50%{opacity:0}}
+
+  /* ── pair report (detail) ──────────────────────────────────────── */
+  #detail{border:1px solid rgba(242,240,230,.35);border-left:3px solid var(--amber);
+    padding:calc(var(--lh)*.5) 1.5ch;margin-bottom:var(--lh);min-height:206px}
+  #detail .d-title{font-family:var(--mono);font-weight:600;letter-spacing:.05em;font-size:11px;color:var(--amber);text-transform:uppercase;line-height:var(--lh)}
+  #detail .d-names{font-size:12px;line-height:var(--lh);opacity:.8}
+  /* hero number: was VT323 in r1 — now Plex Mono 700. Reads at a glance. */
+  #detail .d-hero{font-family:var(--mono);font-weight:700;font-size:27px;line-height:calc(var(--lh)*1.5);
+    font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  #detail .d-hero .pm{font-weight:400;font-size:14px;color:var(--fg);opacity:.7;font-style:italic}
+  #detail .d-row{line-height:var(--lh)}
+
+  /* CI gauge: 35–65% track, CI band, point estimate pin, 50% tick */
+  .gauge{margin:4px 0 6px;max-width:44ch}
+  .g-track{position:relative;height:12px;border:1px solid var(--grid-line);background:var(--bg-raise)}
+  .g-band{position:absolute;top:2px;bottom:2px;background:rgba(255,176,0,.28);border:1px solid var(--amber-dim)}
+  .g-pin{position:absolute;top:0;bottom:0;width:2px;background:var(--fg)}
+  .g-tick50{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(242,240,230,.5)}
+  .g-scale{display:flex;justify-content:space-between;font-size:10px;opacity:.55;line-height:14px;max-width:44ch}
+
+  .chip{display:inline-block;font-family:var(--mono);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+    padding:4px 1ch;border:1px solid var(--fg);color:var(--fg);background:none;cursor:pointer;line-height:16px}
+  .chip:hover{border-color:var(--amber);color:var(--amber)}
+  .chip.on{background:var(--amber);border-color:var(--amber);color:var(--bg)}
+  .chip.locked{border-color:var(--amber-dim);color:var(--amber-low)}
+  .chip.decode{background:var(--amber);border-color:var(--amber);color:var(--bg)}
+  .chip:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+
+  /* ── historical evolution (pro-gated, depth-in-screen) ─────────── */
+  section.hist{margin-top:calc(var(--lh)*1.5)}
+  .win-chips{margin:calc(var(--lh)*.5) 0;display:flex;gap:1ch;flex-wrap:wrap;align-items:center}
+  .pro-tag{font-size:10px;color:var(--amber-low);margin-left:.5ch}
+  .chip.on .pro-tag{color:var(--bg)}
+
+  .scramble-wrap{position:relative;border:1px solid var(--amber-dim);margin-top:calc(var(--lh)*.5)}
+  .scramble-body{filter:blur(3px) contrast(2);padding:calc(var(--lh)*.5) 1.5ch;user-select:none;pointer-events:none}
+  .scramble-body pre{font-size:12px;line-height:15px;overflow:hidden}
+  .sec-label{font-family:var(--mono);font-weight:600;letter-spacing:.05em;font-size:11px;color:var(--amber);text-transform:uppercase;line-height:var(--lh)}
+  .dither{
+    position:absolute;inset:0;opacity:.5;pointer-events:none;image-rendering:pixelated;
+    /* true 50% Bayer: 8 of 16 pixels in checkerboard order */
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Cpath d='M0 0h1v1H0zM2 0h1v1H2zM1 1h1v1H1zM3 1h1v1H3zM0 2h1v1H0zM2 2h1v1H2zM1 3h1v1H1zM3 3h1v1H3z' fill='%230a0a0a'/%3E%3C/svg%3E");
+    background-size:4px 4px;
+  }
+  .decode-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--lh)*.5)}
+  .decode-overlay .why{font-size:11px;color:var(--amber-low);text-transform:uppercase;font-family:var(--mono);font-weight:600;letter-spacing:.05em;text-align:center;padding:0 1ch}
+  @media (prefers-reduced-motion: no-preference){
+    .scramble-wrap.nudge{animation:nudge .18s steps(2)}
+  }
+  @keyframes nudge{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+
+  /* ── fixed status line (tmux-style) ────────────────────────────── */
+  #statusline{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    background:var(--bg-raise);border-top:1px solid var(--amber-dim);
+    font-size:11px;line-height:calc(var(--lh)*1.25);
+    padding:0 1ch;display:flex;gap:1.5ch;align-items:center;white-space:nowrap;overflow:hidden;
+  }
+  #statusline::after{ /* scanlines on chrome */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(242,240,230,.04) 0 1px,transparent 1px 4px);
+  }
+  #statusline .seg-mode{background:var(--amber);color:var(--bg);font-weight:700;padding:0 1ch;letter-spacing:.05em}
+  #statusline .seg{opacity:.7}
+  #statusline .seg b{color:var(--amber);font-weight:600;opacity:1}
+  #statusline .seg-live{color:var(--win);font-weight:600;margin-left:auto}
+  @media (prefers-reduced-motion: no-preference){
+    #statusline .seg-live .dot{animation:blink 1.6s steps(1) infinite}
+  }
+  @media (max-width:480px){ #statusline .seg-src{display:none} }
+
+  /* ── boot ──────────────────────────────────────────────────────── */
+  #boot{
+    position:fixed;inset:0;background:var(--bg);z-index:99;
+    padding:calc(var(--lh)*2) 3ch;font-family:var(--mono);font-size:13px;line-height:var(--lh);
+    color:var(--fg);cursor:pointer;
+  }
+  #boot .b-line{visibility:hidden;white-space:pre-wrap}
+  #boot .b-line.show{visibility:visible}
+  #boot .b-hint{color:var(--fg);opacity:.4;margin-top:var(--lh)}
+  body.booting{overflow:hidden}
+</style>
+</head>
+<body class="booting">
+
+<div id="boot" role="status" aria-label="Loading MetaSurf">
+  <div class="b-line">METASURF BIOS v0.2 — GRINDER TERMINAL</div>
+  <div class="b-line">&gt; LOADING MODERN SNAPSHOT......... OK</div>
+  <div class="b-line">&gt; 2,341 DECKS INDEXED / 4,213 PAIR GAMES</div>
+  <div class="b-line">&gt; MATRIX 8x8 / WINDOW 14D / LOW-CONF FLAG N&lt;30</div>
+  <div class="b-line">&gt; FONT SUBSYSTEM: DATA=PLEX-MONO · CHROME=VT323</div>
+  <div class="b-line b-hint">[ TAP OR PRESS ANY KEY TO SKIP ]</div>
+</div>
+
+<header class="chrome">
+  <div class="faceplate">
+    <div class="fp-id disp"><span class="unit">MS-02</span> // MATCHUP MATRIX</div>
+    <div class="fp-meta">FORMAT: <b>MODERN</b> · WINDOW: <b>14D</b> · N=<b>4,213</b> PAIR GAMES · CI: <b>95%</b></div>
+  </div>
+  <nav aria-label="Primary">
+    <a href="#"><span class="fkey">F1</span>[meta]</a><a href="#" class="active" aria-current="page"><span class="fkey">F2</span>[matrix]</a><a href="#"><span class="fkey">F3</span>[decks]</a>
+  </nav>
+</header>
+
+<h1 class="sr-only">Modern matchup matrix, 8 by 8 archetype winrate grid, 14 day window</h1>
+
+<div class="rule" data-cap="GRID · ROW plays vs COLUMN" data-l="╔═" aria-hidden="true"></div>
+
+<div class="legend" aria-hidden="true">
+  <span><span class="sw w">▲</span>≥52% FAVORED</span>
+  <span><span class="sw l">▼</span>≤48% UNFAV</span>
+  <span><span class="sw e">·</span>48–52 EVEN</span>
+  <span><span class="sw c">!</span>n&lt;30 LOW CONF</span>
+</div>
+<p class="sr-only">Legend: each cell shows the row archetype's winrate against the column archetype, followed by the number of games in the sample. 52 percent or higher is favored, 48 percent or lower is unfavored, and values between 48 and 52 are even. Cells based on fewer than 30 games are marked low confidence.</p>
+<div class="legend-hint dim" aria-hidden="true">tint depth = margin · tap a cell for CI / trend · grid scrolls both ways, headers hold</div>
+
+<div class="mx-outer">
+  <div class="matrix-wrap" id="mxwrap" role="region" aria-label="Matchup winrate grid, scrolls horizontally and vertically with fixed headers" tabindex="0">
+    <table class="matrix" id="mx"></table>
+  </div>
+  <div class="mx-more" id="mxmore" aria-hidden="true">+2 →</div>
+</div>
+
+<div class="abbr-key" id="abbrkey"></div>
+
+<div id="cmdline" aria-hidden="true"><span class="prompt">grinder@ms:~$</span> <span id="cmdtext"></span><span class="cursor" id="cmdcur"></span></div>
+
+<div class="rule" data-cap="PAIR REPORT" data-l="╟─" aria-hidden="true"></div>
+
+<div id="detail" aria-live="polite"></div>
+
+<div class="rule" data-cap="HISTORICAL EVOLUTION" data-l="╟─" aria-hidden="true"></div>
+
+<section class="hist">
+  <div class="win-chips" id="winchips">
+    <button class="chip on" data-w="14D">14D</button>
+    <button class="chip locked" data-w="30D">30D<span class="pro-tag">PRO</span></button>
+    <button class="chip locked" data-w="90D">90D<span class="pro-tag">PRO</span></button>
+    <button class="chip locked" data-w="SZN">SZN<span class="pro-tag">PRO</span></button>
+  </div>
+
+  <div class="scramble-wrap" id="histpanel">
+    <div class="scramble-body" aria-hidden="true">
+      <div class="sec-label">MUR vs SCM — 90D EVOLUTION</div>
+      <pre>
+62%│      ▄▄            ▂▂
+   │   ▂▂█████▄▄    ▄▄█████▄
+54%│▄▄█████████████████████████▄▄
+   │█████████████████████████████
+46%│█████████████████████████████
+   └──────────────────────────────
+    APR·····MAY·····JUN·····JUL</pre>
+      <div>WR 51.3 → 56.2 · band swing +4.9 · pivot: LotV adoption wk of 06-02</div>
+    </div>
+    <div class="dither" aria-hidden="true"></div>
+    <div class="decode-overlay">
+      <span class="why" id="histwhy">SIGNAL SCRAMBLED — PRO INSTRUMENT</span>
+      <button class="chip decode" onclick="this.previousElementSibling.textContent='&gt; PAYMENT LINKAGE OFFLINE IN MOCK — RETRY AT LAUNCH'">DECODE →</button>
+    </div>
+    <span class="sr-only">Historical matchup evolution chart. Locked, requires Pro subscription.</span>
+  </div>
+</section>
+
+<div class="rule" data-l="╚═" aria-hidden="true" style="margin-top:calc(var(--lh)*1.5)"></div>
+
+<div id="statusline" aria-hidden="true">
+  <span class="seg-mode">MATRIX</span>
+  <span class="seg"><b>MODERN</b> 14D</span>
+  <span class="seg">n=<b>4,213</b></span>
+  <span class="seg seg-src">SRC MTGO CHALLENGE+PRELIM · SEED 41</span>
+  <span class="seg-live"><span class="dot">●</span> LIVE 03:12Z</span>
+</div>
+<p class="sr-only">Status: live data, Modern format, 14 day window, 4213 pair games, last ingest 03:12 UTC, next 09:00 UTC.</p>
+
+<script>
+(function(){
+  "use strict";
+  var G="▁▂▃▄▅▆▇█";
+  var A=[
+    {abbr:"MUR",name:"Izzet Murktide",share:14.2},
+    {abbr:"SCM",name:"Rakdos Scam",share:11.8},
+    {abbr:"AMT",name:"Amulet Titan",share:9.1},
+    {abbr:"YWG",name:"Yawgmoth",share:7.4},
+    {abbr:"LVE",name:"Living End",share:6.2},
+    {abbr:"BRN",name:"Burn",share:5.8},
+    {abbr:"TRN",name:"Mono-G Tron",share:5.1},
+    {abbr:"HMR",name:"Hammer Time",share:4.4}
+  ];
+  var WR=[
+    [null,56.2,48.1,52.4,61.0,54.3,44.7,57.9],
+    [43.8,null,51.2,47.5,55.1,49.8,53.6,52.2],
+    [51.9,48.8,null,55.7,42.3,46.9,58.4,50.5],
+    [47.6,52.5,44.3,null,50.8,43.1,49.2,61.4],
+    [39.0,44.9,57.7,49.2,null,52.7,46.1,48.3],
+    [45.7,50.2,53.1,56.9,47.3,null,62.5,41.8],
+    [55.3,46.4,41.6,50.8,53.9,37.5,null,54.6],
+    [42.1,47.8,49.5,38.6,51.7,58.2,45.4,null]
+  ];
+  var N=[
+    [0,143,98,76,51,88,64,47],
+    [143,0,82,67,44,71,53,39],
+    [98,82,0,58,36,62,49,31],
+    [76,67,58,0,29,55,41,26],
+    [51,44,36,29,0,48,33,27],
+    [88,71,62,55,48,0,57,66],
+    [64,53,49,41,33,57,0,24],
+    [47,39,31,26,27,66,24,0]
+  ];
+  function delta(i,j){
+    if(i===j) return 0;
+    var a=Math.min(i,j),b=Math.max(i,j);
+    var d=(((a*5+b*11)%13)-6)/2.5;
+    d=Math.round(d*10)/10;
+    return (i<j)? d : -d;
+  }
+  function ci(i,j){
+    var p=WR[i][j]/100,n=N[i][j];
+    return 1.96*Math.sqrt(p*(1-p)/n)*100;
+  }
+  function spark(i,j){
+    var wr=WR[i][j],d=delta(i,j),out="";
+    var base=Math.max(0,Math.min(7,Math.round((wr-38)/3.4)));
+    for(var k=0;k<7;k++){
+      var h=Math.sin(i*3.7+j*1.3+k*2.1)*0.9;
+      var lvl=Math.max(0,Math.min(7,Math.round(base+h+(k-3)*d/6)));
+      out+=G.charAt(lvl);
+    }
+    return out;
+  }
+  /* tone class: direction + magnitude (tint depth = margin) */
+  function toneClass(wr,n){
+    if(n<30) return "t-lc";
+    var d=wr-50;
+    if(d>=2) return d>=9?"t-w3":(d>=5?"t-w2":"t-w1");
+    if(d<=-2) return d<=-9?"t-l3":(d<=-5?"t-l2":"t-l1");
+    return "t-e";
+  }
+  function glyphOf(wr,n){
+    if(n<30) return {g:"!",cls:"lowconf"};
+    if(wr>=52) return {g:"▲",cls:"win"};
+    if(wr<=48) return {g:"▼",cls:"loss"};
+    return {g:"·",cls:"dim"};
+  }
+  function shareBar(pct){ /* block-char meta-share bar in row header */
+    var full=Math.floor(pct/3),rem=pct/3-full,out="";
+    for(var k=0;k<full;k++) out+="█";
+    if(rem>=.5) out+="▌";
+    return out||"▏";
+  }
+
+  /* ── build grid ── */
+  var mx=document.getElementById("mx");
+  var html="<thead><tr><th class='corner'>row\\col</th>";
+  A.forEach(function(a,j){ html+="<th scope='col' data-col='"+j+"' title='"+a.name+"'>"+a.abbr+"</th>"; });
+  html+="</tr></thead><tbody>";
+  A.forEach(function(row,i){
+    html+="<tr><th class='rowhead' scope='row' data-row='"+i+"' title='"+row.name+"'>"+
+      "<span class='rh-abbr'>"+row.abbr+"</span>"+
+      "<span class='rh-share'><span class='bar' aria-hidden='true'>"+shareBar(row.share)+"</span> "+row.share.toFixed(1)+"%</span></th>";
+    A.forEach(function(col,j){
+      if(i===j){ html+="<td class='mirror' data-j='"+j+"' aria-label='"+row.name+" mirror match'>░░</td>"; return; }
+      var wr=WR[i][j],n=N[i][j],t=toneClass(wr,n),gl=glyphOf(wr,n);
+      html+="<td class='cell "+t+"' data-i='"+i+"' data-j='"+j+"' role='button' tabindex='0' "+
+        "aria-label='"+row.name+" vs "+col.name+": "+wr.toFixed(1)+" percent winrate over "+n+" games"+(n<30?", low confidence":"")+"'>"+
+        "<span class='c-wr'>"+wr.toFixed(1)+"</span>"+
+        "<span class='c-sub'><span class='"+gl.cls+"'>"+gl.g+"</span> <span class='n'>"+n+"g</span></span></td>";
+    });
+    html+="</tr>";
+  });
+  html+="</tbody>";
+  mx.innerHTML=html;
+
+  var key=document.getElementById("abbrkey");
+  key.innerHTML=A.map(function(a){return "<span><b>"+a.abbr+"</b> "+a.name+"</span>";}).join("");
+
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var detail=document.getElementById("detail");
+
+  /* ── command line echo: typed query, reduced-motion = instant ── */
+  var cmdEl=document.getElementById("cmdtext"),cmdTimer=null;
+  function echoCmd(txt,okTail){
+    if(cmdTimer){clearInterval(cmdTimer);cmdTimer=null;}
+    if(reduced){ cmdEl.innerHTML=txt+" <span class='ok'>"+okTail+"</span>"; return; }
+    cmdEl.textContent="";
+    var k=0;
+    cmdTimer=setInterval(function(){
+      k+=2; /* 2 chars/tick ≈ 6ms/char, whole line <200ms */
+      cmdEl.textContent=txt.slice(0,k);
+      if(k>=txt.length){
+        clearInterval(cmdTimer);cmdTimer=null;
+        cmdEl.innerHTML=txt+" <span class='ok'>"+okTail+"</span>";
+      }
+    },12);
+  }
+
+  /* ── pair report ── */
+  function renderDetail(i,j){
+    var a=A[i],b=A[j],wr=WR[i][j],n=N[i][j],d=delta(i,j),c=ci(i,j),sp=spark(i,j);
+    var lo=wr-c,hi=wr+c,spans=lo<50&&hi>50;
+    var t=(n<30)?"lowconf":(wr>=52?"win":(wr<=48?"loss":"dim"));
+    var dTxt=d>0?"▲ +"+d.toFixed(1):(d<0?"▼ "+d.toFixed(1):"· +0.0");
+    var dCls=d>0?"win":(d<0?"loss":"dim");
+    var pos=function(v){ return Math.max(0,Math.min(100,(v-35)/30*100)); }; /* 35–65 domain */
+    var conf=n<30?"<div class='d-row lowconf'>! n="+n+" — LOW CONFIDENCE · treat as directional only</div>":"";
+    detail.innerHTML=
+      "<div class='d-title'>"+a.abbr+" × "+b.abbr+"</div>"+
+      "<div class='d-names'>"+a.name+" <span class='dim'>vs</span> "+b.name+"</div>"+
+      "<div class='d-hero'><span class='"+t+"'>"+wr.toFixed(1)+"%</span> <span class='pm'>±"+c.toFixed(1)+"</span></div>"+
+      "<div class='gauge' aria-hidden='true'>"+
+        "<div class='g-track'>"+
+          "<div class='g-band' style='left:"+pos(lo)+"%;width:"+(pos(hi)-pos(lo))+"%'></div>"+
+          "<div class='g-tick50' style='left:"+pos(50)+"%'></div>"+
+          "<div class='g-pin' style='left:"+pos(wr)+"%'></div>"+
+        "</div>"+
+        "<div class='g-scale'><span>35</span><span>50</span><span>65</span></div>"+
+      "</div>"+
+      "<div class='d-row'>n=<span class='"+(n<30?"lowconf":"amber")+"'>"+n+"</span> GAMES · 95% CI ["+lo.toFixed(1)+", "+hi.toFixed(1)+"] "+
+        (spans?"<span class='lowconf'>SPANS 50%</span>":"<span class='dim'>CLEAR OF 50%</span>")+"</div>"+
+      "<div class='d-row'>TREND <span class='"+dCls+"'>"+dTxt+"</span> <span class='dim'>vs prior 14d</span>"+
+        " · FORM <span class='"+dCls+"' aria-hidden='true'>"+sp+"</span>"+
+        "<span class='sr-only'>7-day form trend, "+(d>0?"improving":(d<0?"declining":"flat"))+"</span></div>"+
+      conf+
+      "<div class='d-row' style='margin-top:6px'><button class='chip'>"+b.abbr+" DECKS →</button> "+
+      "<button class='chip locked'>PAIR HISTORY<span class='pro-tag'>PRO</span></button></div>";
+    echoCmd("pair "+a.abbr.toLowerCase()+" "+b.abbr.toLowerCase()+" -w14d","ok "+n+"g"); /* short flags: whole echo fits 390px */
+  }
+
+  function selectCell(i,j,el){
+    var prev=mx.querySelector("td.sel");
+    if(prev) prev.classList.remove("sel");
+    if(el) el.classList.add("sel");
+    renderDetail(i,j); /* data is static in-mock: no artificial latency */
+  }
+
+  mx.addEventListener("click",function(e){
+    var td=e.target.closest("td.cell");
+    if(td) selectCell(+td.dataset.i,+td.dataset.j,td);
+  });
+  mx.addEventListener("keydown",function(e){
+    if(e.key!=="Enter"&&e.key!==" ") return;
+    var td=e.target.closest("td.cell");
+    if(td){ e.preventDefault(); selectCell(+td.dataset.i,+td.dataset.j,td); }
+  });
+
+  /* crosshair: hover-capable devices only (CSS gates the paint) */
+  var xrCells=[];
+  function clearXr(){ xrCells.forEach(function(c){c.classList.remove("xr");}); xrCells=[]; }
+  mx.addEventListener("mouseover",function(e){
+    var td=e.target.closest("td.cell");
+    if(!td) return;
+    clearXr();
+    var i=td.dataset.i,j=td.dataset.j;
+    mx.querySelectorAll("tr:nth-child("+(+i+1)+") td, td[data-j='"+j+"'], th[data-row='"+i+"'], th[data-col='"+j+"']")
+      .forEach(function(c){ if(c!==td){ c.classList.add("xr"); xrCells.push(c); } });
+  });
+  mx.addEventListener("mouseleave",clearXr);
+
+  var first=mx.querySelector("td[data-i='0'][data-j='1']");
+  if(first) first.classList.add("sel");
+  renderDetail(0,1);
+
+  /* box-drawing rules with embedded caps: ╔═ CAP ═══════… */
+  document.querySelectorAll(".rule").forEach(function(r){
+    var cap=r.dataset.cap,lead=r.dataset.l||"╟─";
+    var fill=(lead.charAt(1)==="═")?"═":"─";
+    var head=lead+fill;
+    r.innerHTML=cap
+      ? head+" <span class='cap'>"+cap+"</span> "+new Array(121).join(fill)
+      : head+new Array(141).join(fill);
+  });
+
+  /* horizontal-scroll affordance: right-edge fade + "+N →" off-screen count */
+  var wrap=document.getElementById("mxwrap");
+  var outer=wrap.parentElement;
+  var more=document.getElementById("mxmore");
+  function updateScrollHint(){
+    var remain=wrap.scrollWidth-wrap.clientWidth-wrap.scrollLeft;
+    if(remain<4){ outer.classList.add("at-end"); return; }
+    outer.classList.remove("at-end");
+    var edge=wrap.scrollLeft+wrap.clientWidth,hidden=0;
+    mx.querySelectorAll("thead th:not(.corner)").forEach(function(th){
+      if(th.offsetLeft+th.offsetWidth>edge+2) hidden++;
+    });
+    more.textContent=hidden>0?"+"+hidden+" →":"→";
+  }
+  wrap.addEventListener("scroll",updateScrollHint,{passive:true});
+  window.addEventListener("resize",updateScrollHint);
+  updateScrollHint();
+
+  /* pro gate: locked window chips talk back through the panel */
+  document.getElementById("winchips").addEventListener("click",function(e){
+    var chip=e.target.closest(".chip");
+    if(!chip||!chip.classList.contains("locked")) return;
+    var why=document.getElementById("histwhy");
+    var panel=document.getElementById("histpanel");
+    why.textContent="> "+chip.dataset.w+" WINDOW IS A PRO INSTRUMENT — DECODE TO UNLOCK";
+    if(!reduced){
+      panel.classList.remove("nudge");
+      void panel.offsetWidth; /* restart animation */
+      panel.classList.add("nudge");
+    }
+    panel.scrollIntoView({behavior:reduced?"auto":"smooth",block:"nearest"});
+  });
+
+  /* boot: ~500ms cold-open, skippable, skipped for reduced-motion & repeat visits */
+  var boot=document.getElementById("boot");
+  function endBoot(){
+    if(!boot) return;
+    boot.remove(); boot=null;
+    document.body.classList.remove("booting");
+    document.removeEventListener("keydown",endBoot);
+    try{ sessionStorage.setItem("ms_boot","1"); }catch(err){}
+  }
+  var seen=false;
+  try{ seen=sessionStorage.getItem("ms_boot")==="1"; }catch(err){}
+  if(seen||reduced){
+    endBoot();
+  }else{
+    var lines=boot.querySelectorAll(".b-line");
+    lines.forEach(function(ln,idx){ setTimeout(function(){ ln.classList.add("show"); },30+idx*45); });
+    setTimeout(endBoot,540);
+    boot.addEventListener("click",endBoot);
+    document.addEventListener("keydown",endBoot);
+  }
+})();
+</script>
+</body>
+</html>

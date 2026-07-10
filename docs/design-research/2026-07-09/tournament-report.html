@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Stint Log / Tournament Report</title>
+<!--
+  PIT-WALL CONSOLE — TOURNAMENT REPORT / STINT LOG (mockup, 2026-07-10)
+  Built from pit-wall-tokens.md v3 + attention-art-spec.md + research-tournament-report.md.
+
+  GROUNDING (real data embedded below, no invented domain facts):
+  - Deck: Azja, 1st Place, Modern Challenge 64 2024-06-18 — "Izzet Wizards", 60 main + 14 side = 74 cards
+    (deck-viewer-data.json). Identity art crop: Murktide Regent (URL from s1-archetype-visuals.json).
+  - Events for the typeahead: 10 real event rows from archetype-page-data.json notable[]/latest[].
+  - Opponent archetype list + colors: s1-archetype-visuals.json MODERN (10 archetypes, pip-mined colors).
+  - Global "field share" in TRACK CONDITIONS: derived at render time from the S1 deck_sample counts
+    (6,242 decks over the 10 tracked archetypes) — labeled DEMO, it is a sample-share proxy, not a
+    measured meta share.
+  - THE STINT ITSELF (rounds, scores, notes, winrates) IS DEMO/PLACEHOLDER — no real personal logs exist.
+
+  PRODUCTION NOTES CARRIED FROM RESEARCH:
+  - Schema reserves confirmed_by (research §4) so future both-players handshakes upgrade
+    SELF-REPORTED -> VERIFIED without migration. Unknown opponent is a stored value, never an error (§3).
+  - Personal raw laps are never gated; CSV export is free (research §12, entitlements posture).
+  - Edits after END STINT are allowed but stamped (wrench marker, research §10).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+:root{
+  --bg:#0d0d12; --panel:#14141a; --panel2:#191921; --line:#2b2b35;
+  --ink:#f2f2f7; --dim:#8a8a96;
+  --win:#3b9dff; --loss:#ff7a1a; --acc:#b45bff; --shadow:#000000;
+  --pix:'Press Start 2P',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  /* colorless 1-bit speckle mask (tokens §4.1) */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* white overlay grain (tokens §4.3) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ background:var(--bg); }
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.45;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button,a,select,input,textarea,[role="button"]{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+}
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+button,input,select,textarea{ font:inherit; color:inherit; }
+
+/* ---------- press physics (tokens §3.3) ---------- */
+.press{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.press:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.sw{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 9px; display:inline-flex; align-items:center; gap:6px;
+  color:var(--dim);
+}
+.sw.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.seg{ display:inline-flex; } .seg .sw:not(:first-child){ border-left-width:0; }
+
+/* ---------- pips (tokens §1.4, canonical MTG set) ---------- */
+.pip{ width:9px; height:9px; border:1px solid #565664; border-radius:50% !important; display:inline-block; flex:0 0 auto; }
+.pip-W{background:#f8f6d8;} .pip-U{background:#b9d4ec;}
+.pip-B{background:#7d7673;border-color:#a6a1a0;} .pip-R{background:#e49977;} .pip-G{background:#a3c095;}
+.pips{ display:inline-flex; gap:3px; align-items:center; }
+
+/* ---------- ticker (tokens §5.1) ---------- */
+.ticker{ position:sticky; top:0; z-index:50; height:30px; background:var(--bg);
+  border-bottom:1px solid var(--line); display:flex; align-items:center; overflow:hidden; }
+.ticker .wbadge{ position:absolute; left:0; top:0; bottom:0; z-index:2; display:flex; align-items:center;
+  padding:0 8px; font-family:var(--pix); font-size:8px; color:var(--bg); background:var(--loss); }
+.ticker-clip{ position:absolute; left:52px; right:34px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{ display:inline-flex; white-space:nowrap; will-change:transform;
+  animation:tickscroll 42s linear infinite; align-items:center; height:30px; }
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.titem{ font-size:11px; letter-spacing:.04em; color:var(--dim); padding:0 18px; }
+.titem b{ color:var(--ink); font-weight:700; }
+.titem .up{ color:var(--win); } .titem .first{ color:var(--acc); }
+.tpause{ position:absolute; right:0; top:0; bottom:0; width:34px; display:flex; align-items:center;
+  justify-content:center; font-size:9px; color:var(--dim); border-left:1px solid var(--line); background:var(--bg); }
+
+/* ---------- layout ---------- */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+.hrow{ display:flex; align-items:center; gap:8px; padding:9px 0; }
+.hrow .pagelab{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.hrow .pagelab b{ color:var(--ink); }
+.clock{ margin-left:auto; font-family:var(--seg); font-weight:700; font-size:16px; color:var(--dim); }
+
+/* ---------- HERO — stint header (L0, attention §1.1; art band anatomy tokens §4.4) ---------- */
+.hero{ position:relative; min-height:196px; border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); overflow:hidden; background:var(--panel); }
+.hero .art{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  filter:saturate(.72) contrast(1.08) brightness(.72); }
+.hero .tint{ position:absolute; inset:0;
+  background:linear-gradient(112deg, rgba(59,157,255,.42) 0%, rgba(13,13,18,.05) 48%, rgba(255,122,26,.38) 100%);
+  mix-blend-mode:hard-light; }
+.hero .grain{ position:absolute; inset:0; pointer-events:none;
+  -webkit-mask-image:var(--noise); mask-image:var(--noise);
+  -webkit-mask-size:64px 64px; mask-size:64px 64px;
+  background:linear-gradient(180deg, rgba(180,91,255,.20), transparent 60%); }
+.hero .scrim{ position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(13,13,18,.30) 0%, rgba(13,13,18,.55) 42%, rgba(13,13,18,.92) 100%); }
+.hero-in{ position:relative; z-index:1; padding:14px 14px 10px; display:flex; flex-direction:column; gap:8px; min-height:196px; }
+.hero-top{ display:flex; gap:12px; align-items:flex-start; }
+.idtile{ width:84px; height:60px; flex:0 0 auto; border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); overflow:hidden; background:var(--panel2); }
+.idtile img{ width:100%; height:100%; object-fit:cover; filter:saturate(.78) contrast(1.05); display:block; }
+.deckname{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; letter-spacing:-.01em;
+  line-height:.92; font-size:38px; }
+.decksub{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.hero-mid{ display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; margin-top:auto; }
+.recbox .lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; display:block; }
+.recval{ font-family:var(--seg); font-weight:700; font-size:44px; line-height:1.05; display:inline-block; }
+.rec-w{ color:var(--win); } .rec-l{ color:var(--loss); } .rec-n{ color:var(--ink); }
+.recsub{ font-size:10px; color:var(--dim); letter-spacing:.08em; display:block; margin-top:2px; text-transform:uppercase; }
+.evline{ font-size:11px; color:var(--dim); letter-spacing:.04em; text-transform:uppercase; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.evline b{ color:var(--ink); }
+.stamp{ font-size:9px; letter-spacing:.14em; color:var(--loss); border:1px dashed var(--loss);
+  padding:3px 6px; text-transform:uppercase; opacity:.9; white-space:nowrap; }
+.stamp.edited{ color:var(--acc); border-color:var(--acc); }
+.gridchip{ font-family:var(--pix); font-size:7px; padding:5px 6px; border:1px solid #1f4e80;
+  background:var(--panel2); color:var(--win); white-space:nowrap; }
+.gridchip.priv{ position:relative; color:var(--ink); border-color:var(--acc); overflow:hidden; }
+.gridchip.priv i{ position:absolute; inset:0; pointer-events:none;
+  -webkit-mask-image:var(--noise); mask-image:var(--noise); -webkit-mask-size:48px 48px; mask-size:48px 48px;
+  background:linear-gradient(90deg, rgba(180,91,255,.85), rgba(255,122,26,.55)); }
+.gridchip.priv span{ position:relative; z-index:1; }
+.band-credit{ position:absolute; right:8px; top:8px; z-index:2; font-size:9px; letter-spacing:.08em;
+  color:var(--dim); text-transform:uppercase; background:rgba(13,13,18,.72); padding:2px 5px; }
+.plaque{ font-size:11px; letter-spacing:3px; white-space:nowrap; padding:3px 4px 3px 7px;
+  border:1px solid var(--line); background:var(--panel2); line-height:1; }
+.plaque .on{ color:var(--loss); } .plaque .off{ color:#3a3a48; }
+.badge-league{ font-family:var(--pix); font-size:7px; padding:5px 6px; border:1px solid #1f4e80;
+  background:var(--panel2); color:var(--win); white-space:nowrap; }
+
+/* calm strip (attention §1.5) */
+.calm{ font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  padding:10px 2px 8px; line-height:1.7; }
+
+/* ---------- race entry (research §5/§6) ---------- */
+.entryhead{ display:flex; align-items:center; gap:8px; margin:2px 0 8px; }
+.entry{ border:1px solid var(--line); background:var(--panel); box-shadow:2px 2px 0 0 var(--shadow);
+  padding:12px; margin-bottom:14px; display:grid; gap:12px; }
+.entry[hidden]{ display:none; }
+.steplab{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.steplab b{ color:var(--ink); }
+.deckpick{ display:flex; gap:10px; align-items:center; }
+.deckpick .idtile{ width:64px; height:46px; }
+.selwrap{ position:relative; flex:1; min-width:0; }
+.selwrap select{ width:100%; min-height:44px; background:var(--panel2); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:8px 26px 8px 10px; font-size:12px;
+  appearance:none; -webkit-appearance:none; }
+.selwrap::after{ content:"▾"; position:absolute; right:9px; top:50%; transform:translateY(-50%);
+  color:var(--dim); pointer-events:none; font-size:11px; }
+.tywrap{ position:relative; }
+.tywrap input[type="text"]{ width:100%; min-height:44px; background:var(--panel2);
+  border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); padding:8px 10px; font-size:12px; }
+.tyres{ border:1px solid var(--line); border-top:0; background:var(--panel2); max-height:264px; overflow-y:auto; }
+.tyres[hidden]{ display:none; }
+.tyrow{ display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:8px; align-items:center;
+  width:100%; text-align:left; padding:8px 10px; min-height:44px;
+  background:transparent; border:0; border-bottom:1px solid var(--line); color:var(--ink); }
+.tyrow:last-child{ border-bottom:0; }
+.tyrow:hover,.tyrow:focus-visible{ background:#1f1f29; }
+.tyrow .d{ font-size:10px; color:var(--dim); line-height:1.3; }
+.tyrow .nm{ font-weight:700; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+.tyrow .sub{ font-size:10px; color:var(--dim); display:block; }
+.mint{ display:grid; gap:8px; }
+.mint[hidden]{ display:none; }
+.mint .frow{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.mint input[type="text"],.mint input[type="date"]{ min-height:44px; background:var(--panel2);
+  border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); padding:8px 10px; font-size:12px; width:100%; }
+.mint input::placeholder{ color:#55555f; }
+.flab{ font-size:9px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:3px; }
+.mintbtn{ min-height:44px; font-family:var(--pix); font-size:8px; color:var(--ink);
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0 12px;
+  border:1px solid var(--acc); position:relative; overflow:hidden; }
+.mintbtn i{ position:absolute; inset:0; pointer-events:none; -webkit-mask-image:var(--noise); mask-image:var(--noise);
+  -webkit-mask-size:48px 48px; mask-size:48px 48px;
+  background:linear-gradient(90deg, rgba(180,91,255,.5), rgba(255,122,26,.35)); }
+.mintbtn span{ position:relative; z-index:1; }
+.tyhide[hidden]{ display:none; }
+
+/* backfill strip (research §3) */
+.unkstrip{ display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  border:1px dashed var(--loss); background:var(--panel); padding:8px 10px; margin-bottom:12px;
+  font-size:10px; letter-spacing:.1em; color:var(--loss); text-transform:uppercase; min-height:40px; }
+.unkstrip[hidden]{ display:none; }
+.unkstrip .go{ margin-left:auto; color:var(--dim); }
+
+/* ---------- lap cards (research §2) ---------- */
+.sechead{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin:4px 0 8px; }
+.sechead b{ color:var(--ink); }
+.lap{ position:relative; border:1px solid var(--line); background:var(--panel);
+  box-shadow:2px 2px 0 0 var(--shadow); margin-bottom:10px; }
+.lap.win{ border-left:3px solid var(--win); }
+.lap.loss{ border-left:3px solid var(--loss); }
+.lap.draw{ border-left:3px solid #55555f; }
+.laptab{ position:absolute; left:-1px; top:-1px; z-index:2; width:34px; height:24px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:11px; color:var(--ink); background:var(--panel2); border:1px solid var(--line); }
+.laptab i{ position:absolute; inset:0; pointer-events:none; -webkit-mask-image:var(--noise); mask-image:var(--noise);
+  -webkit-mask-size:48px 48px; mask-size:48px 48px;
+  background:linear-gradient(120deg, rgba(255,122,26,.75), rgba(59,157,255,.45)); }
+.laptab span{ position:relative; z-index:1; }
+.laphead{ display:flex; align-items:center; gap:8px; width:100%; text-align:left;
+  padding:8px 10px 8px 44px; min-height:44px; background:transparent; border:0; color:var(--ink); }
+.laphead .nm{ font-weight:700; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  display:block; min-width:0; text-transform:uppercase; letter-spacing:.02em; }
+.laphead .nm.unk{ color:var(--dim); font-weight:400; font-style:normal; }
+.laphead .score{ margin-left:auto; font-weight:800; font-size:12px; white-space:nowrap; }
+.laphead .score.w{ color:var(--win); } .laphead .score.l{ color:var(--loss); } .laphead .score.d,.laphead .score.n{ color:var(--dim); }
+.laphead .caret{ color:var(--dim); font-size:10px; }
+.lapbody{ padding:4px 10px 12px 44px; display:grid; gap:10px; }
+.lapbody[hidden]{ display:none; }
+.opprow{ display:flex; gap:8px; align-items:center; }
+.opprow .selwrap{ flex:1; }
+.opprow select.unksel{ border-style:dashed; color:var(--dim); }
+.steps{ display:flex; gap:8px; align-items:stretch; }
+.step{ flex:1; min-height:56px; min-width:44px; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:2px; color:var(--ink); }
+.step .k{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+.step .d{ font-family:var(--seg); font-weight:700; font-size:24px; line-height:1; }
+.step.sw-w .d{ color:var(--win); } .step.sw-l .d{ color:var(--loss); } .step.sw-d .d{ color:var(--dim); }
+.setuptog{ background:transparent; border:0; color:var(--dim); font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; text-align:left; padding:4px 0; min-height:32px; }
+.setup{ border:1px dashed var(--line); padding:10px; display:grid; gap:8px; background:var(--panel2); }
+.setup[hidden]{ display:none; }
+.setup .row2{ display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:center; }
+.lamp{ min-height:44px; padding:0 10px; display:inline-flex; align-items:center; gap:8px;
+  font-size:10px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+.lamp .dot{ width:10px; height:10px; border:1px solid var(--line); background:#1c1c26; display:inline-block; }
+.lamp.play .dot{ background:var(--win); border-color:var(--win); }
+.lamp.draw2 .dot{ background:var(--loss); border-color:var(--loss); }
+.lamp.play,.lamp.draw2{ color:var(--ink); }
+.setup input[type="text"],.setup textarea{ background:var(--bg); border:1px solid var(--line);
+  padding:8px 10px; font-size:11px; width:100%; }
+.setup textarea{ min-height:52px; resize:vertical; }
+.setup input::placeholder,.setup textarea::placeholder{ color:#55555f; }
+.radio{ font-size:11px; color:var(--dim); border-left:2px solid var(--loss);
+  padding:4px 10px; margin:0 10px 10px 44px; letter-spacing:.02em; }
+.radio[hidden]{ display:none; }
+.radio b{ color:var(--loss); font-size:9px; letter-spacing:.12em; }
+
+.addlap{ width:100%; min-height:44px; font-family:var(--pix); font-size:8px; color:var(--dim);
+  display:flex; align-items:center; justify-content:center; gap:8px; margin:2px 0 14px; }
+.actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.endbtn{ min-height:48px; font-family:var(--pix); font-size:8px; color:var(--ink);
+  display:inline-flex; align-items:center; justify-content:center; padding:0 10px;
+  border:1px solid var(--loss); position:relative; overflow:hidden; }
+.endbtn i{ position:absolute; inset:0; pointer-events:none;
+  background-image:var(--grain), linear-gradient(90deg, rgba(255,122,26,.4), rgba(59,157,255,.28));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.endbtn span{ position:relative; z-index:1; }
+.csvbtn{ min-height:48px; font-family:var(--pix); font-size:8px; color:var(--dim);
+  display:inline-flex; align-items:center; justify-content:center; padding:0 10px; text-decoration:none; text-align:center; }
+
+/* frozen state */
+body.frozen .steps .step,body.frozen .opprow select,body.frozen .setup input,
+body.frozen .setup textarea,body.frozen .lamp,body.frozen .addlap{ pointer-events:none; opacity:.55; }
+body.frozen .addlap{ display:none; }
+
+/* ---------- stint report (research §11) ---------- */
+.report{ border:1px solid var(--line); background:var(--panel); box-shadow:2px 2px 0 0 var(--shadow);
+  margin-bottom:16px; }
+.report[hidden]{ display:none; }
+.rephead{ position:relative; padding:12px; border-bottom:1px solid var(--line); overflow:hidden; }
+.rephead::before{ content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.rephead .t{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; font-size:24px; line-height:.95; }
+.rephead .m{ font-size:10px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; margin-top:5px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.repbody{ padding:6px 12px 12px; }
+.reprow{ display:flex; gap:8px; align-items:baseline; padding:7px 0; border-bottom:1px dashed #22222b; font-size:12px; }
+.reprow:last-of-type{ border-bottom:0; }
+.reprow .rn{ font-weight:800; color:var(--dim); flex:0 0 26px; }
+.reprow .vs{ font-weight:700; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.reprow .vs.unk{ color:var(--dim); font-weight:400; }
+.reprow .rs{ margin-left:auto; font-weight:800; white-space:nowrap; }
+.reprow .rs.w{ color:var(--win); } .reprow .rs.l{ color:var(--loss); } .reprow .rs.d{ color:var(--dim); }
+.repradio{ font-size:11px; color:var(--dim); border-left:2px solid var(--loss); padding:2px 8px; margin:2px 0 4px 26px; }
+.repfoot{ padding:8px 12px 12px; display:flex; gap:10px; align-items:center; border-top:1px solid var(--line); }
+.copybtn{ min-height:44px; font-family:var(--pix); font-size:8px; color:var(--dim);
+  display:inline-flex; align-items:center; padding:0 12px; }
+.repnote{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; line-height:1.7; }
+
+/* ---------- track conditions (research §8–9) ---------- */
+.tcpanel{ border:1px solid var(--line); background:var(--panel); box-shadow:2px 2px 0 0 var(--shadow);
+  padding:12px; margin-bottom:14px; }
+.tcpanel .ph{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.tcpanel .ph b{ color:var(--ink); }
+.caveat{ font-size:9px; letter-spacing:.1em; color:var(--loss); border:1px dashed var(--loss);
+  padding:2px 5px; text-transform:uppercase; }
+.callout{ border:1px dashed var(--line); background:var(--panel2); padding:10px; margin-bottom:12px; }
+.callout .big{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; font-size:19px; line-height:1.05; }
+.callout .big em{ font-style:normal; color:var(--loss); }
+.callout .sub{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin-top:4px; }
+.mrow{ display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:10px; align-items:center;
+  padding:8px 0; border-bottom:1px dashed #22222b; }
+.mrow:last-child{ border-bottom:0; }
+.mrow.lown{ opacity:.55; }
+.mrow .nm{ font-weight:700; font-size:12px; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; display:block; }
+.mrow .nm.unk{ color:var(--dim); font-weight:400; }
+.mrow .meta{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; display:flex; gap:6px; align-items:center; margin-top:2px; }
+.lowtag{ font-size:8px; letter-spacing:.1em; color:var(--loss); border:1px dashed var(--loss); padding:1px 4px; }
+.mrow .wr{ font-family:var(--seg); font-weight:700; font-size:18px; text-align:right; }
+.mrow .wr .unit{ font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--dim); font-weight:400; }
+.wr-w{ color:var(--win); } .wr-l{ color:var(--loss); } .wr-n{ color:var(--ink); }
+.mrow .n{ font-size:10px; color:var(--dim); text-align:right; }
+.brow{ padding:8px 0; border-bottom:1px dashed #22222b; }
+.brow:last-child{ border-bottom:0; }
+.brow .bh{ display:flex; align-items:baseline; gap:8px; font-size:11px; }
+.brow .bh .nm{ font-weight:700; text-transform:uppercase; }
+.brow .bh .x{ margin-left:auto; font-weight:800; }
+.brow .bh .x.hot{ color:var(--loss); }
+.bars{ display:grid; gap:3px; margin-top:5px; }
+.bar{ display:grid; grid-template-columns:34px minmax(0,1fr) 46px; gap:8px; align-items:center; font-size:9px; color:var(--dim); }
+.bar .tr{ height:8px; background:#1c1c26; border:1px solid #22222b; position:relative; }
+.bar .tr i{ position:absolute; inset:0 auto 0 0; }
+.bar.you .tr i{ background:var(--win); }
+.bar.fld .tr i{ background:#55555f; }
+.bar .pv{ text-align:right; }
+
+/* ---------- footer ---------- */
+.grainband{ height:8px; position:relative; margin:22px 0 14px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.grainband::before{ content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win)); opacity:.22; z-index:-1; }
+.wordmark{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; line-height:.9; font-size:46px; }
+.wordmark .hollow{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+.fine{ font-size:9px; color:var(--dim); letter-spacing:.06em; line-height:1.7; text-transform:uppercase;
+  margin:10px 0 28px; }
+
+/* ---------- motion (tokens §6) ---------- */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .glitch{ animation:none; }
+  .press,.press:active{ transition:none; }
+  .tpause{ display:none; }
+}
+
+/* ---------- wide ≥1100px — pit-wall spread (tokens §7.3) ---------- */
+.spread{ display:block; }
+@media (min-width:1100px){
+  .wrap{ max-width:1360px; padding:0 24px; }
+  .hero{ min-height:230px; }
+  .hero-in{ min-height:230px; }
+  .deckname{ font-size:56px; }
+  .recval{ font-size:52px; }
+  .spread{ display:grid; grid-template-columns:minmax(0,1fr) 400px; column-gap:20px; align-items:start; }
+  .rail{ position:sticky; top:44px; max-height:calc(100dvh - 56px); overflow-y:auto; scrollbar-width:none;
+    border-left:1px solid var(--line); padding-left:20px; }
+  .rail::-webkit-scrollbar{ display:none; }
+  .wordmark{ font-size:72px; }
+}
+</style>
+</head>
+<body>
+
+<!-- WIRE ticker — real results from archetype-page-data.json (chip 1) -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false" aria-label="results wire, tap to pause">
+  <span class="wbadge">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="ttrack"></div></div>
+  <span class="tpause" id="tpause" aria-hidden="true">❚❚</span>
+</div>
+
+<div class="wrap">
+
+  <div class="hrow">
+    <button class="press sw" id="backBtn" type="button" aria-label="back to pit wall">◀ PIT</button>
+    <span class="pagelab"><b>STINT LOG</b> — TOURNAMENT REPORT</span>
+    <span class="clock" id="clock" aria-hidden="true"></span>
+  </div>
+
+  <!-- ============ HERO (L0): stint header — deck identity + event + live record ============ -->
+  <header class="hero" id="hero">
+    <img class="art" src="https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708" alt="" loading="eager" decoding="async">
+    <span class="band-credit">ART CROP: MURKTIDE REGENT</span>
+    <div class="tint"></div><div class="grain"></div><div class="scrim"></div>
+    <div class="hero-in">
+      <div class="hero-top">
+        <div class="idtile"><img src="https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708" alt="registered deck identity art" loading="eager" decoding="async"></div>
+        <div style="min-width:0">
+          <h1 class="deckname" id="heroDeck">Izzet Wizards</h1>
+          <div class="decksub" id="heroDeckSub">74 CARDS · MODERN <span class="pips" aria-label="colors blue red"><span class="pip pip-U"></span><span class="pip pip-R"></span></span></div>
+        </div>
+      </div>
+      <div class="evline" id="heroEvent"></div>
+      <div class="hero-mid">
+        <div class="recbox">
+          <span class="lbl" id="recLbl">RECORD — LIVE</span>
+          <span class="recval rec-n" id="recVal">0-0</span>
+          <span class="recsub" id="recSub"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-left:auto">
+          <span class="gridchip" id="gridChip">SANCTIONED GRID</span>
+          <span class="stamp" id="stamp">SELF-REPORTED · UNVERIFIED</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <p class="calm">MANUAL TIMING SHEET — LOG EACH ROUND BETWEEN PAIRINGS. OPPONENT ID OPTIONAL, NEVER BLOCKING.</p>
+
+  <!-- ============ RACE ENTRY (collapsed; research §5) ============ -->
+  <div class="entryhead">
+    <button class="press sw" id="entryToggle" type="button" aria-expanded="false" aria-controls="entryPanel">ENTRY ▸</button>
+    <span class="steplab">RACE ENTRY — DECK &amp; EVENT</span>
+  </div>
+  <section class="entry" id="entryPanel" hidden>
+    <div>
+      <span class="steplab" style="display:block;margin-bottom:6px"><b>STEP 1</b> — YOUR MACHINE (SAVED DECKS)</span>
+      <div class="deckpick">
+        <div class="idtile"><img src="https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708" alt="" loading="lazy" decoding="async"></div>
+        <div class="selwrap">
+          <select id="deckSel" aria-label="saved deck">
+            <option value="0" selected>Izzet Wizards — 74 cards (Azja · Modern Challenge 64 · 2024-06-18)</option>
+          </select>
+        </div>
+      </div>
+      <p class="calm" style="padding:6px 0 0">ONE SAVED DECK IN THIS DEMO — IMPORTED FROM THE DECK VIEWER. LIST SNAPSHOT = DECK-VERSION V1.</p>
+    </div>
+    <div>
+      <span class="steplab" style="display:block;margin-bottom:6px"><b>STEP 2</b> — EVENT</span>
+      <div class="seg" role="group" aria-label="event source">
+        <button class="press sw on" id="modeSanc" type="button" aria-pressed="true">SANCTIONED GRID</button>
+        <button class="press sw" id="modePriv" type="button" aria-pressed="false">PRIVATE CIRCUIT</button>
+      </div>
+      <div class="tywrap tyhide" id="sancPane" style="margin-top:8px">
+        <input type="text" id="evtSearch" placeholder="TYPE TO SEARCH INGESTED EVENTS…" aria-label="search ingested events" autocomplete="off">
+        <div class="tyres" id="tyRes" role="listbox" aria-label="matching events" hidden></div>
+        <p class="calm" style="padding:6px 0 0">10 INGESTED MTGO EVENTS EMBEDDED (APR–JUN 2024 WINDOW). ★ SCALE: ★&lt;32 · ★★32–63 · ★★★64–127 · ★★★★128–255 · ★★★★★256+ · LEAGUE = 5-0, SIZE UNREPORTED.</p>
+      </div>
+      <div class="mint" id="privPane" style="margin-top:8px" hidden>
+        <div class="frow">
+          <div><span class="flab">EVENT NAME *</span><input type="text" id="mName" placeholder="FNM MODERN"></div>
+          <div><span class="flab">STORE / VENUE</span><input type="text" id="mStore" placeholder="LOCAL GAME STORE"></div>
+        </div>
+        <div class="frow">
+          <div><span class="flab">FORMAT</span>
+            <div class="selwrap"><select id="mFmt" aria-label="format">
+              <option>Modern</option><option>Pioneer</option><option>Legacy</option>
+            </select></div>
+          </div>
+          <div><span class="flab">DATE</span><input type="date" id="mDate"></div>
+        </div>
+        <button class="press mintbtn" id="mintBtn" type="button"><i aria-hidden="true"></i><span>⚑ MINT PRIVATE CIRCUIT</span></button>
+        <p class="calm" style="padding:0">PRIVATE EVENTS STAY YOURS — THEY NEVER ENTER THE GLOBAL WIRE. PROVENANCE CHIP STAYS VISIBLE.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- backfill invitation, never a blocker (research §3) -->
+  <button class="unkstrip" id="unkStrip" type="button" hidden>
+    <span id="unkTxt"></span><span class="go">TAP TO BACKFILL ▸</span>
+  </button>
+
+  <div class="spread">
+    <div class="maincol">
+
+      <!-- ============ LAP CARDS ============ -->
+      <p class="sechead"><b>LAP CARDS</b> — ROUND BY ROUND · TAP A ROUND TO EDIT</p>
+      <div id="laps"></div>
+
+      <button class="press addlap" id="addLap" type="button">+ ADD LAP — R<span id="nextR">4</span></button>
+
+      <div class="actions">
+        <button class="press endbtn" id="endBtn" type="button"><i aria-hidden="true"></i><span>⚑ END STINT</span></button>
+        <a class="press csvbtn" id="csvBtn" href="#" download="stint-telemetry.csv">⇩ DOWNLOAD TELEMETRY (CSV)</a>
+      </div>
+
+      <!-- ============ COMPOSED STINT REPORT (frozen state; research §11) ============ -->
+      <section class="report" id="report" hidden aria-label="composed stint report">
+        <div class="rephead">
+          <div class="t" id="repTitle"></div>
+          <div class="m" id="repMeta"></div>
+        </div>
+        <div class="repbody" id="repBody"></div>
+        <div class="repfoot">
+          <button class="press copybtn" id="copyBtn" type="button">⧉ COPY REPORT</button>
+          <span class="repnote">COMPOSED FROM <span id="repN">0</span> LAP CARDS · SELF-REPORTED<span id="repEd"></span></span>
+        </div>
+      </section>
+
+    </div>
+    <aside class="rail">
+
+      <!-- ============ TRACK CONDITIONS (research §8–9) ============ -->
+      <p class="sechead" style="margin-top:14px"><b>TRACK CONDITIONS</b> — WHAT YOU ACTUALLY FACE</p>
+
+      <div class="callout" id="calloutBox" hidden>
+        <div class="big" id="calloutTxt"></div>
+        <div class="sub">LOCAL SHARE OF YOUR LOGGED ROUNDS VS GLOBAL FIELD SHARE · DEMO LOG</div>
+      </div>
+
+      <div class="tcpanel">
+        <div class="ph"><b>LOCAL VS GLOBAL</b> SHARE <span class="caveat">DEMO</span></div>
+        <div id="shareRows"></div>
+        <p class="calm" style="padding:8px 0 0">FIELD = SHARE OF 6,242 DECKS ACROSS THE 10 TRACKED MODERN ARCHETYPES (S1 SAMPLE, APR–JUN 2024) — A SAMPLE-SHARE PROXY, NOT A MEASURED META SHARE. YOU = SHARE OF YOUR LOGGED ROUNDS (DEMO).</p>
+      </div>
+
+      <div class="tcpanel">
+        <div class="ph"><b>MATCHUP TELEMETRY</b> — PERSONAL WR <span class="caveat">DEMO</span></div>
+        <div id="wrRows"></div>
+        <p class="calm" style="padding:8px 0 0">COMPUTED LIVE FROM THIS STINT'S LAP CARDS ONLY — NOT REAL PLAYER HISTORY. ROWS UNDER N&lt;5 DIM AS LOW SAMPLE. DRAWS COUNT 0.5.</p>
+      </div>
+
+      <div class="tcpanel">
+        <div class="ph"><b>SCRUTINEERING</b></div>
+        <p style="font-size:11px;color:var(--dim);line-height:1.6">
+          ALL LAPS ON THIS SHEET ARE <span style="color:var(--loss)">SELF-REPORTED</span>.
+          THE SCHEMA RESERVES <span style="color:var(--ink)">confirmed_by</span> — WHEN BOTH PLAYERS
+          LOG THE SAME PAIRING, ENTRIES UPGRADE TO VERIFIED WITHOUT MIGRATION.
+          EDITS AFTER END STINT ARE ALLOWED BUT STAMPED ⚒ WITH A TIMESTAMP.
+        </p>
+      </div>
+
+    </aside>
+  </div>
+
+  <div class="grainband" role="presentation"></div>
+  <div class="wordmark">METASURF<br><span class="hollow">STINT LOG</span></div>
+  <p class="fine">
+    MOCKUP · THE STINT (ROUNDS, SCORES, NOTES, PERSONAL WR) IS PLACEHOLDER DEMO DATA — NOT A REAL PLAYER LOG ·
+    DECK: AZJA, 1ST PLACE, MODERN CHALLENGE 64 2024-06-18 (60+14=74 CARDS, DECK-VIEWER-DATA.JSON) ·
+    EVENTS: MTGO DECKLIST CACHE VIA ARCHETYPE-PAGE-DATA.JSON, WINDOW 2024-04-01 → 2024-06-19 ·
+    ARCHETYPES &amp; COLORS: S1-ARCHETYPE-VISUALS.JSON — COLORS PIP-MINED FROM APR–JUN 2024 MTGO MAINBOARDS;
+    RULE-FILE PORT PENDING (OWNER FLAG) ·
+    FIELD SHARE = S1 DECK-SAMPLE SHARE (6,242 DECKS / 10 ARCHETYPES) — DEMO PROXY ·
+    PRODUCTION: LOGS SERVER-SIDE; RAW LAPS &amp; CSV NEVER GATED (ENTITLEMENTS POSTURE) ·
+    CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL
+  </p>
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+/* ================= GROUNDING DATA (embedded from real JSON on disk) ================= */
+/* s1-archetype-visuals.json → formats.MODERN — names, pip-mined colors, deck samples */
+const ARCHES = [
+  { name:'Izzet Murktide',     colors:['U','R'],     sample:717  },
+  { name:'Rakdos Scam',        colors:['B','R'],     sample:1966 },
+  { name:'Amulet Titan',       colors:['G'],         sample:919  },
+  { name:'Yawgmoth',           colors:['B','G'],     sample:1041 },
+  { name:'Living End',         colors:['U','B','G'], sample:679  },
+  { name:'Mono-Green Tron',    colors:['B','G'],     sample:123  },
+  { name:'Burn',               colors:['R'],         sample:281  },
+  { name:'Hammer Time',        colors:['W'],         sample:113  },
+  { name:'Crashing Footfalls', colors:['W','U','G'], sample:146  },
+  { name:'Jund Saga',          colors:['B','R','G'], sample:257  },
+];
+const SAMPLE_TOTAL = ARCHES.reduce((s,a)=>s+a.sample,0); // 6242 — field share derived at render time
+
+/* archetype-page-data.json → notable[] + latest[] (+ the deck's own event from deck-viewer-data.json) */
+const EVENTS = [
+  { name:'Modern Challenge 64',  date:'2024-06-18', players:null, stars:null, league:false }, // deck's event; field size not in grounding
+  { name:'Modern Challenge 32',  date:'2024-06-18', players:66,  stars:3, league:false },
+  { name:'Modern Challenge 64',  date:'2024-06-15', players:64,  stars:3, league:false },
+  { name:'Modern Challenge 32',  date:'2024-06-14', players:81,  stars:3, league:false },
+  { name:'Modern Challenge 64',  date:'2024-06-04', players:68,  stars:3, league:false },
+  { name:'Modern Challenge 64',  date:'2024-05-21', players:70,  stars:3, league:false },
+  { name:'Modern Challenge 64',  date:'2024-05-13', players:68,  stars:3, league:false },
+  { name:'Modern Preliminary',   date:'2024-06-19', players:20,  stars:1, league:false },
+  { name:'Modern Preliminary',   date:'2024-06-19', players:42,  stars:2, league:false },
+  { name:'Modern League',        date:'2024-06-19', players:null, stars:null, league:true },
+];
+
+/* ================= STATE — demo stint (PLACEHOLDER log, labeled) ================= */
+const stint = {
+  event:{ name:'Modern Preliminary', date:'2024-06-19', players:42, stars:2, league:false, private:false, store:null, format:'Modern' },
+  laps:[
+    { opp:'Rakdos Scam',  w:2, l:1, d:0, pd:'draw', ver:'V1 — AZJA CH64 LIST', note:'G1 LOST TO T1 GRIEF · G2-G3 HELD UP COUNTERSPELL', open:false },
+    { opp:null,           w:2, l:0, d:0, pd:null,   ver:'',                    note:'', open:false },
+    { opp:'Amulet Titan', w:1, l:2, d:0, pd:null,   ver:'',                    note:'', open:true  },
+  ],
+  frozen:false, edited:false, editedAt:null,
+};
+
+/* ================= helpers ================= */
+function glitch(el){
+  if(RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+function lapResult(l){ // null = unreported (all zero)
+  if(l.w===0 && l.l===0 && l.d===0) return null;
+  if(l.w>l.l) return 'win'; if(l.l>l.w) return 'loss'; return 'draw';
+}
+function record(){
+  let w=0,l=0,d=0,played=0;
+  stint.laps.forEach(x=>{ const r=lapResult(x); if(!r) return; played++;
+    if(r==='win')w++; else if(r==='loss')l++; else d++; });
+  return {w,l,d,played};
+}
+function recStr(r){ return r.w+'-'+r.l+(r.d>0 ? '-'+r.d : ''); }
+function pipsHTML(colors){
+  return '<span class="pips" aria-hidden="true">'+colors.map(c=>'<span class="pip pip-'+c+'"></span>').join('')+'</span>';
+}
+function plaqueHTML(ev){
+  if(ev.private) return '';
+  if(ev.league) return '<span class="badge-league">LEAGUE</span>';
+  if(ev.stars==null) return '<span class="plaque" role="img" aria-label="field size not reported"><span class="off">★★★★★</span></span>';
+  const on='★'.repeat(ev.stars), off='★'.repeat(5-ev.stars);
+  return '<span class="plaque" role="img" aria-label="event grade '+ev.stars+' of 5, '+ev.players+' players" title="'+ev.players+' players">'
+    +'<span class="on">'+on+'</span><span class="off">'+off+'</span></span>';
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ================= ticker (real results, archetype-page-data.json) ================= */
+(function(){
+  const items = [
+    '<b>MODERN CHALLENGE 32</b> · 06-18 · 5TH CRAZYMORANGO · IZZET MURKTIDE',
+    '<b>MODERN CHALLENGE 64</b> · 06-15 · 5TH SHADOWZ2005 · IZZET MURKTIDE',
+    '<span class="first"><b>MODERN CHALLENGE 32</b> · 06-14 · 1ST O_DANIELAKOS · IZZET MURKTIDE</span>',
+    '<span class="up"><b>MODERN LEAGUE</b> · 06-19 · 5-0 MORRISON90 · IZZET MURKTIDE</span>',
+    '<b>MODERN PRELIMINARY</b> · 06-19 · 3-1 416FROWNINGTABLE · IZZET MURKTIDE',
+    '<span class="first"><b>MODERN CHALLENGE 64</b> · 05-13 · 1ST MOGGED · IZZET MURKTIDE</span>',
+    'WIRE SYNC 2024-06-19 · MTGO DECKLIST CACHE',
+  ];
+  const half = items.map(t=>'<span class="titem">'+t+'</span>').join('');
+  const track = $('ttrack');
+  track.innerHTML = half + half; // duplicated once; -50% = seamless loop
+  function speed(){ const w=track.scrollWidth/2; if(w>0) track.style.animationDuration=(w/35)+'s'; }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(speed); else speed();
+  const tick=$('ticker');
+  function toggle(){ const p=tick.classList.toggle('paused');
+    tick.setAttribute('aria-pressed',p); $('tpause').textContent=p?'▶':'❚❚'; }
+  tick.addEventListener('click',toggle);
+  tick.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+})();
+
+/* ================= clock ================= */
+(function(){
+  const c=$('clock');
+  function t(){ const n=new Date(), s=n.getSeconds();
+    const colon=(RM || s%2===0)?':':' ';
+    c.textContent=String(n.getHours()).padStart(2,'0')+colon+String(n.getMinutes()).padStart(2,'0'); }
+  t(); setInterval(t,1000);
+})();
+
+/* ================= hero render ================= */
+function renderHero(){
+  const ev=stint.event;
+  const sub = ev.private
+    ? [ev.store||'—', ev.format, ev.date].join(' · ')
+    : ev.date + (ev.players!=null ? ' · '+ev.players+' PLAYERS' : (ev.league ? ' · MTGO LEAGUE' : ' · FIELD N/R'));
+  $('heroEvent').innerHTML = '<b>'+esc(ev.name).toUpperCase()+'</b> · '+esc(sub).toUpperCase()+' '+plaqueHTML(ev);
+  const chip=$('gridChip');
+  if(ev.private){ chip.className='gridchip priv'; chip.innerHTML='<i aria-hidden="true"></i><span>PRIVATE CIRCUIT</span>'; }
+  else{ chip.className='gridchip'; chip.textContent='SANCTIONED GRID'; }
+  const r=record(), el=$('recVal'), s=recStr(r);
+  el.className='recval '+(r.w>r.l?'rec-w':(r.l>r.w?'rec-l':'rec-n'));
+  if(el.textContent!==s){ el.textContent=s; glitch(el); }
+  $('recLbl').textContent = stint.frozen ? 'RECORD — FINAL' : 'RECORD — LIVE';
+  $('recSub').textContent = (stint.frozen ? 'CHEQUERED FLAG · ' : '') + 'AFTER R'+r.played+' · '
+    + (stint.frozen ? 'STINT CLOSED' : 'STINT OPEN');
+  const st=$('stamp');
+  if(stint.edited){ st.className='stamp edited'; st.textContent='⚒ EDITED '+stint.editedAt+' · SELF-REPORTED'; }
+  else{ st.className='stamp'; st.textContent='SELF-REPORTED · UNVERIFIED'; }
+}
+
+/* ================= race entry ================= */
+$('entryToggle').addEventListener('click',()=>{
+  const p=$('entryPanel'), open=p.hidden;
+  p.hidden=!open;
+  $('entryToggle').setAttribute('aria-expanded',open);
+  $('entryToggle').textContent = open ? 'ENTRY ▾' : 'ENTRY ▸';
+});
+function setMode(priv){
+  $('modeSanc').classList.toggle('on',!priv); $('modeSanc').setAttribute('aria-pressed',!priv);
+  $('modePriv').classList.toggle('on',priv);  $('modePriv').setAttribute('aria-pressed',priv);
+  $('sancPane').hidden=priv; $('privPane').hidden=!priv;
+}
+$('modeSanc').addEventListener('click',()=>setMode(false));
+$('modePriv').addEventListener('click',()=>setMode(true));
+
+/* typeahead over the 10 embedded real events */
+const tyRes=$('tyRes'), evtSearch=$('evtSearch');
+function tyRender(q){
+  const needle=(q||'').trim().toLowerCase();
+  const hits=EVENTS.filter(e=>!needle || (e.name+' '+e.date).toLowerCase().includes(needle));
+  tyRes.innerHTML = hits.length
+    ? hits.map((e,i)=>{
+        const idx=EVENTS.indexOf(e);
+        return '<button type="button" class="tyrow" role="option" data-ei="'+idx+'">'
+          +'<span class="d">'+e.date.slice(5)+'<br>'+e.date.slice(0,4)+'</span>'
+          +'<span style="min-width:0"><span class="nm">'+esc(e.name)+'</span>'
+          +'<span class="sub">'+(e.players!=null ? e.players+' PLAYERS' : (e.league?'MTGO LEAGUE · SIZE UNREPORTED':'FIELD N/R'))+'</span></span>'
+          +plaqueHTML(e)+'</button>';
+      }).join('')
+    : '<div style="padding:10px;font-size:10px;color:var(--dim)">NO MATCH IN INGESTED EVENTS — MINT A PRIVATE CIRCUIT INSTEAD.</div>';
+  tyRes.hidden=false;
+}
+evtSearch.addEventListener('input',()=>tyRender(evtSearch.value));
+evtSearch.addEventListener('focus',()=>tyRender(evtSearch.value));
+tyRes.addEventListener('click',e=>{
+  const b=e.target.closest('[data-ei]'); if(!b) return;
+  const ev=EVENTS[+b.dataset.ei];
+  stint.event={ ...ev, private:false, store:null, format:'Modern' };
+  evtSearch.value=ev.name+' · '+ev.date;
+  tyRes.hidden=true;
+  markEditedIfFrozen(); renderHero();
+});
+
+/* local event mint */
+$('mDate').value='2026-07-10';
+$('mintBtn').addEventListener('click',()=>{
+  const name=$('mName').value.trim();
+  if(!name){ $('mName').focus(); $('mName').style.borderColor='var(--loss)'; return; }
+  $('mName').style.borderColor='';
+  stint.event={ name:name, date:$('mDate').value||'2026-07-10', players:null, stars:null, league:false,
+    private:true, store:$('mStore').value.trim()||null, format:$('mFmt').value };
+  markEditedIfFrozen(); renderHero();
+  glitch($('gridChip'));
+});
+
+/* ================= lap cards ================= */
+const lapsEl=$('laps');
+function oppOptions(sel){
+  let h='<option value=""'+(sel==null?' selected':'')+'>— UNKNOWN — NO ID —</option>';
+  ARCHES.forEach(a=>{ h+='<option value="'+esc(a.name)+'"'+(sel===a.name?' selected':'')+'>'+esc(a.name)+'</option>'; });
+  return h;
+}
+function renderLaps(){
+  lapsEl.innerHTML = stint.laps.map((l,i)=>{
+    const r=lapResult(l), rn=i+1;
+    const arch=ARCHES.find(a=>a.name===l.opp);
+    const nm = l.opp ? esc(l.opp).toUpperCase() : 'UNKNOWN — NO ID';
+    const scoreTxt = r ? ({win:'W',loss:'L',draw:'D'})[r]+' '+l.w+'-'+l.l+(l.d?'-'+l.d:'') : '—';
+    const pd = l.pd==='play' ? 'ON THE PLAY' : l.pd==='draw' ? 'ON THE DRAW' : 'P/D: NA';
+    return `
+    <article class="lap ${r||''}" data-i="${i}">
+      <span class="laptab" aria-hidden="true"><i></i><span>R${rn}</span></span>
+      <button class="laphead" type="button" data-act="toggle" data-i="${i}" aria-expanded="${l.open}">
+        <span class="nm ${l.opp?'':'unk'}">${nm}</span>
+        ${arch ? pipsHTML(arch.colors) : ''}
+        <span class="score ${r ? r[0] : 'n'}">${scoreTxt}</span>
+        <span class="caret">${l.open?'▾':'▸'}</span>
+      </button>
+      <div class="lapbody" ${l.open?'':'hidden'}>
+        <div class="opprow">
+          <div class="selwrap" style="min-width:0">
+            <select data-act="opp" data-i="${i}" class="${l.opp?'':'unksel'}" aria-label="round ${rn} opponent archetype" ${stint.frozen?'disabled':''}>
+              ${oppOptions(l.opp)}
+            </select>
+          </div>
+          <span class="pips" data-role="opppips">${arch ? arch.colors.map(c=>'<span class="pip pip-'+c+'"></span>').join('') : ''}</span>
+        </div>
+        <div class="steps" role="group" aria-label="round ${rn} game score, tap to increment">
+          <button class="press step sw-w" type="button" data-act="step" data-k="w" data-i="${i}" aria-label="round ${rn} game wins: ${l.w}, tap to increment"><span class="k">W</span><span class="d">${l.w}</span></button>
+          <button class="press step sw-l" type="button" data-act="step" data-k="l" data-i="${i}" aria-label="round ${rn} game losses: ${l.l}, tap to increment"><span class="k">L</span><span class="d">${l.l}</span></button>
+          <button class="press step sw-d" type="button" data-act="step" data-k="d" data-i="${i}" aria-label="round ${rn} game draws: ${l.d}, tap to increment"><span class="k">D</span><span class="d">${l.d}</span></button>
+        </div>
+        <button class="setuptog" type="button" data-act="setup" data-i="${i}" aria-expanded="false">SETUP SHEET ▸ — PLAY/DRAW · DECK VERSION · NOTES (OPTIONAL)</button>
+        <div class="setup" hidden>
+          <div class="row2">
+            <button class="press lamp ${l.pd==='play'?'play':l.pd==='draw'?'draw2':''}" type="button" data-act="pd" data-i="${i}" aria-label="turn order, currently ${pd}, tap to cycle">
+              <span class="dot" aria-hidden="true"></span><span data-role="pdlab">${pd}</span>
+            </button>
+            <div><span class="flab">DECK VERSION</span>
+              <input type="text" data-act="ver" data-i="${i}" value="${esc(l.ver)}" placeholder="NA — LIST SNAPSHOT TAG" ${stint.frozen?'disabled':''}></div>
+          </div>
+          <div><span class="flab">RADIO MESSAGE — ROUND NOTES</span>
+            <textarea data-act="note" data-i="${i}" placeholder="ONE-LINER FOR THE REPORT…" ${stint.frozen?'disabled':''}>${esc(l.note)}</textarea></div>
+        </div>
+      </div>
+      <p class="radio" data-role="radio" ${l.note?'':'hidden'}><b>R${rn} RADIO</b> — <span data-role="radiotxt">${esc(l.note)}</span></p>
+    </article>`;
+  }).join('');
+  $('nextR').textContent = stint.laps.length+1;
+}
+
+/* delegated lap events */
+lapsEl.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const i=+b.dataset.i, l=stint.laps[i], act=b.dataset.act;
+  if(act==='toggle'){ l.open=!l.open; renderLaps(); return; }
+  if(stint.frozen) return;
+  if(act==='step'){
+    const k=b.dataset.k;
+    l[k]=(l[k]+1)%3;
+    b.querySelector('.d').textContent=l[k];
+    b.setAttribute('aria-label',b.getAttribute('aria-label').replace(/: \d/, ': '+l[k]));
+    glitch(b.querySelector('.d'));
+    // update strip + card frame without full re-render
+    const card=b.closest('.lap'), r=lapResult(l);
+    card.className='lap '+(r||'');
+    const sc=card.querySelector('.laphead .score');
+    sc.textContent = r ? ({win:'W',loss:'L',draw:'D'})[r]+' '+l.w+'-'+l.l+(l.d?'-'+l.d:'') : '—';
+    sc.className='score '+(r?r[0]:'n');
+    refreshDerived();
+    return;
+  }
+  if(act==='setup'){
+    const pane=b.nextElementSibling, open=pane.hidden;
+    pane.hidden=!open; b.setAttribute('aria-expanded',open);
+    b.textContent=(open?'SETUP SHEET ▾':'SETUP SHEET ▸')+' — PLAY/DRAW · DECK VERSION · NOTES (OPTIONAL)';
+    return;
+  }
+  if(act==='pd'){
+    l.pd = l.pd===null ? 'play' : l.pd==='play' ? 'draw' : null; // NA -> PLAY -> DRAW -> NA (honest NA default)
+    b.className='press lamp '+(l.pd==='play'?'play':l.pd==='draw'?'draw2':'');
+    b.querySelector('[data-role=pdlab]').textContent = l.pd==='play'?'ON THE PLAY':l.pd==='draw'?'ON THE DRAW':'P/D: NA';
+    refreshDerived();
+  }
+});
+lapsEl.addEventListener('change',e=>{
+  const s=e.target.closest('select[data-act=opp]'); if(!s || stint.frozen) return;
+  const i=+s.dataset.i, l=stint.laps[i];
+  l.opp = s.value || null;
+  const arch=ARCHES.find(a=>a.name===l.opp);
+  s.classList.toggle('unksel',!l.opp);
+  const card=s.closest('.lap');
+  card.querySelector('[data-role=opppips]').innerHTML = arch ? arch.colors.map(c=>'<span class="pip pip-'+c+'"></span>').join('') : '';
+  const nm=card.querySelector('.laphead .nm');
+  nm.textContent = l.opp ? l.opp.toUpperCase() : 'UNKNOWN — NO ID';
+  nm.classList.toggle('unk',!l.opp);
+  refreshDerived();
+});
+lapsEl.addEventListener('input',e=>{
+  const t=e.target; if(stint.frozen) return;
+  const i=+t.dataset.i, l=stint.laps[i];
+  if(t.dataset.act==='note'){
+    l.note=t.value;
+    const card=t.closest('.lap');
+    const radio=card.querySelector('[data-role=radio]');
+    radio.hidden=!l.note.trim();
+    card.querySelector('[data-role=radiotxt]').textContent=l.note;
+    refreshCSV();
+  }
+  if(t.dataset.act==='ver'){ l.ver=t.value; refreshCSV(); }
+});
+
+$('addLap').addEventListener('click',()=>{
+  if(stint.frozen) return;
+  stint.laps.forEach(l=>l.open=false);
+  stint.laps.push({opp:null,w:0,l:0,d:0,pd:null,ver:'',note:'',open:true});
+  renderLaps(); refreshDerived();
+  lapsEl.lastElementChild.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'});
+});
+
+/* ================= unknown backfill chip ================= */
+function refreshUnk(){
+  const unk=stint.laps.filter(l=>!l.opp).length;
+  const strip=$('unkStrip');
+  strip.hidden = unk===0;
+  if(unk>0) $('unkTxt').textContent = unk+' ROUND'+(unk>1?'S':'')+' MISSING OPPONENT ID';
+}
+$('unkStrip').addEventListener('click',()=>{
+  const i=stint.laps.findIndex(l=>!l.opp); if(i<0) return;
+  stint.laps[i].open=true; renderLaps();
+  const sel=lapsEl.querySelector('.lap[data-i="'+i+'"] select');
+  if(sel){ sel.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'}); sel.focus(); }
+});
+
+/* ================= track conditions ================= */
+function rollup(el, target, dec){
+  if(RM){ el.textContent=target.toFixed(dec); return; }
+  const TICKS=8, DUR=480, start=parseFloat(el.textContent)||0;
+  if(start===target){ el.textContent=target.toFixed(dec); return; }
+  let i=0; clearInterval(el._roll);
+  el._roll=setInterval(()=>{ i++;
+    const v=start+(target-start)*(i/TICKS);
+    el.textContent=v.toFixed(dec);
+    if(i>=TICKS){ el.textContent=target.toFixed(dec); clearInterval(el._roll); }
+  },DUR/TICKS);
+}
+function renderTrack(){
+  const played=stint.laps.filter(l=>lapResult(l));
+  const total=played.length;
+  // personal WR per archetype + unknown bucket
+  const buckets={};
+  played.forEach(l=>{
+    const k=l.opp||'__unk';
+    buckets[k]=buckets[k]||{n:0,pts:0};
+    buckets[k].n++;
+    const r=lapResult(l);
+    buckets[k].pts += r==='win'?1:(r==='draw'?0.5:0);
+  });
+  const keys=Object.keys(buckets).sort((a,b)=>(a==='__unk')-(b==='__unk'));
+  $('wrRows').innerHTML = keys.length ? keys.map(k=>{
+    const b=buckets[k], wr=100*b.pts/b.n;
+    const arch=ARCHES.find(a=>a.name===k);
+    const cls = wr>52?'wr-w':(wr<48?'wr-l':'wr-n');
+    const low = b.n<5;
+    return '<div class="mrow'+(low?' lown':'')+'">'
+      +'<span style="min-width:0"><span class="nm '+(k==='__unk'?'unk':'')+'">'+(k==='__unk'?'UNKNOWN — NO ID':esc(k).toUpperCase())+'</span>'
+      +'<span class="meta">'+(arch?pipsHTML(arch.colors):'UNIDENTIFIED BUCKET')+(low?' <span class="lowtag">LOW SAMPLE</span>':'')+'</span></span>'
+      +'<span class="wr '+cls+'"><span data-wr>'+wr.toFixed(0)+'</span><span class="unit">%</span></span>'
+      +'<span class="n">n='+b.n+'</span></div>';
+  }).join('') : '<p class="calm" style="padding:0">NO PLAYED LAPS YET.</p>';
+  // local vs global share (identified only), dual bars
+  const faced=keys.filter(k=>k!=='__unk');
+  let best=null;
+  $('shareRows').innerHTML = faced.length ? faced.map(k=>{
+    const arch=ARCHES.find(a=>a.name===k);
+    const you=100*buckets[k].n/total;
+    const fld=100*arch.sample/SAMPLE_TOTAL;
+    const ratio=you/fld;
+    if(!best || ratio>best.ratio) best={name:k,ratio};
+    const mx=Math.max(you,fld,1);
+    return '<div class="brow">'
+      +'<div class="bh"><span class="nm">'+esc(k).toUpperCase()+'</span>'+pipsHTML(arch.colors)
+      +'<span class="x'+(ratio>=1.5?' hot':'')+'">'+ratio.toFixed(1)+'×</span></div>'
+      +'<div class="bars">'
+      +'<div class="bar you"><span>YOU</span><span class="tr"><i style="width:'+(100*you/mx)+'%"></i></span><span class="pv">'+you.toFixed(1)+'%</span></div>'
+      +'<div class="bar fld"><span>FIELD</span><span class="tr"><i style="width:'+(100*fld/mx)+'%"></i></span><span class="pv">'+fld.toFixed(1)+'%</span></div>'
+      +'</div></div>';
+  }).join('') : '<p class="calm" style="padding:0">IDENTIFY AT LEAST ONE OPPONENT TO COMPARE VS THE FIELD.</p>';
+  const co=$('calloutBox');
+  if(best && best.ratio>=1.5){
+    co.hidden=false;
+    $('calloutTxt').innerHTML='YOU FACE <em>'+esc(best.name).toUpperCase()+'</em> '+best.ratio.toFixed(1)+'× THE FIELD';
+  } else co.hidden=true;
+}
+
+/* ================= CSV telemetry (research §12) ================= */
+function csvCell(v){ v=String(v==null?'':v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+function buildCSV(){
+  const ev=stint.event;
+  const head='round,event,event_date,event_source,deck,opponent_archetype,game_wins,game_losses,game_draws,match_result,play_draw,deck_version,notes,reported';
+  const rows=stint.laps.map((l,i)=>[
+    'R'+(i+1), ev.name, ev.date, ev.private?'private_circuit':'sanctioned_grid',
+    'Izzet Wizards', l.opp||'UNKNOWN', l.w, l.l, l.d, lapResult(l)||'unreported',
+    l.pd||'NA', l.ver||'NA', l.note||'', 'self_reported'
+  ].map(csvCell).join(','));
+  return head+'\n'+rows.join('\n')+'\n';
+}
+function refreshCSV(){
+  $('csvBtn').href='data:text/csv;charset=utf-8,'+encodeURIComponent(buildCSV());
+}
+
+/* ================= end stint / report (research §10–11) ================= */
+function markEditedIfFrozen(){ /* edits while reopened after a freeze get stamped */
+  if(stint.wasFrozen && !stint.frozen && !stint.edited){
+    stint.edited=true;
+    const n=new Date();
+    stint.editedAt=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  }
+}
+function composeReport(){
+  const r=record(), ev=stint.event;
+  $('repTitle').textContent='IZZET WIZARDS @ '+ev.name.toUpperCase();
+  $('repMeta').innerHTML=esc(ev.date)+' · '+(ev.private?(esc(ev.store||'PRIVATE')+' · '+esc(ev.format)).toUpperCase():'MODERN · MTGO')
+    +' · FINAL <span style="color:var(--ink);font-weight:700">'+recStr(r)+'</span> '
+    +(ev.private?'<span class="gridchip priv"><i aria-hidden="true"></i><span>PRIVATE CIRCUIT</span></span>':'<span class="gridchip">SANCTIONED GRID</span>');
+  $('repBody').innerHTML=stint.laps.map((l,i)=>{
+    const res=lapResult(l);
+    const tag=res?({win:'W',loss:'L',draw:'D'})[res]+' '+l.w+'-'+l.l+(l.d?'-'+l.d:''):'—';
+    return '<div class="reprow"><span class="rn">R'+(i+1)+'</span>'
+      +'<span class="vs '+(l.opp?'':'unk')+'">VS '+(l.opp?esc(l.opp).toUpperCase():'UNKNOWN — NO ID')+'</span>'
+      +(l.pd?'<span style="font-size:9px;color:var(--dim)" title="turn order">'+(l.pd==='play'?'OTP':'OTD')+'</span>':'')
+      +'<span class="rs '+(res?res[0]:'d')+'">'+tag+'</span></div>'
+      +(l.note?'<p class="repradio"><b style="color:var(--loss);font-size:9px;letter-spacing:.12em">RADIO</b> — '+esc(l.note)+'</p>':'');
+  }).join('');
+  $('repN').textContent=stint.laps.length;
+  $('repEd').textContent = stint.edited ? ' · ⚒ EDITED '+stint.editedAt : '';
+}
+function reportText(){
+  const r=record(), ev=stint.event;
+  let t='STINT REPORT — IZZET WIZARDS @ '+ev.name+' ('+ev.date+') — FINAL '+recStr(r)+' [SELF-REPORTED'+(stint.edited?' · EDITED '+stint.editedAt:'')+']\n';
+  stint.laps.forEach((l,i)=>{
+    const res=lapResult(l);
+    t+='R'+(i+1)+' vs '+(l.opp||'UNKNOWN')+' — '+(res?res.toUpperCase()+' '+l.w+'-'+l.l+(l.d?'-'+l.d:''):'unreported')+(l.pd?' ('+l.pd+')':'')+'\n';
+    if(l.note) t+='   RADIO: '+l.note+'\n';
+  });
+  return t;
+}
+$('endBtn').addEventListener('click',()=>{
+  stint.frozen=!stint.frozen;
+  if(stint.frozen){ stint.wasFrozen=true; }
+  else { markEditedIfFrozen(); }
+  document.body.classList.toggle('frozen',stint.frozen);
+  $('endBtn').querySelector('span').textContent = stint.frozen ? '⚒ REOPEN STINT' : '⚑ END STINT';
+  $('entryPanel').hidden=true; $('entryToggle').setAttribute('aria-expanded','false'); $('entryToggle').textContent='ENTRY ▸';
+  $('entryToggle').style.display = stint.frozen ? 'none' : '';
+  if(stint.frozen){ composeReport(); $('report').hidden=false; glitch($('repTitle')); }
+  else { $('report').hidden=true; }
+  renderLaps(); refreshDerived(); renderHero();
+});
+$('copyBtn').addEventListener('click',()=>{
+  const txt=reportText(), btn=$('copyBtn');
+  function ok(){ btn.textContent='✓ COPIED — '+stint.laps.length+' LAPS'; glitch(btn);
+    setTimeout(()=>{ btn.textContent='⧉ COPY REPORT'; },1800); }
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(ok,ok); }
+  else{ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand('copy'); }catch(e){} ta.remove(); ok(); }
+});
+$('backBtn').addEventListener('click',()=>{ /* mock nav target: pit-wall index */ location.href='index.html'; });
+
+/* ================= derived refresh ================= */
+function refreshDerived(){
+  renderHero(); refreshUnk(); renderTrack(); refreshCSV();
+  if(stint.frozen) composeReport();
+  // roll-up the WR numerals after render (quantized, tokens §6.1)
+  document.querySelectorAll('#wrRows [data-wr]').forEach(el=>{
+    const v=parseFloat(el.textContent); el.textContent='0'; rollup(el,v,0);
+  });
+}
+
+/* ================= boot ================= */
+renderLaps();
+renderHero(); refreshUnk(); renderTrack(); refreshCSV();
+</script>
+</body>
+</html>

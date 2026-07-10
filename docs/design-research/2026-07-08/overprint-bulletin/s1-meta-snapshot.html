@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MetaSurf — The Modern Report · Week 27 (Overprint Bulletin / S1 Meta Snapshot)</title>
+<!-- NOTE: mockup only. All numbers are placeholders, not computed metrics. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<!-- Silkscreen subset via text= param: micro-badge glyphs + U+00B7 middle dot (ticker separator) -->
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&text=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789%20.%25%2B-%C2%B7&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f1e8;
+    --ink:#1f1c1a;
+    --teal:#00838A;   /* riso teal — favorable / stable (fills + plates) */
+    --teal-ink:#005d63; /* darkened teal for small type / tiny badge fills (~6:1 on paper) */
+    --pink:#FF48B0;   /* riso fluorescent pink — FILLS AND PLATES ONLY (2.7:1 on paper) */
+    --pink-ink:#c2247f; /* pink ink variant for TEXT carrying data (~4.9:1 on paper) */
+    --plum:#5c2a52;   /* overlap plum — PRO / intersection states */
+    --yellow:#ffe800; /* riso yellow — highlighter swipes */
+    --share-axis:16;  /* sharebar chart max: a 100%-wide bar == 16% metagame share
+                         (fixed axis; top archetype in mock is 14.2%) */
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --serif:'Instrument Serif',Georgia,serif;
+    --pixel:'Silkscreen',var(--mono);
+    /* speckle noise tile: feTurbulence crushed to 1-bit via discrete alpha transfer */
+    --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:1.45;
+    font-variant-numeric:tabular-nums;
+    /* room for fixed bottom nav + iPhone home indicator (viewport-fit=cover) */
+    padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  }
+  /* full-page paper grain — riso stock */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+    background:var(--noise);background-size:96px 96px;
+    opacity:.05;mix-blend-mode:multiply;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 14px}
+  a{color:inherit}
+
+  /* ============ TICKER ============ */
+  .ticker{
+    background:var(--ink);color:var(--paper);
+    font-family:var(--pixel);font-size:8px;line-height:16px;
+    text-transform:uppercase;letter-spacing:1px;
+    overflow:hidden;white-space:nowrap;
+  }
+  .ticker__reel{display:inline-block;padding-left:100%;animation:reel 38s linear infinite}
+  .ticker b{color:var(--yellow);font-weight:400}
+  .ticker i{color:var(--pink);font-style:normal}
+  @keyframes reel{to{transform:translateX(-100%)}}
+
+  /* ============ MASTHEAD ============ */
+  header.mast{padding:18px 0 10px;border-bottom:2px solid var(--ink);position:relative}
+  .mast__brand{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  /* logo mark: pink over teal, multiply -> the free plum third colour of overprint */
+  .mark{position:relative;width:26px;height:22px;flex:0 0 auto}
+  .mark i{position:absolute;width:16px;height:16px;border-radius:50%;mix-blend-mode:multiply}
+  .mark i:nth-child(1){left:0;top:3px;background:var(--teal)}
+  .mark i:nth-child(2){left:9px;top:1px;background:var(--pink)}
+  .mast__brand strong{font-size:13px;letter-spacing:3px}
+  .mast__brand .sk{margin-left:auto}
+  .mast h1{
+    font-family:var(--serif);font-weight:400;
+    font-size:34px;line-height:1.02;letter-spacing:.5px;
+    text-transform:uppercase;position:relative;
+  }
+  /* misregistration: same headline printed twice more, offset ink plates */
+  .mast h1::before,.mast h1::after{
+    content:attr(data-text);position:absolute;inset:0;z-index:-1;pointer-events:none;
+    mix-blend-mode:multiply;
+  }
+  .mast h1::before{color:var(--pink);transform:translate(2px,1.5px);opacity:.75}
+  .mast h1::after{color:var(--teal);transform:translate(-1.5px,-1px);opacity:.65}
+  .mast .dek{
+    font-family:var(--serif);font-style:italic;font-size:16px;
+    margin-top:6px;color:var(--ink);
+  }
+  .mast .dateline{
+    margin-top:8px;font-size:11px;text-transform:uppercase;letter-spacing:1px;
+    display:flex;flex-wrap:wrap;gap:4px 14px;
+  }
+  .mast .dateline b{font-weight:700}
+
+  /* decorative riso ramp — two halftone plates overprinting, plum where they cross.
+     Tall enough (28px / 10px cells) that the dots read as dots, not flat tint. */
+  .ramp{position:relative;height:28px;margin:12px 0 0;overflow:hidden}
+  .ramp .ht{position:absolute;inset:0}
+
+  /* ============ HALFTONE PLATE (Ana Tudor 3-declaration recipe) ============
+     .ht::before  = flat spot-ink plate
+     .ht::after   = dot screen: radial dot tile blended (screen) with a value map,
+                    crushed by filter:contrast(16) -> dot size == mapped value
+     ::after screens over ::before  -> ink dots on white
+     .ht multiplies onto the page   -> white becomes paper, ink stays ink        */
+  .ht{position:relative;display:inline-block;mix-blend-mode:multiply;background:#fff;
+      /* --lumf floors --lum at 25% so a plate behind dark-ink digits never goes
+         near-solid: the strongest archetypes keep fat dots without eating the number.
+         (Decorative surfaces that want the full ramp override --map wholesale.) */
+      --lumf:max(25%, var(--lum,30%));
+      --map:linear-gradient(90deg,
+            hsl(0 0% calc(var(--lumf) + 12%)),
+            hsl(0 0% max(0%, calc(var(--lumf) - 10%))));}
+  .ht::before{content:"";position:absolute;inset:0;background:var(--plate,var(--teal))}
+  .ht::after{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(closest-side,#000,#fff) 0 0/var(--cell,4px) var(--cell,4px),
+      var(--map);
+    background-blend-mode:screen;
+    filter:contrast(16);
+    mix-blend-mode:screen;
+  }
+  /* low-sample-size cells: coarse dither-noise overlay — unreliable data looks noisy */
+  .ht .snow{position:absolute;inset:0;z-index:2;background:var(--noise);
+    background-size:24px 24px;image-rendering:pixelated;opacity:.85}
+
+  /* ============ FORMAT PICKER ============ */
+  .formats{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none;
+    border-bottom:1px dashed var(--ink)}
+  .formats::-webkit-scrollbar{display:none}
+  .fmt{
+    flex:0 0 auto;font-family:var(--mono);font-size:11px;font-weight:700;
+    letter-spacing:1.5px;text-transform:uppercase;
+    border:1.5px solid var(--ink);background:transparent;color:var(--ink);
+    /* >=44px tap height: 16px line + 25px pad + 3px borders */
+    padding:13px 14px 12px;cursor:pointer;border-radius:0;
+    box-shadow:2px 2px 0 rgba(255,72,176,.4); /* misregistered pink under-plate */
+  }
+  .fmt[aria-pressed="true"]{background:var(--ink);color:var(--paper);
+    box-shadow:2px 2px 0 var(--pink)}
+  .fmt:hover{background:var(--yellow)}
+  .fmt[aria-pressed="true"]:hover{background:var(--ink)}
+
+  /* ============ SECTION HEADS ============ */
+  .sec{display:flex;align-items:baseline;gap:8px;margin:20px 0 10px;flex-wrap:wrap}
+  .sec h2{font-family:var(--serif);font-weight:400;font-size:24px;text-transform:uppercase;
+    letter-spacing:.5px}
+  .sec .rule{flex:1;border-bottom:2px solid var(--ink);transform:translateY(-6px)}
+  .swipe{ /* highlighter swipe */
+    background:linear-gradient(100deg,transparent 1.5%,var(--yellow) 4% 96%,transparent 98.5%);
+    box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  }
+
+  /* Silkscreen micro-badge — native 8px grid only */
+  .sk{
+    font-family:var(--pixel);font-weight:400;font-size:8px;line-height:16px;
+    text-transform:uppercase;letter-spacing:0;
+    display:inline-block;padding:0 5px;vertical-align:middle;
+    background:var(--ink);color:var(--paper);
+  }
+  .sk--pro{background:var(--plum)}
+  .sk--new{background:var(--yellow);color:var(--ink)}
+  .sk--ghost{background:transparent;color:var(--ink);border:1px solid var(--ink);line-height:14px}
+  .sk--up{background:var(--teal-ink)} /* darker teal plate: paper text ~6:1 at 8px */
+  .sk--dn{background:var(--pink);color:var(--ink)}
+
+  /* ============ MOVERS CAROUSEL (free tier = low-res print ghost) ============ */
+  .movers{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 14px;
+    scroll-snap-type:x mandatory;scrollbar-width:none}
+  .movers::-webkit-scrollbar{display:none}
+  .mover{
+    position:relative;flex:0 0 168px;scroll-snap-align:start;
+    border:1.5px solid var(--ink);background:var(--paper);
+    box-shadow:3px 3px 0 rgba(0,131,138,.35); /* teal plate slip */
+    padding:8px 8px 10px;
+  }
+  .mover__head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .mover__code{font-family:var(--pixel);font-size:8px;line-height:16px;letter-spacing:1px}
+  .mover canvas{display:block;width:100%;height:64px;image-rendering:pixelated;
+    background:var(--paper)}
+  .mover__delta{margin-top:6px;font-size:12px;font-weight:700;letter-spacing:1px;
+    display:flex;justify-content:space-between;align-items:baseline}
+  .mover__delta .redact{letter-spacing:2px;opacity:.85}
+  .mover__delta small{font-weight:400;font-size:10px;text-transform:uppercase}
+  /* text carrying data uses the ink variants; fluorescent --pink stays on fills/plates */
+  .up{color:var(--teal)} .dn{color:var(--pink-ink)}
+  /* the whole locked card is the tap target (168x~130px); the chip is purely visual */
+  .mover--locked .lock{
+    position:absolute;inset:0;z-index:3;background:transparent;border:0;padding:0;
+    cursor:pointer;font:inherit;color:inherit;
+  }
+  .mover--locked .lock__chip{
+    position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) rotate(-3deg);
+    font-family:var(--pixel);font-size:8px;line-height:16px;text-align:center;
+    background:var(--plum);color:var(--paper);padding:2px 7px;
+    box-shadow:2px 2px 0 var(--pink), -1px -1px 0 rgba(0,131,138,.5); /* misregistration */
+    white-space:nowrap;pointer-events:none;
+  }
+  .mover--locked .lock:hover .lock__chip,
+  .mover--locked .lock:focus-visible .lock__chip{transform:translate(-50%,-50%) rotate(0deg)}
+  .mover--locked .lock:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+  .mover--hero{box-shadow:3px 3px 0 var(--yellow)}
+  .mover--hero .mover__code em{font-style:normal;background:var(--yellow);padding:0 3px}
+
+  /* grainy plum CTA — feTurbulence-crushed fill instead of gloss */
+  .cta{
+    position:relative;display:block;width:100%;border:1.5px solid var(--ink);
+    background:linear-gradient(105deg,var(--plum),#47203f 55%,var(--plum));
+    color:var(--paper);font-family:var(--mono);font-weight:700;font-size:12px;
+    letter-spacing:1.5px;text-transform:uppercase;text-align:left;
+    padding:11px 12px;cursor:pointer;overflow:hidden;
+    box-shadow:3px 3px 0 var(--pink);
+  }
+  .cta::after{content:"";position:absolute;inset:0;background:var(--noise);
+    background-size:64px 64px;opacity:.28;mix-blend-mode:screen;pointer-events:none}
+  .cta .sk{background:var(--yellow);color:var(--ink);margin-right:8px}
+  .cta:hover{box-shadow:1px 1px 0 var(--pink);transform:translate(2px,2px)}
+  .cta small{display:block;font-weight:400;font-size:10px;letter-spacing:.5px;
+    text-transform:none;opacity:.85;margin-top:3px}
+
+  /* ============ FIELD LIST ============ */
+  .cols{
+    display:grid;grid-template-columns:30px 40px 1fr 106px;gap:0 10px;
+    font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+    padding:6px 2px;border-bottom:2px solid var(--ink);color:var(--ink)
+  }
+  .cols :nth-child(4){text-align:right}
+  ol.field{list-style:none}
+  .row{
+    display:grid;grid-template-columns:30px 40px 1fr 106px;gap:2px 10px;
+    align-items:center;padding:10px 2px;border-bottom:1px dashed rgba(31,28,26,.55);
+    position:relative;
+  }
+  .row:hover{background:rgba(0,131,138,.05)}
+  /* hot row = one big halftone surface: coarse 9px yellow dot plate across the full
+     row, so the brand's fat-dots-vs-pinpricks screen is visible before the S2 matrix */
+  .row--hot{background:none}
+  .row--hot .htrow{position:absolute;inset:0;z-index:0;display:block;
+    --plate:var(--yellow);--cell:9px;--lum:40%}
+  .row--hot > *:not(.htrow){position:relative;z-index:1}
+  .rank{grid-row:span 2;font-size:15px;font-weight:700;align-self:center}
+  .rank sup{display:block;font-size:8px;font-weight:400;letter-spacing:1px}
+  .thumb{
+    grid-row:span 2;position:relative;width:40px;height:52px;
+    border:1px solid var(--ink);overflow:hidden;align-self:center;
+    /* CSS dot-screen fallback so thumbs read as plates pre-hydration / JS-off;
+       the dithered canvas multiplies over it once drawn */
+    background:
+      radial-gradient(closest-side,rgba(31,28,26,.5),transparent 72%) 0 0/5px 5px,
+      var(--tint,#ddd);
+    box-shadow:1.5px 1.5px 0 rgba(255,72,176,.45);
+  }
+  .thumb canvas{position:absolute;inset:0;width:100%;height:100%;
+    image-rendering:pixelated;mix-blend-mode:multiply}
+  .name{font-weight:700;font-size:13px;letter-spacing:.2px;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis}
+  .name .sk{margin-left:6px;transform:translateY(-1px)}
+  .shareline{display:flex;align-items:center;gap:8px;font-size:12px}
+  .shareline .pct{font-weight:700;min-width:44px}
+  .sharebar{flex:1;max-width:170px;height:5px;border:1px solid var(--ink);position:relative}
+  .sharebar i{position:absolute;inset:0;right:auto;background:var(--ink);
+    /* --share-axis (see :root) documents the normalization: bar% = share / 16% axis max */
+    width:calc(var(--share) / var(--share-axis) * 100%)}
+  .delta{font-size:11px;font-weight:700;letter-spacing:.5px}
+  .wrcell{grid-row:span 2;justify-self:end;text-align:right}
+  .wr{position:relative;display:inline-block;padding:1px 4px 0}
+  .wr .ht{position:absolute;inset:-1px -2px;z-index:0}
+  .wr b{position:relative;z-index:1;font-size:15px}
+  /* no above/below-50 arrow glyph: next to a number it reads as a trend indicator
+     and contradicts the share delta on the same row. Plate colour (teal/pink) +
+     dot density already encode distance from the coin flip. */
+  .ci{font-size:10px;margin-top:2px;letter-spacing:.3px}
+  .ci .lown{color:var(--plum);font-weight:700}
+  .spark{display:block;margin-left:auto;margin-top:3px}
+  .spark polyline{fill:none;stroke:var(--ink);stroke-width:1.4}
+  .spark circle{stroke:none}
+
+  /* ============ FOOTER ============ */
+  footer{margin-top:22px;padding:14px 0 20px;border-top:2px solid var(--ink);
+    font-size:10px;letter-spacing:.4px}
+  footer .colophon{font-family:var(--serif);font-style:italic;font-size:14px;margin-bottom:8px}
+  footer p{margin-top:4px;opacity:.85}
+
+  /* ============ BOTTOM NAV ============ */
+  .bnav{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:var(--paper);border-top:2px solid var(--ink);
+    /* keep MY META / DECKS above the iPhone home indicator */
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .bnav::before{content:"";position:absolute;left:0;right:0;top:-6px;height:4px;
+    background:var(--noise);background-size:48px 48px;opacity:.4}
+  .bnav ul{list-style:none;display:flex;max-width:760px;margin:0 auto}
+  .bnav li{flex:1}
+  .bnav a{
+    display:block;text-align:center;text-decoration:none;
+    font-family:var(--pixel);font-size:8px;line-height:16px;letter-spacing:1px;
+    padding:10px 0 9px;text-transform:uppercase;
+  }
+  .bnav a span{display:block;font-family:var(--mono);font-size:14px;line-height:1;margin-bottom:3px}
+  .bnav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+  .bnav a:not([aria-current]):hover{background:var(--yellow)}
+
+  /* ============ DESKTOP ============ */
+  @media (min-width:700px){
+    body{font-size:13px}
+    .mast h1{font-size:52px}
+    .mast .dek{font-size:19px}
+    .mover{flex-basis:200px}
+    .cols,.row{grid-template-columns:36px 44px 1fr 220px 130px}
+    .cols::after{content:"7D TREND";text-align:right}
+    .row .wrcell{grid-column:4;grid-row:span 2;justify-self:end}
+    .row .sparkcell{grid-column:5;grid-row:1 / span 2;justify-self:end}
+    .thumb{width:44px;height:57px}
+  }
+  @media (max-width:699px){
+    /* "/ 7D" belongs to the archetype column: the spark renders in col 3 under the
+       name, not under the WR header, so label the column it actually sits in */
+    .cols :nth-child(3)::after{content:" / 7D"}
+    .sparkcell{display:contents}
+  }
+  /* narrow phones: the 40px decorative thumb column (+10px gap) conveys zero
+     information (random seeds) but costs ~14% of content width — collapse it */
+  @media (max-width:399px){
+    .thumb{display:none}
+    .cols :nth-child(2){display:none}
+    .cols,.row{grid-template-columns:30px 1fr 106px}
+  }
+  /* tightest screens: drop the sharebar (it shrinks past legibility);
+     the pct + delta carry the value */
+  @media (max-width:379px){
+    .sharebar{display:none}
+  }
+
+  /* ============ REDUCED MOTION ============ */
+  @media (prefers-reduced-motion: reduce){
+    .ticker__reel{animation:none;padding-left:0}
+    *,*::before,*::after{transition:none!important}
+    .cta:hover{transform:none}
+    .mover--locked .lock:hover .lock__chip{transform:translate(-50%,-50%) rotate(-3deg)}
+  }
+</style>
+</head>
+<body>
+
+  <!-- results wire ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__reel">
+      MODERN CHALLENGE 64 &nbsp;07-05&nbsp; <b>1ST</b> IZZET MURKTIDE <b>2ND</b> YAWGMOTH <b>T4</b> AMULET TITAN &#183;
+      MODERN PRELIM &nbsp;07-06&nbsp; <b>5-0</b> RAKDOS SCAM <i>X2</i> &#183; LIVING END &#183; MONO-G TRON &#183;
+      MODERN CHALLENGE 32 &nbsp;07-06&nbsp; <b>1ST</b> YAWGMOTH <b>2ND</b> TEMUR RHINOS &#183;
+      NRG SERIES CHICAGO &nbsp;07-06&nbsp; <b>1ST</b> HAMMER TIME &#183; 412 PLAYERS &#183;
+      MODERN CHALLENGE 64 &nbsp;07-05&nbsp; <b>1ST</b> IZZET MURKTIDE <b>2ND</b> YAWGMOTH <b>T4</b> AMULET TITAN &#183;
+      MODERN PRELIM &nbsp;07-06&nbsp; <b>5-0</b> RAKDOS SCAM <i>X2</i> &#183; LIVING END &#183; MONO-G TRON &#183;
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <header class="mast">
+      <div class="mast__brand">
+        <span class="mark" aria-hidden="true"><i></i><i></i></span>
+        <strong>METASURF</strong>
+        <span class="sk sk--ghost">FREE TIER</span>
+      </div>
+      <h1 data-text="The Modern Report">The Modern Report</h1>
+      <p class="dek">Week 27 &mdash; the field tilts toward the graveyard, and Yawgmoth smells blood.</p>
+      <div class="dateline">
+        <span><b>JUL 01&ndash;07 2026</b></span>
+        <span>4,812 DECKS</span>
+        <span>61 EVENTS</span>
+        <span>UPD 06:00 UTC</span>
+      </div>
+      <!-- overprint ramp: teal plate + pink plate multiply into plum where they cross -->
+      <div class="ramp" aria-hidden="true">
+        <span class="ht" style="--plate:var(--teal);--cell:10px;--map:linear-gradient(90deg,hsl(0 0% 2%),hsl(0 0% 58%))"></span>
+        <span class="ht" style="--plate:var(--pink);--cell:10px;--map:linear-gradient(270deg,hsl(0 0% 2%),hsl(0 0% 58%))"></span>
+      </div>
+    </header>
+
+    <nav class="formats" aria-label="Format picker">
+      <button class="fmt" aria-pressed="true">Modern</button>
+      <button class="fmt" aria-pressed="false">Pioneer</button>
+      <button class="fmt" aria-pressed="false">Legacy</button>
+      <button class="fmt" aria-pressed="false">Pauper</button>
+      <button class="fmt" aria-pressed="false">Vintage</button>
+    </nav>
+
+    <!-- ============ BIGGEST MOVERS (teased / free tier) ============
+         MOCK ONLY: the ghost canvases below read placeholder data-pts from the DOM.
+         In production the ghost MUST be a server-rendered dithered image; never ship
+         the true locked values to a free-tier client for client-side redaction. -->
+    <section aria-label="Biggest movers, locked preview">
+      <div class="sec">
+        <h2><span class="swipe">Biggest Movers</span></h2>
+        <span class="sk">7D</span>
+        <span class="sk sk--pro">PRO</span>
+        <span class="rule"></span>
+      </div>
+
+      <div class="movers">
+        <article class="mover mover--locked mover--hero">
+          <div class="mover__head">
+            <span class="mover__code"><em>YWG</em> YAWGMOTH</span>
+            <span class="sk sk--up">UP</span>
+          </div>
+          <canvas class="ghost" width="22" height="10" data-dir="up"
+                  data-pts="2,2.2,2.7,3.4,4.6,6.1,7.4" aria-label="Locked trend preview"></canvas>
+          <div class="mover__delta up">
+            <span>&#9650;<span class="redact">&#9608;.&#9608;</span></span><small>share pts</small>
+          </div>
+          <button class="lock" aria-label="Unlock full resolution — go Pro"><span class="lock__chip" aria-hidden="true">UNLOCK FULL RESOLUTION</span></button>
+        </article>
+
+        <article class="mover mover--locked">
+          <div class="mover__head">
+            <span class="mover__code">HMR HAMMER TIME</span>
+            <span class="sk sk--dn">DN</span>
+          </div>
+          <canvas class="ghost" width="22" height="10" data-dir="dn"
+                  data-pts="6.2,6.0,5.9,5.5,5.0,4.8,4.6" aria-label="Locked trend preview"></canvas>
+          <div class="mover__delta dn">
+            <span>&#9660;<span class="redact">&#9608;.&#9608;</span></span><small>share pts</small>
+          </div>
+          <button class="lock" aria-label="Unlock full resolution — go Pro"><span class="lock__chip" aria-hidden="true">UNLOCK FULL RESOLUTION</span></button>
+        </article>
+
+        <article class="mover mover--locked">
+          <div class="mover__head">
+            <span class="mover__code">LVE LIVING END</span>
+            <span class="sk sk--dn">DN</span>
+          </div>
+          <canvas class="ghost" width="22" height="10" data-dir="dn"
+                  data-pts="7.1,7.0,6.6,6.8,6.3,6.2,6.2" aria-label="Locked trend preview"></canvas>
+          <div class="mover__delta dn">
+            <span>&#9660;<span class="redact">&#9608;.&#9608;</span></span><small>share pts</small>
+          </div>
+          <button class="lock" aria-label="Unlock full resolution — go Pro"><span class="lock__chip" aria-hidden="true">UNLOCK FULL RESOLUTION</span></button>
+        </article>
+
+        <article class="mover mover--locked">
+          <div class="mover__head">
+            <span class="mover__code">ZOO DOMAIN ZOO</span>
+            <span class="sk sk--new">NEW</span>
+          </div>
+          <canvas class="ghost" width="22" height="10" data-dir="up"
+                  data-pts="0.4,0.6,0.9,1.1,1.6,2.0,2.4" aria-label="Locked trend preview"></canvas>
+          <div class="mover__delta up">
+            <span>&#9650;<span class="redact">&#9608;.&#9608;</span></span><small>share pts</small>
+          </div>
+          <button class="lock" aria-label="Unlock full resolution — go Pro"><span class="lock__chip" aria-hidden="true">UNLOCK FULL RESOLUTION</span></button>
+        </article>
+      </div>
+
+      <button class="cta">
+        <span class="sk">PRO</span>GO PRO &mdash; PRINT AT FULL RESOLUTION
+        <small>Unblurred movers &#183; matchup drilldowns &#183; 2-year history &#183; $6/mo</small>
+      </button>
+    </section>
+
+    <!-- ============ THE FIELD ============ -->
+    <section aria-label="Ranked archetype list">
+      <div class="sec">
+        <h2>The Field</h2>
+        <span class="sk sk--ghost">RANKED BY SHARE</span>
+        <span class="rule"></span>
+      </div>
+
+      <div class="cols" aria-hidden="true">
+        <span>#</span><span></span><span>Archetype / Share</span><span>WR &#177;CI</span>
+      </div>
+
+      <ol class="field">
+
+        <li class="row">
+          <span class="rank">01<sup>&mdash;</sup></span>
+          <span class="thumb" data-seed="11" style="--tint:color-mix(in oklab,var(--teal) 45%,white)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Izzet Murktide<span class="sk">IZM</span></h3>
+            <div class="shareline">
+              <span class="pct">14.2%</span>
+              <span class="sharebar" style="--share:14.2"><i></i></span>
+              <span class="delta up">&#9650;0.6</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:21%"></span><b>52.8</b></span>
+            <div class="ci">&#177;1.1 &#183; n=1841</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, rising">
+              <polyline points="0,12 10,11 20,13 30,9 40,10 50,7 58,6"/><circle cx="58" cy="6" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">02<sup>&mdash;</sup></span>
+          <span class="thumb" data-seed="23" style="--tint:color-mix(in oklab,var(--pink) 40%,white)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Rakdos Scam<span class="sk">RKS</span></h3>
+            <div class="shareline">
+              <span class="pct">11.7%</span>
+              <span class="sharebar" style="--share:11.7"><i></i></span>
+              <span class="delta dn">&#9660;0.4</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:29%"></span><b>51.9</b></span>
+            <div class="ci">&#177;1.2 &#183; n=1512</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, falling">
+              <polyline points="0,8 10,9 20,7 30,10 40,11 50,10 58,12"/><circle cx="58" cy="12" r="2.2" fill="var(--pink-ink)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">03<sup>&#9650;1</sup></span>
+          <span class="thumb" data-seed="37" style="--tint:color-mix(in oklab,var(--teal) 30%,#e8e442)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Amulet Titan<span class="sk">AMT</span></h3>
+            <div class="shareline">
+              <span class="pct">8.9%</span>
+              <span class="sharebar" style="--share:8.9"><i></i></span>
+              <span class="delta up">&#9650;0.3</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:15%"></span><b>53.4</b></span>
+            <div class="ci">&#177;1.5 &#183; n=1153</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, rising">
+              <polyline points="0,11 10,10 20,12 30,11 40,9 50,9 58,8"/><circle cx="58" cy="8" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row row--hot">
+          <span class="ht htrow" aria-hidden="true"></span>
+          <span class="rank">04<sup>&#9650;3</sup></span>
+          <span class="thumb" data-seed="41" style="--tint:color-mix(in oklab,var(--plum) 38%,white)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Yawgmoth<span class="sk">YWG</span><span class="sk sk--pro">MOVER</span></h3>
+            <div class="shareline">
+              <span class="pct">7.4%</span>
+              <span class="sharebar" style="--share:7.4"><i></i></span>
+              <span class="delta up">&#9650;2.1</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:5%"></span><b>54.6</b></span>
+            <div class="ci">&#177;1.7 &#183; n=962</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, rising sharply">
+              <polyline points="0,16 10,15 20,13 30,12 40,8 50,5 58,3"/><circle cx="58" cy="3" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">05<sup>&#9660;1</sup></span>
+          <span class="thumb" data-seed="53" style="--tint:color-mix(in oklab,var(--pink) 28%,#f0ecb0)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Living End<span class="sk">LVE</span></h3>
+            <div class="shareline">
+              <span class="pct">6.2%</span>
+              <span class="sharebar" style="--share:6.2"><i></i></span>
+              <span class="delta dn">&#9660;0.8</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--pink);--lum:40%"></span><b>49.3</b></span>
+            <div class="ci">&#177;1.9 &#183; n=804</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, falling">
+              <polyline points="0,6 10,7 20,9 30,8 40,11 50,12 58,13"/><circle cx="58" cy="13" r="2.2" fill="var(--pink-ink)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">06<sup>&mdash;</sup></span>
+          <span class="thumb" data-seed="61" style="--tint:color-mix(in oklab,var(--pink) 42%,#ffe9a8)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Burn<span class="sk">BRN</span></h3>
+            <div class="shareline">
+              <span class="pct">5.8%</span>
+              <span class="sharebar" style="--share:5.8"><i></i></span>
+              <span class="delta dn">&#9660;0.2</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--pink);--lum:24%"></span><b>47.6</b></span>
+            <div class="ci">&#177;2.0 &#183; n=752</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, flat">
+              <polyline points="0,9 10,10 20,10 30,11 40,10 50,11 58,11"/><circle cx="58" cy="11" r="2.2" fill="var(--pink-ink)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">07<sup>&#9650;1</sup></span>
+          <span class="thumb" data-seed="71" style="--tint:color-mix(in oklab,var(--teal) 35%,#efe9a0)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Mono-Green Tron<span class="sk">TRN</span></h3>
+            <div class="shareline">
+              <span class="pct">5.1%</span>
+              <span class="sharebar" style="--share:5.1"><i></i></span>
+              <span class="delta up">&#9650;0.1</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:44%"></span><b>50.2</b></span>
+            <div class="ci">&#177;2.1 &#183; n=663</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, flat">
+              <polyline points="0,10 10,10 20,9 30,10 40,11 50,10 58,10"/><circle cx="58" cy="10" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">08<sup>&#9660;2</sup></span>
+          <span class="thumb" data-seed="83" style="--tint:color-mix(in oklab,var(--yellow) 45%,white)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Hammer Time<span class="sk">HMR</span></h3>
+            <div class="shareline">
+              <span class="pct">4.6%</span>
+              <span class="sharebar" style="--share:4.6"><i></i></span>
+              <span class="delta dn">&#9660;1.0</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--pink);--lum:35%"></span><b>48.8</b></span>
+            <div class="ci">&#177;2.3 &#183; n=598</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, falling">
+              <polyline points="0,5 10,7 20,8 30,10 40,12 50,12 58,14"/><circle cx="58" cy="14" r="2.2" fill="var(--pink-ink)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">09<sup>&mdash;</sup></span>
+          <span class="thumb" data-seed="97" style="--tint:color-mix(in oklab,var(--pink) 30%,#bfe3e0)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Temur Rhinos<span class="sk">RHI</span></h3>
+            <div class="shareline">
+              <span class="pct">4.1%</span>
+              <span class="sharebar" style="--share:4.1"><i></i></span>
+              <span class="delta up">&#9650;0.4</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:37%"></span><b>51.0</b></span>
+            <div class="ci">&#177;2.4 &#183; n=531</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, rising">
+              <polyline points="0,12 10,11 20,12 30,10 40,10 50,9 58,9"/><circle cx="58" cy="9" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">10<sup>&#9660;1</sup></span>
+          <span class="thumb" data-seed="103" style="--tint:color-mix(in oklab,var(--plum) 30%,#f4e79a)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">4c Omnath<span class="sk">OMN</span></h3>
+            <div class="shareline">
+              <span class="pct">3.8%</span>
+              <span class="sharebar" style="--share:3.8"><i></i></span>
+              <span class="delta dn">&#9660;0.3</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--teal);--lum:42%"></span><b>50.5</b></span>
+            <div class="ci">&#177;2.6 &#183; n=489</div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, falling">
+              <polyline points="0,9 10,10 20,11 30,10 40,11 50,11 58,12"/><circle cx="58" cy="12" r="2.2" fill="var(--pink-ink)"/>
+            </svg>
+          </div>
+        </li>
+
+        <li class="row">
+          <span class="rank">11<sup>&#9650;4</sup></span>
+          <span class="thumb" data-seed="113" style="--tint:color-mix(in oklab,var(--plum) 26%,#ffe9b8)"><canvas></canvas></span>
+          <div>
+            <h3 class="name">Domain Zoo<span class="sk sk--new">NEW</span><span class="sk">ZOO</span></h3>
+            <div class="shareline">
+              <span class="pct">2.4%</span>
+              <span class="sharebar" style="--share:2.4"><i></i></span>
+              <span class="delta up">&#9650;0.9</span>
+            </div>
+          </div>
+          <div class="wrcell">
+            <span class="wr"><span class="ht" style="--plate:var(--pink);--lum:44%"><i class="snow"></i></span><b>49.8</b></span>
+            <div class="ci">&#177;3.2 &#183; n=214 <span class="lown">LOW N</span></div>
+          </div>
+          <div class="sparkcell">
+            <svg class="spark" width="60" height="20" viewBox="0 0 60 20" aria-label="7 day share trend, rising from a low base">
+              <polyline points="0,14 10,13 20,12 30,13 40,12 50,11 58,11"/><circle cx="58" cy="11" r="2.2" fill="var(--teal)"/>
+            </svg>
+          </div>
+        </li>
+
+      </ol>
+    </section>
+
+    <footer>
+      <p class="colophon">Printed on hall wifi in two inks and one overlap. Dots are data: fatter dots, further from a coin flip.</p>
+      <p>SOURCE: MTGO CHALLENGES + PRELIMS &#183; PAPER OPENS (NRG, SCG) &#183; LAST 7 DAYS &#183; SHARE = % OF 4,812 QUALIFYING DECKS</p>
+      <p>WR SHOWN WITH 95% CI &#183; CELLS UNDER n=250 CARRY THE NOISE SCREEN &#183; ALL FIGURES PLACEHOLDER (DESIGN MOCK)</p>
+    </footer>
+
+  </div>
+
+  <nav class="bnav" aria-label="Primary">
+    <ul>
+      <li><a href="#" aria-current="page"><span>&#9646;&#9646;&#9646;</span>SNAPSHOT</a></li>
+      <li><a href="#"><span>&#9638;</span>MATRIX</a></li>
+      <li><a href="#"><span>&#9641;</span>DECKS</a></li>
+      <li><a href="#"><span>&#9650;</span>MY META</a></li>
+    </ul>
+  </nav>
+
+  <script>
+  /* All JS below is decorative texture (dither plates). The report itself is zero-JS CSS. */
+  (function(){
+    'use strict';
+
+    /* deterministic PRNG so every reload prints the same plates */
+    function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+    /* ---- 1) Archetype thumbs: procedural plate art, Atkinson-dithered ----
+       Stand-in for the build-time card-art pipeline (real art pending ToS review):
+       production dithers real card art at build time (node canvas-dither), serves
+       PNG-8; the .thumb CSS dot-screen is the pre-hydration / JS-off fallback.
+       Drawn at 20x26, dithered, upscaled 2x with image-rendering:pixelated,
+       tinted by the row's color-identity layer via mix-blend-mode:multiply.
+       Luminance is compared in LINEAR space (sRGB decoded first), per spec. */
+    function atkinson(g,w,h){
+      for(var y=0;y<h;y++)for(var x=0;x<w;x++){
+        var i=y*w+x, old=g[i], nv=old<128?0:255, err=(old-nv)/8;
+        g[i]=nv;
+        if(x+1<w) g[i+1]+=err;
+        if(x+2<w) g[i+2]+=err;
+        if(y+1<h){ if(x>0)g[i+w-1]+=err; g[i+w]+=err; if(x+1<w)g[i+w+1]+=err; }
+        if(y+2<h) g[i+2*w]+=err;
+      }
+    }
+    function drawThumb(cv,seed){
+      var w=20,h=26; cv.width=w; cv.height=h;
+      var ctx=cv.getContext('2d'), rnd=mulberry32(seed);
+      /* sky ramp */
+      var grad=ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0,'#c8c8c8'); grad.addColorStop(1,'#6e6e6e');
+      ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+      /* a sun/moon disc */
+      ctx.fillStyle='#e9e9e9';
+      ctx.beginPath(); ctx.arc(4+rnd()*12, 4+rnd()*8, 3+rnd()*4, 0, 7); ctx.fill();
+      /* diagonal beam */
+      ctx.fillStyle='#3a3a3a';
+      ctx.beginPath();
+      var bx=rnd()*w;
+      ctx.moveTo(bx,0); ctx.lineTo(bx+6,0); ctx.lineTo(bx-6+rnd()*4,h); ctx.lineTo(bx-12,h);
+      ctx.closePath(); ctx.fill();
+      /* horizon mass */
+      ctx.fillStyle='#2a2a2a';
+      ctx.beginPath(); ctx.moveTo(0,h);
+      var base=h-4-rnd()*6;
+      for(var x=0;x<=w;x+=4) ctx.lineTo(x, base+Math.sin(x*(0.4+rnd()*0.4))*3);
+      ctx.lineTo(w,h); ctx.closePath(); ctx.fill();
+      /* dither */
+      var img=ctx.getImageData(0,0,w,h), d=img.data, g=new Float32Array(w*h);
+      /* decode sRGB -> linear before weighting; threshold therefore means linear 50% */
+      for(var i=0;i<w*h;i++){
+        var lr=Math.pow(d[i*4]/255,2.2), lg=Math.pow(d[i*4+1]/255,2.2), lb=Math.pow(d[i*4+2]/255,2.2);
+        g[i]=(0.2126*lr+0.7152*lg+0.0722*lb)*255;
+      }
+      atkinson(g,w,h);
+      for(i=0;i<w*h;i++){ var v=g[i]<128?31:255, k=g[i]<128;
+        d[i*4]=k?31:255; d[i*4+1]=k?28:255; d[i*4+2]=k?26:255; d[i*4+3]=255; }
+      ctx.putImageData(img,0,0);
+    }
+    document.querySelectorAll('.thumb').forEach(function(t){
+      var cv=t.querySelector('canvas'); if(!cv) return;
+      try{ drawThumb(cv, parseInt(t.dataset.seed||'1',10)); }catch(e){ cv.remove(); }
+    });
+
+    /* ---- 2) Locked movers: low-res print freemium ----
+       Spark shape rendered at 1/8 resolution, 2x2 Bayer-dithered, upscaled
+       pixelated. Free users see the shape of the spike; the numbers stay behind
+       the plum chip.
+       IMPLEMENTATION WARNING (mock only): data-pts here are design placeholders.
+       In production the ghost is a SERVER-RENDERED dithered image — locked values
+       must never reach the free-tier DOM, where devtools can read them. */
+    var BAYER=[[0.2,0.6],[0.8,0.4]];
+    function drawGhost(cv){
+      var w=cv.width,h=cv.height, ctx=cv.getContext('2d');
+      ctx.imageSmoothingEnabled=false;
+      var pts=(cv.dataset.pts||'1,2,3,4,5,6,7').split(',').map(Number);
+      var up=cv.dataset.dir==='up';
+      var min=Math.min.apply(null,pts), max=Math.max.apply(null,pts), span=(max-min)||1;
+      var rnd=mulberry32(pts.length*97+Math.round(max*13));
+      var img=ctx.createImageData(w,h), d=img.data;
+      var ir=up?[0,131,138]:[255,72,176]; /* teal up / pink down, echoed by the badge glyphs */
+      for(var x=0;x<w;x++){
+        var fx=x/(w-1)*(pts.length-1), i0=Math.floor(fx), fr=fx-i0;
+        var v=pts[i0]+(pts[Math.min(i0+1,pts.length-1)]-pts[i0])*fr;
+        var lineY=(1-(v-min)/span)*(h-2)+1;
+        for(var y=0;y<h;y++){
+          var val=y>=lineY?0.32:0.9;
+          val+=(rnd()-0.5)*0.22;
+          var on=val<BAYER[y%2][x%2];
+          var p=(y*w+x)*4;
+          if(on){ d[p]=ir[0]; d[p+1]=ir[1]; d[p+2]=ir[2]; d[p+3]=235; }
+          else  { d[p+3]=0; }
+        }
+      }
+      ctx.putImageData(img,0,0);
+    }
+    document.querySelectorAll('canvas.ghost').forEach(function(cv){
+      try{ drawGhost(cv); }catch(e){}
+    });
+  })();
+  </script>
+</body>
+</html>

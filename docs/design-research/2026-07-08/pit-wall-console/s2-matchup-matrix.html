@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaSurf — S2 Matchup Matrix — Pit-Wall Console</title>
+<!-- MOCKUP ONLY — ALL NUMBERS ARE PLACEHOLDER DATA -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Archivo:ital,wdth,wght@0,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  /* DSEG7 Classic — SIL OFL. CDN here for the mockup; self-host woff2 in prod. */
+  @font-face{
+    font-family:'DSEG7 Classic';
+    src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+    font-weight:700; font-display:swap;
+  }
+
+  :root{
+    --bg:#0d0d12;
+    --panel:#14141b;
+    --panel2:#1a1a23;
+    --line:#26262e;
+    --text:#f2f2f7;
+    --dim:#8e8e99;
+    --win:#3b9dff;   /* favorable — blue side of CVD-safe diverging scale */
+    --loss:#ff7a1a;  /* unfavorable — orange side, never red/green */
+    --accent:#b45bff;/* sector purple — best-in-class only */
+    --shadow:#050508;
+    --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+    /* stepped pixel frame, URL-encoded SVG border-image */
+    --pxframe:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%23f2f2f7' fill-rule='evenodd' d='M9 0H15V3H18V6H21V9H24V15H21V18H18V21H15V24H9V21H6V18H3V15H0V9H3V6H6V3H9V0ZM8 8H16V16H8Z'/%3E%3C/svg%3E");
+    --pxcursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23f2f2f7'%3E%3Crect x='7' y='0' width='3' height='5'/%3E%3Crect x='7' y='12' width='3' height='5'/%3E%3Crect x='0' y='7' width='5' height='3'/%3E%3Crect x='12' y='7' width='5' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23b45bff'/%3E%3C/svg%3E");
+  }
+
+  *{ box-sizing:border-box; border-radius:0 !important; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    padding-top:30px; /* room for fixed ticker */
+  }
+  .wrap{ max-width:720px; margin:0 auto; padding:0 9px 40px; }
+
+  /* ============ WIRE-FEED TICKER ============ */
+  .ticker{
+    position:fixed; top:0; left:0; right:0; height:30px; z-index:90;
+    background:#111119; border-bottom:1px solid var(--line);
+    overflow:hidden; display:flex; align-items:center;
+    -webkit-user-select:none; user-select:none; cursor:pointer;
+  }
+  .ticker-track{
+    display:inline-flex; white-space:nowrap; will-change:transform;
+    animation:feed var(--feed-dur,40s) linear infinite;
+  }
+  .ticker.paused .ticker-track{ animation-play-state:paused; }
+  @keyframes feed{ to{ transform:translateX(-50%); } }
+  .ticker .item{ padding:0 14px; font-size:11px; letter-spacing:.4px; color:var(--dim); }
+  .ticker .item b{ color:var(--text); font-weight:700; }
+  .ticker .up{ color:var(--win); }
+  .ticker .dn{ color:var(--loss); }
+  .ticker .hot{ color:var(--accent); }
+  .ticker .live-dot{
+    position:absolute; left:0; top:0; bottom:0; z-index:2;
+    display:flex; align-items:center; gap:5px; padding:0 8px;
+    background:#111119; border-right:1px solid var(--line);
+    font-family:'Press Start 2P',monospace; font-size:8px; color:var(--loss);
+  }
+  .ticker .pause-hint{
+    position:absolute; right:0; top:0; bottom:0; display:flex; align-items:center;
+    padding:0 8px; background:#111119; border-left:1px solid var(--line);
+    font-size:10px; color:var(--dim); z-index:2;
+  }
+
+  /* ============ HEADER ============ */
+  header{ display:flex; align-items:flex-end; justify-content:space-between; padding:14px 0 10px; gap:8px; }
+  .wordmark{
+    font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62.5%;
+    font-size:28px; line-height:.9; letter-spacing:-.5px; text-transform:uppercase;
+  }
+  .wordmark small{ display:block; font-size:10px; font-stretch:80%; font-weight:700; color:var(--dim); letter-spacing:2px; margin-top:3px; }
+  .badge-s2{
+    font-family:'Press Start 2P',monospace; font-size:8px; padding:6px 6px 5px;
+    background:var(--panel2); border:1px solid var(--line); color:var(--accent);
+    align-self:center;
+  }
+  .clockbox{ text-align:right; }
+  .clock-label{ font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:2px; }
+  .dseg{ font-family:'DSEG7 Classic','JetBrains Mono',monospace; font-weight:700; }
+  /* unlit-segment ghost defines the width; live value right-aligns over it */
+  .ghostwrap{ position:relative; display:inline-block; }
+  .ghostwrap .ghost{ opacity:.09; pointer-events:none; }
+  .ghostwrap .live{ position:absolute; right:0; top:0; }
+  .clock{ font-size:22px; color:var(--text); }
+
+  /* ============ CONTROLS ============ */
+  /* sticky under the ticker so window-switching never requires scrolling back up */
+  .controls{
+    display:flex; gap:8px; align-items:stretch; margin:0 0 12px;
+    padding:8px 0 10px; height:56px;
+    position:sticky; top:30px; z-index:40; background:var(--bg);
+  }
+  .press{
+    background:var(--panel2); border:1px solid #33333d; color:var(--text);
+    box-shadow:2px 2px 0 0 var(--shadow);
+    transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700;
+    padding:9px 0; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .press:active{
+    transform:translate(2px,2px);
+    box-shadow:0 0 0 0 var(--shadow);
+    transition-duration:0ms; /* instant press, 80ms release */
+  }
+  .press:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .seg{ flex:1; display:flex; }
+  .seg .press{ flex:1; color:var(--dim); }
+  .seg .press + .press{ border-left:none; }
+  .seg .press[aria-pressed="true"]{ background:var(--text); color:var(--bg); border-color:var(--text); }
+
+  /* ============ PREMIUM HISTORY STRIP ============ */
+  .history{
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:var(--panel); border:1px solid var(--line);
+    box-shadow:2px 2px 0 0 var(--shadow); padding:8px 10px; margin-bottom:14px;
+    text-align:left; color:var(--text);
+    transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .history:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition-duration:0ms; }
+  .history canvas{ image-rendering:pixelated; width:120px; height:36px; flex:none; background:#0a0a0f; border:1px solid var(--line); }
+  .history .h-meta{ flex:1; min-width:0; }
+  .history .h-title{ display:block; font-size:11px; font-weight:700; letter-spacing:1px; }
+  .history .h-sub{ display:block; font-size:10px; color:var(--dim); margin-top:3px; }
+  .history .h-sub.flash{ color:var(--accent); }
+  .pro-chip{
+    flex:none; font-family:'Press Start 2P',monospace; font-size:8px; padding:6px 7px 5px;
+    background:#101016; border:1px solid #3c3c46;
+  }
+  .pro-chip span{
+    background:var(--chrome);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent; -webkit-text-fill-color:transparent;
+  }
+
+  /* ============ MATRIX ============ */
+  .matrix-note{ display:flex; justify-content:space-between; font-size:10px; color:var(--dim); letter-spacing:1px; margin-bottom:6px; }
+  table.matrix{ width:100%; border-collapse:separate; border-spacing:2px; table-layout:fixed; }
+  table.matrix th, table.matrix td{ padding:0; }
+  table.matrix col.lbl{ width:54px; }
+  th.corner, th.colhead{
+    position:sticky; top:86px; z-index:20; background:var(--bg); /* 30px ticker + 56px sticky controls */
+    font-size:9px; font-weight:700; color:var(--dim); letter-spacing:.5px;
+    padding:6px 0 5px; border-bottom:2px solid var(--line);
+  }
+  th.corner{ text-align:left; font-size:8px; }
+  /* note: no sticky-left on row heads — table-layout:fixed grid never overflows horizontally */
+  th.rowhead{
+    text-align:left; font-size:10px; font-weight:700; letter-spacing:.5px;
+    padding-left:2px; border-right:2px solid var(--line);
+  }
+  th.rowhead .share{ display:block; font-size:9px; font-weight:400; color:var(--dim); }
+  /* 44px min touch target everywhere — columns stay narrow, only height carries the target */
+  td.cell{ height:44px; }
+  .cellbtn{
+    position:relative; width:100%; height:44px; display:block;
+    border:none; padding:0; font-family:inherit; font-size:12px; font-weight:700;
+    color:var(--text); background:rgba(242,242,247,.05);
+    box-shadow:2px 2px 0 0 var(--shadow);
+    transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+    cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .cellbtn:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition-duration:0ms; }
+  .cellbtn:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+  .cellbtn .v{ display:inline-block; }
+  .cellbtn.best::after{ /* sector-purple: row's best matchup */
+    content:''; position:absolute; top:0; right:0; width:7px; height:7px; background:var(--accent);
+  }
+  .cellbtn.sel{ box-shadow:inset 0 0 0 2px var(--text), 2px 2px 0 0 var(--shadow); }
+  /* low-sample treatment: hatch overlay + dimmed value — grid itself encodes confidence */
+  .cellbtn.lown .v{ opacity:.85; }
+  .cellbtn.lown::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(45deg, rgba(13,13,18,.45) 0 3px, transparent 3px 8px);
+  }
+  td.mirror{ height:44px; text-align:center; color:#3a3a44; background:#111117; font-size:11px; }
+
+  /* one 2-frame RGB-split glitch on changed cells — event-driven, never loops */
+  @media (prefers-reduced-motion: no-preference){
+    .glitch .v, .glitch .live{ animation:rgbsplit 240ms steps(2,end) 1; }
+    @keyframes rgbsplit{
+      0%  { clip-path:inset(0 0 45% 0); transform:translateX(2px);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss); }
+      50% { clip-path:inset(52% 0 0 0); transform:translateX(-2px); text-shadow: 2px 0 var(--win),-2px 0 var(--loss); }
+      100%{ clip-path:none; transform:none; text-shadow:none; }
+    }
+  }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:10px; color:var(--dim); margin:10px 0 16px; }
+  .legend i{ display:inline-block; width:9px; height:9px; margin-right:5px; vertical-align:-1px; }
+
+  /* code → name key, tap to reveal */
+  .key-toggle{ padding:6px 10px; font-size:10px; letter-spacing:1px; margin:0 0 8px; }
+  .keylist{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:4px 14px;
+    font-size:10px; color:var(--dim); background:var(--panel); border:1px solid var(--line);
+    padding:8px 10px; margin-bottom:8px;
+  }
+  .keylist b{ color:var(--text); margin-right:6px; }
+  .keylist[hidden]{ display:none; }
+
+  /* ============ DRILLDOWN (picked game tile) ============ */
+  .drill{
+    border:9px solid transparent;
+    border-image:var(--pxframe) 9 stretch;
+    background:var(--panel); background-clip:padding-box;
+    padding:12px 10px 14px; margin:4px 2px 26px;
+  }
+  .drill-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .mu-code{ font-family:'Press Start 2P',monospace; font-size:8px; padding:5px 6px 4px; background:var(--panel2); border:1px solid var(--line); }
+  .mu-vs{ font-size:10px; color:var(--dim); }
+  .mu-full{ flex-basis:100%; font-size:10px; color:var(--dim); letter-spacing:.5px; }
+  .chip{ font-family:'Press Start 2P',monospace; font-size:8px; padding:5px 6px 4px; margin-left:auto; }
+  .chip.bestmu{ background:var(--accent); color:#0d0d12; }
+  .drill-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 10px; align-items:end; }
+  .stat-label{ font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:4px; }
+  .wr-big{ font-size:44px; line-height:1; }
+  .wr-big .unit{ font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--dim); margin-left:4px; }
+  .n-read{ font-size:22px; line-height:1; }
+  .n-read .unit{ font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--dim); margin-left:8px; }
+  .ci-line{ font-size:12px; font-weight:700; }
+  .ci-bar{ position:relative; height:8px; background:#0a0a0f; border:1px solid var(--line); margin-top:6px; }
+  .ci-band{ position:absolute; top:0; bottom:0; background:rgba(242,242,247,.28); }
+  .ci-mid{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--dim); left:50%; }
+  .ci-pt{ position:absolute; top:0; bottom:0; width:3px; }
+  .trend-row{ display:flex; align-items:center; gap:8px; }
+  .trend-chip{ font-size:12px; font-weight:700; padding:3px 7px; border:1px solid var(--line); background:var(--panel2); white-space:nowrap; }
+  .trend-chip.up{ color:var(--win); } .trend-chip.dn{ color:var(--loss); }
+  .spark{ image-rendering:pixelated; width:120px; height:36px; background:#0a0a0f; border:1px solid var(--line); }
+  .spark-tag{ font-size:9px; color:var(--dim); letter-spacing:1px; }
+  .drill-foot{ margin-top:12px; font-size:10px; color:var(--dim); letter-spacing:.5px; }
+  .wr-big.fav{ color:var(--win); } .wr-big.unfav{ color:var(--loss); } .wr-big.even{ color:var(--text); }
+
+  /* ============ FOOTER WORDMARK BLOCK ============ */
+  footer{ margin-top:44px; border-top:1px solid var(--line); padding-top:18px; }
+  .foot-mark{
+    font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62.5%;
+    font-size:46px; line-height:.88; text-transform:uppercase; letter-spacing:-1px;
+  }
+  .foot-mark .sub{ display:block; font-size:23px; color:var(--dim); }
+  .foot-note{ font-size:9px; color:#55555f; letter-spacing:1px; margin-top:14px; }
+  @media (min-width:600px){
+    .foot-mark{ font-size:72px; } .foot-mark .sub{ font-size:36px; }
+    .wordmark{ font-size:36px; }
+    .cellbtn{ font-size:13px; }
+    th.colhead{ font-size:10px; }
+  }
+
+  /* pixel cursor is desktop garnish only */
+  @media (hover:hover) and (pointer:fine){
+    .press, .cellbtn, .history, .pro-chip, .ticker{ cursor:var(--pxcursor) 8 8, pointer; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{ animation:none; }
+    .ticker .pause-hint{ display:none; }
+    .press, .cellbtn, .history{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= RESULTS WIRE-FEED ======= -->
+<div class="ticker" id="ticker" role="marquee" aria-label="results wire feed — tap to pause">
+  <div class="live-dot">WIRE</div>
+  <div class="ticker-track" id="tickerTrack"></div>
+  <div class="pause-hint" id="pauseHint">⏸</div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="wordmark">MetaSurf<small>PIT-WALL CONSOLE</small></div>
+    <div class="badge-s2">S2·MTX</div>
+    <div class="clockbox">
+      <div class="clock-label">SESSION UTC</div>
+      <span class="ghostwrap">
+        <span class="dseg clock ghost" aria-hidden="true">88:88</span>
+        <span class="dseg clock live" id="clock">--:--</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- period filter — refires quantized roll-ups + one glitch frame per changed cell -->
+  <div class="controls">
+    <div class="seg" role="group" aria-label="data window">
+      <button class="press" data-period="7D"  aria-pressed="false">7D</button>
+      <button class="press" data-period="30D" aria-pressed="true">30D</button>
+      <button class="press" data-period="90D" aria-pressed="false">90D</button>
+    </div>
+  </div>
+
+  <!-- premium-gated historical evolution — resolution-unlock mechanic -->
+  <button class="history" id="historyBtn" aria-label="Matchup history, 12 weeks. PRO feature — unlock full resolution.">
+    <canvas id="histCanvas" width="120" height="36"></canvas>
+    <span class="h-meta">
+      <span class="h-title">MATCHUP HISTORY · 12WK</span>
+      <span class="h-sub" id="histSub">LOW-RES PREVIEW · UNLOCK FULL RESOLUTION</span>
+    </span>
+    <span class="pro-chip" id="proChip" role="button" tabindex="0" aria-label="Demo: unlock full resolution"><span>PRO</span></span>
+  </button>
+
+  <div class="matrix-note">
+    <span>ROW WR% VS COLUMN · MODERN</span>
+    <span id="eventCount">EVENTS: 34</span>
+  </div>
+
+  <button class="press key-toggle" id="keyToggle" aria-expanded="false" aria-controls="keyList">CODE KEY ▸</button>
+  <div class="keylist" id="keyList" hidden></div>
+
+  <table class="matrix" id="matrix" aria-label="matchup winrate matrix">
+    <colgroup><col class="lbl"></colgroup>
+    <thead><tr id="headRow"><th class="corner" scope="col">WR%</th></tr></thead>
+    <tbody id="matrixBody"></tbody>
+  </table>
+
+  <div class="legend">
+    <span><i style="background:var(--win)"></i>FAVORABLE &gt;52%</span>
+    <span><i style="background:var(--loss)"></i>UNFAVORABLE &lt;48%</span>
+    <span><i style="background:var(--accent)"></i>BEST MU IN ROW</span>
+    <span><i style="background:repeating-linear-gradient(45deg,#55555f 0 2px,transparent 2px 4px)"></i>HATCH = LOW SAMPLE N&lt;50</span>
+  </div>
+
+  <!-- ======= CELL DRILLDOWN — picked game tile ======= -->
+  <section class="drill" id="drill" aria-live="polite">
+    <div class="drill-head">
+      <span class="mu-code" id="muRow">MURK</span>
+      <span class="mu-vs">VS</span>
+      <span class="mu-code" id="muCol">TRON</span>
+      <span class="chip bestmu" id="bestChip">BEST MU</span>
+      <span class="mu-full" id="muFull">IZZET MURKTIDE VS MONO-G TRON</span>
+    </div>
+    <div class="drill-grid">
+      <div>
+        <div class="stat-label">WINRATE</div>
+        <span class="ghostwrap">
+          <span class="dseg wr-big ghost" aria-hidden="true">88.8</span>
+          <span class="dseg wr-big even live" id="wrVal">0.0</span>
+        </span><span class="wr-big unit" style="font-size:16px">%</span>
+      </div>
+      <div>
+        <div class="stat-label">SAMPLE</div>
+        <span class="ghostwrap">
+          <span class="dseg n-read ghost" aria-hidden="true">8888</span>
+          <span class="dseg n-read live" id="nVal">0</span>
+        </span><span class="n-read unit" style="font-size:11px">MATCHES</span>
+      </div>
+      <div>
+        <div class="stat-label">95% CI</div>
+        <div class="ci-line" id="ciLine">± 0.0</div>
+        <div class="ci-bar" aria-hidden="true">
+          <div class="ci-band" id="ciBand"></div>
+          <div class="ci-mid"></div>
+          <div class="ci-pt" id="ciPt"></div>
+        </div>
+      </div>
+      <div>
+        <div class="stat-label" id="trendLabel">TREND VS 90D</div>
+        <div class="trend-row">
+          <span class="trend-chip" id="trendChip">▲ +0.0</span>
+          <canvas class="spark" id="sparkCanvas" width="40" height="12" aria-label="12-week trend sparkline"></canvas>
+          <span class="spark-tag">12WK</span>
+        </div>
+      </div>
+    </div>
+    <div class="drill-foot" id="drillFoot">TAP ANY CELL TO READ OUT · WINDOW: 30D</div>
+  </section>
+
+  <footer>
+    <div class="foot-mark">MetaSurf<span class="sub">Modern — Week 27</span></div>
+    <div class="foot-note">MOCKUP · PLACEHOLDER DATA · NOT MEASURED FROM REAL EVENTS</div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   PLACEHOLDER DATA — deterministic seeded PRNG, clearly fake.
+   ============================================================ */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const rng = mulberry32(20260708);
+
+const ARCH = [
+  {code:'MURK', name:'IZZET MURKTIDE', share:14.2},
+  {code:'SCAM', name:'RAKDOS SCAM',    share:12.8},
+  {code:'TITN', name:'AMULET TITAN',   share:9.6},
+  {code:'YAWG', name:'YAWGMOTH',       share:8.1},
+  {code:'LEND', name:'LIVING END',     share:6.9},
+  {code:'BURN', name:'BURN',           share:6.4},
+  {code:'TRON', name:'MONO-G TRON',    share:5.7},
+  {code:'HAMR', name:'HAMMER TIME',    share:5.2},
+];
+const N = ARCH.length;
+
+/* upper triangle, 30D window (row beats col %) */
+const BASE = [
+  [null,46.2,55.1,52.8,61.4,57.9,63.2,54.6],
+  [null,null,48.7,51.2,44.9,55.4,58.8,60.3],
+  [null,null,null,53.5,57.2,42.7,52.1,49.4],
+  [null,null,null,null,47.8,50.9,55.6,62.1],
+  [null,null,null,null,null,53.3,49.5,46.8],
+  [null,null,null,null,null,null,60.7,51.6],
+  [null,null,null,null,null,null,null,41.9],
+  [null,null,null,null,null,null,null,null],
+];
+
+function buildPeriod(jitterScale, nScale){
+  const wr=[], n=[];
+  for(let i=0;i<N;i++){ wr.push(new Array(N).fill(null)); n.push(new Array(N).fill(0)); }
+  for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+    const jit=(rng()*2-1)*jitterScale;
+    const v=Math.min(72,Math.max(28,BASE[i][j]+jit));
+    wr[i][j]=Math.round(v*10)/10;
+    wr[j][i]=Math.round((100-v)*10)/10;
+    const base=Math.round(80+rng()*340);
+    n[i][j]=n[j][i]=Math.max(12,Math.round(base*nScale));
+  }
+  return {wr,n};
+}
+/* build order fixed → deterministic across loads */
+const DATA = {
+  '30D': buildPeriod(0.0, 1.0),
+  '7D' : buildPeriod(2.6, 0.28),
+  '90D': buildPeriod(1.2, 2.6),
+};
+const EVENTS = {'7D':9,'30D':34,'90D':101};
+
+let period='30D';
+let sel={i:0,j:6};   // MURK vs TRON pre-expanded
+
+/* ============================================================
+   MATRIX RENDER
+   ============================================================ */
+const headRow=document.getElementById('headRow');
+const body=document.getElementById('matrixBody');
+const matrixTable=document.getElementById('matrix');
+const colgroup=matrixTable.querySelector('colgroup');
+
+ARCH.forEach(a=>{
+  const th=document.createElement('th');
+  th.className='colhead'; th.scope='col'; th.textContent=a.code;
+  headRow.appendChild(th);
+  colgroup.appendChild(document.createElement('col'));
+});
+
+const cellBtns=[]; // [i][j] -> button or null
+for(let i=0;i<N;i++){
+  const tr=document.createElement('tr');
+  const th=document.createElement('th');
+  th.className='rowhead'; th.scope='row';
+  th.innerHTML=ARCH[i].code+'<span class="share">'+ARCH[i].share.toFixed(1)+'%</span>';
+  tr.appendChild(th);
+  cellBtns.push([]);
+  for(let j=0;j<N;j++){
+    const td=document.createElement('td');
+    if(i===j){
+      td.className='mirror'; td.textContent='—'; cellBtns[i].push(null);
+    }else{
+      td.className='cell';
+      const b=document.createElement('button');
+      b.className='cellbtn';
+      b.innerHTML='<span class="v">--</span>';
+      b.dataset.i=i; b.dataset.j=j;
+      b.addEventListener('click',()=>selectCell(i,j));
+      td.appendChild(b); cellBtns[i].push(b);
+    }
+    tr.appendChild(td);
+  }
+  body.appendChild(tr);
+}
+
+function cellBg(wr){
+  const d=wr-50;
+  if(Math.abs(d)<2) return 'rgba(242,242,247,.06)';           /* neutral 48–52 */
+  const c = d>0 ? '59,157,255' : '255,122,26';
+  /* alpha capped at .55: white 12px text stays >=4.5:1 on both scale extremes */
+  const a = Math.min(.55, .12 + Math.abs(d)*.03);
+  return 'rgba('+c+','+a+')';
+}
+
+function bestInRow(i){
+  let bj=-1,bv=-1;
+  for(let j=0;j<N;j++){ if(j===i) continue;
+    const v=DATA[period].wr[i][j]; if(v>bv){bv=v;bj=j;} }
+  return bj;
+}
+
+/* quantized roll-up: 8 discrete ticks, ≤600ms, IO-gated, RM-gated */
+let matrixInView=true;
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{es.forEach(e=>{matrixInView=e.isIntersecting;});},{threshold:.05})
+    .observe(matrixTable);
+}
+function quantRoll(el,to,dec){
+  const from=parseFloat(el.textContent)||0;
+  if(el._t) clearInterval(el._t);
+  if(REDUCED||!matrixInView||from===to){ el.textContent=to.toFixed(dec); return; }
+  const STEPS=8, DUR=480; let k=0;
+  el._t=setInterval(()=>{
+    k++;
+    const v=from+(to-from)*(k/STEPS);
+    el.textContent=(k>=STEPS?to:v).toFixed(dec);
+    if(k>=STEPS){ clearInterval(el._t); el._t=null; }
+  },DUR/STEPS);
+}
+
+function paintMatrix(glitchChanged){
+  const {wr,n}=DATA[period];
+  for(let i=0;i<N;i++){
+    const bj=bestInRow(i);
+    for(let j=0;j<N;j++){
+      const b=cellBtns[i][j]; if(!b) continue;
+      const v=wr[i][j];
+      const span=b.querySelector('.v');
+      const prev=parseFloat(span.textContent);
+      b.style.background=cellBg(v);
+      b.classList.toggle('best',j===bj);
+      b.classList.toggle('sel',sel.i===i&&sel.j===j);
+      const lowN=n[i][j]<50;                     /* grid encodes confidence, not just drilldown CI */
+      b.classList.toggle('lown',lowN);
+      b.setAttribute('aria-label',ARCH[i].name+' vs '+ARCH[j].name+': '+Math.round(v)+' percent'+
+        (lowN?', low sample, '+n[i][j]+' matches':'')+', tap for detail');
+      quantRoll(span,v,0);
+      if(glitchChanged&&!REDUCED&&Math.round(prev)!==Math.round(v)){
+        b.classList.remove('glitch'); void b.offsetWidth;   // restart
+        b.classList.add('glitch');
+        span.addEventListener('animationend',()=>b.classList.remove('glitch'),{once:true});
+      }
+    }
+  }
+  document.getElementById('eventCount').textContent='EVENTS: '+EVENTS[period];
+}
+
+/* ============================================================
+   DRILLDOWN
+   ============================================================ */
+const wrVal=document.getElementById('wrVal'), nVal=document.getElementById('nVal');
+
+function ci95(p,n){ const q=p/100; return 1.96*Math.sqrt(q*(1-q)/Math.max(n,1))*100; }
+
+function sparkSeries(i,j){
+  const r=mulberry32(1000*i+j+7);
+  const end=DATA['30D'].wr[i][j], pts=[];
+  let v=end+(r()*10-5);
+  for(let k=0;k<12;k++){ pts.push(v); v+= (end-v)*.3 + (r()*4-2); }
+  pts[11]=end; return pts;
+}
+
+function drawSpark(i,j){
+  const cv=document.getElementById('sparkCanvas'), ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,40,12);
+  const pts=sparkSeries(i,j);
+  const min=Math.min(...pts,45), max=Math.max(...pts,55);
+  ctx.strokeStyle='#55555f'; ctx.beginPath();
+  const y50=11-((50-min)/(max-min))*10;
+  ctx.moveTo(0,y50+.5); ctx.lineTo(40,y50+.5); ctx.stroke();
+  const up=pts[11]>=50;
+  ctx.fillStyle=up?'#3b9dff':'#ff7a1a';
+  pts.forEach((p,k)=>{
+    const x=Math.round(k*(40/12)), y=Math.round(11-((p-min)/(max-min))*10);
+    ctx.fillRect(x,y,3,2);   /* chunky staircase texture */
+  });
+}
+
+function selectCell(i,j,silent){
+  const prev=cellBtns[sel.i]&&cellBtns[sel.i][sel.j];
+  if(prev) prev.classList.remove('sel');
+  sel={i,j};
+  const b=cellBtns[i][j]; if(b) b.classList.add('sel');
+
+  const {wr,n}=DATA[period];
+  const v=wr[i][j], nn=n[i][j];
+  const ci=ci95(v,nn);
+  /* re-baseline when the 90D window itself is selected (else trend is always +0.0) */
+  const basePeriod = period==='90D' ? '30D' : '90D';
+  const d90=Math.round((v-DATA[basePeriod].wr[i][j])*10)/10;
+
+  document.getElementById('muRow').textContent=ARCH[i].code;
+  document.getElementById('muCol').textContent=ARCH[j].code;
+  document.getElementById('muFull').textContent=ARCH[i].name+' VS '+ARCH[j].name;
+  document.getElementById('bestChip').style.display=(bestInRow(i)===j)?'':'none';
+
+  wrVal.className='dseg wr-big live '+(v>52?'fav':v<48?'unfav':'even');
+  quantRoll(wrVal,v,1);
+  quantRoll(nVal,nn,0);
+
+  document.getElementById('ciLine').textContent='± '+ci.toFixed(1);
+  /* CI bar spans 30–70 */
+  const lo=Math.max(30,v-ci), hi=Math.min(70,v+ci);
+  const pc=x=>((x-30)/40*100);
+  const band=document.getElementById('ciBand');
+  band.style.left=pc(lo)+'%'; band.style.width=(pc(hi)-pc(lo))+'%';
+  const pt=document.getElementById('ciPt');
+  pt.style.left='calc('+pc(v)+'% - 1px)';
+  pt.style.background=v>52?'var(--win)':v<48?'var(--loss)':'var(--text)';
+
+  document.getElementById('trendLabel').textContent='TREND VS '+basePeriod;
+  const tc=document.getElementById('trendChip');
+  tc.textContent=(d90>=0?'▲ +':'▼ ')+d90.toFixed(1);
+  tc.className='trend-chip '+(d90>=0?'up':'dn');
+
+  drawSpark(i,j);
+  document.getElementById('drillFoot').textContent='TAP ANY CELL TO READ OUT · WINDOW: '+period;
+
+  if(!silent){
+    /* keep the drilldown readout visible when tapping bottom rows on short phones */
+    document.getElementById('drill').scrollIntoView({block:'nearest'});
+  }
+  if(!silent&&!REDUCED){
+    wrVal.parentElement.classList.remove('glitch'); void wrVal.offsetWidth;
+    wrVal.parentElement.classList.add('glitch');
+  }
+}
+
+/* ============================================================
+   PERIOD SWITCH → roll-ups + single glitch frame on changed cells
+   ============================================================ */
+document.querySelectorAll('[data-period]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.dataset.period===period) return;
+    document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',b===btn?'true':'false'));
+    period=btn.dataset.period;
+    paintMatrix(true);
+    selectCell(sel.i,sel.j,true);
+  });
+});
+
+/* ============================================================
+   ARCHETYPE CODE KEY — tap to reveal
+   ============================================================ */
+const keyToggle=document.getElementById('keyToggle'), keyList=document.getElementById('keyList');
+keyList.innerHTML=ARCH.map(a=>'<span><b>'+a.code+'</b>'+a.name+'</span>').join('');
+keyToggle.addEventListener('click',()=>{
+  const open=keyList.hidden;
+  keyList.hidden=!open;
+  keyToggle.setAttribute('aria-expanded',String(open));
+  keyToggle.textContent=open?'CODE KEY ▾':'CODE KEY ▸';
+});
+
+/* ============================================================
+   TICKER — CSS duplicated track, tap to pause, RM = static
+   ============================================================ */
+const FEED=[
+  '<b>MODERN CHALLENGE 64</b> · 1st RAKDOS SCAM',
+  '2nd IZZET MURKTIDE · 3rd AMULET TITAN',
+  '<span class="hot">LIVING END +2.3% ▲ SECTOR BEST</span>',
+  '<span class="dn">TRON −1.1% ▼</span>',
+  '<b>MODERN PRELIM</b> · 5-0 YAWGMOTH',
+  '<span class="up">HAMMER TIME +0.8% ▲</span>',
+  'DATA SYNC 04:12 UTC · 34 EVENTS IN WINDOW',
+  '<b>MTGO SUPER QUAL</b> · TOP8 3× SCAM',
+];
+const track=document.getElementById('tickerTrack');
+const half=FEED.map(t=>'<span class="item">'+t+'</span>').join('<span class="item">///</span>');
+track.innerHTML=half+'<span class="item">///</span>'+half+'<span class="item">///</span>';
+function setFeedSpeed(){
+  const w=track.scrollWidth/2;
+  track.style.setProperty('--feed-dur',(w/35)+'s');  /* ~35 px/s */
+}
+requestAnimationFrame(setFeedSpeed);
+/* recompute once webfonts swap in, otherwise speed drifts off 35 px/s */
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>requestAnimationFrame(setFeedSpeed));
+}
+const ticker=document.getElementById('ticker');
+ticker.addEventListener('click',()=>{
+  ticker.classList.toggle('paused');
+  document.getElementById('pauseHint').textContent=ticker.classList.contains('paused')?'▶':'⏸';
+});
+
+/* ============================================================
+   CLOCK — DSEG readout w/ unlit-segment ghost
+   ============================================================ */
+function tickClock(){
+  const d=new Date();
+  const hh=String(d.getUTCHours()).padStart(2,'0');
+  const mm=String(d.getUTCMinutes()).padStart(2,'0');
+  const colon=(REDUCED||d.getUTCSeconds()%2===0)?':':' ';
+  document.getElementById('clock').textContent=hh+colon+mm;
+}
+tickClock(); setInterval(tickClock,1000);
+
+/* ============================================================
+   PREMIUM HISTORY — downscale-to-1/8 pixelated mosaic,
+   teaser tween pixel size 8→2→8 on tap ("unlock full resolution")
+   ============================================================ */
+const hist=document.getElementById('histCanvas'), hctx=hist.getContext('2d');
+const off=document.createElement('canvas'); off.width=120; off.height=36;
+const octx=off.getContext('2d');
+(function drawHistFull(){
+  const r=mulberry32(4242); octx.fillStyle='#0a0a0f'; octx.fillRect(0,0,120,36);
+  let v=18;
+  octx.strokeStyle='#3b9dff'; octx.lineWidth=2; octx.beginPath();
+  for(let x=0;x<=120;x+=5){ v=Math.max(6,Math.min(30,v+(r()*8-4))); x===0?octx.moveTo(x,v):octx.lineTo(x,v); }
+  octx.stroke();
+  octx.strokeStyle='#ff7a1a'; octx.beginPath(); v=22;
+  for(let x=0;x<=120;x+=5){ v=Math.max(6,Math.min(30,v+(r()*8-4))); x===0?octx.moveTo(x,v):octx.lineTo(x,v); }
+  octx.stroke();
+})();
+function renderHist(px){
+  const w=Math.max(1,Math.round(120/px)), h=Math.max(1,Math.round(36/px));
+  const tiny=document.createElement('canvas'); tiny.width=w; tiny.height=h;
+  const tctx=tiny.getContext('2d');
+  tctx.imageSmoothingEnabled=true; tctx.drawImage(off,0,0,w,h);
+  hctx.imageSmoothingEnabled=false;
+  hctx.clearRect(0,0,120,36); hctx.drawImage(tiny,0,0,120,36);
+}
+renderHist(8);  /* free tier: locked at 1/8 resolution */
+
+let histBusy=false, unlocked=false;
+document.getElementById('historyBtn').addEventListener('click',()=>{
+  const sub=document.getElementById('histSub');
+  if(unlocked){ return; }  /* demo-unlocked: full res stays crisp */
+  if(REDUCED||histBusy){
+    sub.textContent='PRO ONLY · FULL-RES HISTORY LOCKED'; sub.classList.add('flash');
+    setTimeout(()=>{sub.textContent='LOW-RES PREVIEW · UNLOCK FULL RESOLUTION';sub.classList.remove('flash');},1600);
+    return;
+  }
+  histBusy=true;
+  const t0=performance.now(), DUR=900;
+  (function tween(now){
+    const t=Math.min(1,(now-t0)/DUR);
+    /* teaser: 8 → 2 → 8, quantized to whole pixel sizes */
+    const px=Math.round(t<.5 ? 8-12*t : 2+12*(t-.5));
+    renderHist(Math.max(2,px));
+    if(t<1){ requestAnimationFrame(tween); }
+    else{
+      renderHist(8); histBusy=false;
+      sub.textContent='PRO ONLY · FULL-RES HISTORY LOCKED'; sub.classList.add('flash');
+      setTimeout(()=>{sub.textContent='LOW-RES PREVIEW · UNLOCK FULL RESOLUTION';sub.classList.remove('flash');},1600);
+    }
+  })(t0);
+});
+
+/* mock DEMO UNLOCK (tap the PRO chip) — completes the full 8 → 1 tween,
+   the flagship "unlock full resolution" money shot; tap again to re-lock */
+function demoUnlockToggle(){
+  if(histBusy) return;
+  const sub=document.getElementById('histSub');
+  if(unlocked){
+    unlocked=false; renderHist(8);
+    sub.textContent='LOW-RES PREVIEW · UNLOCK FULL RESOLUTION'; sub.classList.remove('flash');
+    return;
+  }
+  if(REDUCED){
+    unlocked=true; renderHist(1);
+    sub.textContent='FULL RESOLUTION · DEMO UNLOCK'; sub.classList.add('flash');
+    return;
+  }
+  histBusy=true;
+  const t0=performance.now(), DUR=1200;
+  (function tween(now){
+    const t=Math.min(1,(now-t0)/DUR);
+    renderHist(Math.max(1,Math.round(8-7*t)));   /* 8 → 1, quantized */
+    if(t<1){ requestAnimationFrame(tween); }
+    else{
+      renderHist(1); histBusy=false; unlocked=true;
+      sub.textContent='FULL RESOLUTION · DEMO UNLOCK'; sub.classList.add('flash');
+    }
+  })(t0);
+}
+const proChip=document.getElementById('proChip');
+proChip.addEventListener('click',e=>{ e.stopPropagation(); demoUnlockToggle(); });
+proChip.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); e.stopPropagation(); demoUnlockToggle(); }
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+paintMatrix(false);
+selectCell(sel.i,sel.j,true);
+</script>
+</body>
+</html>

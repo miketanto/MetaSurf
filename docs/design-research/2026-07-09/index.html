@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaSurf — Pit-Wall Console — Design Gallery</title>
+<!-- ============================================================
+  WAVE-2 DESIGN GALLERY (2026-07-10)
+  Simple index page in the Pit-Wall idiom linking every wave-2
+  mockup plus the four v3 base screens. Not a product surface —
+  a browsing aid for the owner. Styled per pit-wall-tokens.md:
+  carbon palette, no border-radius, panel formula, press states,
+  purple scarce (wordmark underline only).
+  ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d12; --panel:#14141a; --panel2:#191921; --line:#2b2b35;
+  --ink:#f2f2f7; --dim:#8a8a96; --win:#3b9dff; --loss:#ff7a1a;
+  --acc:#b45bff; --shadow:#000;
+}
+*{ margin:0; padding:0; box-sizing:border-box; border-radius:0 !important; }
+body{
+  background:var(--bg); color:var(--ink);
+  font:400 13px/1.5 'JetBrains Mono',monospace;
+  padding:20px 16px 60px;
+}
+.wrap{ max-width:1100px; margin:0 auto; }
+
+/* wordmark */
+.mark{ margin-bottom:6px; }
+.mark h1{
+  font:700 26px 'JetBrains Mono',monospace; letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.mark h1 span{ color:var(--dim); }
+.markrule{ height:4px; background:linear-gradient(90deg,var(--acc),transparent 70%); margin:8px 0 10px; }
+.sub{
+  font:400 10px 'JetBrains Mono',monospace; color:var(--dim);
+  text-transform:uppercase; letter-spacing:.08em; margin-bottom:22px;
+}
+.sub b{ color:var(--ink); font-weight:700; }
+.sub a{ color:var(--win); text-decoration:none; }
+.sub a:hover{ text-decoration:underline; }
+
+/* section bays */
+.bay{ margin-bottom:28px; }
+.baylabel{
+  font:400 8px 'Press Start 2P',monospace; color:var(--dim);
+  text-transform:uppercase; letter-spacing:.1em;
+  border-bottom:1px solid var(--line); padding-bottom:7px; margin-bottom:12px;
+}
+.baylabel b{ color:var(--ink); font-weight:400; }
+
+/* tile grid */
+.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+a.tile{
+  display:block; background:var(--panel); border:1px solid var(--line);
+  box-shadow:3px 3px 0 var(--shadow); padding:12px 12px 11px;
+  text-decoration:none; color:var(--ink); min-height:88px;
+  transition:none;
+}
+a.tile:hover{ background:var(--panel2); border-color:#3a3a48; }
+a.tile:active{ transform:translate(2px,2px); box-shadow:1px 1px 0 var(--shadow); }
+a.tile:focus-visible{ outline:2px solid var(--win); outline-offset:2px; }
+.t-code{
+  font:400 7px 'Press Start 2P',monospace; color:var(--dim);
+  letter-spacing:.08em; margin-bottom:8px; text-transform:uppercase;
+}
+.t-name{ font:700 13px 'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.03em; margin-bottom:5px; }
+.t-name .lnk{ color:var(--win); }
+.t-sub{ font:400 10px 'JetBrains Mono',monospace; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; }
+
+/* per-game keel accents (extension-spec §0 livery slot; provisional hues) */
+.tile.op{ border-left:3px solid #e0b73a; }
+.tile.rb{ border-left:3px solid #3aa7a3; }
+.tile.doc{ border-left:3px solid var(--acc); }
+
+/* caveat chip (extension-spec §3 chrome) */
+.caveat{
+  display:inline-block;
+  font:400 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; margin-top:14px;
+}
+.caveat b{ color:var(--ink); font-weight:700; }
+
+/* provenance footnote */
+.prov{
+  margin-top:26px; border-top:1px solid var(--line); padding-top:10px;
+  font:400 9px 'JetBrains Mono',monospace; color:var(--dim);
+  text-transform:uppercase; letter-spacing:.08em; line-height:1.7;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mark"><h1>METASURF <span>// PIT-WALL CONSOLE</span></h1></div>
+  <div class="markrule"></div>
+  <div class="sub">
+    DESIGN GALLERY · WAVE 2 · AS-OF 2026-07-10 · <b>14 MOCKUPS</b> + 2 SPECS ·
+    REPORT: <a href="README.md">README.md</a>
+  </div>
+
+  <!-- V3 BASE SCREENS -->
+  <div class="bay">
+    <div class="baylabel">BAY 01 // <b>V3 BASE SCREENS</b> — PIT-WALL-CONSOLE (WAVE-1 WINNERS, RE-CUT)</div>
+    <div class="grid">
+      <a class="tile" href="pit-wall-console/s1-meta-snapshot.html">
+        <div class="t-code">S1</div>
+        <div class="t-name">Meta Snapshot</div>
+        <div class="t-sub">Timing tower · share bars · delta chips</div>
+      </a>
+      <a class="tile" href="pit-wall-console/s2-matchup-matrix.html">
+        <div class="t-code">S2</div>
+        <div class="t-name">Matchup Matrix</div>
+        <div class="t-sub">Heat grid · low-n hatch · misprint veil</div>
+      </a>
+      <a class="tile" href="pit-wall-console/s3-archetype-detail.html">
+        <div class="t-code">S3</div>
+        <div class="t-name">Archetype Detail</div>
+        <div class="t-sub">Bench grid · star plaque · deck feed</div>
+      </a>
+      <a class="tile" href="pit-wall-console/s-deck-viewer.html">
+        <div class="t-code">S-DV</div>
+        <div class="t-name">Deck Viewer</div>
+        <div class="t-sub">List rows · inspector dock · duotone hero</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- WAVE-2 MTG / CROSS-GAME -->
+  <div class="bay">
+    <div class="baylabel">BAY 02 // <b>WAVE-2 CONSOLE + MTG SURFACES</b></div>
+    <div class="grid">
+      <a class="tile" href="home-game-switcher.html">
+        <div class="t-code">S4</div>
+        <div class="t-name">Game Console Home</div>
+        <div class="t-sub">Switcher tiles · livery · maturity chips</div>
+      </a>
+      <a class="tile" href="events-browser.html">
+        <div class="t-code">S7</div>
+        <div class="t-name">Events Browser</div>
+        <div class="t-sub">Multi-game feed · podiums · min-field filter</div>
+      </a>
+      <a class="tile" href="best-decks.html">
+        <div class="t-code">FEED</div>
+        <div class="t-name">Best Decks</div>
+        <div class="t-sub">Winners ledger · spotlights · PRO veil</div>
+      </a>
+      <a class="tile" href="emerging-feed.html">
+        <div class="t-code">S10</div>
+        <div class="t-name">Emerging Scanner</div>
+        <div class="t-sub">T3 clusters · tier ladder · V-FEED gate</div>
+      </a>
+      <a class="tile" href="card-trends.html">
+        <div class="t-code">S11</div>
+        <div class="t-name">Card Trends</div>
+        <div class="t-sub">Movers board · 1W/4W · tech adoption</div>
+      </a>
+      <a class="tile" href="deck-classify.html">
+        <div class="t-code">CLSF</div>
+        <div class="t-name">Deck Classify</div>
+        <div class="t-sub">Paste-a-list console · T1/T3 result · ties honest</div>
+      </a>
+      <a class="tile" href="deck-map.html">
+        <div class="t-code">S12</div>
+        <div class="t-name">Deck Map</div>
+        <div class="t-sub">Cluster canvas · curated hulls · bottom sheet</div>
+      </a>
+      <a class="tile" href="meta-forecast.html">
+        <div class="t-code">S13</div>
+        <div class="t-name">Meta Forecast</div>
+        <div class="t-sub">Stepped fan chart · FC/DT modes · CDF gate</div>
+      </a>
+      <a class="tile" href="deck-import.html">
+        <div class="t-code">INTK</div>
+        <div class="t-name">Deck Import</div>
+        <div class="t-sub">Paste/file/link intake · fault log · scrutineering lamps</div>
+      </a>
+      <a class="tile" href="deck-visual.html">
+        <div class="t-code">VIS</div>
+        <div class="t-name">Visual Deck View</div>
+        <div class="t-sub">Poster/console/text modes · stacked scans · pit box</div>
+      </a>
+      <a class="tile" href="tournament-report.html">
+        <div class="t-code">STNT</div>
+        <div class="t-name">Tournament Report</div>
+        <div class="t-sub">Lap cards · W-L-D steppers · local vs global meta</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- WAVE-2 ONE PIECE -->
+  <div class="bay">
+    <div class="baylabel">BAY 03 // <b>WAVE-2 ONE PIECE SURFACES</b> — REAL GROUNDED DATA</div>
+    <div class="grid">
+      <a class="tile op" href="op-matchup-matrix.html">
+        <div class="t-code">OP-MTX</div>
+        <div class="t-name">OP Matchup Matrix</div>
+        <div class="t-sub">13 leaders · 889 online matches · split octagons</div>
+      </a>
+      <a class="tile op" href="op-deck-viewer.html">
+        <div class="t-code">OP-DV</div>
+        <div class="t-name">OP Deck Viewer</div>
+        <div class="t-sub">Bielefeld lists · leader+50 · placeholder frames</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- SPECS & GROUNDING -->
+  <div class="bay">
+    <div class="baylabel">BAY 04 // <b>SPECS &amp; GROUNDING</b></div>
+    <div class="grid">
+      <a class="tile doc" href="pit-wall-tokens.md">
+        <div class="t-code">SPEC</div>
+        <div class="t-name">Pit-Wall Tokens v3</div>
+        <div class="t-sub">Color · type · press · grain · components · motion</div>
+      </a>
+      <a class="tile doc" href="extension-spec.md">
+        <div class="t-code">SPEC</div>
+        <div class="t-name">Extension Spec</div>
+        <div class="t-sub">Multi-game · pips · naming tiers · caveat chrome</div>
+      </a>
+      <a class="tile rb" href="riftbound-games-ground.json">
+        <div class="t-code">GROUND</div>
+        <div class="t-name">Games Registry</div>
+        <div class="t-sub">3-game UI registry · Riftbound catalogue · API shapes</div>
+      </a>
+      <a class="tile op" href="onepiece-ground.json">
+        <div class="t-code">GROUND</div>
+        <div class="t-name">One Piece Ground</div>
+        <div class="t-sub">13 archetypes · decklists · events · matchups</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="caveat">
+    MOCKUPS ONLY — WINRATES PLACEHOLDER UNLESS A PAGE STATES OTHERWISE ·
+    PRODUCTION GATES &amp; PAYLOADS ARE SERVER-SIDE · <b>SEE README §4 FOR PROVENANCE</b>
+  </div>
+
+  <div class="prov">
+    WAVE 2 · 10 NEW PAGES + 4 V3 SCREENS · CRITIQUED &amp; REVISED 2026-07-09→10 ·
+    VERIFIED 390PX / 1440PX HEADLESS CHROMIUM ·
+    RIFTBOUND PAGES S8/S9 NOT YET BUILT — CATALOGUE GROUNDING READY
+  </div>
+
+</div>
+</body>
+</html>

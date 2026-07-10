@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Deck Classify (Pit-Wall Console)</title>
+<!--
+  DECK CLASSIFY — POST /v1/{game}/{format}/classify → My Deck seed · Pit-Wall Console v3
+  Built from docs/design-research/2026-07-09/pit-wall-tokens.md + extension-spec.md
+  (§2 naming tiers, §3 caveat chrome, §4 provenance, §5 V-PANEL veil).
+
+  GROUNDING / HONESTY LEDGER
+  - Pre-filled decklist: the REAL Izzet Wizards list — Modern Challenge 64, 2024-06-18,
+    Azja, 1st Place (deck-viewer-data.json, copied verbatim incl. counts, colors,
+    type-line land flags, Scryfall URLs). Sideboard sums to 14 in the source data;
+    the page prints whatever the parser counts, never a hardcoded 15.
+  - Archetype names / colors / rep-card art: s1-archetype-visuals.json, MODERN section,
+    verbatim. Card images (c) Wizards of the Coast, served via Scryfall — footer credit.
+  - API shape: riftbound-games-ground.json → api_shapes."POST /v1/{game}/{format}/classify"
+    (ClassifyRequest/ClassifyResponse fields, 403/422/501 errors, and the registration
+    fact: serve.py registers a classifier for mtg ONLY — onepiece/riftbound return 501).
+  - T2 structural examples: "Red Monkey.D.Luffy (ST01-001)" (extension-spec §2 T2, from
+    OP-blockers #4 collision data) and "Ahri - Nine-Tailed Fox" [Calm|Mind]
+    (riftbound-games-ground.json legends_all_36_base_nonpromo).
+  - THE CLASSIFIER ON THIS PAGE IS A MOCK. Its catalogue is only the card names present
+    in the grounding files; confidence = weighted-Jaccard vs ONE stored centroid (the
+    Izzet Wizards mainboard, count>=2 nonland slots), computed at render and labeled.
+    All matchup-spread numbers are PLACEHOLDER — labeled on-tile, in the raw-response
+    peek, and in the footer. exp_winrate_vs_field is COMPUTED AT RENDER as the
+    N-weighted mean of those placeholder spread rows (placeholder-derived, labeled).
+  - RES-CODE REGISTRY: the 3-letter code on the T1 art tile ("MUR" for Izzet Murktide)
+    is a UI-generated abbreviation — presentation chrome only, NOT an identifier from
+    any grounding file. No res-code registry exists yet.
+  - NEAREST ALTERNATIVES: the mock has no card-level data for non-centroid archetypes
+    beyond each rep card, so scores can tie. Tied scores print "=X.XX" in A–Z order —
+    the widget never implies a ranking that was not computed.
+  - Unresolved card names are reported verbatim, never spell-corrected (CLAUDE.md rule 3).
+    Sample B ships one deliberate typo ("Lightnig Bolt") to demo that state.
+
+  PRODUCTION GATE NOTE (mock-only caveat, tokens §5.6): classify is a premium endpoint
+  (403 without entitlement). The FREE/PRO demo toggle is presentation-only; in production
+  the gate is server-side (entitlements module) and the free tier never receives true
+  values in the DOM. The matchup-spread veil is the V-PANEL treatment over genuinely
+  rendered (placeholder-labeled) pixels.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NO "88:88" ghost underlay anywhere — lit segments only (tokens §2.2). */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+/* ============ TOKENS (canonical :root, tokens §1.1) ============ */
+:root{
+  --bg:#0d0d12;
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;
+  --loss:#ff7a1a;
+  --acc:#b45bff;
+  --shadow:#000000;
+  --provisional:#b9b9c3;   /* T3 register — extension-spec §2 */
+  --dash:#3a3a48;
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --pix:'Press Start 2P',monospace;
+  --mono:'JetBrains Mono',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  --grainW:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grainD:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.06  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noiseC:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.32' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1 0 0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0 0.05  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='56' height='56' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* ============ RESET (tokens §3.1 — no rounded corners, ever) ============ */
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  background:var(--bg);
+  background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+  color:var(--ink);
+  font:400 13px/1.45 var(--mono);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{ color:inherit; }
+button{ font:inherit; color:inherit; background:none; border:0; }
+img{ max-width:100%; display:block; }
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, .ticker, a, textarea, summary{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+
+/* ============ PRESS PHYSICS (tokens §3.3) ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;
+}
+
+/* ============ WIRE TICKER (tokens §5.1) ============ */
+.ticker{
+  position:sticky; top:0; z-index:50;
+  height:30px; background:var(--panel);
+  border-bottom:1px solid var(--line);
+  font-size:11px; letter-spacing:.04em;
+  white-space:nowrap; user-select:none;
+}
+.ticker:focus-visible{ outline:2px solid var(--acc); outline-offset:-2px; }
+.ticker .wire-badge{
+  position:absolute; left:0; top:0; bottom:0; z-index:2;
+  display:flex; align-items:center; padding:0 8px;
+  font-family:var(--pix); font-size:8px; line-height:1;
+  color:var(--bg); background:var(--loss);
+}
+.ticker-clip{ position:absolute; left:52px; right:36px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{
+  display:inline-flex; align-items:center; height:30px;
+  white-space:nowrap; will-change:transform;
+  animation:tickscroll 42s linear infinite;
+}
+.ticker-track span{ padding-right:48px; }
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.ticker-pause{
+  position:absolute; right:0; top:0; bottom:0;
+  display:flex; align-items:center; padding:0 10px;
+  color:var(--dim); font-size:9px;
+}
+.ticker .up{color:var(--win);} .ticker .dn{color:var(--loss);} .ticker .sec{color:var(--acc);} .ticker .mut{color:var(--dim);}
+
+/* ============ LAYOUT ============ */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+.layout{ max-width:680px; margin:0 auto; padding:0 12px; }
+main{ min-width:0; }
+.rail{ display:none; }
+@media (min-width:640px){ .wrap,.layout{ max-width:none; padding:0 20px; } }
+@media (min-width:1100px){
+  .wrap{ max-width:1440px; padding:0 32px; }
+  .layout{
+    max-width:1440px; padding:0 32px;
+    display:grid; grid-template-columns:minmax(0,1fr) 470px; column-gap:22px;
+  }
+  .rail{
+    display:block; min-width:0;
+    position:sticky; top:42px; align-self:start;
+    max-height:calc(100dvh - 42px); overflow-y:auto; scrollbar-width:none;
+    border-left:1px solid var(--line); padding-left:22px; padding-bottom:24px;
+  }
+  .rail::-webkit-scrollbar{ display:none; }
+}
+
+/* ============ HEADER ============ */
+header.page{ padding-top:16px; }
+.brandrow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wordmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.9;
+  font-size:22px;
+}
+.pro{ padding:2px; background:var(--chrome); display:inline-block; }
+.pro i{
+  display:block; font-style:normal; font-family:var(--pix); font-size:8px; line-height:1;
+  padding:6px 8px; background:#1a1a22; color:var(--ink);
+}
+.gamechip{
+  font-family:var(--pix); font-size:7px; line-height:1.6;
+  padding:5px 7px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+}
+.gamechip b{ color:var(--ink); font-weight:400; }
+h1.title{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.92;
+  font-size:44px; margin-top:14px;
+}
+h1.title .hollow{ color:transparent; -webkit-text-stroke:1px #3a3a46; }
+@media (min-width:768px){ h1.title{ font-size:58px; } .wordmark{ font-size:26px; } }
+@media (min-width:1100px){ h1.title{ font-size:64px; } }
+.grainband{
+  height:8px; position:relative; margin:10px 0 12px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win));
+  opacity:.22; z-index:-1;
+}
+.endpoint{
+  display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:11px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+  padding:5px 8px; letter-spacing:.04em; max-width:100%;
+}
+.endpoint b{ color:var(--ink); font-weight:700; overflow-wrap:anywhere; }
+.endpoint .pixtag{ font-family:var(--pix); font-size:7px; color:var(--acc); }
+.prov{
+  font-size:10px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.08em; line-height:1.7; margin-top:10px;
+}
+.prov b{ color:var(--ink); font-weight:700; }
+.caveat{
+  display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;
+  font:400 9px var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; margin-top:8px;
+}
+.caveat b{ color:var(--ink); font-weight:700; }
+
+/* ============ GAME / DEMO SWITCH BARS ============ */
+.demobar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin:16px 0 0; padding:10px;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+}
+.demobar .lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+.seg{ display:inline-flex; }
+.seg .sw:not(:first-child){ border-left-width:0; }
+.sw{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 12px; display:inline-flex; align-items:center;
+  color:var(--dim); background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.sw:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.sw.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.demobar .note{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.6; }
+
+/* ============ PIT CONSOLE INPUT (heritage: terminal command bar) ============ */
+.consoleio{ margin-top:16px; background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); }
+.cmdbar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:8px 10px; border-bottom:1px solid var(--line); background:var(--panel2);
+  font-family:var(--pix); font-size:7px; line-height:1.7; color:var(--dim);
+}
+.cmdbar .prompt{ color:var(--acc); } /* prose chrome — performance hues reserved for numerals/deltas/heat (ext-spec §1.4) */
+.cmdbar .cmd{ color:var(--ink); }
+.cmdbar .cursor{ display:inline-block; width:7px; height:11px; background:var(--ink); vertical-align:-2px; }
+.cmdbar .hint{ margin-left:auto; color:var(--dim); font-family:var(--mono); font-size:9px; letter-spacing:.08em; }
+.deckta{
+  display:block; width:100%; min-height:236px; resize:vertical;
+  font:400 12px/1.6 var(--mono); color:var(--ink);
+  background:var(--bg); border:0; border-bottom:1px solid var(--line);
+  padding:12px; caret-color:var(--acc);
+  font-variant-numeric:tabular-nums;
+}
+.deckta::placeholder{ color:var(--dim); }
+.deckta:focus-visible{ outline:2px solid var(--acc); outline-offset:-2px; }
+.iobar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:10px;
+}
+.btn-run{
+  font-family:var(--pix); font-size:8px; line-height:1; color:var(--bg);
+  min-height:44px; padding:0 16px; display:inline-flex; align-items:center; gap:8px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  border:1px solid var(--acc);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+}
+.btn-run:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.btn-lite{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:44px; padding:0 11px; display:inline-flex; align-items:center; color:var(--dim);
+}
+.btn-lite[aria-pressed="true"]{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.iocounts{
+  margin-left:auto; display:inline-flex; align-items:baseline; gap:10px;
+  font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em;
+}
+.iocounts .seg7{ font-family:var(--seg); font-weight:700; font-size:18px; color:var(--ink); min-width:2ch; display:inline-block; text-align:right; }
+.iocounts .side7{ color:var(--loss); }
+.ionote{ padding:0 10px 10px; font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; line-height:1.7; }
+.ionote b{ color:var(--ink); }
+
+/* ============ RESULT PANEL ============ */
+.result{ margin-top:16px; min-width:0; }
+.res-status{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  margin-bottom:8px;
+}
+.res-status b{ color:var(--ink); }
+/* status codes are transport chrome, not performance data (ext-spec §1.4) —
+   error state is carried by the errplate stroke, not the numeral ink */
+.res-status .code200{ color:var(--ink); font-weight:700; }
+.res-status .code4xx{ color:var(--ink); font-weight:700; }
+/* T1 curated plate — full weight, hard shadow */
+.resplate{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:12px; position:relative;
+}
+.resplate::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+/* T3 emerging plate — dashed, NO hard shadow (unearned solidity) */
+.resplate.t3{ border:1px dashed var(--dash); box-shadow:none; }
+.resplate.t3::before{ display:none; }
+.res-head{ display:flex; gap:10px; align-items:flex-start; margin-top:4px; }
+.res-art{
+  flex:0 0 auto; width:64px; height:46px; border:1px solid var(--line); overflow:hidden;
+  position:relative; background:var(--panel2);
+}
+.res-art img{ width:100%; height:100%; object-fit:cover; filter:saturate(.78) contrast(1.05); }
+.res-code{
+  position:absolute; left:0; right:0; bottom:0;
+  font-family:var(--pix); font-size:8px; line-height:1; text-align:center;
+  padding:3px 0; background:rgba(13,13,18,.82); color:var(--ink);
+}
+.res-id{ min-width:0; }
+.res-tags{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:5px; }
+.tag-method{
+  font-family:var(--pix); font-size:7px; line-height:1.7; padding:4px 6px;
+  color:var(--dim); background:var(--panel2); border:1px solid var(--line);
+}
+.tag-method b{ color:var(--ink); font-weight:400; }
+.tag-emerging{
+  font-family:var(--pix); font-size:7px; line-height:1; padding:5px 6px;
+  color:var(--dim); background:var(--panel2); border:1px dashed var(--dash);
+}
+.tag-axis{
+  font-family:var(--pix); font-size:7px; line-height:1; padding:5px 6px;
+  color:var(--dim); background:var(--panel2); border:1px solid var(--line);
+}
+.res-name{
+  font:700 18px/1.2 var(--mono); color:var(--ink);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.res-name.t3name{ font-weight:400; color:var(--provisional); text-transform:uppercase; letter-spacing:.02em; font-size:16px; }
+.res-sub{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; line-height:1.7; margin-top:4px; }
+.res-sub b{ color:var(--ink); }
+.pips{ display:inline-flex; gap:3px; align-items:center; }
+.pip{ width:9px; height:9px; border:1px solid #565664; border-radius:50% !important; }
+.pip-W{background:#f8f6d8;} .pip-U{background:#b9d4ec;}
+.pip-B{background:#7d7673;border-color:#a6a1a0;}
+.pip-R{background:#e49977;} .pip-G{background:#a3c095;}
+
+/* confidence gauge */
+.gaugebox{ margin-top:12px; background:var(--panel2); border:1px solid var(--line); padding:10px; }
+.gaugebox .glbl{
+  font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;
+}
+.gaugebox .gval{ display:flex; align-items:baseline; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.gaugebox .seg7{ font-family:var(--seg); font-weight:700; font-size:28px; line-height:1.1; min-width:4ch; display:inline-block; }
+.gaugebox .seg7.hi{ color:var(--ink); }
+.gaugebox .seg7.lo{ color:var(--loss); }
+.gaugebox .band{ font-size:10px; color:var(--dim); }
+.gaugebox svg{ display:block; width:100%; height:38px; margin-top:8px; }
+/* axis labels live in HTML so the pixel font never stretches with the SVG
+   (tokens §2.1 — chrome text floor 7px; 6px is chip-letters only) */
+.gaugebox .gaxis{ position:relative; height:9px; margin-top:4px; font-family:var(--pix); font-size:7px; line-height:1; color:var(--dim); }
+.gaugebox .gaxis span{ position:absolute; top:0; }
+.gaugebox .gaxis .g0{ left:2.5%; }
+.gaugebox .gaxis .gt1{ transform:translateX(-50%); }
+.gaugebox .gaxis .g1{ right:2.5%; }
+.gaugebox .gsub{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; line-height:1.7; margin-top:6px; }
+.gaugebox .gsub b{ color:var(--ink); }
+
+/* unresolved */
+.unres{ margin-top:10px; }
+.unres code{ font:700 11px var(--mono); color:var(--loss); }
+
+/* alternatives */
+.alts{ margin-top:12px; }
+.alts .albl{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:6px; }
+.altrow{
+  display:grid; grid-template-columns:34px minmax(0,1fr) 78px; gap:8px; align-items:center;
+  background:var(--panel2); border:1px solid var(--line);
+  padding:6px 8px; margin-bottom:6px; min-height:44px;
+}
+.altrow .athumb{ width:34px; height:24px; border:1px solid var(--line); object-fit:cover; filter:saturate(.78) contrast(1.05); background:var(--panel2); } /* plate while lazy-loading */
+.altrow .aname{ min-width:0; }
+.altrow .aname b{ display:block; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.altrow .aev{ display:block; font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; }
+.altrow .ascore{ text-align:right; }
+.altrow .ascore .n{ font:700 12px var(--mono); }
+.altrow .abar{ height:5px; background:#1c1c26; border:1px solid var(--line); margin-top:4px; position:relative; }
+.altrow .abar i{ position:absolute; inset:0; right:auto; background:var(--dim); }
+
+/* spread teaser (V-PANEL veil, tokens §5.6) */
+.spread{ margin-top:14px; position:relative; }
+.spread .shead{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  margin-bottom:6px;
+}
+.spread .slbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.spread .slbl b{ color:var(--ink); }
+.spread .sprov{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; }
+.spread .sprov b{ color:var(--ink); }
+.spreadviz{ position:relative; background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); }
+.spreadviz .data{ padding:10px; transition:filter 600ms steps(6,end); }
+.spread.locked .spreadviz .data{ filter:blur(3.5px) saturate(.75); }
+.exprow{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  border-bottom:1px dashed var(--dash); padding-bottom:8px; margin-bottom:8px;
+}
+.exprow .elbl{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+.exprow .seg7{ font-family:var(--seg); font-weight:700; font-size:26px; line-height:1.1; min-width:4ch; display:inline-block; text-align:right; }
+.exprow .unit{ font-size:11px; color:var(--dim); }
+.exprow .esub{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; }
+.mrow{
+  display:grid; grid-template-columns:minmax(0,1fr) 96px 56px; gap:8px; align-items:stretch;
+  margin-bottom:4px;
+}
+.mrow .mname{ display:flex; align-items:center; gap:6px; min-width:0; font-size:11px; }
+.mrow .mname b{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block; }
+.mrow .mcell{
+  position:relative; display:flex; align-items:center; justify-content:center;
+  font:700 12px var(--mono); min-height:34px; border:1px solid var(--line);
+}
+.mrow .mcell .ci{ font-weight:400; font-size:9px; color:rgba(242,242,247,.75); margin-left:4px; }
+.mrow .mcell.lown::before{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(45deg, rgba(13,13,18,.45) 0 3px, transparent 3px 8px);
+}
+.mrow .mn{ display:flex; align-items:center; justify-content:flex-end; font-size:10px; color:var(--dim); }
+/* masked readouts print unlit (--dim): "no value" must read differently from "value"
+   (tokens/ext-spec unlit convention) */
+.exprow .seg7.masked, .mrow .mcell.masked, .mrow .mcell.masked .ci{ color:var(--dim); }
+.spreadkey{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; line-height:1.7; margin-top:8px; }
+.spreadkey b{ color:var(--ink); }
+.riso-veil{
+  position:absolute; inset:0; z-index:2;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  padding:16px; text-align:center;
+  background-image:var(--noiseC), var(--grainD),
+    linear-gradient(105deg, rgba(59,157,255,.50), rgba(13,13,18,.30) 46%, rgba(255,122,26,.46));
+  background-blend-mode:multiply, multiply, normal;
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 700ms steps(12,end);
+}
+.spread.unlocked .riso-veil{ clip-path:inset(0 0 0 100%); pointer-events:none; }
+.spread.noanim .riso-veil, .spread.noanim .spreadviz .data{ transition:none; }
+.veil-chip{
+  font-family:var(--pix); font-size:8px; line-height:1.7; letter-spacing:1px;
+  padding:8px 10px 7px; color:var(--ink);
+  background:rgba(13,13,18,.88); border:1px solid #3c3c46;
+}
+.veil-sub{
+  font-size:9px; color:var(--ink); text-transform:uppercase; letter-spacing:.08em;
+  background:rgba(13,13,18,.88); padding:4px 8px; border:1px solid #3c3c46;
+}
+.btn-unlock{
+  font-family:var(--pix); font-size:8px; line-height:1; color:var(--bg);
+  min-height:44px; padding:0 14px; display:inline-flex; align-items:center;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  border:1px solid var(--acc);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+}
+.btn-unlock:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+
+/* seed CTA */
+.seedbar{ margin-top:12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.btn-seed{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:44px; padding:0 14px; display:inline-flex; align-items:center; gap:8px;
+  color:var(--ink); border-color:var(--acc);
+}
+.btn-seed .arrow{ color:var(--acc); }
+.seednote{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.6; }
+
+/* raw response peek */
+details.raw{ margin-top:12px; border:1px solid var(--line); background:var(--panel2); }
+details.raw summary{
+  list-style:none; font-family:var(--pix); font-size:7px; line-height:1.7;
+  padding:9px 10px; color:var(--dim); user-select:none;
+}
+details.raw summary::-webkit-details-marker{ display:none; }
+details.raw summary::before{ content:'▸ '; color:var(--acc); }
+details.raw[open] summary::before{ content:'▾ '; }
+details.raw pre{
+  font:400 10px/1.6 var(--mono); color:var(--provisional);
+  padding:0 10px 10px; overflow-x:auto; scrollbar-width:none;
+}
+details.raw pre::-webkit-scrollbar{ display:none; }
+
+/* error plates (403 / 422 / 501) */
+.errplate{
+  background:var(--panel); border:1px solid var(--loss);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:12px;
+}
+.errplate .ecode{ font-family:var(--pix); font-size:10px; color:var(--loss); }
+.errplate p{ font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; line-height:1.8; margin-top:8px; }
+.errplate p b{ color:var(--ink); }
+
+/* ============ NAMING-REGISTER LEGEND + METHOD PLATES ============ */
+.plate{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:12px; margin-top:14px; min-width:0;
+}
+.plate .plbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; display:block; margin-bottom:8px; }
+.plate .plbl b{ color:var(--ink); }
+.plate p{ font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.8; }
+.plate p b{ color:var(--ink); }
+.plate p + p{ margin-top:6px; }
+.reg{ border-top:1px dashed var(--dash); padding:9px 0; }
+.reg:first-of-type{ border-top:0; }
+.reg .rgtier{ font-family:var(--pix); font-size:7px; color:var(--dim); display:block; margin-bottom:6px; }
+.reg .rgname{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:700 13px var(--mono); }
+.reg .rgname.t3n{ font-weight:400; color:var(--provisional); text-transform:uppercase; }
+.reg .setid{ font-size:10px; color:var(--dim); font-weight:400; }
+.reg .rgsub{ font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.7; margin-top:4px; }
+/* OP octagon chip (extension-spec §1) */
+.octo{
+  width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:6px; line-height:1; color:var(--bg);
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+}
+/* Riftbound fused twin plates (extension-spec §1) */
+.rbpair{ display:inline-flex; }
+.rbplate{
+  width:22px; height:16px; display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:6px; line-height:1; color:var(--bg);
+  border:1px solid rgba(242,242,247,.25);
+}
+.rbpair .rbplate + .rbplate{ border-left-width:0; }
+
+/* ============ GLITCH (tokens §6.3, one-shot only) ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+
+/* ============ FOOTER ============ */
+footer{ margin-top:28px; padding-bottom:34px; }
+.riso-divider{
+  height:10px;
+  background-image:var(--grainD), linear-gradient(90deg, var(--win), var(--loss));
+  background-blend-mode:multiply, normal;
+  opacity:.55;
+}
+.foot-inner{ padding-top:16px; }
+.footmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; line-height:.9; letter-spacing:-.01em;
+  font-size:46px;
+}
+.footmark .hollow{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+@media (min-width:768px){ .footmark{ font-size:72px; } }
+.fine{
+  font-size:9px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.07em; line-height:1.8; margin-top:12px;
+}
+.fine a{ color:var(--ink); }
+.fine b{ color:var(--ink); }
+
+[hidden]{ display:none !important; }
+
+/* ============ REDUCED MOTION CONTRACT (tokens §6.6) ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .ticker-pause{ display:none; }
+  .glitch{ animation:none; }
+  .press, .press:active, .sw, .sw:active, .btn-run, .btn-run:active, .btn-unlock, .btn-unlock:active{ transition:none; }
+  .riso-veil, .spreadviz .data{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= WIRE TICKER ================= -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+     aria-label="Results wire ticker. Tap to pause.">
+  <span class="wire-badge" aria-hidden="true">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+  <span class="ticker-pause" id="tickerPause" aria-hidden="true">&#10074;&#10074;</span>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header class="page wrap">
+  <div class="brandrow">
+    <span class="wordmark">MetaSurf</span>
+    <span class="pro"><i>PRO</i></span>
+    <span class="gamechip" id="gameChip">GAME <b>MTG</b> · FORMAT <b>MODERN</b> · FULL TELEMETRY</span>
+  </div>
+  <h1 class="title">Deck<br><span class="hollow">Classify</span></h1>
+  <div class="grainband" aria-hidden="true"></div>
+  <div class="endpoint" id="endpointChip">
+    <b id="endpointTxt">POST /v1/mtg/modern/classify</b>
+    <span class="pixtag">PREMIUM</span>
+  </div>
+  <p class="prov">
+    INPUT: PASTED LIST (1–500 CARD LINES) · MOCK CLASSIFIER RUNS IN-PAGE ·
+    RESOLVER CATALOGUE <b id="provCat">—</b> CARD NAMES FROM GROUNDING FILES ·
+    STORED CENTROIDS <b>1</b> (IZZET MURKTIDE — REF LIST 2024-06-18)
+  </p>
+  <div class="caveat" role="note">
+    MOCK CLASSIFY — CONFIDENCE &amp; SPREAD VALUES <b>DEMO-COMPUTED / PLACEHOLDER</b> ·
+    CARD NAMES, LIST &amp; ART <b>REAL</b> (MTGO · SCRYFALL)
+  </div>
+</header>
+
+<!-- ================= GAME + DEMO STATE ================= -->
+<div class="wrap">
+  <div class="demobar">
+    <span class="lbl">Game</span>
+    <span class="seg" role="group" aria-label="Game">
+      <button class="sw on" data-game="mtg" aria-pressed="true">MTG</button>
+      <button class="sw" data-game="onepiece" aria-pressed="false">ONE PIECE</button>
+      <button class="sw" data-game="riftbound" aria-pressed="false">RIFTBOUND</button>
+    </span>
+    <span class="lbl">Demo tier</span>
+    <span class="seg" role="group" aria-label="Demo entitlement state">
+      <button class="sw" id="swFree" aria-pressed="false">FREE</button>
+      <button class="sw on" id="swPro" aria-pressed="true">PRO</button>
+    </span>
+    <span class="note">MOCK ONLY — PRODUCTION GATE IS SERVER-SIDE (ENTITLEMENTS MODULE);<br>CLASSIFY RETURNS 403 WITHOUT ENTITLEMENT</span>
+  </div>
+</div>
+
+<!-- ================= BODY GRID ================= -->
+<div class="layout">
+  <main>
+
+    <!-- 501 plate for onepiece / riftbound (grounded: serve.py registers mtg only) -->
+    <section class="errplate" id="plate501" hidden style="margin-top:16px" aria-live="polite">
+      <span class="ecode" id="e501code">501 — CLASSIFICATION NOT AVAILABLE FOR THIS GAME</span>
+      <p id="e501body"></p>
+      <p id="e501extra"></p>
+    </section>
+
+    <!-- PIT CONSOLE INPUT -->
+    <section class="consoleio" id="consoleSec" aria-label="Decklist console input">
+      <div class="cmdbar">
+        <span class="prompt">MODERN:~$</span>
+        <span class="cmd">classify --stdin --game mtg</span>
+        <span class="cursor" aria-hidden="true"></span>
+        <span class="hint">CTRL+⏎ RUNS</span>
+      </div>
+      <textarea class="deckta" id="deckTa" spellcheck="false" autocomplete="off"
+        aria-label="Paste decklist — one card per line, count then name. 'Sideboard' starts the sideboard."></textarea>
+      <div class="iobar">
+        <button class="btn-run" id="runBtn">RUN CLASSIFY <span aria-hidden="true">▸</span></button>
+        <button class="press btn-lite" id="smplA" aria-pressed="true">SMPL A · CHALLENGE 1ST</button>
+        <button class="press btn-lite" id="smplB" aria-pressed="false">SMPL B · UNKNOWN BREW</button>
+        <button class="press btn-lite" id="clrBtn" aria-pressed="false">CLR</button>
+        <span class="iocounts" aria-live="polite">
+          <span><span class="seg7" id="cntMain">0</span> MAIN</span>
+          <span><span class="seg7 side7" id="cntSide">0</span> SIDE</span>
+        </span>
+      </div>
+      <p class="ionote">
+        FORMAT: <b>COUNT NAME</b> PER LINE · “SIDEBOARD” OR “SB:” STARTS THE SIDEBOARD ·
+        SMPL A = REAL LIST — <b>MODERN CHALLENGE 64 · 2024-06-18 · 1ST · AZJA</b> (MTGO.COM) ·
+        SMPL B = PLACEHOLDER BREW OF REAL CARD NAMES + 1 DELIBERATE TYPO (UNRESOLVED-CARD DEMO)
+      </p>
+    </section>
+
+    <!-- RESULT -->
+    <section class="result" id="resultSec" aria-label="Classify result" aria-live="polite">
+      <div id="resultBody"></div>
+    </section>
+
+    <!-- NAMING REGISTERS -->
+    <div id="infraSlot">
+      <section class="plate" aria-label="Naming registers">
+        <span class="plbl">NAMING <b>REGISTERS</b> — HOW A RESULT PRINTS (EXTENSION SPEC §2)</span>
+        <div class="reg">
+          <span class="rgtier">T1 · CURATED — RULE-FILE NAME</span>
+          <span class="rgname">Izzet Murktide
+            <span class="pips" role="img" aria-label="colors: blue, red"><i class="pip pip-U"></i><i class="pip pip-R"></i></span>
+          </span>
+          <span class="rgsub">FULL WEIGHT + ART TILE + CODE BADGE · DEFINITIONS PORTED FROM MTGOFORMATDATA, NEVER AUTHORED</span>
+        </div>
+        <div class="reg">
+          <span class="rgtier">T2 · STRUCTURAL — THE NAME IS A CARD</span>
+          <span class="rgname">
+            <span class="octo" style="background:#d3492f" role="img" aria-label="color: red">R</span>
+            Red Monkey.D.Luffy <span class="setid">(ST01-001)</span>
+            <span class="tag-axis">LEADER</span>
+          </span>
+          <span class="rgname" style="margin-top:6px">
+            <span class="rbpair" role="img" aria-label="domains: calm, mind"><span class="rbplate" style="background:#3aa7a3">CA</span><span class="rbplate" style="background:#3b7bd0">MI</span></span>
+            Ahri - Nine-Tailed Fox
+            <span class="tag-axis">LEGEND</span>
+          </span>
+          <span class="rgsub">FULL WEIGHT + AXIS CHIP + DIM SET-ID · ONE PIECE LEADERS / RIFTBOUND LEGENDS (CLASSIFY FOR BOTH: 501 TODAY)</span>
+        </div>
+        <div class="reg">
+          <span class="rgtier">T3 · UNNAMED / EMERGING — MACHINE-DETECTED</span>
+          <span class="rgname t3n"><span class="tag-emerging">EMERGING</span> UNNAMED: UR — MURKTIDE REGENT</span>
+          <span class="rgsub">MONO-400 PROVISIONAL REGISTER, DASHED FRAME, NO ART TILE · GRADUATES TO T1 ONLY WHEN A RULE FILE LANDS</span>
+        </div>
+      </section>
+
+      <section class="plate" aria-label="Mock method">
+        <span class="plbl">HOW THIS <b>MOCK</b> CLASSIFIES</span>
+        <p>RESOLVER: NAMES MATCHED AGAINST A <b id="methCat">—</b>-CARD CATALOGUE BUILT FROM THE GROUNDING FILES. UNRESOLVED NAMES ARE <b>REPORTED VERBATIM, NEVER SPELL-CORRECTED</b>.</p>
+        <p>CONFIDENCE = WEIGHTED JACCARD VS THE ONE STORED CENTROID (IZZET MURKTIDE = REF-LIST MAINBOARD, COUNT≥2 NONLAND SLOTS). BAND = 95% NORMAL APPROX OVER CARD-SLOT OVERLAP. <b>T1 FLOOR .65</b> — BELOW IT THE RESULT PRINTS AS UNNAMED/EMERGING.</p>
+        <p>PRODUCTION: FULL DECK-VECTOR KNN OVER ALL RULE-FILE ARCHETYPES (M1 PIPELINE) — THIS PAGE IS UI CHOREOGRAPHY, NOT THE MODEL.</p>
+      </section>
+    </div>
+  </main>
+
+  <aside class="rail" id="rail" aria-label="Classify result rail"></aside>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="riso-divider" aria-hidden="true"></div>
+  <div class="wrap foot-inner">
+    <div class="footmark">MetaSurf<br><span class="hollow">Classify</span></div>
+    <p class="fine">
+      MOCKUP · DECK CLASSIFY (POST /V1/{GAME}/{FORMAT}/CLASSIFY → MY DECK SEED) ·
+      THE IN-PAGE CLASSIFIER, ITS CONFIDENCE VALUES, ALTERNATIVE SCORES, MATCHUP-SPREAD
+      WINRATES AND EXP-WR-VS-FIELD ARE <b>MOCK / PLACEHOLDER — NOT MEASURED</b>.<br>
+      SAMPLE A DECKLIST IS REAL: MODERN CHALLENGE 64 · 2024-06-18 · 1ST PLACE · AZJA ·
+      <a href="https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1812647519" target="_blank" rel="noopener">DECKLISTS FROM MAGIC ONLINE (MTGO.COM)</a> ·
+      ARCHETYPE NAMES/COLORS FROM THE 2026-07-09 GROUNDING MINE (COLORS PIP-MINED APR–JUN 2024 MTGO MAINBOARDS).<br>
+      NO TOPDECK.GG-SOURCED ROWS ON THIS PAGE — ATTRIBUTION CHIP APPEARS WHEREVER THEY FEED A MODULE ·
+      CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL.<br>
+      PRODUCTION GATE IS SERVER-SIDE (ENTITLEMENTS MODULE) — CLASSIFY IS PREMIUM (403 WITHOUT ENTITLEMENT);
+      THE FREE TIER NEVER RECEIVES TRUE VALUES IN THE DOM.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* =====================================================================
+   DECK CLASSIFY — mock classifier. Card names, the Sample-A list, and
+   archetype names/colors/art are grounding-file data (verbatim).
+   Every computed number is a MOCK-MODEL output and is labeled as such.
+   ===================================================================== */
+'use strict';
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- grounding: the REAL Izzet Wizards list (deck-viewer-data.json, verbatim) ---------- */
+/* [count, name, colors[], isLand] — colors + land flags from the source type_line/colors fields */
+const REF_MAIN = [
+  [4,'Counterspell',['U'],0],
+  [2,'Dress Down',['U'],0],
+  [4,'Flame of Anor',['R','U'],0],
+  [1,'Flooded Strand',[],1],
+  [2,'Force of Negation',['U'],0],
+  [3,'Galvanic Discharge',['R'],0],
+  [1,'Hall of Storm Giants',['U'],1],
+  [2,'Invert Polarity',['R','U'],0],
+  [4,'Island',['U'],1],
+  [4,'Lightning Bolt',['R'],0],
+  [2,'Misty Rainforest',[],1],
+  [1,'Otawara, Soaring City',['U'],1],
+  [2,'Polluted Delta',[],1],
+  [4,'Preordain',['U'],0],
+  [2,'Scalding Tarn',[],1],
+  [1,'Sink into Stupor // Soporific Springs',['U'],0],
+  [4,'Snapcaster Mage',['U'],0],
+  [1,'Spell Snare',['U'],0],
+  [3,'Spirebluff Canal',['R','U'],1],
+  [3,'Steam Vents',['R','U'],1],
+  [1,'Stern Scolding',['U'],0],
+  [3,'Subtlety',['U'],0],
+  [4,'Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar',['G','U'],0],
+  [2,'Thundering Falls',['R','U'],1]
+];
+const REF_SIDE = [
+  [2,'Consign to Memory',['U'],0],
+  [2,'Magus of the Moon',['R'],0],
+  [3,'Obsidian Charmaw',['R'],0],
+  [1,'Spell Snare',['U'],0],
+  [2,'Stern Scolding',['U'],0],
+  [2,"Tishana's Tidebinder",['U'],0],
+  [2,'Unlicensed Hearse',[],0]
+];
+
+/* ---------- grounding: MODERN archetypes (s1-archetype-visuals.json, verbatim) ---------- */
+const ARCH = [
+  {name:'Izzet Murktide', colors:['U','R'], rep:'Murktide Regent', sample:717,
+   img:'https://cards.scryfall.io/small/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708'},
+  {name:'Rakdos Scam', colors:['B','R'], rep:'Grief', sample:1966,
+   img:'https://cards.scryfall.io/small/front/e/6/e6befbc4-1320-4f26-bd9f-b1814fedda10.jpg?1782704685'},
+  {name:'Amulet Titan', colors:['G'], rep:'Amulet of Vigor', sample:919,
+   img:'https://cards.scryfall.io/small/front/9/9/997bc933-ac30-477b-a4e1-5333b796a99d.jpg?1782715540'},
+  {name:'Yawgmoth', colors:['B','G'], rep:'Yawgmoth, Thran Physician', sample:1041,
+   img:'https://cards.scryfall.io/small/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1782735245'},
+  {name:'Living End', colors:['U','B','G'], rep:'Living End', sample:679,
+   img:'https://cards.scryfall.io/small/front/b/1/b1eede29-17a4-437f-a5c2-e24cccbc6a33.jpg?1782741862'},
+  {name:'Mono-Green Tron', colors:['B','G'], rep:'Karn Liberated', sample:123,
+   img:'https://cards.scryfall.io/small/front/4/b/4b0c6662-4dde-40a2-97e0-0318478c0367.jpg?1782744061'},
+  {name:'Burn', colors:['R'], rep:'Lava Spike', sample:281,
+   img:'https://cards.scryfall.io/small/front/7/9/79c21c1f-eaa4-454d-a1c7-b41466d0a428.jpg?1782747024'},
+  {name:'Hammer Time', colors:['W'], rep:'Colossus Hammer', sample:113,
+   img:'https://cards.scryfall.io/small/front/8/9/897a134e-7e61-4fe1-bbae-23ef1fe5c0cf.jpg?1782704085'},
+  {name:'Crashing Footfalls', colors:['W','U','G'], rep:'Crashing Footfalls', sample:146,
+   img:'https://cards.scryfall.io/small/front/a/8/a8cca2a2-69e3-4136-936c-7a2774c19351.jpg?1782708457'},
+  {name:'Jund Saga', colors:['B','R','G'], rep:"Urza's Saga", sample:257,
+   img:'https://cards.scryfall.io/small/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1782704580'}
+];
+/* one extra real name from the grounding mine (PIONEER rep card) so Sample B resolves.
+   No color/type data carried for rep-card names — mock treats them as spells. */
+const EXTRA_KNOWN = ['Arclight Phoenix'];
+
+/* ---------- resolver catalogue (names only from grounding) ---------- */
+const CAT = new Map();   /* lowercased name -> {name, colors|null, land} */
+function addCat(name, colors, land){
+  const k = name.toLowerCase();
+  if(!CAT.has(k)) CAT.set(k, {name, colors, land});
+  const front = name.split(' // ')[0].toLowerCase();
+  if(front !== k && !CAT.has(front)) CAT.set(front, {name, colors, land});
+}
+REF_MAIN.concat(REF_SIDE).forEach(([c,n,cols,land])=>addCat(n, cols, !!land));
+ARCH.forEach(a=>addCat(a.rep, null, false));
+EXTRA_KNOWN.forEach(n=>addCat(n, null, false));
+const CAT_DISTINCT = new Set(Array.from(CAT.values()).map(v=>v.name)).size;
+$('#provCat').textContent = CAT_DISTINCT;
+$('#methCat').textContent = CAT_DISTINCT;
+
+/* ---------- stored centroid: ref mainboard, count>=2 nonland (MOCK) ---------- */
+const CENTROID = new Map();
+REF_MAIN.forEach(([c,n,cols,land])=>{ if(!land && c>=2) CENTROID.set(n.toLowerCase(), c); });
+const CENTROID_W = Array.from(CENTROID.values()).reduce((a,b)=>a+b,0);
+
+/* ---------- samples ---------- */
+const fmtLine = ([c,n]) => c + ' ' + n;
+const SAMPLE_A = REF_MAIN.map(fmtLine).join('\n') + '\n\nSideboard\n' + REF_SIDE.map(fmtLine).join('\n');
+/* Sample B: PLACEHOLDER brew of REAL card names (grounding) + one deliberate typo */
+const SAMPLE_B = [
+  '4 Lava Spike','4 Arclight Phoenix','4 Lightning Bolt','4 Preordain',
+  '3 Galvanic Discharge','2 Snapcaster Mage','1 Lightnig Bolt',
+  '4 Island','4 Spirebluff Canal','3 Steam Vents','2 Scalding Tarn'
+].join('\n');
+
+/* ---------- matchup spread — ALL PLACEHOLDER numbers (labeled) ---------- */
+const SPREAD = [
+  {name:'Rakdos Scam',  p:46.8, n:412},
+  {name:'Amulet Titan', p:55.2, n:391},
+  {name:'Yawgmoth',     p:51.0, n:288},
+  {name:'Living End',   p:57.4, n:176},
+  {name:'Burn',         p:44.0, n:38}    /* below N<50 floor — hatched */
+];
+/* EXP WR VS FIELD — actually computed at render: N-weighted mean of the SPREAD rows.
+   Still placeholder-derived (the row winrates are placeholder) and labeled as such. */
+const EXP_VS_FIELD = +( SPREAD.reduce((s,m)=>s+m.p*m.n,0) /
+                        SPREAD.reduce((s,m)=>s+m.n,0) ).toFixed(1);
+const SPREAD_AS_OF = '2026-07-08';       /* PLACEHOLDER snapshot date */
+const T1_FLOOR = 0.65;
+const LOW_N = 50;
+
+/* ---------- helpers ---------- */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const WUBRG = 'WUBRG';
+function pipHTML(cols){
+  const cs = cols.slice().sort((a,b)=>WUBRG.indexOf(a)-WUBRG.indexOf(b));
+  if(!cs.length) return '';
+  return `<span class="pips" role="img" aria-label="colors: ${cs.join(', ')}">`+
+    cs.map(ch=>`<i class="pip pip-${ch}"></i>`).join('')+`</span>`;
+}
+function cellBg(wr){           /* tokens §1.2 — exact formula */
+  const d = wr-50;
+  if(Math.abs(d)<2) return 'rgba(242,242,247,.06)';
+  const c = d>0 ? '59,157,255' : '255,122,26';
+  const a = Math.min(.55, .12 + Math.abs(d)*.03);
+  return 'rgba('+c+','+a+')';
+}
+function rollup(el, target, dec, done){ /* tokens §6.1 — 8 ticks, snap exact */
+  if(RM){ el.textContent = Number(target).toFixed(dec); if(done) done(); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/[^0-9.\-]/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);
+    el.textContent = (i>=TICKS) ? Number(target).toFixed(dec) : v.toFixed(dec);
+    if(i>=TICKS){ clearInterval(el._roll); if(done) done(); }
+  }, DUR/TICKS);
+}
+function glitch(el){
+  if(RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+
+/* ---------- parser: "COUNT NAME" lines; Sideboard/SB: switches board ---------- */
+function parseDeck(text){
+  const cards = [];   /* {name, count, board} — ClassifyCard shape */
+  let board = 'main', badLines = 0;
+  text.split(/\r?\n/).forEach(raw=>{
+    const line = raw.trim();
+    if(!line) return;
+    if(/^(sideboard\b|sb:)/i.test(line)){ board='side'; return; }
+    const m = line.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+    if(!m){ badLines++; return; }
+    cards.push({ name:m[2].trim(), count:Math.max(1,Math.min(250,parseInt(m[1],10))), board });
+  });
+  return {cards, badLines};
+}
+
+/* ---------- mock classify ---------- */
+function classify(cards){
+  const resolved = [], unresolved = [];
+  cards.forEach(c=>{
+    const hit = CAT.get(c.name.toLowerCase());
+    if(hit) resolved.push({...c, ref:hit});
+    else if(!unresolved.includes(c.name)) unresolved.push(c.name);
+  });
+  /* weighted Jaccard vs the single stored centroid — MAINBOARD nonland slots */
+  const mainNL = new Map();
+  resolved.forEach(c=>{
+    if(c.board!=='main' || c.ref.land) return;
+    const k = c.ref.name.toLowerCase();
+    mainNL.set(k, (mainNL.get(k)||0) + c.count);
+  });
+  let inter = 0, inputW = 0;
+  mainNL.forEach((w,k)=>{ inputW += w; inter += Math.min(w, CENTROID.get(k)||0); });
+  const unionW = inputW + CENTROID_W - inter;
+  const conf = unionW ? inter/unionW : 0;
+  const halfW = unionW ? 1.96*Math.sqrt(Math.max(conf*(1-conf),1e-6)/unionW) : 0;
+  /* input color identity — only cards WITH color data in grounding */
+  const colorSet = new Set();
+  resolved.forEach(c=>{ if(c.ref.colors && !c.ref.land) c.ref.colors.forEach(x=>colorSet.add(x)); });
+  const colors = Array.from(colorSet).sort((a,b)=>WUBRG.indexOf(a)-WUBRG.indexOf(b));
+  /* top mainboard card among resolved (for the T3 descriptor) */
+  let top = null, topW = 0;
+  mainNL.forEach((w,k)=>{ if(w>topW){ topW=w; top=CAT.get(k).name; } });
+  /* nearest alternatives: color Jaccard + rep-card hit (MOCK heuristic, printed).
+     No card-level data exists in grounding for these archetypes beyond the rep card,
+     so ties are common and REAL — tie members share a rank ("=X.XX"), ordered A–Z.
+     The widget must never imply an ordering that was not computed. */
+  const inSet = new Set(colors);
+  const names = new Set(resolved.map(c=>c.ref.name.toLowerCase()));
+  const altsAll = ARCH.filter(a=>a.name!=='Izzet Murktide').map(a=>{
+    const aset = new Set(a.colors);
+    let inte=0; aset.forEach(x=>{ if(inSet.has(x)) inte++; });
+    const uni = new Set([...aset,...inSet]).size || 1;
+    const rep = names.has(a.rep.toLowerCase()) ? 1 : 0;
+    return {a, score:.7*(inte/uni)+.3*rep, rep};
+  }).sort((x,y)=> y.score-x.score || x.a.name.localeCompare(y.a.name));
+  /* tie detection over the FULL list (a tie can straddle the top-3 cutoff) */
+  const scoreCount = {};
+  altsAll.forEach(x=>{ const k=x.score.toFixed(2); scoreCount[k]=(scoreCount[k]||0)+1; });
+  const alts = altsAll.slice(0,3).map(x=>({...x, tied:scoreCount[x.score.toFixed(2)]>1}));
+  return {resolved, unresolved, conf, halfW, unionW, colors, top, alts,
+          nMain:cards.filter(c=>c.board==='main').reduce((s,c)=>s+c.count,0),
+          nSide:cards.filter(c=>c.board==='side').reduce((s,c)=>s+c.count,0)};
+}
+
+/* ---------- gauge SVG (crisp vector; framing only is retro) ----------
+   Bar/ticks stretch with preserveAspectRatio="none" (rects survive that);
+   TEXT does not: axis labels render as HTML below the SVG at 7px pixel font
+   (tokens §2.1 — 7px chrome-text floor; never inside a stretched viewBox). */
+function gaugeSVG(conf, lo, hi){
+  const X = v => 8 + v*304;                 /* bar spans 2.5%–97.5% of width */
+  const pct = v => (2.5 + v*95).toFixed(2)+'%';
+  let ticks = '';
+  for(let i=0;i<=10;i++){
+    ticks += `<line x1="${X(i/10)}" y1="30" x2="${X(i/10)}" y2="${i%5?26:23}" stroke="#3a3a48" stroke-width="1"/>`;
+  }
+  return `<svg viewBox="0 0 320 38" preserveAspectRatio="none" shape-rendering="crispEdges" role="img"
+       aria-label="Confidence gauge: ${conf.toFixed(2)}, band ${lo.toFixed(2)} to ${hi.toFixed(2)}, T1 floor 0.65">
+    <rect x="8" y="10" width="304" height="20" fill="#0f0f15" stroke="#2b2b35"/>
+    ${ticks}
+    <rect x="${X(lo)}" y="12" width="${Math.max(2, X(hi)-X(lo))}" height="16" fill="rgba(242,242,247,.14)"/>
+    <line x1="${X(T1_FLOOR)}" y1="6" x2="${X(T1_FLOOR)}" y2="34" stroke="#55555f" stroke-width="1" stroke-dasharray="3 3"/>
+    <rect x="${X(conf)-1.5}" y="8" width="3" height="24" fill="${conf>=T1_FLOOR?'#f2f2f7':'#ff7a1a'}"/>
+  </svg>
+  <div class="gaxis" aria-hidden="true">
+    <span class="g0" style="left:${pct(0)}">0</span>
+    <span class="gt1" style="left:${pct(T1_FLOOR)}">T1 .65</span>
+    <span class="g1">1</span>
+  </div>`;
+}
+
+/* ---------- spread teaser (V-PANEL veil) ---------- */
+function spreadHTML(r, masked){
+  const rows = SPREAD.map(m=>{
+    const ci = 1.96*Math.sqrt(m.p/100*(1-m.p/100)/m.n)*100;
+    const lown = m.n < LOW_N;
+    const val = masked ? '--.-' : m.p.toFixed(1);
+    const civ = masked ? '±?.?' : '±'+ci.toFixed(1);
+    return `<div class="mrow">
+      <span class="mname"><b>${esc(m.name)}</b></span>
+      <span class="mcell ${lown?'lown':''}${masked?' masked':''}" style="background:${masked?'rgba(242,242,247,.06)':cellBg(m.p)}"
+            aria-label="vs ${esc(m.name)}: ${masked?'locked':m.p.toFixed(1)+' percent, plus or minus '+ci.toFixed(1)+', '+m.n+' matches'}">
+        ${val}<span class="ci">${civ}</span>
+      </span>
+      <span class="mn">N=${m.n}</span>
+    </div>`;
+  }).join('');
+  /* caveats/provenance (.spreadkey) print OUTSIDE .spreadviz — extension-spec §5
+     invariant: trust metadata stays crisp on top of / outside the veil, never
+     blurred under it. */
+  return `
+  <div class="spread ${masked?'locked':'unlocked'}" id="spreadZone">
+    <div class="shead">
+      <span class="slbl">MATCHUP <b>SPREAD</b> — SEEDS MY DECK</span>
+      <span class="sprov">SNAPSHOT AS-OF <b>${SPREAD_AS_OF}</b> · PLACEHOLDER</span>
+    </div>
+    <div class="spreadviz">
+      <div class="data">
+        <div class="exprow">
+          <span class="elbl">EXP WR VS FIELD</span>
+          <span><span class="seg7${masked?' masked':''}" id="expSeg">${masked?'--.-':'0.0'}</span><span class="unit"> %</span></span>
+          <span class="esub">N-WEIGHTED OVER SPREAD ROWS</span>
+        </div>
+        ${rows}
+      </div>
+      <div class="riso-veil">
+        <span class="veil-chip">PRO · LOCKED</span>
+        <span class="veil-sub">MY DECK PREVIEW — THE SPREAD THIS RESULT SEEDS INTO YOUR MY DECK SCREEN</span>
+        <span class="veil-sub">FUTURE-SCREEN TEASER, NOT AN ENTITLEMENT GATE — THIS DEMO TIER IS ALREADY PRO</span>
+        <button class="btn-unlock" id="spreadUnlock">PREVIEW SPREAD ▸</button>
+      </div>
+    </div>
+    <p class="spreadkey">HATCH = LOW SAMPLE <b>N&lt;${LOW_N}</b> · CI = 95% NORMAL APPROX (COMPUTED AT RENDER) · EXP WR = N-WEIGHTED MEAN OF SPREAD ROWS (COMPUTED AT RENDER) · ALL WINRATES <b>PLACEHOLDER</b> · BLUE&gt;52 / ORANGE&lt;48</p>
+  </div>`;
+}
+
+/* ---------- raw ClassifyResponse peek (schema-faithful, mock values) ---------- */
+function rawJSON(r, t1){
+  const obj = {
+    game:'mtg', format:'modern',
+    archetype_id: t1 ? 101 : null,          /* mock id; null when unnamed (schema note) */
+    name: t1 ? 'Izzet Murktide' : ('Unnamed: '+r.colors.join('')+' — '+(r.top||'—')),
+    method:'mock-weighted-jaccard-v0',
+    confidence:+r.conf.toFixed(3),
+    unresolved_cards:r.unresolved,
+    as_of: t1 ? SPREAD_AS_OF : null,
+    matchup_spread: t1 ? SPREAD.map(m=>({archetype_id:null,name:m.name,p_win:m.p/100,
+      ci_lo:+((m.p-1.96*Math.sqrt(m.p/100*(1-m.p/100)/m.n)*100)/100).toFixed(3),
+      ci_hi:+((m.p+1.96*Math.sqrt(m.p/100*(1-m.p/100)/m.n)*100)/100).toFixed(3),
+      n_matches:m.n})) : [],
+    exp_winrate_vs_field: t1 ? EXP_VS_FIELD/100 : null,
+    _mock:'ALL NUMBERS PLACEHOLDER / DEMO-COMPUTED — NOT MEASURED'
+  };
+  return JSON.stringify(obj, null, 1);
+}
+
+/* ---------- result renderers ---------- */
+function unresolvedHTML(r){
+  if(!r.unresolved.length) return '';
+  return `<div class="caveat unres" role="note">UNRESOLVED — REPORTED, NEVER GUESSED:&nbsp;
+    ${r.unresolved.map(n=>`<code>${esc(n)}</code>`).join(', ')}
+    <b>${r.unresolved.length}</b> NAME${r.unresolved.length>1?'S':''} NOT IN CATALOGUE</div>`;
+}
+function altsHTML(r){
+  const max = Math.max(...r.alts.map(x=>x.score), .01);
+  const anyTie = r.alts.some(x=>x.tied);
+  return `<div class="alts">
+    <span class="albl">NEAREST ALTERNATIVES — MOCK SCORE (.7×COLOR JACCARD + .3×REP-CARD HIT)${anyTie?` · <b>=</b> MARKS TIED SCORES — SHARED RANK, A–Z ORDER (NO CARD-LEVEL RANKING COMPUTED)`:''}</span>
+    ${r.alts.map(({a,score,rep,tied})=>`
+      <div class="altrow">
+        <img class="athumb" src="${a.img}" alt="Art: ${esc(a.rep)}" width="34" height="24" loading="lazy" decoding="async">
+        <span class="aname"><b>${esc(a.name)} </b>
+          <span class="aev">${pipHTML(a.colors)} ${rep?`REP HIT: ${esc(a.rep)} · `:''}${tied?'TIED · ':''}GROUNDING SAMPLE ${a.sample} DECKS</span>
+        </span>
+        <span class="ascore"><span class="n">${tied?'=':''}${score.toFixed(2)}</span>
+          <span class="abar"><i style="width:${Math.round(score/max*100)}%"></i></span>
+        </span>
+      </div>`).join('')}
+  </div>`;
+}
+function gaugeBlock(r){
+  const lo = Math.max(0, r.conf-r.halfW), hi = Math.min(1, r.conf+r.halfW);
+  return `<div class="gaugebox">
+    <span class="glbl"><span>CONFIDENCE — MOCK MODEL</span><span>T1 FLOOR .65</span></span>
+    <span class="gval">
+      <span class="seg7 ${r.conf>=T1_FLOOR?'hi':'lo'}" id="confSeg">0.00</span>
+      <span class="band" id="confBand" data-final="BAND ${lo.toFixed(2)}–${hi.toFixed(2)}">BAND —</span>
+    </span>
+    ${gaugeSVG(r.conf, lo, hi)}
+    <span class="gsub">95% NORMAL APPROX OVER <b>${r.unionW}</b> CARD-SLOT OVERLAP UNITS ·
+      WEIGHTED JACCARD VS STORED CENTROID (MAINBOARD, NONLAND) · <b>DEMO-COMPUTED, NOT A PRODUCTION MODEL</b></span>
+  </div>`;
+}
+function seedBar(t1){
+  return `<div class="seedbar">
+    <button class="press btn-seed" id="seedBtn">SEED MY DECK <span class="arrow">▸</span></button>
+    <span class="seednote">FUTURE SCREEN — SAVES THIS ${t1?'CLASSIFICATION':'CLUSTER WATCH'} AS YOUR TRACKED DECK<br>(MOCK: NO NAVIGATION TARGET YET)</span>
+  </div>`;
+}
+
+function renderResult(r){
+  const t1 = r.conf >= T1_FLOOR;
+  let html = `<div class="res-status">
+    <b>POST /v1/mtg/modern/classify</b> → <span class="code200">200</span> (MOCK) ·
+    PARSED <b>${r.nMain}</b> MAIN / <b>${r.nSide}</b> SIDE — COUNTS COMPUTED FROM PASTED LIST</div>`;
+
+  if(t1){
+    html += `<div class="resplate">
+      <div class="res-head">
+        <span class="res-art">
+          <img src="${ARCH[0].img}" alt="Art: ${esc(ARCH[0].rep)}" width="64" height="46" decoding="async">
+          <span class="res-code">MUR</span>
+        </span>
+        <span class="res-id">
+          <span class="res-tags">
+            <span class="tag-method">T1 <b>CURATED</b> — RULE-FILE NAME</span>
+            <span class="tag-method">METHOD <b>MOCK-WEIGHTED-JACCARD-V0</b></span>
+          </span>
+          <span class="res-name" id="resName">Izzet Murktide ${pipHTML(ARCH[0].colors)}</span>
+          <span class="res-sub">COLORS PIP-MINED FROM <b>717</b> MTGO DECKS (APR–JUN 2024, GROUNDING) ·
+            REP CARD <b>${esc(ARCH[0].rep)}</b> · RULE-FILE PORT: MTGOFORMATDATA (PENDING — OWNER FLAG IN GROUNDING)</span>
+        </span>
+      </div>
+      ${gaugeBlock(r)}
+      ${unresolvedHTML(r)}
+      ${altsHTML(r)}
+      ${spreadHTML(r, true)}
+      ${seedBar(true)}
+    </div>`;
+  } else {
+    html += `<div class="resplate t3">
+      <div class="res-head">
+        <span class="res-id">
+          <span class="res-tags">
+            <span class="tag-emerging">EMERGING</span>
+            <span class="tag-method">T3 <b>UNNAMED</b> — LOW CONFIDENCE</span>
+            <span class="tag-method">METHOD <b>MOCK-WEIGHTED-JACCARD-V0</b></span>
+          </span>
+          <span class="res-name t3name" id="resName">UNNAMED: ${r.colors.join('')||'—'} — ${esc(r.top||'NO RESOLVED MAINBOARD')} ${pipHTML(r.colors)}</span>
+          <span class="res-sub">NO CURATED MATCH ABOVE THE <b>.65</b> FLOOR — DESCRIPTOR = COLOUR GROUP (FROM RESOLVED CARDS WITH COLOR DATA) + TOP INPUT CARD ·
+            <b>ARCHETYPE_ID NULL</b> · SIMILAR LISTS ARE TRACKED BY THE EMERGING SCANNER ·
+            <a href="emerging-feed.html">EMERGING SCANNER ↗</a></span>
+        </span>
+      </div>
+      ${gaugeBlock(r)}
+      ${unresolvedHTML(r)}
+      ${altsHTML(r)}
+      <p class="spreadkey" style="margin-top:12px">NO STORED MATCHUP SNAPSHOT FOR UNNAMED CLUSTERS —
+        <b>MATCHUP_SPREAD []</b> · <b>EXP_WINRATE_VS_FIELD NULL</b> (SCHEMA: NULL WHEN NO STORED DECKS)</p>
+      ${seedBar(false)}
+    </div>`;
+  }
+
+  html += `<details class="raw"><summary>RAW CLASSIFYRESPONSE (MOCK)</summary><pre>${esc(rawJSON(r, t1))}</pre></details>`;
+  $('#resultBody').innerHTML = html;
+
+  glitch($('#resName'));
+  /* band text settles only when the roll-up snaps exact — value and band must
+     never disagree in a screenshot mid-roll */
+  rollup($('#confSeg'), r.conf, 2, ()=>{
+    const b = $('#confBand');
+    if(b) b.textContent = b.dataset.final;
+  });
+  const seed = $('#seedBtn');
+  seed.addEventListener('click', ()=>glitch(seed));
+  const unlock = $('#spreadUnlock');
+  if(unlock){
+    unlock.addEventListener('click', ()=>{
+      const z = $('#spreadZone');
+      z.classList.remove('locked'); z.classList.add('unlocked');
+      const reveal = ()=>{
+        z.querySelectorAll('.mcell').forEach((cell,i)=>{
+          const m = SPREAD[i];
+          const ci = 1.96*Math.sqrt(m.p/100*(1-m.p/100)/m.n)*100;
+          cell.classList.remove('masked');          /* lit ink once a value exists */
+          cell.style.background = cellBg(m.p);
+          cell.innerHTML = m.p.toFixed(1)+`<span class="ci">±${ci.toFixed(1)}</span>`;
+          glitch(cell);
+        });
+        const ex = $('#expSeg');
+        ex.classList.remove('masked');
+        ex.textContent = '0.0';
+        rollup(ex, EXP_VS_FIELD, 1);
+      };
+      if(RM) reveal(); else setTimeout(reveal, 720);   /* after the 12-step squeegee wipe */
+    }, {once:true});
+  }
+  if(!initialPaint && !wideMQ.matches) $('#resultSec').scrollIntoView({block:'nearest', behavior:RM?'auto':'smooth'});
+}
+
+function render403(){
+  $('#resultBody').innerHTML = `
+    <div class="res-status"><b>POST /v1/mtg/modern/classify</b> → <span class="code4xx">403</span></div>
+    <div class="errplate">
+      <span class="ecode">403 — PREMIUM REQUIRED</span>
+      <p>CLASSIFY IS A <b>PRO</b> ENDPOINT (API CONTRACT). FLIP THE DEMO TIER TO <b>PRO</b> TO RUN THE MOCK.</p>
+      <p>PRODUCTION: GATE IS SERVER-SIDE VIA THE ENTITLEMENTS MODULE — NO INLINE TIER CHECKS, NO TRUE VALUES IN THE FREE DOM.</p>
+    </div>`;
+  if(!wideMQ.matches) $('#resultSec').scrollIntoView({block:'nearest', behavior:RM?'auto':'smooth'});
+}
+function render422(badLines){
+  $('#resultBody').innerHTML = `
+    <div class="res-status"><b>POST /v1/mtg/modern/classify</b> → <span class="code4xx">422</span> (MOCK)</div>
+    <div class="errplate">
+      <span class="ecode">422 — UNPARSEABLE / INVALID DECK</span>
+      <p>NO CARD LINES PARSED${badLines?` (<b>${badLines}</b> LINES DID NOT MATCH “COUNT NAME”)`:''}. CLASSIFIER RAISES VALUEERROR (API CONTRACT).</p>
+      <p>EXPECTED: <b>1–500</b> LINES OF “COUNT NAME”, OPTIONAL “SIDEBOARD” SECTION.</p>
+    </div>`;
+}
+
+/* ---------- console wiring ---------- */
+const ta = $('#deckTa');
+let pro = true;
+let initialPaint = true;
+function liveCounts(){
+  const {cards} = parseDeck(ta.value);
+  $('#cntMain').textContent = cards.filter(c=>c.board==='main').reduce((s,c)=>s+c.count,0);
+  $('#cntSide').textContent = cards.filter(c=>c.board==='side').reduce((s,c)=>s+c.count,0);
+}
+function runClassify(){
+  if(!pro){ render403(); return; }
+  const {cards, badLines} = parseDeck(ta.value);
+  if(!cards.length){ render422(badLines); return; }
+  renderResult(classify(cards));
+}
+$('#runBtn').addEventListener('click', runClassify);
+ta.addEventListener('keydown', e=>{ if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); runClassify(); } });
+ta.addEventListener('input', ()=>{
+  liveCounts();
+  $('#smplA').setAttribute('aria-pressed', String(ta.value===SAMPLE_A));
+  $('#smplB').setAttribute('aria-pressed', String(ta.value===SAMPLE_B));
+});
+function loadSample(txt, btn){
+  ta.value = txt; liveCounts();
+  $('#smplA').setAttribute('aria-pressed', String(btn==='A'));
+  $('#smplB').setAttribute('aria-pressed', String(btn==='B'));
+}
+$('#smplA').addEventListener('click', ()=>loadSample(SAMPLE_A,'A'));
+$('#smplB').addEventListener('click', ()=>loadSample(SAMPLE_B,'B'));
+$('#clrBtn').addEventListener('click', ()=>{ loadSample('', null); $('#resultBody').innerHTML=''; ta.focus(); });
+
+/* demo tier */
+function setPro(next){
+  pro = next;
+  $('#swPro').classList.toggle('on', pro);
+  $('#swPro').setAttribute('aria-pressed', String(pro));
+  $('#swFree').classList.toggle('on', !pro);
+  $('#swFree').setAttribute('aria-pressed', String(!pro));
+  if($('#resultBody').innerHTML) runClassify();
+}
+$('#swPro').addEventListener('click', ()=>setPro(true));
+$('#swFree').addEventListener('click', ()=>setPro(false));
+
+/* ---------- game switch — grounded 501 states ---------- */
+const GAME_INFO = {
+  mtg:{ chip:'GAME <b>MTG</b> · FORMAT <b>MODERN</b> · FULL TELEMETRY', ep:'POST /v1/mtg/modern/classify' },
+  onepiece:{
+    chip:'GAME <b>ONE PIECE</b> · LIMITED SAMPLE — 849 ONLINE MATCHES',
+    ep:'POST /v1/onepiece/{format}/classify',
+    body:'SERVE.PY REGISTERS CLASSIFIERS FOR <b>MTG ONLY</b> — THIS GAME RETURNS 501 “CLASSIFICATION NOT AVAILABLE FOR THIS GAME” (API GROUNDING). WHEN IT SHIPS, RESULTS PRINT IN THE <b>T2 STRUCTURAL</b> REGISTER (LEADER = ARCHETYPE AXIS).',
+    extra:'POPULATION CAVEAT CARRIES EVERYWHERE: <b>ONLINE POPULATION ONLY · N=849 MATCHES</b>.'
+  },
+  riftbound:{
+    chip:'GAME <b>RIFTBOUND</b> · CATALOGUE ONLY — NO MATCH DATA',
+    ep:'POST /v1/riftbound/constructed/classify',
+    body:'SERVE.PY REGISTERS CLASSIFIERS FOR <b>MTG ONLY</b> — THIS GAME RETURNS 501 (API GROUNDING). <b>NO MATCH DATA FEED — CATALOGUE ONLY</b>: NO DECKLISTS, EVENTS OR WINRATES EXIST YET.',
+    extra:'WHEN IT SHIPS: T2 STRUCTURAL REGISTER (LEGEND = ARCHETYPE AXIS, E.G. AHRI - NINE-TAILED FOX [CA|MI]) · CARD SLOTS RENDER AS DOMAIN-COLORED PLACEHOLDERS — NO RIOT CDN IMAGES (OWNER TOS DECISION).'
+  }
+};
+let game = 'mtg';
+$$('.sw[data-game]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    game = btn.dataset.game;
+    $$('.sw[data-game]').forEach(b=>{
+      const on = b===btn;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    const info = GAME_INFO[game];
+    $('#gameChip').innerHTML = info.chip;
+    $('#endpointTxt').textContent = info.ep;
+    glitch($('#endpointTxt'));
+    const isMtg = game==='mtg';
+    $('#consoleSec').hidden = !isMtg;
+    $('#resultSec').hidden = !isMtg;
+    $('#plate501').hidden = isMtg;
+    if(!isMtg){
+      $('#e501body').innerHTML = info.body;
+      $('#e501extra').innerHTML = info.extra;
+    }
+  });
+});
+
+/* ---------- ticker — real facts + labeled placeholder wire ---------- */
+const FEED_ITEMS = [
+  `MODERN CHALLENGE 64 · 2024-06-18 · <span class="sec">1ST AZJA</span> · IZZET WIZARDS (MTGO.COM)`,
+  `CLASSIFY: <span class="up">MTG LIVE</span> · ONEPIECE/RIFTBOUND → <span class="dn">501</span> (SERVE.PY)`,
+  `RESOLVER CATALOGUE ${CAT_DISTINCT} NAMES · CENTROIDS 1 · <span class="mut">MOCK</span>`,
+  `SCRYFALL ORACLE SNAPSHOT 2026-07-08 · ONE CANONICAL PRINTING PER CARD`,
+  `<span class="mut">PLACEHOLDER WIRE — SPREAD & CONFIDENCE VALUES NOT MEASURED</span>`
+];
+(function initTicker(){
+  const tk = $('#ticker'), track = $('#tickerTrack');
+  const half = FEED_ITEMS.map(s=>`<span>${s}</span>`).join('');
+  track.innerHTML = half + half;               /* duplicated once → -50% seamless loop */
+  const setSpeed = ()=>{ track.style.animationDuration = ((track.scrollWidth/2)/35) + 's'; };
+  setSpeed();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(setSpeed);
+  const toggle = ()=>{
+    const p = tk.classList.toggle('paused');
+    tk.setAttribute('aria-pressed', String(p));
+    $('#tickerPause').innerHTML = p ? '&#9654;' : '&#10074;&#10074;';
+  };
+  tk.addEventListener('click', toggle);
+  tk.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+})();
+
+/* ---------- wide reparenting (tokens §7.4) ---------- */
+const wideMQ = matchMedia('(min-width:1100px)');
+let wideApplied = null;
+const mainEl = document.querySelector('main');
+function layoutWide(){
+  const w = wideMQ.matches;
+  if(w === wideApplied) return;
+  wideApplied = w;
+  const rail = $('#rail'), res = $('#resultSec');
+  if(w){ rail.appendChild(res); }
+  else { mainEl.insertBefore(res, $('#infraSlot')); }
+}
+layoutWide();
+wideMQ.addEventListener('change', layoutWide);
+window.addEventListener('resize', layoutWide);
+
+/* ---------- initial paint: Sample A pre-filled, classified on load ---------- */
+loadSample(SAMPLE_A, 'A');
+runClassify();
+initialPaint = false;
+</script>
+</body>
+</html>

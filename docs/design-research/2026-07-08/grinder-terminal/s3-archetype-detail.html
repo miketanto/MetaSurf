@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS-03 // IZZET MURKTIDE — MetaSurf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!--
+  PRODUCTION NOTE: self-host DepartureMono-Regular.woff2 under /assets/fonts/ and
+  point the @font-face src there. The jsdelivr URL below exists only so this static
+  mockup renders standalone. The VT323 fallback fetch has been removed — the stack
+  falls back straight to generic monospace.
+-->
+<style>
+  @font-face {
+    font-family: 'Departure Mono';
+    src: url('https://cdn.jsdelivr.net/gh/rektdeckard/departure-mono@1.500/public/assets/DepartureMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --bg: #0a0a0a;
+    --paper: #f2f0e6;
+    --amber: #ffb000;
+    --amber-dim: #8a6200;
+    --win: #33ff66;
+    --win-dim: #1a8038;
+    --loss: #ff665e;
+    --lh: 1.2rem;           /* 19.2px line grid */
+    --display: 'Departure Mono', monospace;
+    --body: 'IBM Plex Mono', 'Courier New', monospace;
+    --bayer: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='4'%20height='4'%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='2'%20y='0'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='1'%20y='1'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='3'%20y='1'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='0'%20y='2'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='2'%20y='2'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='1'%20y='3'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3Crect%20x='3'%20y='3'%20width='1'%20height='1'%20fill='%230a0a0a'/%3E%3C/svg%3E");
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { background: var(--bg); }
+
+  body {
+    background: var(--bg);
+    color: var(--paper);
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: var(--lh);
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 2ch calc(var(--lh) * 2);
+  }
+
+  .disp {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+  }
+
+  .wrap { max-width: 86ch; margin: 0 auto; }
+
+  a { color: var(--paper); text-decoration: none; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  .up   { color: var(--win); }
+  .dn   { color: var(--loss); }
+  .amb  { color: var(--amber); }
+  .dim  { color: var(--amber-dim); }
+  .mut  { color: #6f6d64; }
+  /* CI qualifies the headline number — keep it upright and readable, not a whisper */
+  .ci   { color: #c9c7bb; }
+
+  /* ============ header chrome ============ */
+
+  header {
+    position: relative;
+    padding-top: var(--lh);
+    border-bottom: 1px solid var(--paper);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    header::after {
+      content: "";
+      position: absolute; inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(242, 240, 230, 0.5) 0px, rgba(242, 240, 230, 0.5) 1px,
+        transparent 1px, transparent 4px
+      );
+      opacity: 0.045;
+    }
+  }
+
+  nav { display: flex; flex-wrap: wrap; gap: 1ch; margin-bottom: var(--lh); }
+  nav a {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 0.5ch;
+  }
+  nav a.active { background: var(--amber); color: var(--bg); }
+  nav a:hover:not(.active) { color: var(--amber); }
+  nav .spacer { flex: 1; }
+  nav .acct { color: var(--amber-dim); }
+
+  .faceplate {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+    padding-bottom: calc(var(--lh) / 4);
+  }
+  .faceplate b { font-weight: 400; color: var(--paper); }
+
+  .rule {
+    color: #4a4840;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    line-height: var(--lh);
+  }
+
+  /* ============ hero ============ */
+
+  .crumb { color: #6f6d64; padding: calc(var(--lh)/2) 0 0; }
+  .crumb a:hover { color: var(--amber); }
+
+  h1 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: calc(var(--lh) * 2);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .herostats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18ch, 1fr));
+    border: 1px solid #35332c;
+    margin: var(--lh) 0;
+  }
+  .herostats > div {
+    padding: calc(var(--lh)/2) 1.5ch;
+    border-right: 1px solid #35332c;
+  }
+  .herostats > div:last-child { border-right: 0; }
+  .hs-label {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    letter-spacing: 0.06em;
+  }
+  .hs-val {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 22px;
+    line-height: calc(var(--lh) * 1.5);
+  }
+  .hs-sub { font-size: 13px; }
+
+  /* ============ sections ============ */
+
+  section { margin-top: var(--lh); }
+  .sect-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2ch;
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    margin-bottom: calc(var(--lh)/2);
+  }
+  .sect-head h2 {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+  }
+  .sect-head .meta { color: #6f6d64; font-size: 13px; margin-left: auto; white-space: nowrap; }
+
+  .termline { color: #6f6d64; margin-bottom: calc(var(--lh)/2); }
+  .termline::before { content: "> "; color: var(--amber-dim); }
+
+  /* ============ chart ============ */
+
+  .chartbox { border: 1px solid #35332c; padding: calc(var(--lh)/2) 1ch; }
+  /* Fixed CSS-pixel height + JS sizes the viewBox to the rendered width,
+     so 1 SVG unit == 1 CSS px: text renders at its declared size on every
+     viewport and crispEdges lands on the (integer) device-pixel grid
+     instead of smearing the Bayer dither at fractional scales. */
+  .chartbox svg { display: block; width: 100%; height: 190px; shape-rendering: crispEdges; }
+  .legend { display: flex; flex-wrap: wrap; gap: 2ch; padding-top: calc(var(--lh)/2); font-size: 13px; }
+  .legend .key { color: #9a988e; }
+  .legend .swatch { display: inline-block; width: 2ch; text-align: center; }
+
+  /* ============ decklists ============ */
+
+  .decks { display: grid; grid-template-columns: 1fr; gap: var(--lh); }
+  @media (min-width: 700px) { .decks { grid-template-columns: repeat(3, 1fr); } }
+
+  .deck { border: 1px solid #35332c; }
+  .deck-head {
+    border-bottom: 1px solid #35332c;
+    padding: calc(var(--lh)/4) 1ch;
+    display: flex; justify-content: space-between; gap: 1ch;
+  }
+  .deck-head .finish {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+  .deck-body { padding: calc(var(--lh)/4) 1ch calc(var(--lh)/2); }
+  .deck-body .ev { font-weight: 500; }
+  .deck-body .sub { color: #6f6d64; }
+  .deck-cards { padding-top: calc(var(--lh)/2); }
+  .deck-cards li { list-style: none; display: flex; }
+  .deck-cards .qty { width: 2ch; color: var(--amber-dim); flex: none; }
+  .deck-cards .more { color: #6f6d64; }
+  .deck-foot { border-top: 1px solid #35332c; padding: calc(var(--lh)/4) 1ch; }
+  .deck-foot a { color: var(--paper); }
+  .deck-foot a:hover { color: var(--amber); }
+
+  /* ============ drift table + freemium scramble ============ */
+
+  /* Free and locked halves are two tables (the locked one sits under the
+     dither overlay), so both use table-layout:fixed with an identical
+     <colgroup> — columns compute the same widths and the free/locked
+     boundary stays flush. */
+  table.drift { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .drift col.c-card { width: 44%; }
+  .drift col.c-num  { width: 14%; }
+  .drift th, .drift td { text-align: left; padding: calc(var(--lh)/4) 1ch calc(var(--lh)/4) 0; }
+  .drift td:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drift th {
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber-dim);
+    border-bottom: 1px solid #35332c;
+  }
+  .drift td { border-bottom: 1px solid #1e1d19; }
+  .num { text-align: right; }
+  .drift th.num { text-align: right; }
+
+  .lockwrap { position: relative; }
+  .scramble {
+    filter: blur(3px) contrast(2);
+    user-select: none;
+    pointer-events: none;
+    position: relative;
+  }
+  .dither {
+    position: absolute; inset: 0;
+    background-image: var(--bayer);
+    background-size: 4px 4px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .decode {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--amber);
+    color: var(--bg);
+    border: 0;
+    padding: calc(var(--lh)/4) 2ch;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .decode:hover { background: var(--paper); }
+  .decode:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+    background: var(--paper);
+  }
+  .locknote { color: #6f6d64; padding-top: calc(var(--lh)/2); }
+  .locknote .amb { color: var(--amber-dim); }
+
+  /* ============ footer / live clock ============ */
+
+  footer {
+    border-top: 1px solid var(--paper);
+    padding-top: calc(var(--lh)/2);
+    display: flex; flex-wrap: wrap; gap: 2ch;
+    color: #6f6d64;
+  }
+  .foot-rule { margin-top: calc(var(--lh) * 2); }
+  .cursor {
+    display: inline-block;
+    width: 1ch;
+    background: var(--amber);
+    color: var(--amber);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor { animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { 50% { background: transparent; color: transparent; } }
+  }
+
+  /* ============ BIOS boot overlay ============ */
+
+  #boot {
+    position: fixed; inset: 0; z-index: 99;
+    background: var(--bg);
+    color: var(--paper);
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: var(--lh);
+    padding: calc(var(--lh) * 2) 3ch;
+    cursor: pointer;
+  }
+  #boot .b-amber { color: var(--amber); }
+  #boot .b-dim { color: #6f6d64; }
+  #boot .skip {
+    position: absolute; bottom: var(--lh); right: 3ch;
+    color: #6f6d64;
+    font-family: var(--display);
+    -webkit-font-smoothing: none;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+  #boot[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<div id="boot" hidden aria-hidden="true">
+  <pre id="bootlines" style="font-family:inherit;white-space:pre-wrap;"></pre>
+  <span class="skip" id="skiplabel">[ press any key to skip ]</span>
+</div>
+
+<div class="wrap">
+
+<header>
+  <nav aria-label="Primary">
+    <a href="#">[meta]</a>
+    <a href="#">[matrix]</a>
+    <a href="#" class="active" aria-current="page">[decks]</a>
+    <a href="#">[alerts]</a>
+    <span class="spacer"></span>
+    <a href="#" class="acct">[free tier]</a>
+  </nav>
+  <div class="faceplate">MS-03 // ARCHETYPE DETAIL &nbsp;·&nbsp; FORMAT: <b>MODERN</b> &nbsp;·&nbsp; WINDOW: <b>30D</b> &nbsp;·&nbsp; N=<b>412</b> DECKS / <b>2,214</b> MATCHES</div>
+  <div class="rule" aria-hidden="true">================================================================================================================</div>
+</header>
+
+<p class="crumb"><a href="#">meta</a> / <a href="#">modern</a> / izzet-murktide</p>
+
+<h1>Izzet Murktide</h1>
+
+<div class="herostats">
+  <div>
+    <div class="hs-label">Meta share</div>
+    <div class="hs-val disp">9.8%</div>
+    <div class="hs-sub"><span class="up">&#9650;1.2</span> <span class="mut">vs prior 30d</span></div>
+  </div>
+  <div>
+    <div class="hs-label">Winrate</div>
+    <div class="hs-val disp">52.4%</div>
+    <div class="hs-sub"><span class="ci">&plusmn;2.1 &middot; 95% CI</span> <span class="mut">n=2,214</span></div>
+  </div>
+  <div>
+    <div class="hs-label">7d trend</div>
+    <div class="hs-val disp" id="spark" aria-hidden="true"></div>
+    <span class="sr-only" id="spark-sr"></span>
+    <div class="hs-sub"><span class="mut">share, daily</span></div>
+  </div>
+  <div>
+    <div class="hs-label">Tier</div>
+    <div class="hs-val disp">T1</div>
+    <div class="hs-sub"><span class="mut">rank #2 of 41</span></div>
+  </div>
+</div>
+
+<section aria-labelledby="h-chart">
+  <div class="sect-head">
+    <h2 id="h-chart">30-day share / winrate</h2>
+    <span class="meta">2026-06-08 &rarr; 2026-07-07</span>
+  </div>
+  <p class="termline">aggregating 30d window... n=412 decks · 2,214 matches · ok</p>
+  <div class="chartbox">
+    <svg id="chart" role="img" aria-label="30-day chart. Right axis: meta share, 0 to 12 percent — share rises from 7.9 to 10.4 percent, shown as a dithered area. Left axis: winrate, 44 to 60 percent — winrate holds between 50.1 and 53.9 percent, shown as a stepped line. Winrates on days with fewer than 30 matches are marked amber.">
+      <defs>
+        <pattern id="bayer50" width="4" height="4" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="1" height="1" fill="#8a6200"/>
+          <rect x="2" y="0" width="1" height="1" fill="#8a6200"/>
+          <rect x="1" y="1" width="1" height="1" fill="#8a6200"/>
+          <rect x="3" y="1" width="1" height="1" fill="#8a6200"/>
+          <rect x="0" y="2" width="1" height="1" fill="#8a6200"/>
+          <rect x="2" y="2" width="1" height="1" fill="#8a6200"/>
+          <rect x="1" y="3" width="1" height="1" fill="#8a6200"/>
+          <rect x="3" y="3" width="1" height="1" fill="#8a6200"/>
+        </pattern>
+      </defs>
+      <g id="chart-g"></g>
+    </svg>
+  </div>
+  <div class="legend">
+    <span class="key"><span class="swatch dim">&#9618;</span> meta share (0&ndash;12%, right axis)</span>
+    <span class="key"><span class="swatch up">&#9644;</span> winrate (44&ndash;60%, left axis)</span>
+    <span class="key"><span class="swatch amb">&#9679;</span> n&lt;30 matches that day</span>
+  </div>
+</section>
+
+<section aria-labelledby="h-decks">
+  <div class="sect-head">
+    <h2 id="h-decks">Recent lists</h2>
+    <span class="meta">3 of 47 in window</span>
+  </div>
+
+  <div class="decks">
+
+    <article class="deck">
+      <div class="deck-head">
+        <span class="mut">2026-07-05</span>
+        <span class="finish">2nd &middot; 6&ndash;1</span>
+      </div>
+      <div class="deck-body">
+        <div class="ev">Modern Challenge 64</div>
+        <div class="sub">MTGO &middot; pilot: sodek_</div>
+        <ul class="deck-cards" aria-label="Key cards">
+          <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+          <li><span class="qty">4</span>Dragon's Rage Channeler</li>
+          <li><span class="qty">2</span>Murktide Regent</li>
+          <li><span class="qty">4</span>Counterspell</li>
+          <li class="more">+ 61 more &middot; 15 SB</li>
+        </ul>
+      </div>
+      <div class="deck-foot"><a href="#">[view 75 &rarr;]</a></div>
+    </article>
+
+    <article class="deck">
+      <div class="deck-head">
+        <span class="mut">2026-07-04</span>
+        <span class="finish">Top 8 &middot; 5&ndash;2</span>
+      </div>
+      <div class="deck-body">
+        <div class="ev">Modern Challenge 32</div>
+        <div class="sub">MTGO &middot; pilot: grinderB0T</div>
+        <ul class="deck-cards" aria-label="Key cards">
+          <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+          <li><span class="qty">4</span>Expressive Iteration</li>
+          <li><span class="qty">3</span>Murktide Regent</li>
+          <li><span class="qty">3</span>Spell Pierce</li>
+          <li class="more">+ 61 more &middot; 15 SB</li>
+        </ul>
+      </div>
+      <div class="deck-foot"><a href="#">[view 75 &rarr;]</a></div>
+    </article>
+
+    <article class="deck">
+      <div class="deck-head">
+        <span class="mut">2026-07-02</span>
+        <span class="finish">1st &middot; 7&ndash;0</span>
+      </div>
+      <div class="deck-body">
+        <div class="ev">Modern Preliminary</div>
+        <div class="sub">MTGO &middot; pilot: kanister__</div>
+        <ul class="deck-cards" aria-label="Key cards">
+          <li><span class="qty">4</span>Ragavan, Nimble Pilferer</li>
+          <li><span class="qty">4</span>Unholy Heat</li>
+          <li><span class="qty">4</span>Mishra's Bauble</li>
+          <li><span class="qty">2</span>Murktide Regent</li>
+          <li class="more">+ 61 more &middot; 15 SB</li>
+        </ul>
+      </div>
+      <div class="deck-foot"><a href="#">[view 75 &rarr;]</a></div>
+    </article>
+
+  </div>
+</section>
+
+<section aria-labelledby="h-drift">
+  <div class="sect-head">
+    <h2 id="h-drift">Card-choice drift <span class="dim">// premium</span></h2>
+    <span class="meta">avg copies, 14d vs prior 14d</span>
+  </div>
+  <p class="termline">diffing 47 lists vs 52 prior... 9 cards moved &ge;0.3 copies</p>
+
+  <table class="drift">
+    <colgroup>
+      <col class="c-card"><col class="c-num"><col class="c-num"><col class="c-num"><col class="c-num">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Card</th>
+        <th class="num">Now</th>
+        <th class="num">Prev</th>
+        <th class="num">&Delta;</th>
+        <th class="num">Lists</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Spell Pierce</td>
+        <td class="num">2.6</td>
+        <td class="num">1.4</td>
+        <td class="num up">&#9650;1.2</td>
+        <td class="num amb">n=28</td>
+      </tr>
+      <tr>
+        <td>Murktide Regent</td>
+        <td class="num">2.9</td>
+        <td class="num">3.6</td>
+        <td class="num dn">&#9660;0.7</td>
+        <td class="num">44</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="lockwrap">
+    <div class="scramble" aria-hidden="true">
+      <table class="drift">
+        <colgroup>
+          <col class="c-card"><col class="c-num"><col class="c-num"><col class="c-num"><col class="c-num">
+        </colgroup>
+        <tbody>
+          <tr>
+            <td>Subtlety</td>
+            <td class="num">1.8</td>
+            <td class="num">1.1</td>
+            <td class="num up">&#9650;0.7</td>
+            <td class="num">39</td>
+          </tr>
+          <tr>
+            <td>Unholy Heat</td>
+            <td class="num">3.4</td>
+            <td class="num">4.0</td>
+            <td class="num dn">&#9660;0.6</td>
+            <td class="num">47</td>
+          </tr>
+          <tr>
+            <td>Brotherhood's End</td>
+            <td class="num">1.9</td>
+            <td class="num">1.3</td>
+            <td class="num up">&#9650;0.6</td>
+            <td class="num">31</td>
+          </tr>
+          <tr>
+            <td>Blood Moon</td>
+            <td class="num">1.2</td>
+            <td class="num">1.7</td>
+            <td class="num dn">&#9660;0.5</td>
+            <td class="num">26</td>
+          </tr>
+          <tr>
+            <td>Magmatic Sinkhole</td>
+            <td class="num">0.8</td>
+            <td class="num">0.4</td>
+            <td class="num up">&#9650;0.4</td>
+            <td class="num">18</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dither" aria-hidden="true"></div>
+    <button class="decode" type="button" onclick="alert('Mockup: this would open the premium upgrade flow.')">Decode 7 more movers &rarr;</button>
+  </div>
+  <p class="locknote"><span class="amb">// locked:</span> full drift table, per-card winrate deltas, and 90d history are premium depth. The screen itself is never walled.</p>
+</section>
+
+<div class="rule foot-rule" aria-hidden="true">================================================================================================================</div>
+<footer>
+  <span id="ingestline">LAST INGEST --:-- UTC</span>
+  <span><span class="cursor" aria-hidden="true">&#9646;</span> LIVE</span>
+  <span style="margin-left:auto">metasurf v0.1 &middot; data: MTGO scrape, 1 req/s</span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- single source of truth for every number on this screen ----------
+     The visible glyphs, the sr-only labels, the boot readout, and the footer
+     clock all derive from DATA, so the accessible text can never drift from
+     what is displayed. */
+
+  var DATA = {
+    decksIndexed: 2341,
+    archetypeDecks: 412,
+    matches: 2214,
+    lastIngestUtc: '03:12',
+    /* daily meta share %, oldest -> newest, 30 days */
+    share: [7.9, 8.1, 8.0, 8.4, 8.2, 8.6, 8.9, 8.7, 9.1, 8.8,
+            9.0, 9.3, 9.1, 9.4, 9.2, 9.0, 9.5, 9.7, 9.4, 9.8,
+            9.6, 10.0, 9.9, 10.2, 9.8, 10.1, 10.4, 10.2, 10.3, 10.4],
+    /* daily winrate %, same window */
+    wr:    [50.1, 51.3, 50.6, 52.0, 51.1, 50.4, 52.6, 51.8, 52.2, 53.0,
+            51.5, 52.4, 53.9, 52.8, 51.9, 50.9, 52.1, 53.2, 52.5, 51.6,
+            52.9, 53.4, 52.0, 52.7, 53.1, 52.3, 51.8, 52.6, 53.0, 52.4],
+    thin:  [4, 11, 25]  /* day indexes with n<30 matches */
+  };
+
+  document.getElementById('ingestline').textContent =
+    'LAST INGEST ' + DATA.lastIngestUtc + ' UTC';
+
+  /* ---------- 7d sparkline: glyphs + sr-only label from the same slice ---------- */
+
+  (function renderSpark() {
+    var last7 = DATA.share.slice(-7);
+    var glyphs = '▁▂▃▄▅▆▇█';
+    var min = last7[0], max = last7[0], i;
+    for (i = 1; i < last7.length; i++) {
+      if (last7[i] < min) min = last7[i];
+      if (last7[i] > max) max = last7[i];
+    }
+    var span = (max - min) || 1;
+    var s = '';
+    for (i = 0; i < last7.length; i++) {
+      s += glyphs.charAt(Math.min(7, Math.round((last7[i] - min) / span * 7)));
+    }
+    var net = last7[last7.length - 1] - last7[0];
+    var sparkEl = document.getElementById('spark');
+    sparkEl.textContent = s;
+    sparkEl.classList.add(net > 0 ? 'up' : net < 0 ? 'dn' : 'mut');
+    document.getElementById('spark-sr').textContent =
+      '7-day meta share trend: ' +
+      (net > 0 ? 'rising' : net < 0 ? 'falling' : 'flat') +
+      ' from ' + last7[0].toFixed(1) + '% to ' + last7[last7.length - 1].toFixed(1) + '%';
+  })();
+
+  /* ---------- 30d chart: dithered share area + stepped winrate line ----------
+     The viewBox is sized to the rendered CSS width on every draw, so 1 SVG
+     unit == 1 CSS px: 10px text really is 10px on a 390px phone and on
+     desktop, and crispEdges hits the device-pixel grid (integer scale)
+     instead of turning the Bayer dither into moire. */
+
+  var svg = document.getElementById('chart');
+  var g = document.getElementById('chart-g');
+  var NS = 'http://www.w3.org/2000/svg';
+
+  var SHARE_MAX = 12;         /* right axis: 0-12%, sized to the data */
+  var WR_MIN = 44, WR_MAX = 60;
+
+  function drawChart() {
+    while (g.firstChild) g.removeChild(g.firstChild);
+
+    var W = Math.max(280, Math.round(svg.getBoundingClientRect().width));
+    var H = 190;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+    var padL = 34, padR = 36, padT = 12, padB = 20;
+    var iw = W - padL - padR, ih = H - padT - padB;
+    var share = DATA.share, wr = DATA.wr, n = share.length, colW = iw / n;
+
+    function xAt(i) { return Math.round(padL + i * colW); }
+    function yShare(v) { return Math.round(padT + ih - (v / SHARE_MAX) * ih); }
+    function yWr(v) { return Math.round(padT + ih - ((v - WR_MIN) / (WR_MAX - WR_MIN)) * ih); }
+
+    function el(name, attrs, text) {
+      var e = document.createElementNS(NS, name);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      if (text) e.textContent = text;
+      g.appendChild(e);
+      return e;
+    }
+    function label(x, y, anchor, fill, text) {
+      el('text', { x: x, y: y, 'text-anchor': anchor, fill: fill,
+                   'font-family': 'IBM Plex Mono, monospace', 'font-size': '10' }, text);
+    }
+
+    /* gridlines + left axis (winrate scale) */
+    [44, 48, 52, 56, 60].forEach(function (v) {
+      var y = yWr(v);
+      el('line', { x1: padL, y1: y, x2: W - padR, y2: y,
+                   stroke: v === 52 ? '#4a4840' : '#26251f', 'stroke-width': 1,
+                   'stroke-dasharray': v === 52 ? '' : '2 3' });
+      label(padL - 4, y + 3, 'end', '#6f6d64', v + '%');
+    });
+
+    /* right axis: meta share scale, tick marks + labels in the share color */
+    [0, 4, 8, 12].forEach(function (v) {
+      var y = yShare(v);
+      el('line', { x1: W - padR, y1: y, x2: W - padR + 3, y2: y,
+                   stroke: '#8a6200', 'stroke-width': 1 });
+      label(W - padR + 5, y + 3, 'start', '#8a6200', v + '%');
+    });
+
+    /* meta share: stepped bars filled with 4x4 Bayer pattern */
+    var i, x, y;
+    for (i = 0; i < n; i++) {
+      x = xAt(i); y = yShare(share[i]);
+      el('rect', { x: x + 1, y: y, width: Math.max(1, Math.round(colW) - 2),
+                   height: (padT + ih) - y, fill: 'url(#bayer50)' });
+    }
+
+    /* winrate: hard-stepped phosphor line */
+    var d = '';
+    for (i = 0; i < n; i++) {
+      x = xAt(i); y = yWr(wr[i]);
+      d += (i === 0 ? 'M' + x + ' ' + y : 'H' + x + ' V' + y);
+    }
+    d += 'H' + (W - padR);
+    el('path', { d: d, fill: 'none', stroke: '#33ff66', 'stroke-width': 2 });
+
+    /* n<30 caution markers: amber pixel + n= tag, never color alone */
+    DATA.thin.forEach(function (idx) {
+      var mx = xAt(idx) + Math.round(colW / 2), my = yWr(wr[idx]);
+      el('rect', { x: mx - 2, y: my - 2, width: 4, height: 4, fill: '#ffb000' });
+      label(mx, my - 6, 'middle', '#ffb000', 'n<30');
+    });
+
+    /* x axis ticks */
+    [[0, '06-08', 'start'], [10, '06-18', 'start'], [20, '06-28', 'start'], [29, '07-07', 'end']].forEach(function (t) {
+      label(t[2] === 'end' ? W - padR : xAt(t[0]) + 2, H - 6, t[2], '#6f6d64', t[1]);
+    });
+  }
+
+  drawChart();
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawChart, 120);
+  });
+
+  /* ---------- BIOS boot: sessionStorage-gated, ~500ms, skippable ----------
+     6 lines x 70ms + 80ms linger = 500ms budget. Readout numbers come from
+     DATA — the boot screen doubles as an honest freshness check. */
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var boot = document.getElementById('boot');
+  var out = document.getElementById('bootlines');
+
+  if (!reduced && !sessionStorage.getItem('ms_boot_s3')) {
+    var lines = [
+      { t: 'METASURF BIOS v0.1', c: 'b-amber' },
+      { t: 'MEM CHECK .............. OK', c: 'b-dim' },
+      { t: 'LOADING MODERN SNAPSHOT...', c: '' },
+      { t: DATA.decksIndexed.toLocaleString('en-US') + ' DECKS INDEXED / ' +
+           DATA.archetypeDecks + ' IN ARCHETYPE', c: '' },
+      { t: 'LAST INGEST ' + DATA.lastIngestUtc + ' UTC', c: '' },
+      { t: '> open izzet-murktide --window 30d', c: 'b-amber' }
+    ];
+
+    document.getElementById('skiplabel').textContent =
+      window.matchMedia('(pointer: coarse)').matches
+        ? '[ tap anywhere to skip ]'
+        : '[ press any key to skip ]';
+
+    var timer;
+    var dismiss = function () {
+      clearInterval(timer);
+      boot.hidden = true;
+      boot.setAttribute('aria-hidden', 'true');   /* hidden again -> hide from AT */
+      sessionStorage.setItem('ms_boot_s3', '1');
+      document.removeEventListener('keydown', dismiss);
+      boot.removeEventListener('click', dismiss);
+    };
+
+    boot.hidden = false;
+    boot.removeAttribute('aria-hidden');          /* visible + clickable -> expose to AT */
+    var li = 0;
+    timer = setInterval(function () {
+      if (li >= lines.length) { clearInterval(timer); setTimeout(dismiss, 80); return; }
+      var span = document.createElement('span');
+      if (lines[li].c) span.className = lines[li].c;
+      span.textContent = lines[li].t + '\n';
+      out.appendChild(span);
+      li++;
+    }, 70);
+
+    boot.addEventListener('click', dismiss);
+    document.addEventListener('keydown', dismiss);
+  }
+})();
+</script>
+
+</body>
+</html>

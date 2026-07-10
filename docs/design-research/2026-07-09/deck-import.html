@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>METASURF — DECK INTAKE</title>
+<!--
+  PIT-WALL CONSOLE · DECK IMPORT (deck intake registration console)
+  Built from pit-wall-tokens.md + attention-art-spec.md + research-deck-import-visual.md §A (patterns 1–7).
+  HERO (L0): the intake console itself (data set-piece, attention spec §1.1 species iii).
+  Data: embedded card registry = deck-viewer-data.json (Modern Challenge 64, 2024-06-18, Azja 1st — Izzet Wizards).
+  All counts/lamps computed LIVE from the paste box. No fabricated cards; two faults planted deliberately.
+  PRODUCTION NOTES carried per spec: legality set here = the event registry (demo); production resolves
+  through the cards table (Scryfall oracle_id) + formats.config; unresolved names go to an unresolved-cards
+  report, never guessed. Premium gating (none on this page) would be server-side via entitlements.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+:root{
+  --bg:#0d0d12; --panel:#14141a; --panel2:#191921; --line:#2b2b35;
+  --ink:#f2f2f7; --dim:#8a8a96; --win:#3b9dff; --loss:#ff7a1a; --acc:#b45bff;
+  --shadow:#000000;
+  --pix:'Press Start 2P',monospace;
+  --mono:'JetBrains Mono',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  /* riso grain — white overlay recipe (tokens §4.3) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ background:var(--bg); }
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--mono); font-size:13px; line-height:1.45;
+  font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+  padding-top:30px;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  a,button,.press,textarea,input,select{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+}
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+a{ color:inherit; text-decoration:none; }
+img{ max-width:100%; }
+
+/* ---------- press physics (tokens §3.3) ---------- */
+.press{
+  font-family:inherit; color:inherit; text-align:left;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.press:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.press[aria-disabled="true"]:active{ transform:none; box-shadow:2px 2px 0 0 var(--shadow); }
+.press.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+
+/* ---------- ticker (tokens §5.1) ---------- */
+.ticker{ position:fixed; top:0; left:0; right:0; height:30px; z-index:60;
+  background:var(--panel); border-bottom:1px solid var(--line);
+  display:flex; align-items:stretch; overflow:hidden; }
+.ticker .wirebadge{ font-family:var(--pix); font-size:8px; line-height:1;
+  display:flex; align-items:center; padding:0 8px; background:var(--loss); color:var(--bg);
+  z-index:2; letter-spacing:1px; }
+.ticker-clip{ position:absolute; left:52px; right:36px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{ display:inline-flex; align-items:center; height:30px; white-space:nowrap; will-change:transform;
+  animation:tickscroll 42s linear infinite; }
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.ticker .titem{ font-size:11px; letter-spacing:.04em; color:var(--dim); padding:0 18px; }
+.ticker .titem b{ color:var(--ink); font-weight:700; }
+.ticker .titem.hot b{ color:var(--acc); }
+.ticker .titem.price b{ color:var(--loss); }
+.ticker .pausebtn{ position:absolute; right:0; top:0; bottom:0; width:36px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; color:var(--dim); background:var(--panel); border-left:1px solid var(--line); }
+
+/* ---------- page frame ---------- */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+.hdr{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 0 6px; }
+.backchip{ font-family:var(--pix); font-size:8px; line-height:1; display:inline-flex; align-items:center;
+  min-height:38px; padding:0 10px; color:var(--dim); }
+.clock{ display:flex; align-items:baseline; gap:6px; }
+.clock .seg7{ font-family:var(--seg); font-weight:700; font-size:18px; color:var(--ink); }
+.clock .lbl{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+
+.titleblock{ padding:8px 0 0; }
+h1{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase;
+  letter-spacing:-.01em; line-height:.92; font-size:46px; }
+.grainband{ height:8px; position:relative; margin:10px 0 8px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal; }
+.grainband::before{ content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win)); opacity:.22; z-index:-1; }
+.introline{ font-size:10px; letter-spacing:.08em; color:var(--dim); text-transform:uppercase;
+  line-height:1.7; margin-bottom:14px; }
+
+/* ---------- section labels / calm strips ---------- */
+.seclbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase;
+  margin:18px 0 8px; display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.seclbl b{ color:var(--ink); }
+.calm{ font-size:10px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase;
+  line-height:1.7; margin:6px 0 0; }
+
+/* ---------- HERO: intake console ---------- */
+.lanes{ display:flex; gap:6px; margin-bottom:8px; }
+.lane{ font-family:var(--pix); font-size:8px; line-height:1; letter-spacing:1px;
+  min-height:44px; padding:0 12px; display:inline-flex; align-items:center; gap:8px;
+  color:var(--dim); flex:1 1 0; justify-content:center; }
+.lane .ln-led{ width:8px; height:8px; background:#3a3a48; }
+.lane.on .ln-led{ background:var(--bg); }
+.intake{ position:relative; background:var(--panel); border:1px solid var(--line);
+  box-shadow:4px 4px 0 0 var(--shadow); }
+.intake::before{ content:""; display:block; height:4px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.intake-head{ display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:8px 10px; border-bottom:1px solid var(--line); }
+.intake-head .ih-lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+.linesplate{ display:flex; align-items:baseline; gap:6px; }
+.linesplate .seg7{ font-family:var(--seg); font-weight:700; font-size:16px; color:var(--win); min-width:3ch; text-align:right; display:inline-block; }
+.linesplate .u{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+#pasteBox{
+  display:block; width:100%; min-height:452px; padding:10px 12px;
+  background:#0f0f15; color:var(--ink); border:0; border-top:0;
+  font-family:var(--mono); font-size:12px; line-height:1.65;
+  resize:vertical; caret-color:var(--win);
+  white-space:pre; overflow-x:auto;
+}
+#pasteBox:focus-visible{ outline-offset:-2px; }
+.lanepanel{ padding:0; }
+.lanepanel[hidden]{ display:none; }
+.droppl{ min-height:452px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; background:#0f0f15; border:1px dashed #3a3a48; margin:10px; padding:20px; text-align:center; }
+.droppl .big{ font-family:var(--pix); font-size:10px; color:var(--dim); line-height:2; }
+.droppl .fine{ font-size:10px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7; }
+.linkpl{ min-height:452px; background:#0f0f15; margin:10px; padding:16px; display:flex; flex-direction:column; gap:12px; }
+.linkpl input{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--ink);
+  font-family:var(--mono); font-size:12px; padding:12px 10px; min-height:44px; }
+.stamps{ display:flex; flex-wrap:wrap; gap:6px; }
+.stamp{ font-size:9px; letter-spacing:.1em; color:var(--dim); border:1px dashed #3a3a48; padding:4px 6px; text-transform:uppercase; }
+
+/* ---------- command strip (pattern 5) ---------- */
+.cmdstrip{ margin-top:10px; background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:8px 10px; }
+.cmdrow{ display:flex; align-items:stretch; gap:6px; }
+.cmdprefix{ font-family:var(--pix); font-size:10px; color:var(--loss); display:flex; align-items:center; padding:0 2px; }
+#cmdInput{ flex:1 1 auto; min-width:0; background:#0f0f15; border:1px solid var(--line); color:var(--ink);
+  font-family:var(--mono); font-size:12px; padding:0 8px; min-height:44px; caret-color:var(--loss); }
+.qtyplate{ display:flex; align-items:center; gap:4px; padding:0 8px; background:var(--panel2); border:1px solid var(--line); }
+.qtyplate .seg7{ font-family:var(--seg); font-weight:700; font-size:16px; color:var(--ink); min-width:1ch; }
+.qtyplate .u{ font-size:8px; letter-spacing:.1em; color:var(--dim); }
+.zoneseg{ display:inline-flex; }
+.zoneseg .sw{ font-family:var(--pix); font-size:8px; line-height:1; min-height:44px; padding:0 9px;
+  display:inline-flex; align-items:center; color:var(--dim); }
+.zoneseg .sw:not(:first-child){ border-left-width:0; }
+.zoneseg .sw.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.sugg{ display:flex; gap:6px; margin-top:8px; overflow-x:auto; scrollbar-width:none; }
+.sugg::-webkit-scrollbar{ display:none; }
+.sugg:empty{ display:none; }
+.sg{ display:inline-flex; align-items:center; gap:8px; padding:5px 8px 5px 5px; flex:0 0 auto; max-width:100%; }
+.sg img{ width:26px; height:36px; object-fit:cover; border:1px solid var(--line);
+  filter:saturate(.78) contrast(1.05); }
+.sg .sgq{ font-family:var(--seg); font-weight:700; font-size:13px; color:var(--win); }
+.sg .sgn{ font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px; display:block; }
+.sg .sgz{ font-size:8px; font-family:var(--pix); color:var(--dim); }
+.cmdhint{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; margin-top:6px; line-height:1.7; }
+
+/* ---------- readback (pattern 2) ---------- */
+.rback{ background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); }
+.rb-zone-h{ display:flex; align-items:baseline; justify-content:space-between; gap:8px;
+  padding:7px 10px; border-bottom:1px solid var(--line); }
+.rb-zone-h .zl{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+.rb-zone-h .zl b{ color:var(--ink); }
+.rb-zone-h .zt{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+.rb-side .rb-zone-h{ border-top:0; }
+.rrows{ padding:2px 0; }
+.rrow{ display:grid; grid-template-columns:30px 12px minmax(0,1fr) auto; gap:6px; align-items:center;
+  padding:3px 10px; border-bottom:1px solid #17171f; font-size:12px; }
+.rrow:last-child{ border-bottom:0; }
+.rrow .rq{ font-family:var(--seg); font-weight:700; font-size:12px; text-align:right; color:var(--win); }
+.rrow .rx{ color:var(--dim); font-size:10px; }
+.rrow .rn{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700; }
+.rrow .rt{ font-size:9px; color:var(--dim); letter-spacing:.06em; }
+.rb-side .rrow .rq{ color:var(--loss); }
+.rrow.fault .rq, .rrow.fault .rn{ color:var(--loss); }
+.rrow.fault .rn{ font-weight:400; text-decoration:line-through; text-decoration-color:#7a4a2a; }
+.rrow.fault .rt{ color:var(--loss); }
+
+/* gasket (pattern 3) */
+.gasket{ position:relative; display:grid; grid-template-columns:auto 1fr auto; align-items:stretch;
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  background:var(--panel2); min-height:44px; touch-action:none; }
+.gasket .gcount{ display:flex; align-items:center; gap:5px; padding:0 10px; }
+.gasket .gcount .seg7{ font-family:var(--seg); font-weight:700; font-size:20px; min-width:2ch; text-align:right; display:inline-block; }
+.gasket .gcount .u{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+.gasket .gc-main .seg7{ color:var(--win); }
+.gasket .gc-side .seg7{ color:var(--loss); }
+.gmid{ position:relative; display:flex; align-items:center; justify-content:center; gap:8px;
+  background-image:var(--grain), linear-gradient(90deg, rgba(255,122,26,.55), rgba(255,122,26,.18));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal;
+  border-left:1px solid var(--line); border-right:1px solid var(--line); }
+.gmid .grip{ letter-spacing:2px; color:var(--bg); font-weight:800; font-size:11px; user-select:none; }
+.gbtn{ font-family:var(--pix); font-size:8px; line-height:1; min-height:32px; min-width:32px;
+  display:inline-flex; align-items:center; justify-content:center; padding:0 6px; }
+.gconfirm{ color:var(--loss); border-color:var(--loss); }
+.gasket.confirmed .gconfirm{ color:var(--bg); background:var(--loss); border-color:var(--loss);
+  transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); }
+@keyframes gpulse{ 0%,49%{ box-shadow:0 0 0 2px var(--loss), 2px 2px 0 0 var(--shadow); } 50%,100%{ box-shadow:0 0 0 0 rgba(0,0,0,0), 2px 2px 0 0 var(--shadow); } }
+.gasket.unconfirmed{ animation:gpulse 1.1s steps(2,end) infinite; }
+.gnote{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  padding:5px 10px 7px; border-top:1px dashed #2b2b35; background:var(--panel); grid-column:1/-1; }
+.gnote b{ color:var(--loss); }
+
+/* ---------- fault log (pattern 4) ---------- */
+.faultlog{ background:var(--panel); border:1px solid var(--loss); box-shadow:2px 2px 0 0 var(--shadow); }
+.fl-head{ display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:7px 10px; border-bottom:1px solid var(--loss); }
+.fl-head .fl-lbl{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--loss); }
+.fl-count{ display:flex; align-items:baseline; gap:5px; }
+.fl-count .seg7{ font-family:var(--seg); font-weight:700; font-size:18px; color:var(--loss); min-width:1ch; text-align:right; display:inline-block; }
+.fl-count .u{ font-size:9px; letter-spacing:.12em; color:var(--dim); }
+.fentry{ padding:9px 10px; border-bottom:1px dashed #2b2b35; }
+.fentry:last-child{ border-bottom:0; }
+.fentry .fled{ display:inline-block; width:8px; height:8px; background:var(--loss); margin-right:8px; }
+.fentry .fraw{ font-size:12px; color:var(--ink); background:var(--panel2); border:1px solid var(--line);
+  padding:4px 8px; display:inline-block; }
+.fentry .fstat{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin:7px 0 0; line-height:1.7; }
+.fentry .fstat b{ color:var(--loss); }
+.fcands{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.fc{ display:inline-flex; align-items:center; gap:8px; padding:5px 9px 5px 5px; }
+.fc img{ width:26px; height:36px; object-fit:cover; border:1px solid var(--line);
+  filter:saturate(.78) contrast(1.05); }
+.fc .fcn{ font-size:11px; font-weight:700; }
+.fc .fca{ font-size:9px; letter-spacing:.1em; font-weight:700; color:var(--win); }
+.fl-empty{ padding:12px 10px; font-size:10px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; line-height:1.7; }
+.faultlog.clear{ border-color:var(--line); }
+.faultlog.clear .fl-head{ border-bottom-color:var(--line); }
+.faultlog.clear .fl-head .fl-lbl{ color:var(--dim); }
+.faultlog.clear .fl-count .seg7{ color:var(--ink); }
+
+/* ---------- scrutineering (pattern 6) ---------- */
+.scrut{ background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); padding:10px; }
+.lamps{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.lamp{ border:1px solid var(--line); background:var(--panel2); padding:8px 8px 7px; }
+.lamp .led{ width:10px; height:10px; border:1px solid #3a3a48; background:transparent; margin-bottom:7px; }
+.lamp .ll{ font-size:10px; font-weight:700; line-height:1; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+.lamp .ls{ font-size:9px; color:var(--dim); margin-top:6px; letter-spacing:.04em; line-height:1.5; min-height:26px; }
+.lamp.lit{ border-color:var(--win); }
+.lamp.lit .led{ background:var(--win); border-color:var(--win); }
+.lamp.lit .ll{ color:var(--win); }
+.lamp.fault{ border-color:var(--loss); }
+.lamp.fault .led{ background:var(--loss); border-color:var(--loss); }
+.lamp.fault .ll{ color:var(--loss); }
+.boards{ display:flex; align-items:baseline; gap:14px; margin:12px 2px 2px; }
+.boards .bd{ display:flex; align-items:baseline; gap:6px; }
+.boards .seg7{ font-family:var(--seg); font-weight:700; font-size:24px; min-width:2ch; text-align:right; display:inline-block; }
+.boards .bd-main .seg7{ color:var(--win); }
+.boards .bd-side .seg7{ color:var(--loss); }
+.boards .u{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+#submitKey{ width:100%; margin-top:12px; min-height:48px; font-family:var(--pix); font-size:10px;
+  letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:10px; }
+#submitKey[aria-disabled="true"]{ color:#3a3a48; }
+#submitKey:not([aria-disabled="true"]){ color:var(--win); border-color:var(--win); }
+#submitKey.done{ color:var(--bg); background:var(--win); border-color:var(--win);
+  transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); }
+
+/* ---------- registration (pattern 7) ---------- */
+.reg{ background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); position:relative; }
+.reg::before{ content:""; display:block; height:4px;
+  background-image:var(--grain), linear-gradient(90deg, var(--acc), var(--win));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.reg-in{ padding:10px 10px 12px; }
+.reg.locked .reg-in{ opacity:.45; }
+.reg.locked .reg-in *{ pointer-events:none; }
+.reglock{ font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase;
+  padding:6px 10px; border-bottom:1px dashed #2b2b35; }
+.reg:not(.locked) .reglock{ display:none; }
+.reg .rl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; margin-bottom:8px; }
+.reg .rl b{ color:var(--ink); }
+#deckName{ width:100%; background:#0f0f15; border:1px solid var(--line); color:var(--ink);
+  font-family:var(--mono); font-weight:800; font-size:15px; letter-spacing:.04em;
+  padding:10px; min-height:44px; text-transform:uppercase; caret-color:var(--acc); }
+.confnote{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7; margin-top:6px; }
+.confnote b{ color:var(--acc); }
+.regchips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.rchip{ font-family:var(--pix); font-size:8px; line-height:1; min-height:38px; padding:0 10px;
+  display:inline-flex; align-items:center; color:var(--dim); }
+.rchip.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.regkeys{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.rkey{ font-family:var(--pix); font-size:8px; line-height:1; min-height:44px; padding:0 12px;
+  display:inline-flex; align-items:center; gap:8px; flex:1 1 auto; justify-content:center; }
+.rkey.save{ color:var(--acc); border-color:var(--acc); }
+.regnote{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7; margin-top:10px; }
+
+/* ---------- glitch (tokens §6.3) ---------- */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+
+/* ---------- footer ---------- */
+footer{ margin-top:34px; }
+.riso-divider{ height:10px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+  background-blend-mode:multiply, normal; opacity:.55; }
+.wordmark{ font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; line-height:.9;
+  font-size:46px; padding:18px 0 4px; }
+.wordmark .hollow{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+.fineprint{ font-size:9px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.08em; line-height:1.7; padding:8px 0 40px; }
+
+/* ---------- layout: ≥1100px pit-wall spread ---------- */
+.layout{ display:block; }
+.railgap{ height:0; }
+@media (min-width:600px){
+  h1{ font-size:58px; }
+  .wordmark{ font-size:72px; }
+}
+@media (min-width:1100px){
+  .wrap{ max-width:1440px; padding:0 32px; }
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 440px; column-gap:26px; align-items:start; }
+  .maincol{ min-width:0; }
+  .rail{ position:sticky; top:42px; max-height:calc(100dvh - 42px); overflow-y:auto;
+    scrollbar-width:none; border-left:1px solid var(--line); padding:0 0 24px 26px;
+    display:flex; flex-direction:column; }
+  .rail::-webkit-scrollbar{ display:none; }
+  /* wide rail: the gate telemetry docks on top (tokens §7.3 order:-1 pattern) */
+  .rsec-scrut{ order:-2; } .rsec-fault{ order:-1; }
+  .rsec-scrut .seclbl{ margin-top:12px; }
+  #pasteBox{ min-height:480px; }
+  .droppl,.linkpl{ min-height:480px; }
+  h1{ font-size:64px; }
+}
+
+/* ---------- reduced motion (tokens §6.6) ---------- */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .glitch{ animation:none; }
+  .press, .press:active{ transition:none; }
+  .gasket.unconfirmed{ animation:none; box-shadow:0 0 0 2px var(--loss), 2px 2px 0 0 var(--shadow); }
+}
+</style>
+</head>
+<body>
+
+<!-- L3 chrome: the wire — the only looping motion on the page -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false" aria-label="Results wire — tap to pause">
+  <span class="wirebadge">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+  <span class="pausebtn" id="pauseGlyph" aria-hidden="true">&#10074;&#10074;</span>
+</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <a class="backchip press" href="index.html">&#9666; CONSOLE</a>
+    <div class="clock"><span class="lbl">LOCAL</span><span class="seg7" id="clock"></span></div>
+  </div>
+
+  <!-- L0 hero statement: DECK INTAKE — the console below IS the hero -->
+  <div class="titleblock">
+    <h1>Deck Intake</h1>
+    <div class="grainband" aria-hidden="true"></div>
+    <p class="introline">REGISTRATION CONSOLE &middot; MODERN &middot; LIBERAL IN, STRICT OUT &mdash; UNRESOLVED NAMES ARE QUARANTINED, NEVER GUESSED</p>
+  </div>
+
+  <div class="layout">
+    <div class="maincol">
+
+      <!-- pattern 1: three-lane intake, PASTE pre-depressed -->
+      <div class="lanes" role="tablist" aria-label="Intake channel">
+        <button class="lane press on" id="laneP" role="tab" aria-selected="true" data-lane="paste"><span class="ln-led"></span>PASTE</button>
+        <button class="lane press" id="laneF" role="tab" aria-selected="false" data-lane="file"><span class="ln-led"></span>FILE</button>
+        <button class="lane press" id="laneL" role="tab" aria-selected="false" data-lane="link"><span class="ln-led"></span>LINK</button>
+      </div>
+
+      <div class="intake">
+        <div class="intake-head">
+          <span class="ih-lbl" id="intakeLbl">CHANNEL A &middot; PASTE &mdash; ANY DIALECT</span>
+          <span class="linesplate"><span class="seg7" id="lineCount"></span><span class="u">LINES</span></span>
+        </div>
+
+        <div class="lanepanel" id="panelPaste">
+<textarea id="pasteBox" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Decklist paste box"># MTGO export — Modern Challenge 64 · 2024-06-18 · Azja · 1st Place
+4 Counterspell
+2 Dress Down
+4 Flame of Anor
+1 Flooded Strand
+2 Force of Negation
+3 Galvanic Discharge
+1 Hall of Storm Giants
+2 Invert Polarity
+4 Island
+1 Lightning Bolt
+3 Lightnig Bolt
+2 Misty Rainforest
+Otawara, Soaring City
+2 Polluted Delta
+4 Preordain
+2 Scalding Tarn
+1 Sink into Stupor // Soporific Springs
+4x Snapcaster Mage
+1 Spell Snare
+3 Spirebluff Canal
+3 Steam Vents
+1 Stern Scolding
+3 Subtlety
+1 Totally Fake Card
+4 Tamiyo, Inquisitive Student
+2 Thundering Falls
+
+2 Consign to Memory
+2 Magus of the Moon
+3 Obsidian Charmaw
+1 Spell Snare
+2 Stern Scolding
+2 Tishana's Tidebinder
+2 Unlicensed Hearse</textarea>
+        </div>
+
+        <div class="lanepanel" id="panelFile" hidden>
+          <div class="droppl">
+            <div class="big">DROP .TXT / .DEC / .DEK</div>
+            <div class="fine">OR PRESS TO BROWSE &mdash; FILE CHANNEL IS PRESENTATIONAL IN THIS MOCKUP;<br>PRODUCTION READS THE FILE INTO THE SAME PASTE PARSER</div>
+          </div>
+        </div>
+
+        <div class="lanepanel" id="panelLink" hidden>
+          <div class="linkpl">
+            <input type="url" placeholder="https://&hellip; (decklist URL)" aria-label="Decklist URL">
+            <div class="fine calm" style="margin:0">RECOGNIZED-SOURCE STAMPS &mdash; SOURCES DOCUMENTED IN IMPORT RESEARCH; FETCH IS PRESENTATIONAL IN THIS MOCKUP</div>
+            <div class="stamps">
+              <span class="stamp">MTGTOP8</span><span class="stamp">MTGGOLDFISH</span><span class="stamp">MOXFIELD</span><span class="stamp">MTGDECKS</span><span class="stamp">MELEE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="calm">GRAMMAR: <span style="color:var(--ink)">4 NAME &middot; 4X NAME &middot; BARE NAME &middot; NAME (SET) 123 &middot; SB: NAME &middot; # COMMENT</span> &mdash; SIDEBOARD SPLIT BY BLANK LINE, HEADER, SB: PREFIX, OR [TAG]</p>
+
+      <!-- pattern 5: quantity autocomplete command strip -->
+      <div class="seclbl"><span><b>MANUAL ENTRY</b> &middot; COMMAND STRIP</span></div>
+      <div class="cmdstrip">
+        <div class="cmdrow">
+          <span class="cmdprefix" aria-hidden="true">&#8811;</span>
+          <input id="cmdInput" type="text" placeholder="4 lightn&hellip;" aria-label="Quantity and card name" autocomplete="off" spellcheck="false">
+          <span class="qtyplate" title="Parsed quantity"><span class="seg7" id="cmdQty">1</span><span class="u">&times;</span></span>
+          <span class="zoneseg" role="group" aria-label="Target board">
+            <button class="sw press on" id="zMain" aria-pressed="true">MAIN</button>
+            <button class="sw press" id="zSide" aria-pressed="false">SIDE</button>
+          </span>
+        </div>
+        <div class="sugg" id="suggRow" role="listbox" aria-label="Card suggestions"></div>
+        <p class="cmdhint">TYPE QTY + NAME &mdash; PRESS A CANDIDATE TO APPEND TO THE PASTE. ILLEGAL CARDS REFUSE THE PRESS (NONE IN THIS REGISTRY &mdash; ALL CARDS FROM A MODERN EVENT).</p>
+      </div>
+
+      <div class="railgap"></div>
+    </div><!-- /maincol -->
+
+    <div class="rail">
+
+      <!-- pattern 2: normalized readback + pattern 3: gasket -->
+      <div class="rsec rsec-read">
+      <div class="seclbl"><span><b>READBACK</b> &middot; NORMALIZED</span><span id="rbTotal"></span></div>
+      <div class="rback">
+        <div class="rb-zone-h"><span class="zl"><b>MAINBOARD</b></span><span class="zt" id="mainMeta"></span></div>
+        <div class="rrows" id="rbMain"></div>
+
+        <div class="gasket" id="gasket">
+          <span class="gcount gc-main"><span class="seg7" id="gMain"></span><span class="u">MAIN</span></span>
+          <div class="gmid" id="gGrip" title="Drag to move the MAIN/SIDE split" aria-hidden="true"><span class="grip">&#8801;&#8801;&#8801;</span></div>
+          <span class="gcount gc-side"><span class="u">SIDE</span><span class="seg7" id="gSide"></span></span>
+          <div class="gnote" id="gNote"></div>
+          <div class="gnote" style="border-top:0;padding-top:0;display:flex;gap:6px;align-items:center">
+            <button class="gbtn press" id="gUp" aria-label="Move split up one card">&#9650;</button>
+            <button class="gbtn press" id="gDown" aria-label="Move split down one card">&#9660;</button>
+            <button class="gbtn press gconfirm" id="gConfirm">&#10003; CONFIRM SPLIT</button>
+          </div>
+        </div>
+
+        <div class="rb-side">
+          <div class="rb-zone-h"><span class="zl"><b>SIDEBOARD</b></span><span class="zt" id="sideMeta"></span></div>
+          <div class="rrows" id="rbSide"></div>
+        </div>
+      </div>
+
+      </div><!-- /rsec-read -->
+
+      <!-- pattern 4: fault log -->
+      <div class="rsec rsec-fault">
+      <div class="seclbl"><span><b>FAULT LOG</b> &middot; UNRESOLVED NAMES</span></div>
+      <div class="faultlog" id="faultLog">
+        <div class="fl-head">
+          <span class="fl-lbl">FAULTS</span>
+          <span class="fl-count"><span class="seg7" id="faultCount"></span><span class="u">LINES</span></span>
+        </div>
+        <div id="faultEntries"></div>
+      </div>
+      <p class="calm">NAMES RESOLVE AGAINST THE CARD REGISTRY ONLY. A FUZZY CANDIDATE IS APPLIED BY DELIBERATE PRESS &mdash; NOTHING IS AUTO-CORRECTED. NO-MATCH LINES STAY QUARANTINED AND ARE NOT REGISTERED.</p>
+
+      </div><!-- /rsec-fault -->
+
+      <!-- pattern 6: scrutineering gate -->
+      <div class="rsec rsec-scrut">
+      <div class="seclbl"><span><b>SCRUTINEERING</b> &middot; 4-LAMP GATE</span></div>
+      <div class="scrut">
+        <div class="lamps" id="lampRow">
+          <div class="lamp" id="lampParse"><div class="led"></div><div class="ll">PARSE</div><div class="ls" id="lsParse"></div></div>
+          <div class="lamp" id="lampResolve"><div class="led"></div><div class="ll">RESOLVE</div><div class="ls" id="lsResolve"></div></div>
+          <div class="lamp" id="lampLegal"><div class="led"></div><div class="ll">LEGAL</div><div class="ls" id="lsLegal"></div></div>
+          <div class="lamp" id="lampSize"><div class="led"></div><div class="ll">SIZE</div><div class="ls" id="lsSize"></div></div>
+        </div>
+        <div class="boards">
+          <span class="bd bd-main"><span class="seg7" id="bMain"></span><span class="u">MAIN / 60+</span></span>
+          <span class="bd bd-side"><span class="seg7" id="bSide"></span><span class="u">SIDE / &le;15</span></span>
+        </div>
+        <button id="submitKey" class="press" aria-disabled="true">SUBMIT FOR REGISTRATION</button>
+        <p class="calm" id="scrutNote" aria-live="polite"></p>
+      </div>
+
+      </div><!-- /rsec-scrut -->
+
+      <!-- pattern 7: registration save card -->
+      <div class="rsec rsec-reg">
+      <div class="seclbl"><span><b>REGISTRATION</b> &middot; SAVE</span></div>
+      <div class="reg locked" id="regCard">
+        <div class="reglock">AWAITING SCRUTINEERING PASS &mdash; ALL FOUR LAMPS MUST LIGHT</div>
+        <div class="reg-in">
+          <div class="rl"><b>DECK NAME</b> &middot; PRE-FILLED BY CLASSIFIER</div>
+          <input id="deckName" value="IZZET MURKTIDE" aria-label="Deck name">
+          <p class="confnote">CLASSIFIER PRE-FILL: <b>IZZET MURKTIDE</b> &middot; CONFIDENCE --.- &mdash; PLACEHOLDER, CLASSIFIER NOT RUN IN THIS MOCKUP. EVENT ARCHETYPE OF RECORD: IZZET WIZARDS (MTGO DECKLIST PAGE).</p>
+          <div class="regchips">
+            <button class="rchip press on" aria-pressed="true">MODERN</button>
+            <button class="rchip press" aria-pressed="false">MTGO</button>
+            <button class="rchip press" aria-pressed="false">CHALLENGE</button>
+          </div>
+          <div class="regkeys">
+            <button class="rkey press" id="copyKey">&#10697; COPY TEXT</button>
+            <button class="rkey press save" id="saveKey">&#9632; SAVE TO GARAGE</button>
+          </div>
+          <p class="regnote" id="regNote">EXPORTS THAT WOULD DROP CARDS WARN BEFORE COPYING &mdash; NO SILENT CASUALTIES. SAVE IS MOCK-ONLY (NO BACKEND).</p>
+        </div>
+      </div>
+
+      </div><!-- /rsec-reg -->
+
+    </div><!-- /rail -->
+  </div><!-- /layout -->
+
+  <footer>
+    <div class="riso-divider" aria-hidden="true"></div>
+    <div class="wordmark">METASURF<br><span class="hollow">PIT WALL</span></div>
+    <p class="fineprint">
+      INTAKE REGISTRY: 29 UNIQUE CARDS / 74 COPIES &mdash; MODERN CHALLENGE 64 (MTGO, 2024-06-18), AZJA, 1ST PLACE &middot; IZZET WIZARDS<br>
+      IMAGES &amp; CARD DATA: SCRYFALL 2026-07-08 SNAPSHOT, ONE CANONICAL PRINTING PER CARD<br>
+      LEGALITY SET (DEMO) = THE EVENT REGISTRY &mdash; PRODUCTION RESOLVES VIA THE CARDS TABLE (ORACLE_ID) + FORMATS.CONFIG<br>
+      CLASSIFIER PRE-FILL &ldquo;IZZET MURKTIDE&rdquo;: PLACEHOLDER &mdash; NOT MEASURED &middot; TWO FAULT LINES PLANTED FOR DEMO<br>
+      ALL COUNTS &amp; LAMPS COMPUTED LIVE FROM THE PASTE BOX &middot; MOCKUP &mdash; NO NETWORK CALLS BEYOND FONTS/IMAGES<br>
+      CARD IMAGES &copy; WIZARDS OF THE COAST, SERVED VIA SCRYFALL
+    </p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============ CARD REGISTRY (embedded from deck-viewer-data.json) ============ */
+const CARDS = [{"n": "Counterspell", "t": "Instant", "img": "https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884", "usd": 3.71, "q": 4}, {"n": "Dress Down", "t": "Enchantment", "img": "https://cards.scryfall.io/small/front/0/4/04f9f061-67b8-4427-9fcb-b3ccfee8fc5d.jpg?1782704716", "usd": 0.53, "q": 2}, {"n": "Flame of Anor", "t": "Instant", "img": "https://cards.scryfall.io/small/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120", "usd": 4.34, "q": 4}, {"n": "Flooded Strand", "t": "Land", "img": "https://cards.scryfall.io/small/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197", "usd": 15.64, "q": 1}, {"n": "Force of Negation", "t": "Instant", "img": "https://cards.scryfall.io/small/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934", "usd": 52.82, "q": 2}, {"n": "Galvanic Discharge", "t": "Instant", "img": "https://cards.scryfall.io/small/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296", "usd": 0.3, "q": 3}, {"n": "Hall of Storm Giants", "t": "Land", "img": "https://cards.scryfall.io/small/front/b/f/bf8f052d-8840-4905-a807-9a305f4fd8f7.jpg?1782704291", "usd": 0.42, "q": 1}, {"n": "Invert Polarity", "t": "Instant", "img": "https://cards.scryfall.io/small/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225", "usd": 0.52, "q": 2}, {"n": "Island", "t": "Basic Land — Island", "img": "https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662", "usd": 0.18, "q": 4}, {"n": "Lightning Bolt", "t": "Instant", "img": "https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979", "usd": 0.83, "q": 4}, {"n": "Misty Rainforest", "t": "Land", "img": "https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585", "usd": 36.17, "q": 2}, {"n": "Otawara, Soaring City", "t": "Legendary Land", "img": "https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159", "usd": 27.49, "q": 1}, {"n": "Polluted Delta", "t": "Land", "img": "https://cards.scryfall.io/small/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195", "usd": 19.27, "q": 2}, {"n": "Preordain", "t": "Sorcery", "img": "https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813", "usd": 0.42, "q": 4}, {"n": "Scalding Tarn", "t": "Land", "img": "https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583", "usd": 40.4, "q": 2}, {"n": "Sink into Stupor // Soporific Springs", "t": "Instant // Land", "img": "https://cards.scryfall.io/small/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170", "usd": 5.45, "q": 1}, {"n": "Snapcaster Mage", "t": "Creature — Human Wizard", "img": "https://cards.scryfall.io/small/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477", "usd": 18.52, "q": 4}, {"n": "Spell Snare", "t": "Instant", "img": "https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089", "usd": 0.3, "q": 2}, {"n": "Spirebluff Canal", "t": "Land", "img": "https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926", "usd": 5.25, "q": 3}, {"n": "Steam Vents", "t": "Land — Island Mountain", "img": "https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912", "usd": 12.96, "q": 3}, {"n": "Stern Scolding", "t": "Instant", "img": "https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207", "usd": 0.3, "q": 3}, {"n": "Subtlety", "t": "Creature — Elemental Incarnation", "img": "https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086", "usd": 15.06, "q": 3}, {"n": "Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar", "t": "Legendary Creature — Moonfolk Wizard // Legendary Planeswalker — Tamiyo", "img": "https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169", "usd": 15.14, "q": 4}, {"n": "Thundering Falls", "t": "Land — Island Mountain", "img": "https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773", "usd": 14.43, "q": 2}, {"n": "Consign to Memory", "t": "Instant", "img": "https://cards.scryfall.io/small/front/b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362", "usd": 3.46, "q": 2}, {"n": "Magus of the Moon", "t": "Creature — Human Wizard", "img": "https://cards.scryfall.io/small/front/7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825", "usd": 3.95, "q": 2}, {"n": "Obsidian Charmaw", "t": "Creature — Dragon", "img": "https://cards.scryfall.io/small/front/e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654", "usd": 1.56, "q": 3}, {"n": "Tishana's Tidebinder", "t": "Creature — Merfolk Wizard", "img": "https://cards.scryfall.io/small/front/9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545", "usd": 2.47, "q": 2}, {"n": "Unlicensed Hearse", "t": "Artifact — Vehicle", "img": "https://cards.scryfall.io/small/front/9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515", "usd": 0.38, "q": 2}];
+
+const REG = new Map();           // normalized name (incl. front-face alias) -> card
+function norm(s){
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+          .replace(/[’']/g,"'").replace(/\s+/g,' ').trim();
+}
+CARDS.forEach(c=>{
+  REG.set(norm(c.n), c);
+  if(c.n.includes(' // ')) REG.set(norm(c.n.split(' // ')[0]), c);
+});
+const REGKEYS = [...REG.entries()];   // [normKey, card]
+
+/* ============ utils ============ */
+function lev(a,b,cap){
+  if(Math.abs(a.length-b.length)>cap) return cap+1;
+  const m=a.length,n=b.length;
+  let prev=new Array(n+1), cur=new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    cur[0]=i; let rowMin=cur[0];
+    for(let j=1;j<=n;j++){
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+      if(cur[j]<rowMin) rowMin=cur[j];
+    }
+    if(rowMin>cap) return cap+1;
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+function fuzzy(name){
+  const q=norm(name);
+  const cap=Math.min(3, Math.max(1, Math.floor(q.length*0.25)));
+  const seen=new Set(); const out=[];
+  REGKEYS.forEach(([k,c])=>{
+    const d=lev(q,k,cap);
+    if(d<=cap && !seen.has(c.n)){ seen.add(c.n); out.push({card:c,d}); }
+  });
+  out.sort((a,b)=>a.d-b.d);
+  return out.slice(0,3);
+}
+function glitch(el){
+  if(RM||!el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+const shown={};
+function rollup(el, target){
+  const id=el.id||el.dataset.rid;
+  if(shown[id]===target){ return; }
+  shown[id]=target;
+  if(RM){ el.textContent=String(target); return; }
+  const TICKS=8, DUR=480, start=parseInt(el.textContent,10)||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v=Math.round(start+(target-start)*(i/TICKS));
+    el.textContent=String(i>=TICKS?target:v);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+
+/* ============ parser (patterns 2+3: permissive grammar, four SB dialects) ============ */
+function parseText(text){
+  const rawLines=text.split('\n');
+  const lines=[];
+  let zone='main', sawCard=false, explicitSB=false, heuristic=false, blankPending=false;
+  rawLines.forEach((raw,i)=>{
+    const t=raw.trim();
+    if(!t){ if(sawCard) blankPending=true; lines.push({i,raw,kind:'blank'}); return; }
+    if(/^(#|\/\/)/.test(t)){ lines.push({i,raw,kind:'comment'}); return; }
+    if(/^(sideboard|side|sb)\s*:?$/i.test(t)){ zone='side'; explicitSB=true; blankPending=false; lines.push({i,raw,kind:'header'}); return; }
+    if(/^(deck|main|mainboard)\s*:?$/i.test(t)){ zone='main'; explicitSB=true; blankPending=false; lines.push({i,raw,kind:'header'}); return; }
+    if(/^companion\s*:?$/i.test(t)){ zone='side'; explicitSB=true; blankPending=false; lines.push({i,raw,kind:'header'}); return; }
+    let lineZone=zone, body=t;
+    if(/^sb:\s*/i.test(t)){ lineZone='side'; explicitSB=true; body=t.replace(/^sb:\s*/i,''); }
+    else if(blankPending && !explicitSB){ zone='side'; lineZone='side'; heuristic=true; }
+    blankPending=false;
+    // rejected forms (decklist.gg): "4:" prefix, bare number
+    if(/^\d+\s*:/.test(body) || /^\d+$/.test(body)){ lines.push({i,raw,kind:'bad'}); sawCard=true; return; }
+    let qty=1, name=body;
+    const m=body.match(/^(\d+)\s*[xX]?\s+(.+)$/);
+    if(m){ qty=parseInt(m[1],10); name=m[2]; }
+    name=name.replace(/\s*\(([A-Za-z0-9]{2,6})\)\s*\d*\s*$/,'');           // Arena (SET) 123
+    const cat=name.match(/\[([^\]]+)\]\s*$/);                              // Archidekt [Category]
+    if(cat){
+      name=name.replace(/\s*\[[^\]]+\]\s*$/,'');
+      if(/^(side|sideboard|sb)$/i.test(cat[1])){ lineZone='side'; explicitSB=true; }
+    }
+    lines.push({i,raw,kind:'card',qty,name:name.trim(),zone:lineZone});
+    sawCard=true;
+  });
+  return {lines, heuristic, explicitSB};
+}
+
+/* ============ state ============ */
+const S={ override:null, confirmed:false, splitOrigin:'heuristic', submitted:false, lastLamps:{} };
+const $=id=>document.getElementById(id);
+const pasteBox=$('pasteBox');
+let programmatic=false;
+
+function setPaste(v){
+  programmatic=true;
+  pasteBox.value=v;
+  recompute();
+  programmatic=false;
+}
+
+/* ============ recompute (live re-parse) ============ */
+function recompute(){
+  const text=pasteBox.value;
+  const P=parseText(text);
+  const cardLines=P.lines.filter(l=>l.kind==='card');
+  const badLines=P.lines.filter(l=>l.kind==='bad');
+
+  // resolve
+  cardLines.forEach(l=>{
+    l.res=REG.get(norm(l.name))||null;
+    l.cands=l.res?[]:fuzzy(l.name);
+  });
+
+  // zone override (only meaningful for heuristic/no-marker splits)
+  if(S.override!=null && !P.explicitSB){
+    cardLines.forEach((l,idx)=>{ l.zone = idx<S.override ? 'main':'side'; });
+    S.splitOrigin='manual';
+  } else {
+    S.splitOrigin = P.explicitSB ? 'explicit' : (P.heuristic ? 'heuristic' : 'none');
+  }
+
+  const mainRows=cardLines.filter(l=>l.zone==='main');
+  const sideRows=cardLines.filter(l=>l.zone==='side');
+  const mainCount=mainRows.reduce((s,l)=>s+(l.res?l.qty:0),0);
+  const sideCount=sideRows.reduce((s,l)=>s+(l.res?l.qty:0),0);
+  const faults=cardLines.filter(l=>!l.res);
+  const actionable=faults.filter(l=>l.cands.length>0);
+  const quarantined=faults.filter(l=>l.cands.length===0);
+
+  // line counter
+  rollup($('lineCount'), text.split('\n').length);
+
+  // readback
+  renderRows($('rbMain'), mainRows);
+  renderRows($('rbSide'), sideRows);
+  $('mainMeta').textContent = mainRows.length+' LINES';
+  $('sideMeta').textContent = sideRows.length+' LINES';
+  $('rbTotal').textContent = (mainCount+sideCount)+' RESOLVED';
+  rollup($('gMain'), mainCount);
+  rollup($('gSide'), sideCount);
+  rollup($('bMain'), mainCount);
+  rollup($('bSide'), sideCount);
+
+  // gasket state
+  const g=$('gasket');
+  const heurUnconfirmed = S.splitOrigin==='heuristic' && !S.confirmed;
+  g.classList.toggle('unconfirmed', heurUnconfirmed);
+  g.classList.toggle('confirmed', S.confirmed || S.splitOrigin==='manual');
+  const notes={
+    heuristic: heurUnconfirmed ? 'SPLIT: <b>HEURISTIC (BLANK LINE)</b> — CONFIRM OR DRAG/NUDGE'
+                               : 'SPLIT: BLANK-LINE HEURISTIC — CONFIRMED',
+    manual:    'SPLIT: MANUAL — SET BY GASKET',
+    explicit:  'SPLIT: EXPLICIT MARKER (HEADER / SB: / [TAG])',
+    none:      'NO SIDEBOARD DETECTED — ALL LINES MAIN'
+  };
+  $('gNote').innerHTML=notes[S.splitOrigin]||'';
+  const nudgeOK=!P.explicitSB && cardLines.length>0;
+  $('gUp').disabled=!nudgeOK; $('gDown').disabled=!nudgeOK;
+  $('gUp').style.opacity=$('gDown').style.opacity=nudgeOK?'1':'.35';
+
+  // fault log
+  renderFaults(faults, P);
+  rollup($('faultCount'), faults.length);
+  $('faultLog').classList.toggle('clear', faults.length===0);
+
+  // lamps (sequential gate)
+  const parseOk = badLines.length===0 && cardLines.length>0;
+  const resolveOk = parseOk && actionable.length===0;
+  const legalBad = 0; // demo legality set = event registry (all Modern-legal); production: formats.config
+  const legalOk = resolveOk && legalBad===0;
+  const sizeOk = legalOk && mainCount>=60 && sideCount<=15;
+
+  setLamp('Parse',  parseOk,  badLines.length>0,
+    parseOk ? cardLines.length+' CARD LINES' : (cardLines.length? badLines.length+' BAD LINES':'NO CARD LINES'));
+  setLamp('Resolve', resolveOk, actionable.length>0,
+    resolveOk ? (mainCount+sideCount)+' CARDS'+(quarantined.length?' ·'+quarantined.length+'Q':'')
+              : actionable.length+' UNRESOLVED');
+  setLamp('Legal', legalOk, false, legalOk?'MODERN OK':'GATED');
+  setLamp('Size', sizeOk, legalOk&&!sizeOk, sizeOk?mainCount+'/'+sideCount+' OK'
+    : (legalOk ? mainCount+'/'+sideCount+' FAIL' : 'GATED'));
+
+  // submit key
+  const ready=parseOk&&resolveOk&&legalOk&&sizeOk;
+  const sk=$('submitKey');
+  if(S.submitted){
+    sk.classList.add('done'); sk.setAttribute('aria-disabled','true');
+    sk.textContent='✓ SUBMITTED — '+mainCount+' / '+sideCount+' REGISTERED';
+  } else {
+    sk.setAttribute('aria-disabled', ready?'false':'true');
+    sk.textContent='SUBMIT FOR REGISTRATION';
+  }
+  $('scrutNote').textContent = ready
+    ? (quarantined.length? 'READY — '+quarantined.length+' QUARANTINED LINE'+(quarantined.length>1?'S':'')+' EXCLUDED FROM REGISTRATION.' : 'READY.')
+    : 'KEY STAYS RAISED UNTIL ALL FOUR LAMPS LIGHT.';
+
+  S._P=P; S._cardLines=cardLines; S._mainLen=mainRows.length;
+  S._counts=[mainCount,sideCount];
+}
+
+function setLamp(name, lit, fault, statusText){
+  const el=$('lamp'+name);
+  el.classList.toggle('lit', !!lit);
+  el.classList.toggle('fault', !!fault && !lit);
+  $('ls'+name).textContent=statusText;
+  const key=name+(lit?'1':'0')+(fault?'F':'');
+  if(S.lastLamps[name]!==undefined && S.lastLamps[name]!==key) glitch(el.querySelector('.ll'));
+  S.lastLamps[name]=key;
+}
+
+function renderRows(host, rows){
+  host.innerHTML='';
+  rows.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='rrow'+(l.res?'':' fault');
+    d.innerHTML='<span class="rq">'+l.qty+'</span><span class="rx">&times;</span>'
+      +'<span class="rn"></span>'
+      +'<span class="rt">'+(l.res?'':'&#9888; FAULT')+'</span>';
+    d.querySelector('.rn').textContent = l.res ? l.res.n : l.name;
+    host.appendChild(d);
+  });
+  if(!rows.length){
+    const d=document.createElement('div');
+    d.className='rrow'; d.innerHTML='<span></span><span></span><span class="rn" style="color:var(--dim);font-weight:400">&mdash;</span><span></span>';
+    host.appendChild(d);
+  }
+}
+
+function renderFaults(faults, P){
+  const host=$('faultEntries');
+  host.innerHTML='';
+  if(!faults.length){
+    const d=document.createElement('div');
+    d.className='fl-empty';
+    d.textContent='NO UNRESOLVED LINES — REGISTRY MATCH 100%.';
+    host.appendChild(d);
+    return;
+  }
+  faults.forEach(l=>{
+    const e=document.createElement('div');
+    e.className='fentry';
+    const raw=document.createElement('span'); raw.className='fraw';
+    raw.textContent='> '+l.raw.trim();
+    const led=document.createElement('span'); led.className='fled';
+    e.appendChild(led); e.appendChild(raw);
+    const st=document.createElement('p'); st.className='fstat';
+    if(l.cands.length){
+      st.innerHTML='<b>UNRESOLVED</b> — '+l.qty+'&times; NOT IN REGISTRY. CANDIDATES (PRESS TO RESOLVE — DELIBERATE, NEVER AUTOMATIC):';
+      e.appendChild(st);
+      const row=document.createElement('div'); row.className='fcands';
+      l.cands.forEach(c=>{
+        const b=document.createElement('button');
+        b.className='fc press';
+        b.innerHTML='<img alt="" loading="lazy" decoding="async"><span><span class="fcn"></span><br><span class="fca">PRESS TO RESOLVE &middot; D'+c.d+'</span></span>';
+        b.querySelector('img').src=c.card.img;
+        b.querySelector('.fcn').textContent=c.card.n;
+        b.addEventListener('click',()=>resolveFault(l, c.card));
+        row.appendChild(b);
+      });
+      e.appendChild(row);
+    } else {
+      st.innerHTML='<b>QUARANTINED</b> — NO CANDIDATE IN REGISTRY. LINE IS EXCLUDED FROM REGISTRATION AND LOGGED TO THE UNRESOLVED-CARDS REPORT. EDIT THE PASTE TO CLEAR.';
+      e.appendChild(st);
+    }
+    host.appendChild(e);
+  });
+}
+
+function resolveFault(line, card){
+  const lines=pasteBox.value.split('\n');
+  lines[line.i]=line.qty+' '+card.n;
+  setPaste(lines.join('\n'));
+  glitch($('lampResolve').querySelector('.ll'));
+}
+
+/* ============ gasket: nudge + drag + confirm ============ */
+function nudge(delta){
+  if(!S._cardLines || S._P.explicitSB) return;
+  const cur = S.override!=null ? S.override : S._mainLen;
+  S.override=Math.max(0, Math.min(S._cardLines.length, cur+delta));
+  S.confirmed=true;
+  recompute();
+}
+$('gUp').addEventListener('click',()=>nudge(-1));
+$('gDown').addEventListener('click',()=>nudge(+1));
+$('gConfirm').addEventListener('click',()=>{ S.confirmed=true; recompute(); });
+
+(function dragGasket(){
+  const grip=$('gGrip');
+  let dragging=false;
+  grip.addEventListener('pointerdown',e=>{
+    if(S._P && S._P.explicitSB) return;
+    dragging=true; grip.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  grip.addEventListener('pointermove',e=>{
+    if(!dragging) return;
+    const rows=[...document.querySelectorAll('#rbMain .rrow, #rbSide .rrow')].filter(r=>r.querySelector('.rq').textContent);
+    let idx=rows.length;
+    for(let k=0;k<rows.length;k++){
+      const r=rows[k].getBoundingClientRect();
+      if(e.clientY < r.top + r.height/2){ idx=k; break; }
+    }
+    if(idx!==S.override){ S.override=idx; S.confirmed=true; recompute(); }
+  });
+  grip.addEventListener('pointerup',()=>{ dragging=false; });
+})();
+
+/* ============ lanes ============ */
+const laneLbl={paste:'CHANNEL A · PASTE — ANY DIALECT', file:'CHANNEL B · FILE — .TXT/.DEC/.DEK', link:'CHANNEL C · LINK — URL FETCH'};
+['laneP','laneF','laneL'].forEach(id=>{
+  $(id).addEventListener('click',()=>{
+    const lane=$(id).dataset.lane;
+    ['laneP','laneF','laneL'].forEach(x=>{
+      const on=x===id;
+      $(x).classList.toggle('on',on);
+      $(x).setAttribute('aria-selected',on?'true':'false');
+    });
+    $('panelPaste').hidden = lane!=='paste';
+    $('panelFile').hidden  = lane!=='file';
+    $('panelLink').hidden  = lane!=='link';
+    $('intakeLbl').textContent=laneLbl[lane];
+  });
+});
+
+/* ============ command strip (pattern 5) ============ */
+let cmdZone='main';
+$('zMain').addEventListener('click',()=>setZone('main'));
+$('zSide').addEventListener('click',()=>setZone('side'));
+function setZone(z){
+  cmdZone=z;
+  $('zMain').classList.toggle('on',z==='main'); $('zMain').setAttribute('aria-pressed',z==='main');
+  $('zSide').classList.toggle('on',z==='side'); $('zSide').setAttribute('aria-pressed',z==='side');
+}
+$('cmdInput').addEventListener('input',()=>{
+  const v=$('cmdInput').value.trim();
+  const m=v.match(/^(\d+)\s*[xX]?\s*(.*)$/);
+  const qty=m&&m[1]?parseInt(m[1],10):1;
+  const q=norm(m?m[2]:v);
+  $('cmdQty').textContent=String(qty);
+  const host=$('suggRow'); host.innerHTML='';
+  if(q.length<2) return;
+  const seen=new Set();
+  const hits=REGKEYS.filter(([k])=>k.startsWith(q)).concat(REGKEYS.filter(([k])=>k.includes(q)&&!k.startsWith(q)))
+    .map(([,c])=>c).filter(c=>!seen.has(c.n)&&seen.add(c.n)).slice(0,4);
+  hits.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='sg press'; b.setAttribute('role','option');
+    b.innerHTML='<img alt="" loading="lazy" decoding="async"><span class="sgq">'+qty+'</span><span><span class="sgn"></span><span class="sgz">ADD &#9656; '+cmdZone.toUpperCase()+'</span></span>';
+    b.querySelector('img').src=c.img;
+    b.querySelector('.sgn').textContent=c.n;
+    b.addEventListener('click',()=>{
+      addLine(qty+' '+c.n, cmdZone);
+      $('cmdInput').value=''; host.innerHTML=''; $('cmdQty').textContent='1';
+    });
+    host.appendChild(b);
+  });
+});
+function addLine(lineText, zone){
+  const lines=pasteBox.value.split('\n');
+  if(zone==='main'){
+    let firstBlank=-1;
+    let sawCard=false;
+    for(let k=0;k<lines.length;k++){
+      const t=lines[k].trim();
+      if(t && !/^(#|\/\/)/.test(t)) sawCard=true;
+      if(!t && sawCard){ firstBlank=k; break; }
+    }
+    if(firstBlank===-1) lines.push(lineText);
+    else lines.splice(firstBlank,0,lineText);
+    if(S.override!=null) S.override++;
+  } else {
+    lines.push(lineText);
+  }
+  setPaste(lines.join('\n'));
+}
+
+/* ============ submit / registration ============ */
+$('submitKey').addEventListener('click',()=>{
+  const sk=$('submitKey');
+  if(sk.getAttribute('aria-disabled')==='true') return;
+  S.submitted=true;
+  recompute();
+  const reg=$('regCard');
+  reg.classList.remove('locked');
+  glitch($('deckName'));
+  reg.scrollIntoView({behavior:RM?'auto':'smooth', block:'nearest'});
+});
+$('copyKey').addEventListener('click',()=>{
+  const cl=S._cardLines.filter(l=>l.res);
+  const main=cl.filter(l=>l.zone==='main').map(l=>l.qty+' '+l.res.n);
+  const side=cl.filter(l=>l.zone==='side').map(l=>l.qty+' '+l.res.n);
+  const out=main.join('\n')+'\n\n'+side.join('\n');
+  const done=()=>{
+    const k=$('copyKey');
+    k.textContent='✓ COPIED — '+(S._counts[0]+S._counts[1])+' CARDS';
+    glitch(k);
+    setTimeout(()=>{ k.innerHTML='&#10697; COPY TEXT'; },1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(out).then(done,done);
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=out; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta); done();
+  }
+});
+$('saveKey').addEventListener('click',()=>{
+  $('regNote').textContent='SAVED (MOCK — NO BACKEND). PRODUCTION WRITES THE REGISTERED LIST + UNRESOLVED-CARDS REPORT.';
+  glitch($('saveKey'));
+});
+
+/* ============ live input ============ */
+pasteBox.addEventListener('input',()=>{
+  if(!programmatic){
+    S.override=null; S.confirmed=false;
+    if(S.submitted){ S.submitted=false; $('regCard').classList.add('locked'); }  // edits re-open scrutineering
+  }
+  recompute();
+});
+
+/* ============ ticker ============ */
+(function ticker(){
+  const items=[
+    '<span class="titem hot">MODERN CHALLENGE 64 &middot; 2024-06-18 &middot; <b>1ST AZJA — IZZET WIZARDS</b></span>',
+    '<span class="titem">REGISTRY <b>'+new Set(CARDS.map(c=>c.n)).size+' UNIQUE / '+CARDS.reduce((s,c)=>s+c.q,0)+' CARDS</b> &middot; SCRYFALL 2026-07-08 SNAPSHOT</span>'
+  ].concat(['Snapcaster Mage','Counterspell','Force of Negation','Subtlety'].map(n=>{
+    const c=CARDS.find(x=>x.n===n);
+    return c&&c.usd!=null?'<span class="titem price">'+c.n.toUpperCase()+' <b>$'+c.usd.toFixed(2)+'</b></span>':'';
+  })).filter(Boolean);
+  const half=items.join('<span class="titem">&middot;</span>');
+  const track=$('tickerTrack');
+  track.innerHTML=half+'<span class="titem">&middot;</span>'+half+'<span class="titem">&middot;</span>';
+  function speed(){ track.style.animationDuration=((track.scrollWidth/2)/35)+'s'; }
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(speed); else speed();
+  const t=$('ticker');
+  function toggle(){
+    const p=t.classList.toggle('paused');
+    t.setAttribute('aria-pressed',p?'true':'false');
+    $('pauseGlyph').innerHTML=p?'&#9654;':'&#10074;&#10074;';
+  }
+  t.addEventListener('click',toggle);
+  t.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+})();
+
+/* ============ clock ============ */
+(function clock(){
+  function tick(){
+    const d=new Date();
+    $('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+  tick(); setInterval(tick, 15000);
+})();
+
+/* ============ boot ============ */
+recompute();
+</script>
+</body>
+</html>

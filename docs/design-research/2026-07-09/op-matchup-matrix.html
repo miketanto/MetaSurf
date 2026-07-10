@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaSurf — One Piece Matchup Matrix — Pit-Wall Console</title>
+<!-- ============================================================
+  ONE PIECE MATCHUP MATRIX VARIANT — Pit-Wall Console (2026-07-09)
+  Built from docs/design-research/2026-07-09/pit-wall-tokens.md +
+  extension-spec.md (OP octagon pips, T2 structural naming, caveat
+  chrome, degradation states).
+
+  DATA IS REAL, COMPUTED THIS SESSION (2026-07-09) from the raw
+  archive /Users/michaelsutanto/MetaSurf/data/onepiece-raw/
+  play.limitlesstcg.com (12 online events with standings+pairings,
+  2026-07-01 → 2026-07-08):
+    · 889 decided matches (86 mirrors; mirrors excluded from grid)
+    · 393 deck rows; top-13 leaders by deck count
+    · 485 pairwise non-mirror matches among the top 13
+    · leader colours joined from data/punk-records catalogue
+  NOTE: the owner brief cited N=849 online matches; this session's
+  recount of the same archive returned 889 decided matches. The
+  computed figure is shown; discrepancy flagged for owner review.
+
+  IMAGE POLICY: no One Piece card images in local grounding → no
+  images anywhere on this page (colour-framed chips only).
+  PRODUCTION NOTE: winrate payloads served by the API; this mockup
+  inlines the computed snapshot verbatim.
+  ============================================================ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Archivo:ital,wdth,wght@0,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+  /* DSEG7Classic — SIL OFL. CDN for the mockup; self-host woff2 in prod.
+     Family name matches the tokens ('DSEG7Classic', no space).
+     NO "88" ghost underlay anywhere — lit segments only. */
+  @font-face{
+    font-family:'DSEG7Classic';
+    src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+    font-weight:700; font-display:swap;
+  }
+
+  :root{
+    --bg:#0d0d12;
+    --panel:#14141a;
+    --panel2:#191921;
+    --line:#2b2b35;
+    --ink:#f2f2f7;
+    --dim:#8a8a96;
+    --win:#3b9dff;   /* favorable — blue side of CVD-safe diverging scale */
+    --loss:#ff7a1a;  /* unfavorable — orange side, never red/green */
+    --acc:#b45bff;   /* sector purple — best-in-class only */
+    --shadow:#000000;
+    --unlit:#3a3a48; /* unlit DSEG segments / hollow chrome */
+    --livery:#e0b73a;/* ONE PIECE livery accent (extension-spec §0, provisional) —
+                        applied ONLY to the game indicator + title grainband;
+                        zero livery on trust chrome */
+    --pxframe:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath fill='%23f2f2f7' fill-rule='evenodd' d='M9 0H15V3H18V6H21V9H24V15H21V18H18V21H15V24H9V21H6V18H3V15H0V9H3V6H6V3H9V0ZM8 8H16V16H8Z'/%3E%3C/svg%3E");
+    --pxcursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17'%3E%3Cg fill='%23f2f2f7'%3E%3Crect x='7' y='0' width='3' height='5'/%3E%3Crect x='7' y='12' width='3' height='5'/%3E%3Crect x='0' y='7' width='5' height='3'/%3E%3Crect x='12' y='7' width='5' height='3'/%3E%3C/g%3E%3Crect x='7' y='7' width='3' height='3' fill='%23b45bff'/%3E%3C/svg%3E");
+    /* riso grain plates (tokens §4.2 — dark multiply, for divider + drill) */
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.06  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    /* white overlay grain plate (tokens §4.3 — the grainband recipe) */
+    --grainW:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.45;
+    font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+    padding-top:30px; /* room for fixed ticker */
+  }
+  .wrap{ max-width:680px; margin:0 auto; padding:0 12px 40px; }
+  a{ color:inherit; }
+
+  /* ============ WIRE TICKER (tokens §5.1) ============ */
+  .ticker{
+    position:fixed; top:0; left:0; right:0; height:30px; z-index:90;
+    background:#111119; border-bottom:1px solid var(--line);
+    overflow:hidden; display:flex; align-items:center;
+    -webkit-user-select:none; user-select:none; cursor:pointer;
+  }
+  .ticker:focus-visible{ outline:2px solid var(--acc); outline-offset:-2px; }
+  .ticker-track{ display:inline-flex; white-space:nowrap; will-change:transform;
+    animation:feed var(--feed-dur,40s) linear infinite; }
+  .ticker.paused .ticker-track{ animation-play-state:paused; }
+  @keyframes feed{ to{ transform:translateX(-50%); } }
+  .ticker .item{ padding:0 14px; font-size:11px; letter-spacing:.4px; color:var(--dim); }
+  .ticker .item b{ color:var(--ink); font-weight:700; }
+  .ticker .live-dot{
+    position:absolute; left:0; top:0; bottom:0; z-index:2;
+    display:flex; align-items:center; gap:5px; padding:0 8px;
+    background:#111119; border-right:1px solid var(--line);
+    font-family:'Press Start 2P',monospace; font-size:8px; color:var(--loss);
+  }
+  .ticker .pause-hint{
+    position:absolute; right:0; top:0; bottom:0; display:flex; align-items:center;
+    padding:0 8px; background:#111119; border-left:1px solid var(--line);
+    font-size:10px; color:var(--dim); z-index:2;
+  }
+
+  /* ============ HEADER ============ */
+  header{ display:flex; align-items:flex-end; justify-content:space-between; padding:14px 0 8px; gap:8px; flex-wrap:wrap; }
+  .wordmark{
+    font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62.5%;
+    font-size:28px; line-height:.9; letter-spacing:-.5px; text-transform:uppercase;
+  }
+  .wordmark small{ display:block; font-size:10px; font-stretch:80%; font-weight:700; color:var(--dim); letter-spacing:2px; margin-top:3px; }
+  /* active-game indicator — livery slot (extension-spec §0). Not trust chrome. */
+  .game-ind{
+    font-family:'Press Start 2P',monospace; font-size:8px; padding:6px 7px 5px;
+    background:var(--panel2); border:1px solid var(--livery); color:var(--livery);
+    align-self:center; letter-spacing:1px;
+  }
+  /* page-code badge — decoration, not best-in-class → dim ink on #1c1c26
+     (s1 CODE-badge precedent; sector purple reserved per tokens §1.2) */
+  .badge-pg{
+    font-family:'Press Start 2P',monospace; font-size:8px; padding:6px 6px 5px;
+    background:#1c1c26; border:1px solid var(--line); color:var(--dim);
+    align-self:center;
+  }
+  .clockbox{ text-align:right; }
+  .clock-label{ font-size:9px; color:var(--dim); letter-spacing:2px; margin-bottom:2px; }
+  .dseg{ font-family:'DSEG7Classic','JetBrains Mono',monospace; font-weight:700; }
+  .ghostwrap{ position:relative; display:inline-block; } /* legacy name; holds NO ghost */
+  .ghostwrap .live{ display:inline-block; text-align:right; }
+  .clock{ font-size:22px; color:var(--ink); }
+  /* page-title grainband — livery slot #2: the named §4.3 recipe (white
+     overlay grain + misregistered ::before second ink pass), gradient
+     livery-recolored per extension-spec §0. Not the §4.2 multiply plate. */
+  .grainband{
+    height:4px; margin:0 0 10px; position:relative;
+    background-image:var(--grainW), linear-gradient(90deg, var(--livery), rgba(224,183,58,.15) 60%, transparent);
+    background-size:120px 120px, 100% 100%;
+    background-blend-mode:overlay, normal;
+  }
+  .grainband::before{   /* 2px offset "misregistered second ink pass" (§4.3) */
+    content:''; position:absolute; inset:0; transform:translate(2px,2px);
+    background:linear-gradient(90deg, transparent, rgba(224,183,58,.5) 55%, var(--livery));
+    opacity:.22; z-index:-1;
+  }
+
+  /* ============ CONTROLS — source mode switch (sticky) ============ */
+  .controls{
+    display:flex; gap:8px; align-items:stretch; margin:0 0 10px;
+    padding:8px 0 10px; height:56px;
+    position:sticky; top:30px; z-index:40; background:var(--bg);
+  }
+  .press{
+    background:var(--panel); border:1px solid var(--line); color:var(--ink);
+    box-shadow:2px 2px 0 0 var(--shadow);
+    transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    padding:6px 4px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .press:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition-duration:0ms; }
+  .press:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+  .seg{ flex:1; display:flex; }
+  .seg .press{ flex:1; color:var(--dim); min-height:38px; }
+  .seg .press + .press{ border-left:none; }
+  .seg .press[aria-pressed="true"]{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .seg .press small{ display:block; font-size:8px; font-weight:400; letter-spacing:.5px; }
+
+  /* ============ CAVEAT CHROME (extension-spec §3) — trust chrome, zero livery ============ */
+  .caveat{
+    display:inline-block;
+    font:400 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+    line-height:1.6; color:var(--dim); background:var(--panel2);
+    border:1px solid var(--line); border-left:3px solid var(--loss); /* orange keel — sanctioned non-performance use */
+    padding:4px 7px; margin:0 0 10px;
+  }
+  .caveat b{ color:var(--ink); font-weight:700; }
+
+  /* ============ MATRIX NOTE + CREDIT ============ */
+  .matrix-note{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:10px; color:var(--dim); letter-spacing:1px; margin-bottom:6px; flex-wrap:wrap; }
+  .credit{
+    font-size:9px; font-weight:700; letter-spacing:.06em; color:var(--ink);
+    background:var(--panel2); border:1px solid var(--line); padding:3px 6px;
+    text-decoration:none; white-space:nowrap;
+  }
+  .credit:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+
+  /* ============ OP OCTAGON PIPS (extension-spec §1) ============
+     octagon silhouette = One Piece; dual identity = ONE split octagon,
+     hard 50/50 diagonal (never a smooth blend). Rim via nested spans
+     because clip-path clips borders. */
+  .opip{ position:relative; display:inline-block; width:10px; height:10px;
+    background:rgba(242,242,247,.25); /* rim */
+    clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+    vertical-align:-1px; flex:none;
+  }
+  .opip i{ position:absolute; inset:1px; display:block;
+    clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%); }
+  .opip.rim-b{ background:#a6a1a0; } /* near-black fills take the bright rim */
+  /* scale M: 16px letter octagon (fused pairs, zero gap) */
+  .opipM{ width:16px; height:16px; }
+  .opipM i{ font-family:'Press Start 2P',monospace; font-size:6px; line-height:1;
+    display:flex; align-items:center; justify-content:center; font-style:normal; }
+  .pipset{ display:inline-flex; gap:0; vertical-align:middle; }
+  .pipset .opipM + .opipM{ margin-left:-1px; } /* fused: one visual atom */
+
+  /* pip legend strip — mandatory on OP pages (extension-spec §1.5) */
+  .pipkey{ display:flex; flex-wrap:wrap; gap:5px 12px; align-items:center;
+    font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin:0 0 8px; }
+  .pipkey span{ display:inline-flex; align-items:center; gap:4px; }
+
+  /* ============ CODE KEY (tap to reveal) ============ */
+  .key-toggle{ padding:6px 10px; font-size:10px; letter-spacing:1px; margin:0 0 8px; min-height:38px; }
+  .keylist{
+    display:grid; grid-template-columns:1fr; gap:4px 14px;
+    font-size:10px; color:var(--dim); background:var(--panel); border:1px solid var(--line);
+    padding:8px 10px; margin-bottom:8px;
+  }
+  .keylist b{ color:var(--ink); margin-right:6px; }
+  .keylist .kid{ color:var(--dim); font-weight:400; }
+  .keylist[hidden]{ display:none; }
+  @media (min-width:600px){ .keylist{ grid-template-columns:repeat(2,1fr); } }
+
+  /* ============ 13×13 MATRIX (tokens §5.9, v3 sticky-axes) ============
+     table-layout:fixed — never overflows horizontally; height carries
+     the 44px touch target, columns stay narrow. */
+  table.matrix{ width:100%; border-collapse:separate; border-spacing:2px; table-layout:fixed; }
+  table.matrix th, table.matrix td{ padding:0; }
+  table.matrix col.lbl{ width:52px; }
+  th.corner, th.colhead{
+    position:sticky; top:86px; z-index:20; background:var(--bg); /* 30 ticker + 56 sticky controls */
+    font-size:8px; font-weight:700; color:var(--dim); letter-spacing:0;
+    padding:4px 0 4px; border-bottom:2px solid var(--line); vertical-align:bottom;
+  }
+  th.corner{ text-align:left; font-size:8px; letter-spacing:.5px; }
+  th.colhead .cnum{ display:block; margin-bottom:3px; }
+  th.colhead .cpips{ display:flex; justify-content:center; }
+  th.rowhead{
+    text-align:left; font-size:9px; font-weight:700; letter-spacing:0;
+    padding-left:1px; border-right:2px solid var(--line); overflow:hidden;
+  }
+  th.rowhead .rline{ display:flex; align-items:center; gap:3px; }
+  th.rowhead .rnum{ color:var(--dim); font-weight:700; font-size:8px; }
+  th.rowhead .rshort{ display:block; font-weight:700; font-size:9px; letter-spacing:0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  th.rowhead .share{ display:block; font-size:8px; font-weight:400; color:var(--dim); }
+  th.rowhead .rname{ display:none; } /* widescreen-only full structural label */
+  td.cell{ height:44px; }
+  .cellbtn{
+    position:relative; width:100%; height:44px; display:block;
+    border:none; padding:0; font-family:inherit; font-size:11px; font-weight:700;
+    color:var(--ink); background:rgba(242,242,247,.05);
+    box-shadow:2px 2px 0 0 var(--shadow);
+    transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+    cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  }
+  .cellbtn:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition-duration:0ms; }
+  .cellbtn:focus-visible{ outline:2px solid var(--acc); outline-offset:1px; }
+  .cellbtn .v{ display:inline-block; }
+  .cellbtn .sub{ display:none; } /* widescreen-only in-cell N + record */
+  .cellbtn.unlit .v{ color:var(--unlit); font-weight:400; } /* below floor / no pairings: honest empty */
+  .cellbtn.best::after{ content:''; position:absolute; top:0; right:0; width:7px; height:7px; background:var(--acc); }
+  .cellbtn.sel{ box-shadow:inset 0 0 0 2px var(--ink), 2px 2px 0 0 var(--shadow); }
+  /* low sample encoded IN the grid (hatch), threshold printed in legend */
+  .cellbtn.lown::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(45deg, rgba(13,13,18,.45) 0 3px, transparent 3px 8px);
+  }
+  td.mirror{ height:44px; text-align:center; color:#3a3a44; background:#111117; font-size:11px; }
+
+  @media (prefers-reduced-motion: no-preference){
+    .glitch .v, .glitch .live{ animation:rgbsplit 240ms steps(2,end) 1; }
+    @keyframes rgbsplit{
+      0%  { clip-path:inset(0 0 45% 0); transform:translateX(2px);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss); }
+      50% { clip-path:inset(52% 0 0 0); transform:translateX(-2px); text-shadow: 2px 0 var(--win),-2px 0 var(--loss); }
+      100%{ clip-path:none; transform:none; text-shadow:none; }
+    }
+  }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:10px; color:var(--dim); margin:10px 0 16px; }
+  .legend i{ display:inline-block; width:9px; height:9px; margin-right:5px; vertical-align:-1px; }
+
+  /* ============ DRILLDOWN — picked matchup tile (tokens §5.8) ============ */
+  .drill{
+    position:relative;
+    border:9px solid transparent;
+    border-image:var(--pxframe) 9 stretch;
+    background:var(--panel); background-clip:padding-box;
+    padding:12px 10px 14px; margin:4px 2px 26px;
+  }
+  .drill::before{
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+    background-image:var(--grain),
+      linear-gradient(118deg, rgba(59,157,255,.14), transparent 40%, transparent 62%, rgba(255,122,26,.12));
+    background-blend-mode:multiply, normal; opacity:.8;
+  }
+  .drill > *{ position:relative; z-index:1; }
+  .idrow{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; min-height:20px; }
+  .idrow .iname{ font-weight:700; font-size:13px; }
+  .idrow .iid{ font-size:10px; color:var(--dim); font-weight:400; } /* dim set-id — always on detail (T2 spec) */
+  .axis-chip{ font-family:'Press Start 2P',monospace; font-size:7px; padding:4px 5px 3px;
+    color:var(--dim); background:var(--panel2); border:1px solid var(--line); }
+  .vsline{ font-size:10px; color:var(--dim); margin:5px 0; letter-spacing:1px; display:flex; align-items:center; gap:8px; }
+  .chip{ font-family:'Press Start 2P',monospace; font-size:8px; padding:5px 6px 4px; }
+  .chip.bestmu{ background:var(--acc); color:#0d0d12; margin-left:auto; }
+  .drill-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px 10px; align-items:end; margin-top:12px; }
+  .stat-label{ font-size:9px; letter-spacing:2px; color:var(--dim); margin-bottom:4px; }
+  .wr-big{ font-size:34px; line-height:1; } /* 34px lets the 5ch box + % share the narrow grid cell */
+  #wrVal{ min-width:5ch; } /* sized to widest reachable value '100.0' (tokens §2.2) */
+  .wr-big .unit{ font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; color:var(--dim); margin-left:4px; }
+  .wr-big.fav{ color:var(--win); } .wr-big.unfav{ color:var(--loss); } .wr-big.even{ color:var(--ink); }
+  .wr-big.unlitv{ color:var(--unlit); }
+  .n-read{ font-size:22px; line-height:1; }
+  #nVal{ min-width:3ch; }
+  .n-read .unit{ font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--dim); margin-left:8px; }
+  .n-read.unlitv{ color:var(--unlit); }
+  .rec-line{ font-size:12px; font-weight:700; margin-top:3px; }
+  .rec-line .w{ color:var(--win); } .rec-line .l{ color:var(--loss); }
+  .ci-line{ font-size:12px; font-weight:700; }
+  .ci-bar{ position:relative; height:8px; background:#0f0f15; border:1px solid var(--line); margin-top:6px; }
+  .ci-band{ position:absolute; top:0; bottom:0; background:rgba(242,242,247,.28); }
+  .ci-mid{ position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--dim); left:50%; }
+  .ci-pt{ position:absolute; top:0; bottom:0; width:3px; }
+  .drill-caveat{ margin:12px 0 0; }
+  .drill-caveat .caveat{ margin:0; }
+  .drill-foot{ margin-top:10px; font-size:10px; color:var(--dim); letter-spacing:.5px; }
+
+  /* ============ FOOTER ============ */
+  footer{ margin-top:44px; border-top:1px solid var(--line); padding-top:18px; }
+  .riso-divider{
+    height:10px; margin:0 0 16px;
+    background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+    background-blend-mode:multiply, normal; opacity:.55;
+  }
+  .foot-mark{
+    font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62.5%;
+    font-size:46px; line-height:.88; text-transform:uppercase; letter-spacing:-1px;
+  }
+  .foot-mark .sub{ display:block; font-size:23px; color:var(--dim);
+    letter-spacing:0; word-spacing:.18em; } /* condensed 62.5% stretch eats word
+    gaps at 390px — restore them so it never reads 'ONEPIECE—OP16WINDOW' */
+  .foot-note{ font-size:9px; color:#55555f; letter-spacing:1px; margin-top:14px; line-height:1.7; text-transform:uppercase; }
+  .foot-note a{ color:var(--dim); }
+
+  @media (min-width:600px){
+    .foot-mark{ font-size:72px; } .foot-mark .sub{ font-size:36px; }
+    .wordmark{ font-size:36px; }
+    .wr-big{ font-size:40px; }
+    .cellbtn{ font-size:13px; }
+    th.rowhead .rshort{ font-size:10px; }
+    th.colhead{ font-size:9px; }
+    .seg .press{ font-size:13px; }
+  }
+  @media (min-width:768px){ .wrap{ max-width:940px; padding:0 16px 40px; } }
+
+  /* ============ WIDESCREEN ≥1100px — pit-wall spread (tokens §7.3) ============ */
+  @media (min-width:1100px){
+    .wrap{ max-width:1660px; padding:0 24px 40px; }
+    .cols{ display:flex; align-items:flex-start; gap:26px; }
+    .main-col{ flex:1 1 auto; min-width:0; }
+    .dock{ flex:0 0 clamp(360px,30vw,430px); position:sticky; top:38px; }
+    .dock .drill{ margin:0; }
+    .keylist{ grid-template-columns:repeat(3,1fr); }
+    table.matrix col.lbl{ width:170px; }
+    td.cell, td.mirror{ height:58px; }
+    .cellbtn{ height:58px; font-size:15px; }
+    .cellbtn .sub{
+      display:block; margin-top:3px; font-size:8px; font-weight:400;
+      letter-spacing:0; color:rgba(242,242,247,.85);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      /* 1100–1399px shows N## only: 'N32 · 22-10' measurably ellipsizes in
+         the ~48px cells at 1280 (13 cols in an ~822px main col). The W-L
+         record (.subrec) lights up at ≥1400px where the narrowest wide cell
+         fits it; ellipsis stays as the last-resort safety net — truncation
+         must be visible, never silent (§must-fix) */
+    }
+    .cellbtn .sub .subrec{ display:none; }
+    .cellbtn.unlit .sub{ color:var(--unlit); }
+    th.rowhead{ font-size:11px; padding-left:4px; }
+    th.rowhead .rshort{ display:none; }
+    th.rowhead .rname{
+      display:block; font-size:10px; font-weight:700; color:var(--ink);
+      letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    th.colhead{ font-size:10px; }
+  }
+  /* ≥1400px — cells are wide enough for the full N + record sub-line */
+  @media (min-width:1400px){
+    .cellbtn .sub .subrec{ display:inline; }
+  }
+
+  @media (hover:hover) and (pointer:fine){
+    .press, .cellbtn, .ticker, .key-toggle, .credit{ cursor:var(--pxcursor) 8 8, pointer; }
+  }
+
+  /* reduced-motion contract (tokens §6.6) */
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{ animation:none; }
+    .ticker .pause-hint{ display:none; }
+    .press, .cellbtn{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======= RESULTS WIRE — real events + winners from the raw archive ======= -->
+<!-- tokens §5.1 pause pattern: role=button + aria-pressed (not role=marquee —
+     the element behaves as a toggle, so it announces as one) -->
+<div class="ticker" id="ticker" role="button" aria-pressed="false" aria-live="off" tabindex="0" aria-label="pause one piece results wire">
+  <div class="live-dot">WIRE</div>
+  <div class="ticker-track" id="tickerTrack"></div>
+  <div class="pause-hint" id="pauseHint">⏸</div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="wordmark">MetaSurf<small>PIT-WALL CONSOLE</small></div>
+    <div class="game-ind">ONE PIECE</div>
+    <div class="badge-pg">OP·MTX</div>
+    <div class="clockbox">
+      <div class="clock-label">SESSION UTC</div>
+      <span class="ghostwrap"><span class="dseg clock live" id="clock">--:--</span></span>
+    </div>
+  </header>
+  <div class="grainband" aria-hidden="true"></div>
+
+  <!-- source-mode switch: online pairings vs offline majors (share-only degradation demo) -->
+  <div class="controls">
+    <div class="seg" role="group" aria-label="data source mode">
+      <button class="press" data-mode="online" aria-pressed="true">ONLINE SIM<small>PAIRINGS · 12 EVENTS</small></button>
+      <button class="press" data-mode="offline" aria-pressed="false">OFFLINE MAJORS<small>SHARE-ONLY · NO PAIRINGS</small></button>
+    </div>
+  </div>
+
+  <!-- page-population caveat (extension-spec §3) — trust chrome, never veiled -->
+  <!-- user-facing chrome carries the canonical figure only; the 849-vs-889
+       recount discrepancy is internal provenance → footer fine print + the
+       header comment above, never the caveat chip -->
+  <div class="caveat" id="pageCaveat" role="status">ONLINE POPULATION ONLY · WINDOW 2026-07-01 → 2026-07-08 · WINRATES FROM <b>889</b> ONLINE MATCHES · 12 EVENTS · AS-OF 2026-07-08</div>
+
+  <div class="matrix-note">
+    <!-- format label grounded in the archive: events carry format 'CUSTOM' or
+         null — never 'OP Standard'. Label = source mode + set window (see footer). -->
+    <span id="noteLeft">ROW WR% VS COLUMN · ONLINE SIM · OP16 WINDOW · ALL PAIRS N&lt;50 — READ WITH DRILLDOWN CI</span>
+    <a class="credit" id="creditChip" href="https://play.limitlesstcg.com" target="_blank" rel="noopener">DATA: PLAY.LIMITLESSTCG.COM ↗</a>
+  </div>
+
+  <!-- OP pip legend strip — mandatory (extension-spec §1.5) -->
+  <div class="pipkey" id="pipkey" aria-hidden="false"></div>
+
+  <button class="press key-toggle" id="keyToggle" aria-expanded="false" aria-controls="keyList">LEADER KEY 01–13 ▸</button>
+  <div class="keylist" id="keyList" hidden></div>
+
+  <table class="matrix" id="matrix" aria-label="one piece leader matchup winrate matrix, 13 by 13">
+    <colgroup><col class="lbl"></colgroup>
+    <thead><tr id="headRow"><th class="corner" scope="col">WR%</th></tr></thead>
+    <tbody id="matrixBody"></tbody>
+  </table>
+
+  <div class="legend" id="legend">
+    <span><i style="background:var(--win)"></i>FAVORABLE &gt;52%</span>
+    <span><i style="background:var(--loss)"></i>UNFAVORABLE &lt;48%</span>
+    <span><i style="background:var(--acc)"></i>BEST MU IN ROW (N≥5)</span>
+    <span><i style="background:repeating-linear-gradient(45deg,#55555f 0 2px,transparent 2px 4px)"></i>HATCH = LOW SAMPLE N&lt;15</span>
+    <span><i style="border:1px solid var(--unlit)"></i>-- = BELOW FLOOR N&lt;5 · NO PAIR REACHES N=50</span>
+  </div>
+
+  <!-- ======= CELL DRILLDOWN ======= -->
+  <section class="drill" id="drill" aria-live="polite">
+    <div class="idrow" id="idRowA">
+      <span class="pipset" id="pipsA"></span>
+      <span class="iname" id="nameA">—</span>
+      <span class="iid" id="idA"></span>
+      <span class="axis-chip">LEADER</span>
+    </div>
+    <div class="vsline"><span>VS</span><span class="chip bestmu" id="bestChip" hidden>BEST MU</span></div>
+    <div class="idrow" id="idRowB">
+      <span class="pipset" id="pipsB"></span>
+      <span class="iname" id="nameB">—</span>
+      <span class="iid" id="idB"></span>
+      <span class="axis-chip">LEADER</span>
+    </div>
+    <div class="drill-grid">
+      <div>
+        <div class="stat-label">WINRATE</div>
+        <span class="ghostwrap"><span class="dseg wr-big even live" id="wrVal">--.-</span></span><span class="wr-big unit" style="font-size:16px">%</span>
+      </div>
+      <div>
+        <div class="stat-label">SAMPLE</div>
+        <span class="ghostwrap"><span class="dseg n-read live" id="nVal">--</span></span><span class="n-read unit" style="font-size:11px">MATCHES</span>
+        <div class="rec-line" id="recLine">—</div>
+      </div>
+      <div style="grid-column:1/-1">
+        <div class="stat-label">95% CI · WILSON · BAR SCALE 30–70</div>
+        <div class="ci-line" id="ciLine">—</div>
+        <div class="ci-bar" aria-hidden="true">
+          <div class="ci-band" id="ciBand" style="display:none"></div>
+          <div class="ci-mid"></div>
+          <div class="ci-pt" id="ciPt" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drill-caveat" id="drillCaveatWrap" hidden><span class="caveat" id="drillCaveat"></span></div>
+    <div class="drill-foot" id="drillFoot">TAP ANY CELL TO READ OUT</div>
+  </section>
+
+  <footer>
+    <div class="riso-divider" aria-hidden="true"></div>
+    <div class="foot-mark">MetaSurf<span class="sub">One Piece — OP16 Window</span></div>
+    <div class="foot-note">
+      SOURCE: <a href="https://play.limitlesstcg.com" target="_blank" rel="noopener">PLAY.LIMITLESSTCG.COM</a> TOURNAMENT API (KEYLESS) · 12 ONLINE EVENTS 2026-07-01 → 2026-07-08 ·
+      N=889 DECIDED MATCHES · 86 MIRROR MATCHES EXCLUDED FROM GRID · 393 DECK ROWS · TOP-13 LEADERS BY DECK COUNT · PAIRWISE NON-MIRROR N=485 ·
+      ALL MATRIX NUMBERS COMPUTED 2026-07-09 FROM THE RAW ARCHIVE (data/onepiece-raw) — REAL DATA, NOT PLACEHOLDER ·
+      OWNER BRIEF CITED N=849 ONLINE MATCHES; THIS SESSION'S RECOUNT RETURNED 889 — DISCREPANCY FLAGGED FOR OWNER REVIEW ·
+      LEADER NAMES, SET-IDS &amp; COLORS: PUNK-RECORDS CATALOGUE (data/punk-records) ·
+      OFFLINE-MAJORS MODE: <a href="https://onepiece.limitlesstcg.com" target="_blank" rel="noopener">ONEPIECE.LIMITLESSTCG.COM</a> PUBLISHES STANDINGS WITHOUT PAIRINGS
+      (OBSERVED: REGIONAL BIELEFELD 2026-07-04 · 1,541 PLAYERS · TOP 64 PUBLISHED) — WINRATES UNAVAILABLE, NEVER FABRICATED ·
+      'OP16 WINDOW' IS AN EDITORIAL LABEL — EVENTS CARRY FORMAT CUSTOM/NULL; DERIVED FROM EVENT NAMES + OP16 SET-IDS IN THE ARCHIVE, NOT A PUBLISHED FORMAT ·
+      NO ONE PIECE CARD IMAGES IN GROUNDING — COLOR-FRAMED CHIPS ONLY · MOCKUP: PRODUCTION GATE &amp; PAYLOADS ARE SERVER-SIDE
+    </div>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   REAL DATA — computed 2026-07-09 from
+   data/onepiece-raw/play.limitlesstcg.com (12 events with
+   standings + pairings, 2026-07-01 → 2026-07-08). Leader colours
+   joined from data/punk-records. Nothing below is invented.
+   ============================================================ */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wideMQ  = window.matchMedia('(min-width:1100px)');
+
+const TOTALS = { events:12, decided:889, mirrors:86, deckRows:393, pairN:485,
+                 window:['2026-07-01','2026-07-08'], asOf:'2026-07-08' };
+const FLOOR = 5;      /* per-metric display floor — printed in legend */
+const HATCH_N = 15;   /* hatch threshold — printed in legend (no pair reaches 50) */
+
+/* top-13 leaders by deck count. colors verbatim from punk-records. */
+const ARCH = [
+ {id:'OP16-022', colors:['Green','Blue'],    name:'Monkey.D.Luffy',       decks:70, share:17.8},
+ {id:'OP11-041', colors:['Blue','Yellow'],   name:'Nami',                 decks:41, share:10.4},
+ {id:'OP12-061', colors:['Purple','Yellow'], name:'Donquixote Rosinante', decks:35, share:8.9},
+ {id:'OP16-080', colors:['Black','Yellow'],  name:'Marshall.D.Teach',     decks:30, share:7.6},
+ {id:'OP15-058', colors:['Purple'],          name:'Enel',                 decks:24, share:6.1},
+ {id:'OP15-002', colors:['Red','Blue'],      name:'Lucy',                 decks:24, share:6.1},
+ {id:'OP16-079', colors:['Black'],           name:'Yamato',               decks:15, share:3.8},
+ {id:'OP13-002', colors:['Red','Blue'],      name:'Portgas.D.Ace',        decks:13, share:3.3},
+ {id:'OP16-001', colors:['Red'],             name:'Portgas.D.Ace',        decks:12, share:3.1},
+ {id:'OP08-098', colors:['Yellow'],          name:'Kalgara',              decks:11, share:2.8},
+ {id:'OP14-020', colors:['Green'],           name:'Dracule Mihawk',       decks:10, share:2.5},
+ {id:'OP14-041', colors:['Blue','Yellow'],   name:'Boa Hancock',          decks:10, share:2.5},
+ {id:'OP13-001', colors:['Red','Green'],     name:'Monkey.D.Luffy',       decks:10, share:2.5},
+];
+const N = ARCH.length;
+
+/* 'rowId|colId' -> [row wins, decided matches]. Full 156-entry table,
+   computed from the pairings. w(a,b) + w(b,a) === n by construction. */
+const CELLS = {
+"OP16-022|OP11-041":[9,30],"OP16-022|OP12-061":[14,31],"OP16-022|OP16-080":[22,32],"OP16-022|OP15-058":[5,21],"OP16-022|OP15-002":[10,16],"OP16-022|OP16-079":[4,6],"OP16-022|OP13-002":[6,13],"OP16-022|OP16-001":[9,17],"OP16-022|OP08-098":[3,11],"OP16-022|OP14-020":[7,9],"OP16-022|OP14-041":[5,9],"OP16-022|OP13-001":[3,8],
+"OP11-041|OP16-022":[21,30],"OP11-041|OP12-061":[8,13],"OP11-041|OP16-080":[3,13],"OP11-041|OP15-058":[9,13],"OP11-041|OP15-002":[6,14],"OP11-041|OP16-079":[6,6],"OP11-041|OP13-002":[1,3],"OP11-041|OP16-001":[4,6],"OP11-041|OP08-098":[4,7],"OP11-041|OP14-020":[3,5],"OP11-041|OP14-041":[1,1],"OP11-041|OP13-001":[5,7],
+"OP12-061|OP16-022":[17,31],"OP12-061|OP11-041":[5,13],"OP12-061|OP16-080":[8,13],"OP12-061|OP15-058":[6,12],"OP12-061|OP15-002":[7,10],"OP12-061|OP16-079":[0,0],"OP12-061|OP13-002":[2,9],"OP12-061|OP16-001":[2,4],"OP12-061|OP08-098":[3,4],"OP12-061|OP14-020":[2,4],"OP12-061|OP14-041":[2,4],"OP12-061|OP13-001":[4,8],
+"OP16-080|OP16-022":[10,32],"OP16-080|OP11-041":[10,13],"OP16-080|OP12-061":[5,13],"OP16-080|OP15-058":[4,9],"OP16-080|OP15-002":[0,5],"OP16-080|OP16-079":[2,2],"OP16-080|OP13-002":[4,5],"OP16-080|OP16-001":[1,3],"OP16-080|OP08-098":[0,3],"OP16-080|OP14-020":[2,3],"OP16-080|OP14-041":[4,5],"OP16-080|OP13-001":[2,3],
+"OP15-058|OP16-022":[16,21],"OP15-058|OP11-041":[4,13],"OP15-058|OP12-061":[6,12],"OP15-058|OP16-080":[5,9],"OP15-058|OP15-002":[6,8],"OP15-058|OP16-079":[1,2],"OP15-058|OP13-002":[2,4],"OP15-058|OP16-001":[1,2],"OP15-058|OP08-098":[0,1],"OP15-058|OP14-020":[3,5],"OP15-058|OP14-041":[0,0],"OP15-058|OP13-001":[1,2],
+"OP15-002|OP16-022":[6,16],"OP15-002|OP11-041":[8,14],"OP15-002|OP12-061":[3,10],"OP15-002|OP16-080":[5,5],"OP15-002|OP15-058":[2,8],"OP15-002|OP16-079":[1,5],"OP15-002|OP13-002":[4,6],"OP15-002|OP16-001":[2,3],"OP15-002|OP08-098":[0,2],"OP15-002|OP14-020":[0,2],"OP15-002|OP14-041":[1,4],"OP15-002|OP13-001":[0,0],
+"OP16-079|OP16-022":[2,6],"OP16-079|OP11-041":[0,6],"OP16-079|OP12-061":[0,0],"OP16-079|OP16-080":[0,2],"OP16-079|OP15-058":[1,2],"OP16-079|OP15-002":[4,5],"OP16-079|OP13-002":[0,4],"OP16-079|OP16-001":[0,2],"OP16-079|OP08-098":[1,1],"OP16-079|OP14-020":[1,1],"OP16-079|OP14-041":[1,2],"OP16-079|OP13-001":[1,4],
+"OP13-002|OP16-022":[7,13],"OP13-002|OP11-041":[2,3],"OP13-002|OP12-061":[7,9],"OP13-002|OP16-080":[1,5],"OP13-002|OP15-058":[2,4],"OP13-002|OP15-002":[2,6],"OP13-002|OP16-079":[4,4],"OP13-002|OP16-001":[2,3],"OP13-002|OP08-098":[2,2],"OP13-002|OP14-020":[3,4],"OP13-002|OP14-041":[0,2],"OP13-002|OP13-001":[3,3],
+"OP16-001|OP16-022":[8,17],"OP16-001|OP11-041":[2,6],"OP16-001|OP12-061":[2,4],"OP16-001|OP16-080":[2,3],"OP16-001|OP15-058":[1,2],"OP16-001|OP15-002":[1,3],"OP16-001|OP16-079":[2,2],"OP16-001|OP13-002":[1,3],"OP16-001|OP08-098":[0,1],"OP16-001|OP14-020":[2,2],"OP16-001|OP14-041":[0,3],"OP16-001|OP13-001":[0,0],
+"OP08-098|OP16-022":[8,11],"OP08-098|OP11-041":[3,7],"OP08-098|OP12-061":[1,4],"OP08-098|OP16-080":[3,3],"OP08-098|OP15-058":[1,1],"OP08-098|OP15-002":[2,2],"OP08-098|OP16-079":[0,1],"OP08-098|OP13-002":[0,2],"OP08-098|OP16-001":[1,1],"OP08-098|OP14-020":[0,1],"OP08-098|OP14-041":[0,2],"OP08-098|OP13-001":[0,1],
+"OP14-020|OP16-022":[2,9],"OP14-020|OP11-041":[2,5],"OP14-020|OP12-061":[2,4],"OP14-020|OP16-080":[1,3],"OP14-020|OP15-058":[2,5],"OP14-020|OP15-002":[2,2],"OP14-020|OP16-079":[0,1],"OP14-020|OP13-002":[1,4],"OP14-020|OP16-001":[0,2],"OP14-020|OP08-098":[1,1],"OP14-020|OP14-041":[0,1],"OP14-020|OP13-001":[1,1],
+"OP14-041|OP16-022":[4,9],"OP14-041|OP11-041":[0,1],"OP14-041|OP12-061":[2,4],"OP14-041|OP16-080":[1,5],"OP14-041|OP15-058":[0,0],"OP14-041|OP15-002":[3,4],"OP14-041|OP16-079":[1,2],"OP14-041|OP13-002":[2,2],"OP14-041|OP16-001":[3,3],"OP14-041|OP08-098":[2,2],"OP14-041|OP14-020":[1,1],"OP14-041|OP13-001":[1,2],
+"OP13-001|OP16-022":[5,8],"OP13-001|OP11-041":[2,7],"OP13-001|OP12-061":[4,8],"OP13-001|OP16-080":[1,3],"OP13-001|OP15-058":[1,2],"OP13-001|OP15-002":[0,0],"OP13-001|OP16-079":[3,4],"OP13-001|OP13-002":[0,3],"OP13-001|OP16-001":[0,0],"OP13-001|OP08-098":[1,1],"OP13-001|OP14-020":[0,1],"OP13-001|OP14-041":[1,2]
+};
+function cellWN(i,j){ return CELLS[ARCH[i].id+'|'+ARCH[j].id] || [0,0]; }
+
+/* ============================================================
+   OP PIP SYSTEM (extension-spec §1) — octagon; dual = ONE split
+   octagon, hard 50/50 diagonal, pipOrder Red→Green→Blue→Purple→
+   Black→Yellow, first colour upper-left. Letters: R G B P K Y
+   (K = Black, CMYK key-plate convention).
+   ============================================================ */
+const PIP_ORDER = ['Red','Green','Blue','Purple','Black','Yellow'];
+const PIP_BG = {Red:'#d3492f',Green:'#3e9c62',Blue:'#3b7bd0',Purple:'#7b4fa6',Black:'#2b2b33',Yellow:'#e0b73a'};
+const PIP_LETTER = {Red:'R',Green:'G',Blue:'B',Purple:'P',Black:'K',Yellow:'Y'};
+/* letter ink: dark on every fill except Black + Purple (extension-spec §1.4) */
+const PIP_FG = {Red:'#0d0d12',Green:'#0d0d12',Blue:'#0d0d12',Purple:'#f3eafd',Black:'#c9c4d2',Yellow:'#0d0d12'};
+
+function orderColors(cols){ return [...cols].sort((a,b)=>PIP_ORDER.indexOf(a)-PIP_ORDER.indexOf(b)); }
+function colorsLabel(cols){ return orderColors(cols).join('/'); }
+/* scale S: 10px octagon; dual = split fill (hard stop — a split, not a blend) */
+function pipS(cols){
+  const c=orderColors(cols);
+  const rim=c.includes('Black')?' rim-b':'';
+  const fill=c.length===1?PIP_BG[c[0]]:
+    'linear-gradient(135deg,'+PIP_BG[c[0]]+' 0 50%,'+PIP_BG[c[1]]+' 50% 100%)';
+  return '<span class="opip'+rim+'" role="img" aria-label="colors: '+c.join(', ').toLowerCase()+'"><i style="background:'+fill+'"></i></span>';
+}
+/* scale M: 16px letter octagons, fused pair = one visual atom */
+function pipM(cols){
+  const c=orderColors(cols);
+  return c.map(k=>'<span class="opip opipM'+(k==='Black'?' rim-b':'')+'"><i style="background:'+PIP_BG[k]+';color:'+PIP_FG[k]+'">'+PIP_LETTER[k]+'</i></span>').join('');
+}
+
+/* T2 structural label (extension-spec §2): colours + leader name.
+   No colour+name collisions inside this top-13 → no set-id in dense
+   rows; the drilldown (detail register) always prints the set-id. */
+function fullLabel(a){ return (colorsLabel(a.colors)+' '+a.name).toUpperCase(); }
+/* mechanical dense-row abbreviation: last name token, first 6 chars;
+   T2 collision rule: when two dense rows collide (ACE/ACE, LUFFY/LUFFY)
+   append the 2-char set tag from the set-id so rows stay tellable-apart */
+function shortStem(a){
+  const t=a.name.split(/[\s.]+/).filter(Boolean);
+  return t[t.length-1].toUpperCase().slice(0,6);
+}
+const STEMS=ARCH.map(shortStem);
+const STEM_COUNT={};
+STEMS.forEach(s=>{ STEM_COUNT[s]=(STEM_COUNT[s]||0)+1; });
+function shortName(a){
+  const s=shortStem(a);
+  return STEM_COUNT[s]>1 ? s+' '+a.id.slice(2,4) : s; /* e.g. ACE 13 / ACE 16 */
+}
+const pad2=k=>String(k+1).padStart(2,'0');
+
+/* ============================================================
+   PIP KEY + LEADER KEY
+   ============================================================ */
+document.getElementById('pipkey').innerHTML =
+  PIP_ORDER.map(k=>'<span><span class="opip opipM'+(k==='Black'?' rim-b':'')+'"><i style="background:'+PIP_BG[k]+';color:'+PIP_FG[k]+'">'+PIP_LETTER[k]+'</i></span>'+k.toUpperCase()+'</span>').join('')
+  +'<span>SPLIT OCTAGON = DUAL-COLOR LEADER</span>';
+
+const keyToggle=document.getElementById('keyToggle'), keyList=document.getElementById('keyList');
+keyList.innerHTML=ARCH.map((a,k)=>
+  '<span><b>'+pad2(k)+'</b>'+pipS(a.colors)+' '+fullLabel(a)+' <span class="kid">('+a.id+') · '+a.decks+' DECKS</span></span>'
+).join('');
+keyToggle.addEventListener('click',()=>{
+  const open=keyList.hidden;
+  keyList.hidden=!open;
+  keyToggle.setAttribute('aria-expanded',String(open));
+  keyToggle.textContent=open?'LEADER KEY 01–13 ▾':'LEADER KEY 01–13 ▸';
+});
+/* ≥600px the key defaults OPEN: column ids are number+pip only, and two
+   column pairs share identical pips (02/12 Blue-Yellow, 06/08 Red-Blue) —
+   the number→name round-trip must not hide behind a tap where space allows */
+if(window.matchMedia('(min-width:600px)').matches){
+  keyList.hidden=false;
+  keyToggle.setAttribute('aria-expanded','true');
+  keyToggle.textContent='LEADER KEY 01–13 ▾';
+}
+
+/* ============================================================
+   MATRIX BUILD — 13×13, table-layout:fixed (never overflows);
+   v3 sticky axes: colheads stick at 86px (30 ticker + 56 controls).
+   Columns carry the row index + pip; full names live in rowheads
+   (widescreen), the leader key, and every aria-label.
+   ============================================================ */
+const headRow=document.getElementById('headRow');
+const body=document.getElementById('matrixBody');
+const matrixTable=document.getElementById('matrix');
+const colgroup=matrixTable.querySelector('colgroup');
+
+ARCH.forEach((a,k)=>{
+  const th=document.createElement('th');
+  th.className='colhead'; th.scope='col';
+  th.innerHTML='<span class="cnum">'+pad2(k)+'</span><span class="cpips">'+pipS(a.colors)+'</span>';
+  th.setAttribute('aria-label','column '+pad2(k)+': '+fullLabel(a));
+  headRow.appendChild(th);
+  colgroup.appendChild(document.createElement('col'));
+});
+
+const cellBtns=[];
+for(let i=0;i<N;i++){
+  const tr=document.createElement('tr');
+  const th=document.createElement('th');
+  th.className='rowhead'; th.scope='row';
+  th.innerHTML=
+    '<span class="rline"><span class="rnum">'+pad2(i)+'</span>'+pipS(ARCH[i].colors)+'</span>'+
+    '<span class="rshort">'+shortName(ARCH[i])+'</span>'+
+    '<span class="rname">'+fullLabel(ARCH[i])+'</span>'+
+    '<span class="share" data-share>'+ARCH[i].share.toFixed(1)+'%</span>';
+  th.setAttribute('aria-label','row '+pad2(i)+': '+fullLabel(ARCH[i])+', field share '+ARCH[i].share.toFixed(1)+' percent of online decks');
+  tr.appendChild(th);
+  cellBtns.push([]);
+  for(let j=0;j<N;j++){
+    const td=document.createElement('td');
+    if(i===j){
+      td.className='mirror'; td.textContent='—';
+      td.setAttribute('aria-label','mirror match — excluded');
+      cellBtns[i].push(null);
+    }else{
+      td.className='cell';
+      const b=document.createElement('button');
+      b.className='cellbtn';
+      b.innerHTML='<span class="v">--</span><span class="sub"></span>';
+      b.addEventListener('click',()=>selectCell(i,j));
+      td.appendChild(b); cellBtns[i].push(b);
+    }
+    tr.appendChild(td);
+  }
+  body.appendChild(tr);
+}
+
+/* heat fill — tokens §1.2 exact formula, alpha capped for contrast */
+function cellBg(wr){
+  const d=wr-50;
+  if(Math.abs(d)<2) return 'rgba(242,242,247,.06)';
+  const c = d>0 ? '59,157,255' : '255,122,26';
+  const a = Math.min(.55, .12 + Math.abs(d)*.03);
+  return 'rgba('+c+','+a+')';
+}
+function bestInRow(i){
+  let bj=-1,bv=-1;
+  for(let j=0;j<N;j++){
+    if(j===i) continue;
+    const [w,n]=cellWN(i,j);
+    if(n<FLOOR) continue;               /* best-of-row only among cells above floor */
+    const v=100*w/n;
+    if(v>bv){bv=v;bj=j;}
+  }
+  return bj;
+}
+
+/* quantized arcade roll-up — 8 ticks ≤600ms, IO- and RM-gated (tokens §6.1) */
+let matrixInView=true;
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{es.forEach(e=>{matrixInView=e.isIntersecting;});},{threshold:.05})
+    .observe(matrixTable);
+}
+function quantRoll(el,to,dec){
+  const from=parseFloat(el.textContent)||0;
+  if(el._t) clearInterval(el._t);
+  if(REDUCED||!matrixInView||from===to){ el.textContent=to.toFixed(dec); return; }
+  const STEPS=8, DUR=480; let k=0;
+  el._t=setInterval(()=>{
+    k++;
+    const v=from+(to-from)*(k/STEPS);
+    el.textContent=(k>=STEPS?to:v).toFixed(dec);
+    if(k>=STEPS){ clearInterval(el._t); el._t=null; }
+  },DUR/STEPS);
+}
+function fireGlitch(el){
+  if(REDUCED) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+
+/* ============================================================
+   MODE — 'online' (pairings, real WR) vs 'offline' (share-only:
+   offline majors publish standings without pairings → the WR grid
+   collapses to an honest empty state; nothing is fabricated).
+   ============================================================ */
+let mode='online';
+let sel={i:0,j:3}; /* 01 LUFFY vs 04 TEACH — biggest real sample (N=32) */
+
+function paintMatrix(glitchChanged){
+  const online = mode==='online';
+  for(let i=0;i<N;i++){
+    const bj = online ? bestInRow(i) : -1;
+    for(let j=0;j<N;j++){
+      const b=cellBtns[i][j]; if(!b) continue;
+      const [w,n]=cellWN(i,j);
+      const span=b.querySelector('.v');
+      const sub=b.querySelector('.sub');
+      b.classList.toggle('sel',sel.i===i&&sel.j===j);
+      if(online && n>=FLOOR){
+        const v=100*w/n;
+        b.style.background=cellBg(v);
+        b.classList.remove('unlit');
+        b.classList.toggle('lown',n<HATCH_N);
+        b.classList.toggle('best',j===bj);
+        span.textContent=String(Math.round(v));
+        /* record is a CSS-gated span: hidden 1100–1399px, shown ≥1400px */
+        sub.innerHTML='N'+n+'<span class="subrec"> · '+w+'-'+(n-w)+'</span>';
+        b.setAttribute('aria-label',fullLabel(ARCH[i])+' vs '+fullLabel(ARCH[j])+': '+Math.round(v)+
+          ' percent over '+n+' matches'+(n<HATCH_N?', low sample':'')+', tap for detail');
+      }else if(online){
+        b.style.background='rgba(242,242,247,.03)';
+        b.classList.add('unlit'); b.classList.remove('lown','best');
+        span.textContent='--';
+        sub.textContent='N'+n;
+        b.setAttribute('aria-label',fullLabel(ARCH[i])+' vs '+fullLabel(ARCH[j])+': '+
+          (n>0?('below sample floor, only '+n+' matches'):'no matches recorded in window')+', tap for detail');
+      }else{
+        b.style.background='rgba(242,242,247,.03)';
+        b.classList.add('unlit'); b.classList.remove('lown','best');
+        span.textContent='--';
+        sub.textContent='';
+        b.setAttribute('aria-label',fullLabel(ARCH[i])+' vs '+fullLabel(ARCH[j])+
+          ': winrate unavailable — share-only feed, no pairings published');
+      }
+      if(glitchChanged) fireGlitch(b);
+    }
+  }
+  /* field-share line: computed for the online population only */
+  document.querySelectorAll('[data-share]').forEach((el,k)=>{
+    el.textContent = online ? ARCH[k].share.toFixed(1)+'%' : '—';
+  });
+}
+
+/* ============================================================
+   WILSON 95% CI — appropriate at these sample sizes
+   ============================================================ */
+function wilson(w,n){
+  const z=1.96, p=w/n, den=1+z*z/n;
+  const ctr=(p+z*z/(2*n))/den;
+  const hw=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/den;
+  return [Math.max(0,(ctr-hw))*100, Math.min(1,(ctr+hw))*100];
+}
+/* CI bar drawn on a 30–70 scale (tokens §5.8) so intervals read at size;
+   values outside the window clamp to the bar edges — printed CI is exact */
+const CI_MIN=30, CI_MAX=70;
+function ciX(v){ return Math.max(0,Math.min(100,(v-CI_MIN)/(CI_MAX-CI_MIN)*100)); }
+
+/* ============================================================
+   DRILLDOWN — T2 detail register: full-weight structural name +
+   LEADER axis chip + dim set-id (always shown at detail scope)
+   ============================================================ */
+const wrVal=document.getElementById('wrVal'), nVal=document.getElementById('nVal');
+
+function setIdentity(prefix,a){
+  document.getElementById('pips'+prefix).innerHTML=pipM(a.colors);
+  document.getElementById('name'+prefix).textContent=fullLabel(a);
+  document.getElementById('id'+prefix).textContent='('+a.id+')';
+}
+
+function selectCell(i,j,silent){
+  const prev=cellBtns[sel.i]&&cellBtns[sel.i][sel.j];
+  if(prev) prev.classList.remove('sel');
+  sel={i,j};
+  const b=cellBtns[i][j]; if(b) b.classList.add('sel');
+
+  setIdentity('A',ARCH[i]);
+  setIdentity('B',ARCH[j]);
+
+  const [w,n]=cellWN(i,j);
+  const online = mode==='online';
+  const live = online && n>=FLOOR;
+  const ciBand=document.getElementById('ciBand'), ciPt=document.getElementById('ciPt');
+  const caveatWrap=document.getElementById('drillCaveatWrap'), caveat=document.getElementById('drillCaveat');
+  document.getElementById('bestChip').hidden = !(online && bestInRow(i)===j);
+
+  if(live){
+    const v=100*w/n;
+    wrVal.className='dseg wr-big live '+(v>52?'fav':v<48?'unfav':'even');
+    quantRoll(wrVal,v,1);
+    nVal.className='dseg n-read live';
+    quantRoll(nVal,n,0);
+    document.getElementById('recLine').innerHTML='<span class="w">'+w+'W</span> — <span class="l">'+(n-w)+'L</span>';
+    const [lo,hi]=wilson(w,n);
+    document.getElementById('ciLine').textContent=lo.toFixed(1)+' – '+hi.toFixed(1)+' %';
+    ciBand.style.display=''; ciPt.style.display='';
+    ciBand.style.left=ciX(lo)+'%'; ciBand.style.width=(ciX(hi)-ciX(lo))+'%';
+    ciPt.style.left='calc('+ciX(v)+'% - 1px)';
+    ciPt.style.background=v>52?'var(--win)':v<48?'var(--loss)':'var(--ink)';
+    if(n<HATCH_N){
+      caveatWrap.hidden=false;
+      caveat.innerHTML='LOW SAMPLE · <b>N='+n+'</b> / HATCH BELOW '+HATCH_N+' · ONLINE ONLY · N=889';
+    }else{
+      caveatWrap.hidden=false;
+      caveat.innerHTML='ONLINE ONLY · <b>N=889</b> MATCHES · 12 EVENTS';
+    }
+    document.getElementById('drillFoot').textContent=
+      'ROW WR VS COLUMN · WINDOW '+TOTALS.window[0]+' → '+TOTALS.window[1]+' · SOURCE: PLAY.LIMITLESSTCG.COM';
+  }else{
+    /* honest empty readout — unlit segments, never a fabricated value */
+    wrVal.className='dseg wr-big live unlitv';
+    wrVal.textContent='--.-';
+    nVal.className='dseg n-read live'+(online?'':' unlitv');
+    nVal.textContent=online?String(n):'--';
+    document.getElementById('recLine').textContent=online?(w+'W — '+(n-w)+'L'):'—';
+    document.getElementById('ciLine').textContent='—';
+    ciBand.style.display='none'; ciPt.style.display='none';
+    caveatWrap.hidden=false;
+    caveat.innerHTML = online
+      ? 'LOW SAMPLE · <b>N='+n+'</b> / FLOOR '+FLOOR+' — WINRATE WITHHELD'
+      : 'SHARE-ONLY FEED — NO PAIRINGS PUBLISHED · WINRATES UNAVAILABLE';
+    document.getElementById('drillFoot').textContent = online
+      ? 'ROW WR VS COLUMN · WINDOW '+TOTALS.window[0]+' → '+TOTALS.window[1]+' · SOURCE: PLAY.LIMITLESSTCG.COM'
+      : 'OFFLINE MAJORS DB · STANDINGS ONLY (E.G. REGIONAL BIELEFELD: TOP 64 OF 1,541) · SOURCE: ONEPIECE.LIMITLESSTCG.COM';
+  }
+
+  if(!silent&&!wideMQ.matches){
+    document.getElementById('drill').scrollIntoView({block:'nearest'});
+  }
+  if(!silent) fireGlitch(wrVal.parentElement);
+}
+
+/* ============================================================
+   MODE SWITCH — the share-only degradation demo. One-shot glitch
+   per cell (legit changed-data trigger); caveat + credit + note
+   chrome swap; layout never collapses.
+   ============================================================ */
+const pageCaveat=document.getElementById('pageCaveat');
+const noteLeft=document.getElementById('noteLeft');
+const creditChip=document.getElementById('creditChip');
+/* legend swaps with mode: while share-only degraded, no cell can show
+   favorable/unfavorable/best/hatch — list only the state that exists */
+const legendEl=document.getElementById('legend');
+const LEGEND_ONLINE=legendEl.innerHTML;
+const LEGEND_OFFLINE='<span><i style="border:1px solid var(--unlit)"></i>— — = NO PAIRINGS PUBLISHED · WINRATES UNAVAILABLE</span>';
+document.querySelectorAll('[data-mode]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(btn.dataset.mode===mode) return;
+    document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+    mode=btn.dataset.mode;
+    if(mode==='online'){
+      pageCaveat.innerHTML='ONLINE POPULATION ONLY · WINDOW 2026-07-01 → 2026-07-08 · WINRATES FROM <b>889</b> ONLINE MATCHES · 12 EVENTS · AS-OF 2026-07-08';
+      noteLeft.textContent='ROW WR% VS COLUMN · ONLINE SIM · OP16 WINDOW · ALL PAIRS N<50 — READ WITH DRILLDOWN CI';
+      creditChip.textContent='DATA: PLAY.LIMITLESSTCG.COM ↗';
+      creditChip.href='https://play.limitlesstcg.com';
+      legendEl.innerHTML=LEGEND_ONLINE;
+    }else{
+      /* §4.2 provenance holds even degraded: WINDOW/N is unavailable for
+         pairings, so the chip states the latest observed event + as-of */
+      pageCaveat.innerHTML='SHARE-ONLY FEED — NO PAIRINGS PUBLISHED · <b>WINRATES UNAVAILABLE</b> · LATEST: REGIONAL BIELEFELD 2026-07-04 · AS-OF 2026-07-08';
+      noteLeft.textContent='OFFLINE MAJORS · STANDINGS ONLY · AS-OF 2026-07-08';
+      creditChip.textContent='DATA: ONEPIECE.LIMITLESSTCG.COM ↗';
+      creditChip.href='https://onepiece.limitlesstcg.com';
+      legendEl.innerHTML=LEGEND_OFFLINE;
+    }
+    paintMatrix(true);
+    selectCell(sel.i,sel.j,true);
+  });
+});
+
+/* ============================================================
+   TICKER — real events + real winners from the raw archive
+   (event name · date · winner · winning leader, verbatim)
+   ============================================================ */
+const FEED=[
+  '<b>CHINOIZECUP #81 WEDNESDAY</b> · 07-08 · 63 PLAYERS · 1st KEVYZHOU · PURPLE/YELLOW DONQUIXOTE ROSINANTE',
+  '<b>CHINOIZECUP #80 TUESDAY</b> · 07-07 · 64 PLAYERS · 1st WORTAXX · PURPLE ENEL',
+  '<b>SAIYAJAZZ LEAGUE OP16 SERIES</b> · 07-07 · 1st ANDREAS HARSCHE · GREEN/BLUE MONKEY.D.LUFFY',
+  '<b>CHINOIZECUP #79 MONDAY</b> · 07-06 · 64 PLAYERS · 1st NIKOLAYBAYDANOV · RED/BLUE PORTGAS.D.ACE',
+  '<b>MON MON BOX TURNERING</b> · 07-04 · 50 PLAYERS · 1st KRULLZOR · PURPLE/YELLOW DONQUIXOTE ROSINANTE',
+  '<b>[GER] DRESSROSA — REGIO BIELEFELD ARC</b> · 07-02 · 1st ALTANX · BLUE/YELLOW NAMI',
+  '<b>CHINOIZECUP #78 WEDNESDAY</b> · 07-01 · 64 PLAYERS · 1st KEREMINATOR · BLUE/YELLOW BOA HANCOCK',
+  'DATA SYNC 2026-07-08 · 12 EVENTS · 889 DECIDED MATCHES',
+];
+const track=document.getElementById('tickerTrack');
+const half=FEED.map(t=>'<span class="item">'+t+'</span>').join('<span class="item">///</span>');
+track.innerHTML=half+'<span class="item">///</span>'+half+'<span class="item">///</span>';
+function setFeedSpeed(){
+  const w=track.scrollWidth/2;
+  track.style.setProperty('--feed-dur',(w/35)+'s'); /* ~35 px/s */
+}
+requestAnimationFrame(setFeedSpeed);
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>requestAnimationFrame(setFeedSpeed));
+}
+const ticker=document.getElementById('ticker');
+function togglePause(){
+  const paused=ticker.classList.toggle('paused');
+  ticker.setAttribute('aria-pressed',String(paused));
+  document.getElementById('pauseHint').textContent=paused?'▶':'⏸';
+}
+ticker.addEventListener('click',togglePause);
+/* tokens §5.1: Tap / Enter / Space all toggle pause — keyboard reachable via tabindex=0 */
+ticker.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){
+    e.preventDefault(); /* Space must not scroll the page */
+    togglePause();
+  }
+});
+
+/* ============================================================
+   CLOCK — DSEG UTC readout (colon solid under reduced motion)
+   ============================================================ */
+function tickClock(){
+  const d=new Date();
+  const hh=String(d.getUTCHours()).padStart(2,'0');
+  const mm=String(d.getUTCMinutes()).padStart(2,'0');
+  const colon=(REDUCED||d.getUTCSeconds()%2===0)?':':' ';
+  document.getElementById('clock').textContent=hh+colon+mm;
+}
+tickClock(); setInterval(tickClock,1000);
+
+/* ============================================================
+   WIDESCREEN DOCK — reparent the SAME drilldown node into the
+   sticky right rail at ≥1100px; exact mobile DOM order restored
+   below the breakpoint (tokens §7.4)
+   ============================================================ */
+const wrapEl=document.querySelector('.wrap');
+const footerEl=wrapEl.querySelector('footer');
+const colsEl=document.createElement('div'); colsEl.className='cols';
+const mainCol=document.createElement('div'); mainCol.className='main-col';
+const dockEl=document.createElement('aside'); dockEl.className='dock';
+dockEl.setAttribute('aria-label','matchup telemetry dock');
+colsEl.append(mainCol,dockEl);
+const FLOW=[
+  document.querySelector('.controls'),
+  pageCaveat,
+  document.querySelector('.matrix-note'),
+  document.getElementById('pipkey'),
+  keyToggle, keyList, matrixTable,
+  document.getElementById('legend'),
+  document.getElementById('drill'),
+];
+let wideApplied=null;
+function layoutWide(){
+  const w=wideMQ.matches;
+  if(w===wideApplied) return;
+  wideApplied=w;
+  if(w){
+    mainCol.append(FLOW[0],FLOW[1],FLOW[2],FLOW[3],FLOW[4],FLOW[5],FLOW[6],FLOW[7]);
+    dockEl.append(FLOW[8]);
+    wrapEl.insertBefore(colsEl,footerEl);
+  }else{
+    FLOW.forEach(el=>wrapEl.insertBefore(el,footerEl));
+    colsEl.remove();
+  }
+}
+layoutWide();
+wideMQ.addEventListener('change',layoutWide);
+window.addEventListener('resize',layoutWide);
+
+/* ============================================================
+   INIT
+   ============================================================ */
+paintMatrix(false);
+selectCell(sel.i,sel.j,true);
+</script>
+</body>
+</html>

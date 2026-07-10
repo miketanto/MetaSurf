@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Game Console</title>
+<!--
+  S4 — GAME CONSOLE HOME (route /)
+  Pit-Wall Console v3 system. Built from docs/design-research/2026-07-09/pit-wall-tokens.md
+  + extension-spec.md (§0 livery layer, §1 pip grammar, §3 caveat chrome, §6 S4 plan).
+
+  REVISED 2026-07-10 per attention-art-spec.md (audit §3 rank #5 — "three identical
+  tiles, 18+ chips, no lead"):
+  - L0 HERO: the active/last-used game (default MTG) leads as an oversized livery
+    hero plate — big Archivo wordmark, livery grainband, maturity badge, headline
+    DSEG counts. The MTG hero carries a TIER-A ART BAND (spec §2.1): Scryfall
+    img_art_crop + the tokens §4.4 recipe VERBATIM (saturate/contrast/brightness
+    filter, hard-light duotone tint, overlay grain, scrim to rgba(13,13,18,.88),
+    ART CROP credit) — the same Snapcaster Mage asset the s-deck-viewer band uses
+    (pit-wall-console/s-deck-viewer.html BAND_ART, from its embedded Scryfall data).
+  - ONE PIECE / RIFTBOUND heroes are NON-ART HERO PLATES (spec §2.4): riso
+    color-field built from the livery accent (masked speckle + misregistered
+    second pass), NO images — both ToS postures unchanged.
+  - Other games demote to a compact SECONDARY TILE ROW (L1): livery band, small
+    name, maturity chip, pip strip, one dim stat line. Tapping a tile makes that
+    game the hero (demonstrates the "last-used console leads" behavior).
+  - Per-tile format chips COLLAPSE behind an "N FORMATS ▸" press-toggle
+    (spec §1.4.2 disclosure; the toggle is JetBrains 9px — deliberately NOT a
+    Press Start chip, so it spends no chip budget).
+  - DOCKING-BAY ghosts drop to L3 chrome: dashed micro-slots + one shared note.
+  - The ALL/LIVE/SOON filter console and the header winrate ramp are REMOVED
+    (7 items don't need a filter; the WR ramp was a legend for data this page
+    doesn't show). RESYNC is demo chrome → moved below the feed (spec §1.4.4).
+  - Budgets (spec §1.3, first 390×844 viewport): DSEG ≤6 incl. clock (here:
+    clock + 3 MTG hero tiles = 4; worst case Riftbound hero = 5), Press Start
+    chips/badges/buttons ≤6 (here: WIRE + hero maturity + hero ENTER + 2
+    secondary maturity chips = 5), exactly 1 ticker, 0 control rows above data.
+
+  GROUNDING (every domain fact below comes from these, nothing invented):
+  - riftbound-games-ground.json  → game_ui_registry (pipPalette/pipOrder verbatim for
+    the NON-MTG pip systems; MTG pip fills come from tokens §1.4 — see canon note
+    2026-07-09), riftbound catalogue (1,064 printings · 36 legends · sets/dates),
+    IMAGE_POLICY_CRITICAL.
+  - s1-archetype-visuals.json    → MTG archetype deck samples (pip-mine Apr–Jun 2024 MTGO);
+    hero DECKS/ARCHETYPES numbers are COMPUTED from that table at render time.
+  - pit-wall-console/s-deck-viewer.html → hero art asset: Snapcaster Mage
+    img_art_crop (cards.scryfall.io) + its "ART CROP: SNAPCASTER MAGE" credit.
+  - config/formats.json          → per-game format lists + zone shapes (copied verbatim).
+  - docs/notes/onepiece-limitless-observed-schema.md (fetched 2026-07-08)
+    → Regional Bielefeld 4 Jul 2026 · 1,541 players · OP16 · Top 64 published ·
+      winner "1st Luka Forjan" · "Purple Enel"; World Finals 2026 · 34 players · Top 8.
+  - One Piece N=849 online matches: owner brief 2026-07-09 (extension-spec §3).
+  - Livery accents (#e0b73a onepiece / #3aa7a3 riftbound): extension-spec §0,
+    PROVISIONAL — owner sign-off pending.
+
+  IMAGE POLICY: MTG may hotlink Scryfall art (tokens §0 — credit required, rendered
+  in-band and in the footer). NO Riot CDN assets (owner ToS decision 2026-07-08);
+  NO One Piece card images (owner posture) — their heroes are color-field plates.
+  No TopDeck-sourced rows on this page; the .credit chip renders wherever
+  EventsResponse.credits.required=true.
+  PRODUCTION NOTE: freemium gates are server-side (entitlements module); this page has
+  no gated module — the maturity badge IS the degradation state (extension-spec §6/S4).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;         /* favorable — blue */
+  --loss:#ff7a1a;        /* unfavorable — orange. NEVER red/green */
+  --acc:#b45bff;         /* sector purple — best-in-class only */
+  --shadow:#000000;
+  --provisional:#b9b9c3; /* extension-spec §2 T3 register */
+  --unlit:#3a3a48;
+  --pix:'Press Start 2P',monospace;
+  /* white overlay grain (tokens §4.3) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* 1-bit speckle mask (tokens §4.1) */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0 !important;}
+
+html,body{background:var(--bg);}
+body{
+  color:var(--ink);
+  font:400 13px/1.45 'JetBrains Mono',monospace;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  /* faint 45° carbon weave (tokens §3.5) */
+  background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+  overflow-x:hidden;
+}
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  a,button{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;}
+a{color:inherit;}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 12px;}
+
+/* ============ WIRE TICKER (tokens §5.1) — the one allowed loop ============ */
+.ticker{
+  position:sticky;top:0;z-index:50;height:30px;background:var(--bg);
+  border-bottom:1px solid var(--line);user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.ticker:focus-visible{outline-offset:-2px;}
+.tick-badge{
+  position:absolute;left:0;top:0;bottom:0;z-index:2;display:flex;align-items:center;
+  padding:0 8px;font:400 8px/1 var(--pix);color:var(--bg);background:var(--loss);
+}
+.tick-clip{position:absolute;left:52px;right:36px;top:0;bottom:0;overflow:hidden;}
+.ticker-track{display:inline-flex;align-items:center;height:30px;white-space:nowrap;will-change:transform;animation:tickscroll 42s linear infinite;}
+@keyframes tickscroll{to{transform:translateX(-50%);}}
+.ticker.paused .ticker-track{animation-play-state:paused;}
+.titem{font-size:11px;letter-spacing:.04em;color:var(--dim);padding:0 18px;}
+.titem b{color:var(--ink);font-weight:700;}
+/* .up/.dn are PERFORMANCE inks (tokens §1.2/§8): favorable/unfavorable numerals+deltas
+   with ▲▼ glyphs only — never set names, dates, or sample sizes. .pu = best-in-class. */
+.titem .up{color:var(--win);} .titem .dn{color:var(--loss);} .titem .pu{color:var(--acc);}
+.tick-pause{
+  position:absolute;right:0;top:0;bottom:0;width:36px;display:flex;align-items:center;justify-content:center;
+  font:400 8px/1 var(--pix);color:var(--dim);border-left:1px solid var(--line);background:var(--bg);
+}
+
+/* ============ HEADER — L3 chrome only ============ */
+header{padding:14px 0 0;}
+.hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.wordmark{
+  font-family:'Archivo',sans-serif;font-weight:900;font-stretch:62%;
+  font-variation-settings:'wdth' 62;text-transform:uppercase;letter-spacing:-.01em;line-height:.9;
+  font-size:26px;   /* stays under the 34px L0 display threshold — the hero owns display type */
+}
+.wordmark small{display:block;font:400 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.14em;color:var(--dim);margin-top:3px;}
+.clockbox{text-align:right;}
+.clock{font-family:'DSEG7Classic','JetBrains Mono',monospace;font-weight:700;font-size:22px;color:var(--ink);}
+.clockbox .lbl{font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;display:block;}
+/* NOTE: the winrate riso-ramp legend was removed in the 2026-07-10 revision —
+   this page renders no WR numerals, so the legend was chrome without a referent
+   (attention-art-spec §1.3 legend budget). It lives on where WR data lives. */
+
+/* active-game plate — livery slot #3 (extension-spec §0) */
+.activebar{display:flex;align-items:center;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.active-plate{
+  display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:6px 10px;
+  background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--alv,var(--ink));
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+}
+.active-plate b{color:var(--ink);font-weight:700;}
+.sw{
+  font-family:var(--pix);font-size:8px;line-height:1;min-height:38px;padding:0 9px;
+  display:inline-flex;align-items:center;gap:6px;color:var(--dim);background:var(--panel);
+  border:1px solid var(--line);box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.sw:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+
+/* ============ KICKER — the dim title row that introduces the hero ============ */
+/* attention-art-spec §1.1: display type lives in ONE place above the fold — the
+   hero. So "GAME CONSOLE" is a 10px dim kicker, not a 40px h1; the h1 is the
+   active game's name inside the hero plate. */
+.kicker{font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin:16px 0 0;line-height:1.7;}
+.kicker b{color:var(--ink);}
+
+/* ============ HERO PLATE — L0, exactly one (spec §1.1 / §2.5) ============ */
+.hero-plate{
+  position:relative;margin-top:10px;background:var(--panel);
+  border:1px solid var(--line);box-shadow:2px 2px 0 0 var(--shadow);
+}
+/* livery grainband — slot #2 scaled up to the hero's top edge */
+.hp-band{
+  height:6px;
+  background-image:var(--grain), var(--lvgrad, linear-gradient(90deg, var(--win), var(--acc)));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.hp-visual{
+  position:relative;overflow:hidden;min-height:168px;   /* spec §1.1 floor (deck-viewer band) */
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+/* --- tier-A art layers (MTG only) — tokens §4.4 recipe, verbatim from s-deck-viewer --- */
+.hp-visual .art{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center 30%;
+  filter:saturate(.72) contrast(1.08) brightness(.72);
+}
+.hp-visual .tint{
+  position:absolute;inset:0;
+  background:linear-gradient(112deg, rgba(59,157,255,.42) 0%, rgba(13,13,18,.05) 48%, rgba(255,122,26,.38) 100%);
+  mix-blend-mode:hard-light;pointer-events:none;
+}
+/* --- non-art color-field (One Piece / Riftbound — spec §2.4, NO images) ---
+   livery accent printed as a masked riso speckle over the panel, plus a
+   misregistered second pass (tokens §4.1/§4.3) for print-object depth */
+.hp-visual .field{position:absolute;inset:0;background:var(--panel2);}
+/* soft livery wash under the speckle — the speckle mask alone (~25% coverage)
+   read as near-black; the field must read as the game's color at a glance */
+.hp-visual .field::before{content:"";position:absolute;inset:0;background:var(--fieldgrad, none);opacity:.34;}
+.hp-visual .field i{
+  position:absolute;inset:0;display:block;
+  -webkit-mask-image:var(--noise);mask-image:var(--noise);
+  -webkit-mask-size:56px 56px;mask-size:56px 56px;
+  background:var(--fieldgrad, linear-gradient(135deg, var(--acc), transparent));
+}
+.hp-visual .field i.mis{transform:translate(3px,3px);opacity:.4;}
+/* shared: overlay grain + legibility scrim (scrim bottoms out at .88 — the
+   §2.2 stop; the name/chips zone sits only on that stop) */
+.hp-visual .bgrain{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:var(--grain);background-size:120px 120px;
+  mix-blend-mode:overlay;opacity:.55;
+}
+.hp-visual .scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(13,13,18,.15) 0%, rgba(13,13,18,.34) 55%, rgba(13,13,18,.88) 100%);
+}
+.hp-credit{
+  position:absolute;top:8px;right:10px;z-index:1;
+  font-size:9px;letter-spacing:.1em;color:rgba(242,242,247,.75);
+  text-transform:uppercase;text-shadow:1px 1px 0 var(--shadow);
+}
+.hp-inner{position:relative;padding:44px 14px 12px;display:flex;flex-direction:column;gap:10px;}
+.hp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.hp-name{
+  font-family:'Archivo',sans-serif;font-weight:900;font-stretch:62%;
+  font-variation-settings:'wdth' 62;text-transform:uppercase;letter-spacing:-.01em;line-height:.92;
+  font-size:42px;text-shadow:2px 2px 0 var(--shadow);
+}
+.gsub{font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-top:4px;display:block;}
+.hp-visual .gsub{color:rgba(242,242,247,.72);text-shadow:1px 1px 0 var(--shadow);}
+/* lower deck: solid plate — every DSEG numeral sits on --panel/--panel2, never raw art (§2.2a) */
+.hp-deck{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px;background:var(--panel);border-top:1px solid var(--line);}
+
+/* ============ CHIPS (Press Start budget items) ============ */
+.chip{
+  font-family:var(--pix);font-size:7px;line-height:1.6;padding:5px 6px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--ink);
+  white-space:normal;text-align:right;max-width:200px;
+}
+/* maturity chip variants — chrome stays neutral: performance hues are confined
+   to numerals/deltas/heat/strokes (ext §1.4 firewall), never chip borders */
+.chip.full{border-color:var(--ink);}                                /* live, full: solid ink frame */
+.chip.cat{color:var(--dim);border-color:var(--line);}               /* live, catalogue-only: solid+dim */
+/* JS toggles .wrapped when the chip has flex-wrapped under the game name —
+   a left-positioned chip reads ragged with text-align:right */
+.chip.wrapped{text-align:left;}
+
+/* pip strips — one grammar, three silhouettes (extension-spec §1) */
+.pipstrip{display:flex;align-items:center;gap:5px;flex-wrap:wrap;position:relative;}
+.mchip{
+  width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;
+  font:400 6px/1 var(--pix);color:var(--bg);
+  border:1px solid rgba(242,242,247,.25);flex:none;
+}
+.mchip.round{border-radius:50% !important;}
+.mchip.oct{clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);}
+.mchip.diamond{width:12px;height:12px;transform:rotate(45deg);}
+.mchip.diamond span{transform:rotate(-45deg);display:inline-block;}
+.mchip.plate{width:24px;}
+/* legend strip (ext §1.5): 9px, each entry = scale-M chip + full word */
+.pipkey{
+  display:flex;flex-wrap:wrap;gap:5px 12px;align-items:center;
+  font-size:9px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;
+}
+.pipkey .pk{display:inline-flex;align-items:center;gap:5px;}
+.pipkey.wideonly{display:none;}   /* MTG-only legend: shown ≥1100px (see §7.3 block) */
+
+/* ============ COLLAPSED FORMAT CHIPS (spec §1.4.2 disclosure) ============ */
+/* the toggle is JetBrains 9px, NOT Press Start — deliberately outside the chip
+   budget; the .fmt Press Start chips render only in the expanded state */
+.fwrap{align-self:flex-start;max-width:100%;}
+.fmtoggle{
+  position:relative;z-index:1;   /* stays clickable above the mini tile's stretched press target */
+  font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);background:var(--panel2);border:1px solid var(--line);
+  min-height:30px;padding:0 9px;display:inline-flex;gap:7px;align-items:center;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.fmtoggle b{color:var(--ink);font-weight:700;}
+.fmtoggle[aria-expanded="true"]{color:var(--ink);border-color:var(--ink);}
+.fpanel{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.fpanel[hidden]{display:none;}   /* class display:flex must not defeat the hidden attribute */
+.fmts{display:flex;gap:6px;flex-wrap:wrap;}
+.fmt{
+  font-family:var(--pix);font-size:7px;line-height:1;padding:7px 7px 6px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim);
+}
+.fmt.live-f{color:var(--ink);border-color:var(--ink);}
+.fmtkey{font-size:8px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;}
+.fmtkey i{font-style:normal;color:var(--ink);}
+
+.shape{display:none;font-size:9px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;}
+.shape b{color:var(--ink);}
+
+/* DSEG stat tiles (tokens §5.3) — hero-only now; the secondary row carries none */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stats.odd .cell:first-child{grid-column:1/-1;}
+.cell{
+  background:var(--panel2);border:1px solid var(--line);box-shadow:2px 2px 0 0 var(--shadow);
+  padding:10px 10px 8px;text-align:left;min-width:0;
+}
+.cell .lbl{font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;display:block;}
+/* deliberate §5.3 drift: DSEG at the §2.1 24px floor, not the 30px reference —
+   these are static readouts, not the spec's .press.cell controls, so press
+   physics are omitted. */
+.cell .seg7{
+  font-family:'DSEG7Classic','JetBrains Mono',monospace;font-weight:700;
+  font-size:24px;line-height:1.15;display:inline-block;margin-top:6px;color:var(--ink);
+  max-width:100%;
+  /* no overflow:hidden — a truncated numeral is the system's cardinal sin;
+     JS sets min-width in ch to the value's width (tokens §2.2). If a
+     regression overflows, it overflows LOUDLY. */
+}
+.cell .seg7.unlit{color:var(--unlit);}
+.cell .sub{font-size:8px;color:var(--dim);margin-top:3px;display:block;letter-spacing:.04em;line-height:1.5;text-transform:uppercase;overflow-wrap:anywhere;}
+
+/* caveat chrome (extension-spec §3) — trust chrome, never disclosed away */
+.caveat{
+  display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  font:400 9px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);background:var(--panel2);
+  border:1px solid var(--line);border-left:3px solid var(--loss);
+  padding:4px 7px;line-height:1.5;
+}
+.caveat b{color:var(--ink);font-weight:700;}
+
+.prov{font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;line-height:1.7;}
+
+.enter{
+  margin-top:2px;
+  font-family:var(--pix);font-size:8px;line-height:1;min-height:44px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  color:var(--ink);background:var(--panel2);border:1px solid var(--lv,var(--line));
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;-webkit-tap-highlight-color:transparent;width:100%;
+}
+.enter:active{transform:translate(2px,2px);box-shadow:0 0 0 0 var(--shadow);transition:none;}
+
+/* ============ SECONDARY ROW — the demoted games (L1, compact) ============ */
+.baylbl{font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin:18px 0 8px;}
+.baylbl b{color:var(--ink);}
+.bays{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+.tile{
+  position:relative;background:var(--panel);border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);padding:0 10px 10px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.tile-band{
+  height:4px;position:relative;margin:0 -10px;
+  background-image:var(--grain), var(--lvgrad, linear-gradient(90deg, var(--win), var(--acc)));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.tile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.gname{
+  font-family:'Archivo',sans-serif;font-weight:900;font-stretch:62%;
+  font-variation-settings:'wdth' 62;text-transform:uppercase;line-height:.95;font-size:17px;
+}
+.tile .chip{font-size:6px;padding:4px 5px;max-width:150px;}
+.tile .mchip{width:14px;height:14px;}
+.tile .mchip.plate{width:20px;}
+.tile .mchip.diamond{width:11px;height:11px;}
+.ministat{font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;line-height:1.6;}
+.ministat b{color:var(--ink);}
+/* whole-tile press target: the .mk button stretches over the tile via ::after;
+   the format toggle stays clickable above it (z-index). Press physics on the
+   chassis via :has(), same S4 pattern as before. */
+.mk{
+  margin-top:auto;width:100%;min-height:34px;
+  font:400 9px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);background:none;border:0;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:6px;justify-content:flex-start;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.mk b{color:var(--ink);font-weight:700;}
+.tile.mini .mk::after{content:"";position:absolute;inset:0;}
+.tile.mini{transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);}
+.tile.mini:has(.mk:active){transform:translate(2px,2px);box-shadow:0 0 0 0 var(--shadow);transition:none;}
+.tile.mini:has(.mk:focus-visible){outline:2px solid var(--acc);outline-offset:2px;}
+@supports not selector(:has(*)){
+  .mk:active{color:var(--ink);}
+  .mk:focus-visible{outline:2px solid var(--acc);outline-offset:-2px;}
+}
+
+/* ============ DOCKING BAY — L3 chrome (demoted from full ghost tiles) ============ */
+.dockstrip{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.dock-slot{
+  border:1px dashed var(--unlit);padding:8px 10px;
+  display:flex;flex-direction:column;gap:4px;background:transparent;
+}
+.bayno{font-family:var(--pix);font-size:7px;color:var(--unlit);letter-spacing:1px;}
+.dock-slot .dname{font-size:10px;font-weight:700;color:var(--provisional);letter-spacing:.08em;text-transform:uppercase;}
+.ghostline{font-size:9px;color:var(--unlit);letter-spacing:.08em;text-transform:uppercase;line-height:1.7;margin-top:8px;}
+/* RESYNC lives down here now — demo chrome below the feed (spec §1.4.4) */
+.utilrow{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.utilnote{font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;line-height:1.6;}
+
+/* ============ FOOTER ============ */
+.riso-divider{
+  height:10px;margin:26px 0 16px;
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--loss));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:multiply, normal;opacity:.55;
+}
+.foot-mark{
+  font-family:'Archivo',sans-serif;font-weight:900;font-stretch:62%;
+  font-variation-settings:'wdth' 62;text-transform:uppercase;line-height:.9;font-size:46px;
+}
+.foot-mark .hollow{
+  display:block;color:transparent;-webkit-text-stroke:1px #2e2e3a;
+}
+.fine{font-size:9px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;line-height:1.7;margin:12px 0 40px;}
+.fine b{color:var(--ink);}
+
+/* glitch — one-shot, changed data only (tokens §6.3) */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{animation:glitch 240ms steps(2,jump-none) 1;}
+
+/* ============ MID WIDTHS ============ */
+@media (min-width:720px){
+  .wordmark{font-size:30px;}
+  .hp-visual{min-height:210px;}    /* band grows per tokens §7 */
+  .hp-name{font-size:52px;}
+  .stats{grid-template-columns:repeat(3,1fr);}
+  .stats.four{grid-template-columns:repeat(4,1fr);}
+  .stats.odd .cell:first-child{grid-column:auto;}
+  .cell .seg7{font-size:26px;}
+  .dockstrip{grid-template-columns:repeat(4,1fr);}
+}
+
+/* ============ ≥1100px — PIT-WALL SPREAD (tokens §7.3) ============ */
+@media (min-width:1100px){
+  .wrap{max-width:1400px;padding:0 32px;}
+  .hrow{align-items:center;}
+  /* hero splits: art/field left, instrument deck right — keeps the art crop
+     near its native resolution instead of stretching it to 1400px */
+  .hero-plate{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);}
+  .hp-band{grid-column:1/-1;}
+  .hp-visual{min-height:250px;height:100%;border-right:1px solid var(--line);}
+  .hp-name{font-size:64px;}
+  .hp-deck{border-top:0;}
+  /* deck column ≈600px → stats back to 2-up + .odd hero row (no clipped numerals) */
+  .stats,.stats.four{grid-template-columns:1fr 1fr;}
+  .stats.odd .cell:first-child{grid-column:1/-1;}
+  .cell .seg7{font-size:26px;}
+  .shape{display:block;}          /* zone shapes earn their width */
+  .pipkey.wideonly{display:flex;} /* MTG legend fills the ≥1100 gap (ext §1.5 allows it) */
+  .foot-mark{font-size:72px;}
+}
+
+/* ============ REDUCED MOTION (tokens §6.6) ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{animation:none;}
+  .tick-pause{display:none;}
+  .glitch{animation:none;}
+  .sw,.sw:active,.enter,.enter:active,.tile.mini,.mk{transition:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- WIRE — only real results/facts from grounding data -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+     aria-label="Results wire. Tap to pause scrolling.">
+  <span class="tick-badge">WIRE</span>
+  <div class="tick-clip">
+    <div class="ticker-track" id="tickTrack">
+      <span class="titem"><b>ONE PIECE</b> · REGIONAL BIELEFELD · 04 JUL 26 · <span class="pu">P1 LUKA FORJAN</span> · PURPLE ENEL · 1,541 PLAYERS</span>
+      <!-- set names / sample sizes are facts, not performance: ink, never .up/.dn -->
+      <span class="titem"><b>RIFTBOUND</b> · SET <b>UNLEASHED (UNL)</b> · 280 CARDS · 2026-05-08</span>
+      <span class="titem"><b>ONE PIECE</b> · WORLD FINALS 2026 · 34 PLAYERS · TOP 8 PUBLISHED</span>
+      <span class="titem"><b>MTG</b> · MODERN · RAKDOS SCAM · <b>N=1,966</b> DECK SAMPLE</span>
+      <span class="titem"><b>RIFTBOUND</b> · ANNOUNCED <b>VENDETTA (VEN)</b> · 2026-07-31 · NO CARDS YET</span>
+      <span class="titem">AS-OF 2026-07-09 · SOURCES IN FOOTER</span>
+    </div>
+  </div>
+  <span class="tick-pause" id="tickGlyph" aria-hidden="true">❚❚</span>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="hrow">
+      <div class="wordmark">MetaSurf
+        <small>PIT-WALL CONSOLE · NUMBERS YOU CAN TRUST</small>
+      </div>
+      <div class="clockbox">
+        <span class="lbl">CONSOLE TIME</span>
+        <span class="clock" id="clock">--:--</span>
+      </div>
+    </div>
+    <div class="activebar">
+      <span class="active-plate" id="activePlate" aria-live="polite">CONSOLE ACTIVE ▸ <b id="activeName">MTG</b><span id="activeNote"> — FULL TELEMETRY</span></span>
+    </div>
+  </header>
+
+  <!-- dim kicker introduces the hero (spec §1.1: at most one dim line between
+       title row and hero; "CONSOLES", not "FEEDS" — Riftbound is live as
+       catalogue-only and claiming 3 feeds would contradict its own badge) -->
+  <p class="kicker"><b>GAME CONSOLE</b> · 3 LIVE CONSOLES · 4 DOCKING BAYS RESERVED · LAST-USED CONSOLE LEADS</p>
+
+  <!-- L0 hero plate — rendered from REG (active/last-used game) -->
+  <div id="heroMount"></div>
+
+  <!-- calm strip + L1 secondary row -->
+  <section id="secSec">
+    <p class="baylbl"><b>OTHER CONSOLES</b> — TAP A TILE TO MAKE IT THE ACTIVE CONSOLE</p>
+    <div class="bays" id="bayMini"><!-- compact tiles rendered from REG --></div>
+  </section>
+
+  <!-- L3 docking bay — demoted from full ghost tiles to dashed micro-slots -->
+  <section id="dockSec">
+    <p class="baylbl"><b>DOCKING BAY</b> — RESERVED SLOTS · NOT LIVE · NO DATA</p>
+    <div class="dockstrip" id="bayDock"><!-- slots rendered from DOCK --></div>
+    <p class="ghostline">NO DATA · NO REGISTRY · PALETTE PENDING — NOTHING RENDERS UNTIL A REAL FEED LANDS</p>
+    <div class="utilrow">
+      <button class="sw" id="resync" type="button" aria-label="Re-run readout roll-ups">⟳ RESYNC</button>
+      <span class="utilnote">DEMO CONTROL — RE-RUNS THE DSEG ROLL-UPS · KEPT BELOW THE FEED (SPEC §1.4.4)</span>
+    </div>
+  </section>
+
+  <footer>
+    <div class="riso-divider" aria-hidden="true"></div>
+    <div class="foot-mark">MetaSurf<span class="hollow">Game Console</span></div>
+    <p class="fine">
+      MTG DECK / ARCHETYPE COUNTS: <b>COMPUTED AT RENDER TIME</b> FROM S1-ARCHETYPE-VISUALS.JSON — PIP-MINE SAMPLES, APR–JUN 2024 MTGO MAINBOARDS · FORMAT LISTS + ZONE SHAPES: CONFIG/FORMATS.JSON VERBATIM ·
+      MTG HERO ART: <b>SNAPCASTER MAGE</b> ART CROP — © WIZARDS OF THE COAST, SERVED VIA SCRYFALL (HOTLINK OK, CREDIT REQUIRED — TOKENS §0; SAME ASSET AS THE S-DECK-VIEWER BAND) ·
+      ONE PIECE: ONLINE POPULATION ONLY, <b>N=849 MATCHES</b> (PLAY.LIMITLESSTCG API POPULATION — OWNER BRIEF 2026-07-09); OFFLINE MAJORS PUBLISH TOP-CUT ONLY (REGIONAL BIELEFELD: TOP 64 OF 1,541 — OBSERVED 2026-07-08, ONEPIECE.LIMITLESSTCG.COM); NO ONE PIECE CARD IMAGES — TOS POSTURE ·
+      RIFTBOUND: CATALOGUE ONLY — <b>NO MATCH DATA FEED</b>; COUNTS FROM THE RIFTCODEX CAPTURE OF 2026-07-08 (1,064 PRINTINGS); NO RIOT CDN ASSETS PER OWNER TOS DECISION 2026-07-08 — CARD SLOTS RENDER AS DOMAIN-COLORED PLACEHOLDER FRAMES ·
+      RIFTBOUND DOMAIN HUES + GAME LIVERY ACCENTS ARE <b>PROVISIONAL DESIGN CHOICES</b>, OWNER SIGN-OFF PENDING · DOCKING-BAY GAMES ARE ROADMAP SLOTS — NO DATA, NO PALETTE, NOTHING FAKED ·
+      NO TOPDECK-SOURCED ROWS ON THIS PAGE; WHERE EVENTSRESPONSE.CREDITS.REQUIRED=TRUE, A VISIBLE LINKED "DATA: TOPDECK.GG ↗" CHIP RENDERS IN THE MODULE HEADER ·
+      MOCKUP — PRODUCTION GATING IS SERVER-SIDE (ENTITLEMENTS MODULE)
+    </p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =========================================================================
+   GAME REGISTRY — the per-game theming handshake.
+   NON-MTG pipPalette / pipOrder copied VERBATIM from riftbound-games-ground.json
+   → game_ui_registry (the registry is canonical only for the non-MTG pip
+   systems). MTG pip fills come from pit-wall-tokens.md §1.4 — its 2026-07-09
+   canon note forbids restyling MTG pips from the registry values, and by
+   extension-spec's own precedence rule ("nothing in this spec overrides the
+   token spec") the tokens note wins over ext §1.4 "registry verbatim".
+   Zone shapes / format lists from config/formats.json.
+   Livery accents from extension-spec §0 (provisional, owner to bless).
+   shortLabel values from extension-spec §1.3 (the flagged registry-seam
+   extension: registry_seam_gaps[0]).
+   heroArt (MTG only): the Snapcaster Mage img_art_crop already in the design
+   system (pit-wall-console/s-deck-viewer.html BAND_ART — Scryfall). fieldGrad
+   (non-MTG): the non-art hero color-field, derived from the livery accent only.
+   NOTE: the registry has no display-name metadata (flagged gap) — the
+   `label`/`fullName` strings here are page copy naming the actual games.
+   ========================================================================= */
+const REG = {
+  mtg: {
+    label:'MTG', fullName:'MAGIC: THE GATHERING',      /* topdeck_game value in formats.json */
+    accent:null,                                       /* flagship: product-default chrome IS the livery */
+    lvGrad:'linear-gradient(90deg, #3b9dff, #b45bff)', /* default win→acc grainband */
+    heroArt:{                                          /* tier-A art band (spec §2.1) — MTG has Scryfall rights */
+      src:'https://cards.scryfall.io/art_crop/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477',
+      credit:'ART CROP: SNAPCASTER MAGE'
+    },
+    silhouette:'round',
+    pipOrder:['W','U','B','R','G','C'],
+    /* canonical MTG fills — tokens §1.4 .pip-W..C verbatim (canon note 2026-07-09);
+       NOT the registry pipPalette, which governs non-MTG systems only */
+    pipPalette:{W:'#f8f6d8',U:'#b9d4ec',B:'#7d7673',R:'#e49977',G:'#a3c095',C:'#8b8b99'},
+    shortLabel:{W:'W',U:'U',B:'B',R:'R',G:'G',C:'C'},
+    lightInk:{},                                       /* §1.4 pastels all take dark letter ink */
+    brightRim:['B'],                                   /* tokens §1.4: .pip-B border #a6a1a0 */
+    pipWords:{W:'WHITE',U:'BLUE',B:'BLACK',R:'RED',G:'GREEN',C:'COLORLESS'},
+    pipkey:'wide',                                     /* ext §1.5: MTG MAY omit — rendered ≥1100px only */
+    maturity:{text:'FULL TELEMETRY', cls:'full'},
+    formats:[ /* config/formats.json — import:true = ingesting */
+      {n:'MODERN',live:true},{n:'STANDARD',live:true},{n:'LEGACY',live:false},
+      {n:'VINTAGE',live:false},{n:'PIONEER',live:false},{n:'PAUPER',live:false}
+    ],
+    shape:'ZONES: <b>MAIN 60+</b> · <b>SIDE ≤15</b>',
+    stats:[
+      {lbl:'DECK SAMPLES', val:'MTG_DECKS', sub:'Σ PIP-MINE SAMPLES · MTGO APR–JUN 2024'},
+      {lbl:'ARCHETYPES',   val:'MTG_ARCH',  sub:'GROUNDED · MODERN+PIONEER+LEGACY'},
+      {lbl:'FORMATS',      val:6,           sub:'FORMATS.JSON · 2 INGESTING'}
+    ],
+    caveat:null,
+    prov:'WINDOW APR–JUN 2024 (PIP-MINE) · N=<span class="mtgN"></span> DECKS · AS-OF 2026-07-09'
+  },
+  onepiece: {
+    label:'ONE PIECE', fullName:'ONE PIECE CARD GAME',
+    accent:'#e0b73a',                                  /* registry Yellow — ext §0, provisional */
+    lvGrad:'linear-gradient(90deg, #e0b73a, rgba(224,183,58,.12))',
+    heroArt:null,                                      /* NO card images — owner ToS posture */
+    fieldGrad:'linear-gradient(135deg, #e0b73a 0%, rgba(224,183,58,.08) 78%)',
+    fieldNote:'NO CARD IMAGERY — TOS POSTURE',
+    silhouette:'oct',
+    /* registry pipOrder has a 7th code '—' (colorless) — DELIBERATELY omitted
+       here: the registry's own notes call it "defensive fallback only; no
+       colourless One Piece card observed", so rendering it would claim a pip
+       that no real card carries */
+    pipOrder:['Red','Green','Blue','Purple','Black','Yellow'],
+    pipPalette:{Red:'#d3492f',Green:'#3e9c62',Blue:'#3b7bd0',Purple:'#7b4fa6',Black:'#2b2b33',Yellow:'#e0b73a'},
+    shortLabel:{Red:'R',Green:'G',Blue:'B',Purple:'P',Black:'K',Yellow:'Y'},  /* K = CMYK key plate, ext §1.3 */
+    lightInk:{Black:'#c9c4d2',Purple:'#f3eafd'},
+    brightRim:['Black'],
+    pipWords:{Red:'RED',Green:'GREEN',Blue:'BLUE',Purple:'PURPLE',Black:'BLACK',Yellow:'YELLOW'},
+    pipkey:true,                                       /* legend built from pipOrder/pipWords (ext §1.5) */
+    maturity:{text:'LIMITED SAMPLE — 849 ONLINE MATCHES', cls:''},
+    formats:[{n:'STANDARD',live:true}],
+    shape:'ZONES: <b>LEADER 1</b> · <b>MAIN 50</b>',
+    stats:[
+      {lbl:'MATCHES',   val:849,  sub:'ONLINE ONLY · PLAY.LIMITLESSTCG · OWNER BRIEF'},
+      /* not 'MAX FIELD' — a superlative the shallow majors corpus (coverage
+         from Dec 2025, 2 observed fixtures) cannot ground; claim only what
+         was measured */
+      {lbl:'LARGEST OBSERVED', val:1541, sub:'FIELD · REGIONAL BIELEFELD · 04 JUL 26 · OP16'},
+      {lbl:'PUBLISHED', val:64,   sub:'TOP-64 OF 1,541 — TOP-CUT SHARE'}
+    ],
+    caveat:'ONLINE POPULATION ONLY · <b>N=849 MATCHES</b>',
+    /* §4.2 order is WINDOW·N·AS-OF, but the owner brief states NO window for the
+       849 online matches — say so instead of inventing one. Dec 2025 is grounded
+       only as the OFFLINE majors-DB coverage start (onepiece schema notes), so it
+       is scoped to that population, never to the online N. */
+    prov:'N=849 MATCHES (ONLINE — NO WINDOW STATED IN OWNER BRIEF 2026-07-09) · OFFLINE MAJORS DB COVERAGE FROM DEC 2025 · AS-OF 2026-07-09'
+  },
+  riftbound: {
+    label:'RIFTBOUND', fullName:'RIFTBOUND — LEAGUE OF LEGENDS TCG',
+    accent:'#3aa7a3',                                  /* registry Calm teal — ext §0, provisional */
+    lvGrad:'linear-gradient(90deg, #3aa7a3, rgba(58,167,163,.12))',
+    heroArt:null,                                      /* NO images, ever — no Riot CDN (owner ToS) */
+    fieldGrad:'linear-gradient(135deg, #3aa7a3 0%, rgba(58,167,163,.06) 78%)',
+    fieldNote:'NO RIOT CDN ASSETS — OWNER TOS 2026-07-08',
+    silhouette:'plate',
+    /* full registry pipOrder incl. the 7th code 'Colorless' ('--' plate, ext
+       §1.2/§1.3) — real data, not defensive: ground domain_facts says
+       "Battlefields are always ['Colorless'] (all 57)" */
+    pipOrder:['Body','Calm','Chaos','Fury','Mind','Order','Colorless'],
+    pipPalette:{Body:'#3e9c62',Calm:'#3aa7a3',Chaos:'#a54fc4',Fury:'#d3492f',Mind:'#3b7bd0',Order:'#c9a13b',Colorless:'#8a919e'},
+    shortLabel:{Body:'BO',Calm:'CA',Chaos:'CH',Fury:'FU',Mind:'MI',Order:'OR',Colorless:'--'},
+    lightInk:{},
+    brightRim:[],
+    pipWords:{Body:'BODY',Calm:'CALM',Chaos:'CHAOS',Fury:'FURY',Mind:'MIND',Order:'ORDER',Colorless:'COLORLESS'},
+    pipkey:true,
+    maturity:{text:'CATALOGUE ONLY — NO MATCH DATA', cls:'cat'},  /* live console, degraded data */
+    formats:[{n:'CONSTRUCTED',live:false}],
+    shape:'ZONES: <b>LEGEND 1</b> · <b>MAIN 40+</b> · <b>RUNES 12</b> · <b>BATTLEFIELDS 3</b>',
+    stats:[
+      {lbl:'PRINTINGS', val:1064, sub:'RIFTCODEX CAPTURE 2026-07-08'},
+      {lbl:'LEGENDS',   val:36,   sub:'BASE NON-PROMO · ALL 2-DOMAIN'},
+      {lbl:'SETS',      val:7,    sub:'WITH CARDS · VEN ANNOUNCED 07-31'},
+      {lbl:'MATCHES',   val:null, sub:'NO FEED — NOTHING FAKED', unlit:true}
+    ],
+    caveat:'NO MATCH DATA FEED — <b>CATALOGUE ONLY</b>',
+    prov:'CATALOGUE 1,064 PRINTINGS · N=0 MATCHES · AS-OF 2026-07-08'
+  }
+};
+const ORDER = ['mtg','onepiece','riftbound'];
+let activeId = 'mtg';   /* default / last-used console — the hero */
+
+/* MTG pip-mine samples — s1-archetype-visuals.json deck_sample values, verbatim.
+   The hero's DECKS / ARCHETYPES readouts are computed from this table. */
+const MTG_SAMPLES = {
+  MODERN:  {'Izzet Murktide':717,'Rakdos Scam':1966,'Amulet Titan':919,'Yawgmoth':1041,'Living End':679,'Mono-Green Tron':123,'Burn':281,'Hammer Time':113,'Crashing Footfalls':146,'Jund Saga':257},
+  PIONEER: {'Izzet Phoenix':1506,'Rakdos Vampires':1686,'Amalia Combo':965,'Lotus Field':464,'Boros Convoke':75,'Azorius Control':410,'Mono-G Devotion':481,'Mono-U Spirits':353},
+  LEGACY:  {'Temur Delver':568,'Reanimator':899,'Death & Taxes':48,'Lands':232,'Doomsday':153,'Painter':153,'Cephalid Breakfast':80,'8-Cast':89}
+};
+let MTG_DECKS = 0, MTG_ARCH = 0;
+for (const fmt of Object.values(MTG_SAMPLES)){
+  for (const n of Object.values(fmt)){ MTG_DECKS += n; MTG_ARCH += 1; }
+}
+
+/* Docking bay — roadmap slots only. Coming-soon games carry NO palette, NO stats:
+   registries do not exist yet and nothing is faked. */
+const DOCK = [
+  {bay:'BAY 04', name:'POKÉMON'},
+  {bay:'BAY 05', name:'YU-GI-OH!'},
+  {bay:'BAY 06', name:'FLESH AND BLOOD'},
+  {bay:'BAY 07', name:'LORCANA'}
+];
+
+/* ---------- helpers ---------- */
+/* DSEG7 has no comma glyph — a literal comma falls back to JetBrains Mono
+   mid-numeral. Sanctioned grouping for DSEG readouts: THIN SPACE (U+2009),
+   which reads as an intentional blank cell. Prose/subs/ticker keep commas. */
+const fmtProse = v => v.toLocaleString('en-US');   /* JetBrains Mono prose keeps commas */
+const fmtVal = v => v.toLocaleString('en-US').replace(/,/g,' ');
+function glitch(el){
+  if (RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+/* quantized arcade roll-up — 8 discrete ticks, snap exact on the last (tokens §6.1) */
+function rollup(el, target){
+  if (RM){ el.textContent = fmtVal(target); return; }
+  const TICKS=8, DUR=600;
+  const start = parseFloat((el.textContent||'0').replace(/[^0-9.]/g,'')) || 0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll = setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);
+    el.textContent = (i>=TICKS) ? fmtVal(target) : fmtVal(Math.round(v));
+    if (i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+
+/* ---------- pip chip builders (extension-spec §1) ---------- */
+function buildChip(g, code){
+  const bg = g.pipPalette[code];
+  const chip = document.createElement('span');
+  let cls = 'mchip';
+  if (g.silhouette==='round') cls += (code==='C') ? ' diamond' : ' round';
+  if (g.silhouette==='oct')   cls += ' oct';
+  if (g.silhouette==='plate') cls += ' plate';
+  chip.className = cls;
+  chip.style.background = bg;
+  if (g.brightRim.includes(code)) chip.style.borderColor = '#a6a1a0';
+  const s = document.createElement('span');
+  s.textContent = g.shortLabel[code];
+  s.style.color = g.lightInk[code] || 'var(--bg)';
+  chip.appendChild(s);
+  return chip;
+}
+function buildPipstrip(g){
+  const strip = document.createElement('div');
+  strip.className = 'pipstrip';
+  strip.setAttribute('role','img');
+  const words = g.pipOrder.map(c=>g.pipWords[c].toLowerCase()).join(', ');
+  strip.setAttribute('aria-label', (g.silhouette==='plate'?'domains: ':'colors: ')+words);
+  g.pipOrder.forEach(c=>strip.appendChild(buildChip(g,c)));
+  return strip;
+}
+function buildPipkey(g){
+  /* legend strip (ext §1.5): each entry pairs a scale-M chip with the full word;
+     chips are decorative here — the words carry the meaning */
+  const key = document.createElement('div');
+  key.className = 'pipkey' + (g.pipkey==='wide' ? ' wideonly' : '');
+  g.pipOrder.forEach(c=>{
+    const pk = document.createElement('span');
+    pk.className = 'pk';
+    const chip = buildChip(g,c);
+    chip.setAttribute('aria-hidden','true');
+    pk.appendChild(chip);
+    pk.appendChild(document.createTextNode(g.pipWords[c]));
+    key.appendChild(pk);
+  });
+  return key;
+}
+
+/* ---------- collapsed format chips (spec §1.4.2) ----------
+   Default state renders ONE JetBrains toggle ("N FORMATS ▸ M INGESTING"), not a
+   Press Start chip per format — the .fmt chips + bright/dim key appear only on
+   expand. State resets on hero swap (the row re-renders): acceptable for a mockup. */
+function buildFwrap(g, compact){
+  const wrap = document.createElement('div'); wrap.className = 'fwrap';
+  const liveN = g.formats.filter(f=>f.live).length;
+  const tog = document.createElement('button');
+  tog.type = 'button'; tog.className = 'fmtoggle';
+  tog.setAttribute('aria-expanded','false');
+  /* compact (mini-tile) label omits the ingest count — it would wrap at ~170px */
+  const lblTxt = '<b>'+g.formats.length+'</b> FORMAT'+(g.formats.length>1?'S':'')
+               + (compact ? ' ' : ' · '+liveN+' INGESTING ');
+  tog.innerHTML = lblTxt + '<span aria-hidden="true">▸</span>';
+  const panel = document.createElement('div');
+  panel.className = 'fpanel'; panel.hidden = true;
+  const fm = document.createElement('div'); fm.className = 'fmts';
+  g.formats.forEach(f=>{
+    const c = document.createElement('span');
+    c.className = 'fmt'+(f.live?' live-f':'');
+    c.textContent = f.n;
+    fm.appendChild(c);
+  });
+  panel.appendChild(fm);
+  const key = document.createElement('p'); key.className = 'fmtkey';
+  key.innerHTML = '<i>BRIGHT</i> FORMAT CHIP = INGESTING · DIM = CATALOGUED (FORMATS.JSON)';
+  panel.appendChild(key);
+  tog.addEventListener('click', e=>{
+    e.stopPropagation();
+    const open = panel.hidden;
+    panel.hidden = !open;
+    tog.setAttribute('aria-expanded', String(open));
+    tog.innerHTML = lblTxt + '<span aria-hidden="true">'+(open?'▾':'▸')+'</span>';
+  });
+  wrap.appendChild(tog); wrap.appendChild(panel);
+  return wrap;
+}
+
+/* ---------- L0 hero plate (attention-art-spec §1.1, §2.4, §2.5) ---------- */
+function buildHero(id){
+  const g = REG[id];
+  const plate = document.createElement('section');
+  plate.className = 'hero-plate'; plate.id = 'heroPlate';
+  plate.dataset.game = id;
+  plate.setAttribute('aria-label', g.label+' — active console');
+  plate.style.setProperty('--lvgrad', g.lvGrad);
+  plate.style.setProperty('--lv', g.accent || 'var(--line)');
+
+  /* livery grainband — slot #2, scaled to the hero's top edge */
+  const band = document.createElement('div');
+  band.className = 'hp-band'; band.setAttribute('aria-hidden','true');
+  plate.appendChild(band);
+
+  /* visual zone: tier-A art band (MTG) or non-art color-field (OP/RB) */
+  const vis = document.createElement('div');
+  vis.className = 'hp-visual';
+  if (g.heroArt){
+    /* tokens §4.4 stack, verbatim from s-deck-viewer: art → tint → grain → scrim → credit */
+    vis.innerHTML =
+      '<img class="art" src="'+g.heroArt.src+'" alt="" aria-hidden="true">'+
+      '<div class="tint" aria-hidden="true"></div>'+
+      '<div class="bgrain" aria-hidden="true"></div>'+
+      '<div class="scrim" aria-hidden="true"></div>'+
+      '<span class="hp-credit">'+g.heroArt.credit+'</span>';
+  } else {
+    /* spec §2.4 non-art hero: livery color-field, riso mask + misregistered
+       second pass. The credit slot states WHY there is no art — honest chrome. */
+    vis.style.setProperty('--fieldgrad', g.fieldGrad);
+    vis.innerHTML =
+      '<div class="field" aria-hidden="true"><i></i><i class="mis"></i></div>'+
+      '<div class="bgrain" aria-hidden="true"></div>'+
+      '<div class="scrim" aria-hidden="true"></div>'+
+      '<span class="hp-credit">'+g.fieldNote+'</span>';
+  }
+  const inner = document.createElement('div');
+  inner.className = 'hp-inner';
+  const head = document.createElement('div');
+  head.className = 'hp-head';
+  const nm = document.createElement('div');
+  /* the h1 lives INSIDE the hero — the page's one display-type statement (§1.1) */
+  nm.innerHTML = '<h1 class="hp-name">'+g.label+'</h1><span class="gsub">'+g.fullName+'</span>';
+  const mat = document.createElement('span');
+  mat.className = 'chip '+g.maturity.cls;
+  mat.textContent = g.maturity.text;
+  head.appendChild(nm); head.appendChild(mat);
+  inner.appendChild(head);
+  inner.appendChild(buildPipstrip(g));   /* identity chips on the ≥.88 scrim stop (§2.4) */
+  vis.appendChild(inner);
+  plate.appendChild(vis);
+
+  /* lower instrument deck — solid plate; the ONE DSEG grid above the fold (§1.3) */
+  const deck = document.createElement('div');
+  deck.className = 'hp-deck';
+  if (g.pipkey) deck.appendChild(buildPipkey(g));
+
+  const st = document.createElement('div');
+  st.className = 'stats'+(g.stats.length===4?' four':'')+(g.stats.length%2?' odd':'');
+  g.stats.forEach(s=>{
+    const c = document.createElement('div'); c.className='cell';
+    let val = s.val;
+    if (val==='MTG_DECKS') val = MTG_DECKS;
+    if (val==='MTG_ARCH')  val = MTG_ARCH;
+    const seg = s.unlit
+      ? '<span class="seg7 unlit" role="img" aria-label="no data">--.-</span>'
+      : '<span class="seg7" data-target="'+val+'">0</span>';
+    c.innerHTML = '<span class="lbl">'+s.lbl+'</span>'+seg+'<span class="sub">'+s.sub+'</span>';
+    /* tokens §2.2: size the value box in ch (DSEG digit cells) to the widest
+       value so roll-up ticks never reflow and nothing can silently truncate */
+    const el = c.querySelector('.seg7[data-target]');
+    if (el) el.style.minWidth = fmtVal(val).length + 'ch';
+    st.appendChild(c);
+  });
+  deck.appendChild(st);
+
+  deck.appendChild(buildFwrap(g));
+
+  const sh = document.createElement('div'); sh.className='shape';
+  sh.innerHTML = g.shape;
+  deck.appendChild(sh);
+
+  if (g.caveat){
+    const cv = document.createElement('span');
+    cv.className='caveat'; cv.innerHTML=g.caveat;
+    deck.appendChild(cv);
+  }
+
+  const pv = document.createElement('p'); pv.className='prov';
+  pv.innerHTML = g.prov;
+  const nSlot = pv.querySelector('.mtgN');
+  if (nSlot) nSlot.textContent = fmtProse(MTG_DECKS);
+  deck.appendChild(pv);
+
+  const btn = document.createElement('button');
+  btn.className='enter'; btn.type='button';
+  btn.innerHTML = 'ENTER '+g.label+' CONSOLE ▸';
+  btn.setAttribute('aria-label','Enter '+g.label+' console — '+g.maturity.text.toLowerCase());
+  deck.appendChild(btn);
+
+  plate.appendChild(deck);
+  return plate;
+}
+
+/* ---------- L1 secondary tiles — the demoted games ----------
+   Compact: livery band + small name + maturity chip + pip strip + ONE dim stat
+   line. NO DSEG grid, no caveat/prov/shape — those live in the hero when the
+   game is promoted. The whole tile is the press target: tapping makes the game
+   the active console (the "last-used" behavior). */
+function ministatFor(id){
+  if (id==='mtg')      return '<b>'+fmtProse(MTG_DECKS)+'</b> DECK SAMPLES · <b>'+MTG_ARCH+'</b> ARCHETYPES';
+  if (id==='onepiece') return '<b>849</b> ONLINE MATCHES · LARGEST OBSERVED FIELD <b>1,541</b>';
+  return '<b>1,064</b> PRINTINGS · <b>36</b> LEGENDS · N=0 MATCHES';
+}
+function buildMini(id){
+  const g = REG[id];
+  const t = document.createElement('article');
+  t.className = 'tile mini';
+  t.dataset.game = id;
+  t.style.setProperty('--lvgrad', g.lvGrad);
+
+  const band = document.createElement('div');
+  band.className = 'tile-band'; band.setAttribute('aria-hidden','true');
+  t.appendChild(band);
+
+  const head = document.createElement('div');
+  head.className = 'tile-head';
+  const nm = document.createElement('div');
+  nm.innerHTML = '<div class="gname">'+g.label+'</div>';
+  const mat = document.createElement('span');
+  mat.className = 'chip '+g.maturity.cls;
+  mat.textContent = g.maturity.text;
+  head.appendChild(nm); head.appendChild(mat);
+  t.appendChild(head);
+
+  t.appendChild(buildPipstrip(g));
+
+  const ms = document.createElement('p');
+  ms.className = 'ministat';
+  ms.innerHTML = ministatFor(id);
+  t.appendChild(ms);
+
+  t.appendChild(buildFwrap(g, true));   /* collapsed format chips here too (§1.4.2) */
+
+  const btn = document.createElement('button');
+  btn.className='mk'; btn.type='button';
+  btn.innerHTML = '<b>SET ACTIVE</b> ▸';
+  btn.setAttribute('aria-label','Make '+g.label+' the active console');
+  btn.addEventListener('click', ()=>selectGame(id));
+  t.appendChild(btn);
+
+  return t;
+}
+
+function buildDockSlot(d){
+  const s = document.createElement('span');
+  s.className = 'dock-slot';
+  s.innerHTML = '<span class="bayno">'+d.bay+' — RESERVED</span><span class="dname">'+d.name+'</span>';
+  return s;
+}
+
+/* ---------- render: hero + secondary row from the active game ---------- */
+const heroMount = document.getElementById('heroMount');
+const bayMini   = document.getElementById('bayMini');
+function render(){
+  const g = REG[activeId];
+  heroMount.replaceChildren(buildHero(activeId));
+  bayMini.replaceChildren(...ORDER.filter(x=>x!==activeId).map(buildMini));
+  /* livery slot #3 — active plate recolors to the hero game's accent */
+  document.getElementById('activeName').textContent = g.label;
+  document.getElementById('activeNote').textContent = ' — '+g.maturity.text;
+  document.getElementById('activePlate').style.setProperty('--alv', g.accent || 'var(--ink)');
+  chipWrapCheck();
+  armRollups(false);
+}
+
+/* maturity chip: when it flex-wraps under the game name, right-aligned text
+   reads ragged and orphaned — flip to left */
+function chipWrapCheck(){
+  document.querySelectorAll('#heroPlate .hp-head, .tile.mini .tile-head').forEach(head=>{
+    const nm = head.firstElementChild, chip = head.querySelector('.chip');
+    if (nm && chip) chip.classList.toggle('wrapped', chip.offsetTop > nm.offsetTop);
+  });
+}
+addEventListener('resize', chipWrapCheck);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(chipWrapCheck);
+
+/* ---------- roll-ups: IO-gated, RM-gated, sync fallback ----------
+   One observer at a time (disconnect before re-arm — no per-click IO leak) and a
+   shown{} diff cache (tokens §6.1): only changed cells re-animate. Hero swaps
+   mount fresh cells, so the promoted game's readouts roll up from 0 — data
+   changed, motion earned. */
+let rollIO = null;
+const shown = new WeakMap();
+function armRollups(force){
+  const els = document.querySelectorAll('.seg7[data-target]');
+  if (RM || !('IntersectionObserver' in window)){
+    els.forEach(el=>{ el.textContent = fmtVal(+el.dataset.target); });
+    return;
+  }
+  if (rollIO) rollIO.disconnect();
+  rollIO = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if (e.isIntersecting){
+        const target = +e.target.dataset.target;
+        rollup(e.target, target);
+        shown.set(e.target, target);
+        rollIO.unobserve(e.target);
+      }
+    });
+  },{threshold:.2});
+  els.forEach(el=>{
+    const target = +el.dataset.target;
+    if (!force && shown.get(el)===target) return;  /* unchanged — no re-roll */
+    if (force) el.textContent='0';
+    const r = el.getBoundingClientRect();          /* sync fallback for already-visible cells */
+    if (r.top < innerHeight && r.bottom > 0){ rollup(el, target); shown.set(el, target); }
+    else rollIO.observe(el);
+  });
+}
+/* tokens §6.1: IO never fires while visibilityState is hidden — promote
+   in-viewport work manually. Two promotions so below-fold readouts never sit
+   at '0': (a) re-arm when a background-loaded tab is focused, (b) a passive
+   scroll rect-check for scrolling that happens while IO is deaf. The shown{}
+   cache keeps already-rolled cells from re-animating in both paths. */
+document.addEventListener('visibilitychange', ()=>{
+  if (document.visibilityState === 'visible') armRollups(false);
+});
+function promoteVisible(){
+  if (RM) return;
+  document.querySelectorAll('.seg7[data-target]').forEach(el=>{
+    const target = +el.dataset.target;
+    if (shown.get(el)===target) return;
+    const r = el.getBoundingClientRect();          /* hidden sections give 0×0 rects — skipped */
+    if (r.top < innerHeight && r.bottom > 0){
+      rollup(el, target); shown.set(el, target);
+      if (rollIO) rollIO.unobserve(el);
+    }
+  });
+}
+addEventListener('scroll', promoteVisible, {passive:true});
+
+/* ---------- livery handshake: promoting a game re-skins hero + shell ---------- */
+function selectGame(id){
+  if (id === activeId) return;
+  activeId = id;
+  render();
+  glitch(document.getElementById('activePlate'));  /* one-shot: data changed */
+  glitch(document.querySelector('#heroPlate .hp-name'));
+  /* bring the new hero into view — the tap happened below it */
+  document.getElementById('heroPlate')
+    .scrollIntoView({behavior: RM ? 'auto' : 'smooth', block:'start'});
+}
+
+/* ---------- docking bay (L3) + resync demo control ---------- */
+const bayDock = document.getElementById('bayDock');
+DOCK.forEach(d=>bayDock.appendChild(buildDockSlot(d)));
+document.getElementById('resync').addEventListener('click', ()=>{
+  armRollups(true);
+  glitch(document.querySelector('#heroPlate .hp-name'));
+  document.querySelectorAll('.gname').forEach(glitch);
+});
+
+/* ---------- first paint ---------- */
+render();
+
+/* ---------- ticker (tokens §5.1) ---------- */
+const ticker = document.getElementById('ticker');
+const track  = document.getElementById('tickTrack');
+/* duplicate once for the seamless -50% loop; the clone is presentational only,
+   so screen readers must not hear every item twice */
+const tickDup = document.createElement('span');
+tickDup.setAttribute('aria-hidden','true');
+tickDup.style.display = 'inline-flex';
+tickDup.style.alignItems = 'center';
+tickDup.innerHTML = track.innerHTML;
+track.appendChild(tickDup);
+function tickSpeed(){
+  const px = track.scrollWidth/2;
+  track.style.animationDuration = (px/35)+'s';       /* pin ~35px/s */
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(tickSpeed);
+tickSpeed();
+function toggleTick(){
+  const p = ticker.classList.toggle('paused');
+  ticker.setAttribute('aria-pressed', String(p));
+  document.getElementById('tickGlyph').textContent = p ? '▶' : '❚❚';
+}
+ticker.addEventListener('click', toggleTick);
+ticker.addEventListener('keydown', e=>{
+  if (e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleTick(); }
+});
+
+/* ---------- DSEG clock — colon solid under reduced motion ---------- */
+function clock(){
+  const d = new Date(), s = d.getSeconds();
+  const colon = (RM || s%2===0) ? ':' : ' ';
+  document.getElementById('clock').textContent =
+    String(d.getHours()).padStart(2,'0') + colon + String(d.getMinutes()).padStart(2,'0');
+}
+clock(); setInterval(clock, 1000);
+</script>
+</body>
+</html>

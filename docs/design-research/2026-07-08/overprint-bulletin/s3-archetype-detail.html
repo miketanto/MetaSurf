@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaSurf — Izzet Murktide — The Modern Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   OVERPRINT BULLETIN — S3 ARCHETYPE DETAIL
+   Riso spot inks: teal #00838A / fluoro pink #FF48B0
+   overlap plum #5c2a52 / riso yellow #ffe800 / paper #f5f1e8
+   ============================================================ */
+:root{
+  --paper:#f5f1e8;
+  --ink:#1f1c1a;
+  --teal:#00838A;
+  --pink:#FF48B0;
+  /* text-safe ink variants: the fluoro spot colours are for PLATES (fills,
+     dots, chips), not 12px type. On paper #f5f1e8:
+     #FF48B0 ≈ 2.7:1 (fails AA) -> text uses --pink-ink #c4006e ≈ 5.2:1
+     #00838A ≈ 4.0:1 (marginal) -> text uses --teal-ink #00666b ≈ 6.0:1 */
+  --pink-ink:#c4006e;
+  --teal-ink:#00666b;
+  --plum:#5c2a52;
+  --yellow:#ffe800;
+  --rule:rgba(31,28,26,.28);
+  /* feTurbulence grain, reused for dividers + CTA (no gloss allowed) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--paper)}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  max-width:760px;
+  margin:0 auto;
+  padding:0 14px 56px;
+}
+.serif{font-family:'Instrument Serif',serif;font-weight:400}
+.px{font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;letter-spacing:0;text-transform:uppercase;-webkit-font-smoothing:none}
+a{color:inherit}
+canvas{display:block;image-rendering:pixelated}
+.nojs{font-size:11px;padding:6px 8px;border:1px dashed var(--rule);margin-top:8px}
+
+/* ---------- micro-badge chips (Silkscreen, native 8px grid) ---------- */
+.chip{
+  display:inline-block;
+  padding:0 5px;
+  border:1px solid var(--ink);
+  background:var(--paper);
+  color:var(--ink);
+  white-space:nowrap;
+  vertical-align:middle;
+}
+.chip.teal{background:var(--teal);border-color:var(--teal);color:var(--paper)}
+.chip.pink{background:var(--pink);border-color:var(--pink);color:var(--ink)}
+.chip.plum{background:var(--plum);border-color:var(--plum);color:var(--paper)}
+.chip.yell{background:var(--yellow);border-color:var(--ink);color:var(--ink)}
+.up{color:var(--teal-ink);font-weight:700}
+.dn{color:var(--pink-ink);font-weight:700}
+
+/* ---------- grainy section divider (riso squeegee, not gloss) ---------- */
+.divider{
+  height:10px;margin:26px 0 14px;position:relative;
+  background:linear-gradient(90deg,var(--teal),var(--pink));
+}
+.divider::after{content:"";position:absolute;inset:0;background:var(--grain);background-size:120px;mix-blend-mode:overlay;opacity:.9}
+.divider::before{ /* misregistration ghost, 2px off */
+  content:"";position:absolute;inset:0;transform:translate(2px,2px);
+  background:linear-gradient(90deg,var(--pink),var(--teal));
+  opacity:.28;mix-blend-mode:multiply;z-index:-1;
+}
+
+/* ---------- masthead ---------- */
+.mast{
+  display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:3px double var(--ink);
+  padding:12px 0 6px;
+}
+.mast .brand{font-size:15px;font-weight:700;letter-spacing:.08em}
+.mast .brand .tm{color:var(--pink)}
+.navrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule)}
+.navrow a{text-decoration:none;font-weight:700}
+button.share{
+  font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);border:0;padding:3px 8px;cursor:pointer;
+}
+button.share:active{transform:translate(1px,1px)}
+.live{display:inline-block;width:7px;height:7px;background:var(--pink);border-radius:50%;vertical-align:middle;margin-right:4px}
+
+/* ---------- header ---------- */
+header.arch{padding:18px 0 10px}
+h1.title{
+  font-size:36px;line-height:1.02;letter-spacing:-.01em;position:relative;
+  /* overprint misregistration: pink + teal plates 1-2px off the ink plate */
+  text-shadow:2px 1px 0 rgba(255,72,176,.5), -2px -1px 0 rgba(0,131,138,.42);
+}
+.subtitle{font-style:italic;font-family:'Instrument Serif',serif;font-size:17px;color:var(--ink);opacity:.85;margin-top:2px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 2px;align-items:center}
+.ci-pip{display:inline-block;width:10px;height:10px;border:1px solid var(--ink);vertical-align:-1px}
+.ci-U{background:#3b6fb5}.ci-R{background:#c8452e}
+
+.headgrid{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:14px;margin-top:14px;align-items:start}
+.artframe{position:relative;width:96px;border:1px solid var(--ink);background:#fff;box-shadow:3px 3px 0 rgba(92,42,82,.35)}
+.artframe canvas{width:100%;height:auto} /* canvas fills the frame at every breakpoint; tint never shows bare */
+.artframe .tint{position:absolute;inset:0;mix-blend-mode:multiply;pointer-events:none;
+  background:linear-gradient(160deg,#3b6fb5 0%,#7a5aa0 48%,#c8452e 100%)}
+.artframe .reg{ /* misregistered pink frame */
+  position:absolute;inset:-1px;border:1px solid var(--pink);transform:translate(2px,2px);pointer-events:none;opacity:.6}
+.artframe figcaption{position:absolute;bottom:-1px;left:-1px;right:-1px;background:var(--ink);color:var(--paper);
+  font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;text-align:center;text-transform:uppercase}
+
+/* minmax(0,1fr) tracks: no track is allowed to grow past its share, so the
+   WINRATE cell wraps gracefully instead of forcing uneven columns at 390px */
+.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+.stat .k{font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;text-transform:uppercase;opacity:.75}
+.stat .v{font-size:22px;font-weight:700;line-height:1.15}
+.stat .v small{font-size:12px;font-weight:400}
+.stat .sub{font-size:11px;opacity:.8}
+.hl{ /* riso-yellow highlighter swipe (no nowrap: let narrow tracks wrap) */
+  background:linear-gradient(100deg,transparent 2%,var(--yellow) 6%,var(--yellow) 94%,transparent 98%);
+  box-decoration-break:clone;padding:0 3px;
+}
+
+/* ---------- SIGNATURE EFFECT 1: pure-CSS halftone winrate meter ----------
+   Ana Tudor recipe: dot layer + gradient map, blended, crushed by contrast(16).
+   Dot size (ink density) IS the winrate scale. Zero JS, zero images. */
+.meterwrap{margin-top:16px;margin-bottom:12px}
+.meter{position:relative;height:22px;border:1px solid var(--ink);background:#fff;overflow:hidden}
+.meter .ht{
+  position:absolute;inset:0;
+  filter:contrast(16);
+  background:
+    radial-gradient(closest-side,#000 0%,#fff 100%) 0 0/5px 5px,
+    linear-gradient(90deg,#6e6e6e 0%,#000 100%); /* starts just under the crush threshold: pinpricks at 40%, fat dots at 65% */
+  background-blend-mode:screen;
+}
+.meter .inkmap{ /* colours the crushed dots: screen turns black->ink colour, keeps white */
+  position:absolute;inset:0;mix-blend-mode:screen;transform:translateX(1px); /* 1px misregistration */
+  background:linear-gradient(90deg,var(--pink) 0%,var(--pink) 40%,var(--teal) 40%,var(--teal) 100%);
+}
+.meter .tick50{position:absolute;top:-3px;bottom:-3px;left:40%;width:0;border-left:1px dashed var(--ink);opacity:.7}
+.meter .marker{
+  position:absolute;top:-5px;bottom:-5px;left:57.6%;width:3px;background:var(--ink);
+  box-shadow:2px 0 0 var(--pink), -2px 0 0 var(--teal);
+}
+/* breathing room so the bold 50% label never collides with what follows */
+.meterlabels{display:flex;justify-content:space-between;font-size:10px;margin-top:6px;padding-bottom:6px;opacity:.85}
+.meterlabels b{font-size:10px}
+
+/* ---------- section headers ---------- */
+h2.sect{
+  font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;line-height:1.1;
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+}
+h2.sect .no{font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;border:1px solid var(--ink);padding:0 5px}
+.sectsub{font-style:italic;font-family:'Instrument Serif',serif;font-size:15px;opacity:.85;margin:2px 0 12px}
+
+/* ---------- trend chart: two stacked strips, each with its own scale ---------- */
+.chartcard{border:1px solid var(--ink);background:#fff;padding:10px 10px 8px;position:relative}
+.chartcard::before{content:"";position:absolute;inset:-1px;border:1px solid var(--teal);transform:translate(-2px,2px);pointer-events:none;opacity:.4;z-index:0}
+.striplab{opacity:.75;position:relative;z-index:1}
+.striprow{display:flex;gap:6px;margin-top:2px;position:relative;z-index:1}
+.striprow canvas{flex:none}
+.ylab{position:relative;width:22px;flex:none} /* pixel-styled axis numerals */
+.ylab span{position:absolute;right:0;transform:translateY(-50%)}
+.axisrow{display:flex;justify-content:space-between;font-size:10px;opacity:.8;margin:6px 0 0 28px;position:relative;z-index:1}
+.legend{display:flex;gap:14px;font-size:11px;margin-top:8px;flex-wrap:wrap;position:relative;z-index:1}
+.legend .sw{display:inline-block;width:14px;height:9px;vertical-align:-1px;margin-right:5px;border:1px solid var(--ink)}
+.sw.share{background:repeating-conic-gradient(var(--ink) 0% 25%, #fff 0% 50%) 0 0/4px 4px}
+.sw.wr{background:var(--teal);border-color:var(--teal)}
+.sw.ref{background:repeating-linear-gradient(90deg,var(--pink) 0 3px,#fff 3px 6px);border-color:var(--pink)}
+.sw.mv{background:var(--yellow)}
+
+/* ---------- matchup spread strip (S2 halftone cells) ----------
+   Same Ana Tudor contrast-crush recipe as the winrate meter, per cell:
+   ::before = grayscale dot layer + flat gray map, screen-blended, contrast(16)
+   ::after  = spot-ink layer, mix-blend-mode:screen colours the crushed dots.
+   WR -> gray map (documented, same scale as the meter, 40%..65% WR):
+     gray = 110 * (65 - WR) / 25      (110 = #6e = pinpricks, 0 = fat dots)
+   Each cell declares only --wr and --dotc; radius is derived, never hand-typed. */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:560px){.mgrid{grid-template-columns:repeat(6,1fr)}}
+.mcell{
+  border:1px solid var(--ink);background:#fff;padding:6px 6px 4px;position:relative;overflow:hidden;text-align:center;
+  isolation:isolate;
+  --gray:rgb(calc(110*(65 - var(--wr))/25) calc(110*(65 - var(--wr))/25) calc(110*(65 - var(--wr))/25));
+}
+.mcell::before{ /* crushed halftone: dot size derived from --wr */
+  content:"";position:absolute;inset:0;
+  filter:contrast(16);
+  background:
+    radial-gradient(closest-side,#000 0%,#fff 100%) 0 0/6px 6px,
+    linear-gradient(var(--gray),var(--gray));
+  background-blend-mode:screen;
+}
+.mcell::after{ /* inkmap: paints the crushed dots in the cell's spot colour */
+  content:"";position:absolute;inset:0;z-index:0;mix-blend-mode:screen;background:var(--dotc);
+}
+.mcell .vs{position:relative;z-index:2;font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;background:var(--paper);display:inline-block;padding:0 4px;border:1px solid var(--ink)}
+.mcell .opp{position:relative;z-index:2;display:inline-block;font-size:10px;line-height:1.3;background:#fff;padding:0 3px;margin-top:3px}
+/* digits sit ABOVE the low-n grain (z-index 2) on solid white: the field
+   looks noisy, the numbers stay crisp */
+.mcell .wr{position:relative;z-index:2;font-weight:700;font-size:15px;background:#fff;display:inline-block;padding:0 3px;margin-top:4px}
+.mcell .n{position:relative;z-index:2;font-size:10px;opacity:.8;background:#fff;display:inline-block;padding:0 3px}
+.mcell .noise{ /* unreliable data literally looks noisy — but under the type */
+  position:absolute;inset:0;z-index:1;background:var(--grain);background-size:60px;mix-blend-mode:multiply;opacity:.75;
+}
+.mcell .flag{position:absolute;top:2px;right:2px;z-index:3}
+
+/* ---------- decklists ---------- */
+.decks{display:grid;gap:14px}
+@media(min-width:640px){.decks{grid-template-columns:repeat(3,1fr)}}
+.deck{border:1px solid var(--ink);background:#fff;position:relative}
+.deck::after{content:"";position:absolute;inset:-1px;border:1px solid var(--pink);transform:translate(2px,-2px);pointer-events:none;opacity:.35}
+.deck .strip{position:relative;height:44px;overflow:hidden;border-bottom:1px solid var(--ink);background:#fff}
+.deck .strip canvas{width:100%;height:44px;object-fit:cover}
+.deck .strip .tint{position:absolute;inset:0;mix-blend-mode:multiply;background:linear-gradient(120deg,#3b6fb5,#c8452e)}
+.deck .strip .fin{
+  position:absolute;top:4px;left:4px;background:var(--ink);color:var(--paper);
+  font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;padding:0 5px;text-transform:uppercase;
+}
+.deck .body{padding:8px 10px 10px}
+.deck .ev{font-weight:700;font-size:13px}
+.deck .meta{font-size:11px;opacity:.8;margin-bottom:6px}
+.deck ul{list-style:none;font-size:12px;border-top:1px dashed var(--rule);padding-top:6px}
+.deck li{display:flex;gap:6px}
+.deck li .ct{width:16px;text-align:right;font-weight:700}
+.deck li.core{opacity:.75}
+.deck li.diff-up .ct,.deck li.diff-up{color:var(--teal-ink)}
+.deck li.diff-dn .ct,.deck li.diff-dn{color:var(--pink-ink)}
+.deck .more{font-size:11px;opacity:.7;padding-left:22px}
+.deck .view{display:inline-block;margin-top:8px;font-weight:700;font-size:12px;text-decoration:none;border-bottom:2px solid var(--yellow)}
+
+/* ---------- SIGNATURE EFFECT 3: low-res print freemium ---------- */
+.drift{border:1px solid var(--ink);background:#fff;position:relative;overflow:hidden}
+.drift .ghostwrap{position:relative}
+#ghost{width:100%;height:auto;display:block;filter:contrast(1.05)}
+.drift .fog{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:rgba(245,241,232,.14)}
+/* narrow viewports: teaser + CTA flow BELOW the canvas so the ghost —
+   the whole freemium pitch — stays fully visible */
+@media(max-width:559px){
+  .drift .fog{position:static;background:none;border-top:1px dashed var(--rule);padding:10px 10px 12px}
+}
+.unlock{
+  font-family:'Silkscreen',monospace;font-size:8px;line-height:16px;text-transform:uppercase;letter-spacing:.02em;
+  color:var(--paper);background:var(--plum);border:1px solid var(--ink);
+  padding:7px 14px;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:3px 3px 0 var(--ink);
+}
+.unlock::after{content:"";position:absolute;inset:0;background:var(--grain);background-size:120px;mix-blend-mode:overlay;opacity:.8;pointer-events:none}
+.unlock:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.fog .teaser{font-style:italic;font-family:'Instrument Serif',serif;font-size:16px;text-align:center;max-width:300px;
+  background:var(--paper);border:1px solid var(--ink);padding:4px 10px;box-shadow:2px 2px 0 rgba(92,42,82,.4)}
+.drift .cap{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--ink);padding:6px 10px;background:var(--paper)}
+.drift .cap .note{font-size:10px;opacity:.75}
+
+/* ---------- footer colophon ---------- */
+.colophon{margin-top:34px;border-top:3px double var(--ink);padding-top:8px;font-size:10px;opacity:.75;text-align:center}
+.colophon .px{opacity:1}
+
+/* ---------- motion (gated; static fallback is the default state) ---------- */
+@media (prefers-reduced-motion: no-preference){
+  .live{animation:blink 1.4s steps(2,start) infinite}
+  @keyframes blink{to{visibility:hidden}}
+  .meter .marker{animation:settle .5s ease-out both}
+  @keyframes settle{from{transform:translateX(-14px)}to{transform:none}}
+  .hl{background-size:200% 100%;background-repeat:no-repeat;animation:swipe .7s .2s ease-out both}
+  @keyframes swipe{from{background-position:200% 0}to{background-position:0 0}}
+}
+
+@media(min-width:640px){
+  h1.title{font-size:52px}
+  .headgrid{grid-template-columns:minmax(0,1fr) 120px}
+  .artframe{width:120px}
+  .statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= masthead ================= -->
+<div class="mast">
+  <div class="brand">METASURF<span class="tm">▲</span></div>
+  <div class="serif" style="font-size:17px;font-style:italic">The Modern Report — Week 27</div>
+</div>
+<div class="navrow">
+  <a href="#">&larr; META SNAPSHOT</a>
+  <span class="px"><span class="live"></span>UPDATED 2026-07-08 09:00 UTC</span>
+  <button class="share" id="sharebtn" type="button">SHARE ⧉</button>
+</div>
+
+<!-- ================= S3 header ================= -->
+<header class="arch">
+  <h1 class="title serif">Izzet Murktide</h1>
+  <p class="subtitle">“The fair deck that isn’t fair to anyone.”</p>
+
+  <div class="badges">
+    <span class="chip px">IZM</span>
+    <span><span class="ci-pip ci-U" title="Blue"></span> <span class="ci-pip ci-R" title="Red"></span></span>
+    <span class="chip teal px">7D ▲</span>
+    <span class="chip yell px">BIGGEST MOVER</span>
+    <span class="chip plum px" title="A mover that is also your deck — pink over teal makes plum">YOUR DECK ∩ MOVER</span>
+  </div>
+
+  <div class="headgrid">
+    <div class="statgrid">
+      <div class="stat">
+        <div class="k">WINRATE 30D</div>
+        <div class="v">54.4<small>%</small> <span class="up">▲1.2</span></div>
+        <div class="sub">95% CI 52.1–56.7</div>
+      </div>
+      <div class="stat">
+        <div class="k">META SHARE</div>
+        <div class="v">11.8<small>%</small> <span class="up">▲0.6</span></div>
+        <div class="sub">#2 of 41 archetypes</div>
+      </div>
+      <div class="stat">
+        <div class="k">MATCHES</div>
+        <div class="v">2 431</div>
+        <div class="sub">184 events</div>
+      </div>
+      <div class="stat">
+        <div class="k">THIS WEEK</div>
+        <div class="v"><span class="hl">+38 tops ▲</span></div>
+        <div class="sub">12 × top-8 finishes</div>
+      </div>
+    </div>
+
+    <figure class="artframe">
+      <canvas id="heroart" width="80" height="104" aria-label="Dithered placeholder card art, tinted blue-red"></canvas>
+      <span class="tint"></span><span class="reg"></span>
+      <figcaption>ART:DITHERED</figcaption>
+    </figure>
+  </div>
+
+  <!-- halftone winrate meter: dot density IS the winrate -->
+  <div class="meterwrap">
+    <div class="px" style="opacity:.75">WINRATE SCALE 40–65% · DOT DENSITY = WR · MARK = 54.4%</div>
+    <div class="meter" role="img" aria-label="Winrate meter, 54.4 percent, above the 50 percent line">
+      <div class="ht"></div>
+      <div class="inkmap"></div>
+      <div class="tick50"></div>
+      <div class="marker"></div>
+    </div>
+    <div class="meterlabels"><span>40%</span><b>50%</b><span>65%</span></div>
+  </div>
+</header>
+
+<div class="divider" role="presentation"></div>
+
+<!-- ================= 30-day trend ================= -->
+<section>
+  <h2 class="sect"><span class="no">01</span>30-Day Trend</h2>
+  <p class="sectsub">Share climbs into the double digits; winrate holds north of the fold.</p>
+  <div class="chartcard">
+
+    <div class="striplab px">META SHARE %</div>
+    <div class="striprow">
+      <div class="ylab px" aria-hidden="true"><span style="top:0">16</span><span style="top:50%">8</span><span style="top:100%">0</span></div>
+      <canvas id="trendShare" width="150" height="40" aria-label="30-day meta share, dithered area rising from 9.4 to 11.8 percent on a 0 to 16 percent scale, biggest single-day move highlighted July 1"></canvas>
+    </div>
+
+    <div class="striplab px" style="margin-top:12px">WINRATE %</div>
+    <div class="striprow">
+      <div class="ylab px" aria-hidden="true"><span style="top:0">65</span><span style="top:60%">50</span><span style="top:100%">40</span></div>
+      <canvas id="trendWr" width="150" height="40" aria-label="30-day winrate, teal line rising from 51.8 to 54.4 percent on a 40 to 65 percent scale, dashed 50 percent reference line"></canvas>
+    </div>
+
+    <div class="axisrow" id="trendAxis"><span>JUN 08</span><span>JUN 18</span><span>JUN 28</span><span>JUL 08</span></div>
+    <noscript><p class="nojs">Static proof: share 9.4% → 11.8% and winrate 51.8% → 54.4% over the last 30 days; biggest single-day share move on Jul 01. Chart requires JS.</p></noscript>
+    <div class="legend">
+      <span><span class="sw share"></span>SHARE (DITHER AREA)</span>
+      <span><span class="sw wr"></span>WINRATE LINE</span>
+      <span><span class="sw ref"></span>50% LINE</span>
+      <span><span class="sw mv"></span>BIGGEST MOVE ▲</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<!-- ================= matchup spread ================= -->
+<section>
+  <h2 class="sect"><span class="no">02</span>Matchup Spread</h2>
+  <p class="sectsub">Fat teal dots favour you. Sparse pink pinpricks don’t. Noise means low sample.</p>
+  <!-- cells declare --wr (winrate, %) and --dotc (spot ink) only;
+       dot size derives from the documented gray map in the CSS above -->
+  <div class="mgrid">
+    <div class="mcell" style="--wr:58.1;--dotc:var(--teal)">
+      <span class="vs" title="Rakdos Scam">RKS</span><br><span class="opp">Rakdos Scam</span><br><span class="wr">58.1% ▲</span><br><span class="n">n=412</span>
+    </div>
+    <div class="mcell" style="--wr:46.3;--dotc:var(--pink)">
+      <span class="vs" title="Amulet Titan">AMT</span><br><span class="opp">Amulet Titan</span><br><span class="wr">46.3% ▼</span><br><span class="n">n=287</span>
+    </div>
+    <div class="mcell" style="--wr:52.9;--dotc:var(--teal)">
+      <span class="vs" title="Golgari Yawgmoth">YWG</span><br><span class="opp">Yawgmoth</span><br><span class="wr">52.9% ▲</span><br><span class="n">n=198</span>
+    </div>
+    <div class="mcell" style="--wr:61.4;--dotc:var(--teal)">
+      <i class="noise" aria-hidden="true"></i>
+      <span class="flag chip pink px">LOW N</span>
+      <span class="vs" title="Living End">LVE</span><br><span class="opp">Living End</span><br><span class="wr">61.4% ▲</span><br><span class="n">n=18</span>
+    </div>
+    <div class="mcell" style="--wr:44.7;--dotc:var(--pink)">
+      <span class="vs" title="Boros Burn">BRN</span><br><span class="opp">Burn</span><br><span class="wr">44.7% ▼</span><br><span class="n">n=243</span>
+    </div>
+    <div class="mcell" style="--wr:55.2;--dotc:var(--teal)">
+      <span class="vs" title="Hammer Time">HMR</span><br><span class="opp">Hammer Time</span><br><span class="wr">55.2% ▲</span><br><span class="n">n=176</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<!-- ================= recent decklists ================= -->
+<section>
+  <h2 class="sect"><span class="no">03</span>Recent Lists</h2>
+  <p class="sectsub">Diffs vs the 30-day aggregate lead each list — the flex slots are the news; the 4-of core is not.</p>
+  <div class="decks">
+
+    <article class="deck">
+      <div class="strip">
+        <canvas class="art" data-seed="7" width="120" height="30"></canvas>
+        <span class="tint"></span>
+        <span class="fin">1ST · 8-0</span>
+      </div>
+      <div class="body">
+        <div class="ev">MTGO Modern Challenge 64</div>
+        <div class="meta">2026-07-05 · pilot sokos13 · 60+15</div>
+        <ul>
+          <li class="diff-up"><span class="ct">+1</span>Brazen Borrower ▲</li>
+          <li class="diff-dn"><span class="ct">−2</span>Blood Moon ▼</li>
+          <li class="core"><span class="ct">4</span>Ragavan, Nimble Pilferer</li>
+          <li class="core"><span class="ct">4</span>Murktide Regent</li>
+        </ul>
+        <div class="more">…stock core + 52 more</div>
+        <a class="view" href="#">VIEW 75 →</a>
+      </div>
+    </article>
+
+    <article class="deck">
+      <div class="strip">
+        <canvas class="art" data-seed="23" width="120" height="30"></canvas>
+        <span class="tint"></span>
+        <span class="fin">4TH · 7-2</span>
+      </div>
+      <div class="body">
+        <div class="ev">Modern Super Qualifier</div>
+        <div class="meta">2026-07-03 · pilot meltiez · 60+15</div>
+        <ul>
+          <li class="diff-up"><span class="ct">+2</span>Spell Pierce ▲</li>
+          <li class="diff-dn"><span class="ct">−1</span>Archmage's Charm ▼</li>
+          <li class="core"><span class="ct">3</span>Unholy Heat</li>
+          <li class="core"><span class="ct">4</span>Consider</li>
+        </ul>
+        <div class="more">…stock core + 51 more</div>
+        <a class="view" href="#">VIEW 75 →</a>
+      </div>
+    </article>
+
+    <article class="deck">
+      <div class="strip">
+        <canvas class="art" data-seed="41" width="120" height="30"></canvas>
+        <span class="tint"></span>
+        <span class="fin">3-1 · PRELIM</span>
+      </div>
+      <div class="body">
+        <div class="ev">MTGO Modern Preliminary</div>
+        <div class="meta">2026-07-01 · pilot wurst_ · 60+15</div>
+        <ul>
+          <li class="diff-up"><span class="ct">+1</span>Otawara, Soaring City ▲</li>
+          <li class="diff-dn"><span class="ct">−1</span>Steam Vents ▼</li>
+          <li class="core"><span class="ct">2</span>Subtlety</li>
+          <li class="core"><span class="ct">4</span>Mishra's Bauble</li>
+        </ul>
+        <div class="more">…stock core + 53 more</div>
+        <a class="view" href="#">VIEW 75 →</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<div class="divider" role="presentation"></div>
+
+<!-- ================= card-choice drift (premium) ================= -->
+<section>
+  <h2 class="sect"><span class="no">04</span>Card-Choice Drift <span class="chip plum px">PRO</span></h2>
+  <p class="sectsub">What the field is trimming and teching, week over week. Free tier gets the low-res print.</p>
+
+  <div class="drift">
+    <div class="ghostwrap">
+      <canvas id="ghost" width="352" height="216" aria-label="Locked card-choice drift chart, rendered as an unreadable coarse dither. Subscribe to view the numbers."></canvas>
+      <noscript><p class="nojs" style="margin:8px 10px">Drift chart is a PRO feature. Free tier shows a dithered proof print (requires JS).</p></noscript>
+      <div class="fog">
+        <div class="teaser serif">Pilots are trimming Blood Moon for the third straight week — the reason is in the matchup column.</div>
+        <button class="unlock" type="button">UNLOCK FULL RESOLUTION</button>
+      </div>
+    </div>
+    <div class="cap">
+      <span class="px">FREE TIER: 2×2 DITHER PROOF PRINT</span>
+      <span class="note">shape is real · numbers withheld</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= colophon ================= -->
+<div class="colophon">
+  <span class="px">METASURF RISOGRAPH EDITION</span><br>
+  printed 2026-07-08 · data window: last 30 days · all numbers placeholder mock data<br>
+  meter + matchup halftones are pure CSS; charts + art are JS canvas with static noscript fallbacks<br>
+  two inks + paper: teal / fluoro pink / plum is free
+</div>
+
+<script>
+/* ============================================================
+   Everything below runs once at load. The halftone meter and the
+   matchup cells are pure CSS (legible pre-hydration); the trend,
+   hero art and freemium ghost are canvas and carry <noscript>
+   static fallbacks.
+   ============================================================ */
+
+/* deterministic PRNG — same art every load */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- SIGNATURE EFFECT 2: Atkinson-dithered "card art" ----------
+   Procedural grayscale placeholder art (clearly not real card scans),
+   Atkinson error-diffusion to 1-bit, rendered pixelated, then tinted by
+   colour identity via the CSS multiply layer sitting on top.            */
+function atkinson(gray,w,h){
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const i=y*w+x, old=gray[i], nw=old<128?0:255, err=(old-nw)/8;
+      gray[i]=nw;
+      if(x+1<w) gray[i+1]+=err;
+      if(x+2<w) gray[i+2]+=err;
+      if(y+1<h){
+        if(x>0) gray[i+w-1]+=err;
+        gray[i+w]+=err;
+        if(x+1<w) gray[i+w+1]+=err;
+      }
+      if(y+2<h) gray[i+2*w]+=err;
+    }
+  }
+  return gray;
+}
+function makeArt(canvas,seed){
+  const w=canvas.width,h=canvas.height,rnd=mulberry32(seed);
+  const a=2+rnd()*4,b=2+rnd()*4,ph=rnd()*6.28,cx=w*(.3+rnd()*.4),cy=h*(.3+rnd()*.4);
+  const g=new Float32Array(w*h);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const dx=(x-cx)/w,dy=(y-cy)/h,d=Math.sqrt(dx*dx+dy*dy);
+    let v=162
+      +64*Math.sin(x/w*a*6.28+ph+Math.sin(y/h*b*3.14))
+      +52*Math.cos(y/h*b*6.28-ph)
+      -235*Math.max(0,.40-d)           /* dark focal blob = the "creature" */
+      +30*(rnd()-.5);                  /* grain */
+    g[y*w+x]=Math.max(0,Math.min(255,v));
+  }
+  atkinson(g,w,h);
+  const ctx=canvas.getContext('2d'),img=ctx.createImageData(w,h);
+  for(let i=0;i<w*h;i++){
+    const v=g[i]<128?31:255, k=i*4;        /* ink #1f1c1a-ish vs white */
+    img.data[k]=v<32?31:255; img.data[k+1]=v<32?28:255; img.data[k+2]=v<32?26:248; img.data[k+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+}
+makeArt(document.getElementById('heroart'),1312);
+document.querySelectorAll('canvas.art').forEach(c=>makeArt(c,+c.dataset.seed));
+
+/* ---------- 30-day trend: two stacked low-res strips ----------
+   Each strip owns its scale (share 0-16, winrate 40-65) with HTML axis
+   numerals — no more two hidden scales sharing one vertical band.
+   Buffer: colW=5, 30 days -> W = 30*5 = 150, zero wasted columns, so the
+   last data point lands flush against the JUL 08 axis label.
+   Upscaling: CSS width is set to an INTEGER multiple of the buffer
+   (image-rendering:pixelated), so chunky pixels stay even at any width. */
+(function(){
+  const share=[9.4,9.6,9.5,9.8,10.1,9.9,10.3,10.2,10.6,10.4,10.8,10.7,11.0,10.9,11.2,10.8,11.1,11.4,11.2,11.6,11.3,11.7,11.5,12.4,12.1,11.9,12.0,11.8,11.9,11.8];
+  const wr=[51.8,52.0,52.4,51.9,52.6,52.2,52.8,53.1,52.7,53.0,53.4,52.9,53.2,53.6,53.1,53.5,53.8,53.4,53.9,54.2,53.7,54.0,54.5,55.1,54.6,54.3,54.7,54.2,54.5,54.4];
+  const mover=23; /* biggest single-day share jump */
+  const DAYS=30,colW=5,W=DAYS*colW,H=40; /* 150x40: buffer exactly filled */
+  const shY=v=>H-1-Math.round(v/16*(H-2));          /* share scale 0-16% */
+  const wrY=v=>H-1-Math.round((v-40)/25*(H-2));     /* winrate scale 40-65% */
+  function prep(id){
+    const cv=document.getElementById(id);
+    const o=cv.getContext('2d');
+    o.fillStyle='#ffffff';o.fillRect(0,0,W,H);
+    /* biggest-mover highlighter column (riso yellow), in both strips */
+    o.fillStyle='#ffe800';o.fillRect(mover*colW,0,colW,H);
+    return [cv,o];
+  }
+
+  /* strip 1: share area, 2x2 checker dither */
+  const [cvS,oS]=prep('trendShare');
+  oS.fillStyle='#dcd6c8';oS.fillRect(0,shY(8),W,1);  /* 8% gridline, matches axis numeral */
+  oS.fillStyle='#1f1c1a';
+  for(let d=0;d<DAYS;d++){
+    const x0=d*colW, top=shY(share[d]);
+    for(let x=x0;x<x0+colW;x++)for(let y=top;y<H;y++)
+      if(x%2===0&&y%2===0)oS.fillRect(x,y,1,1);      /* 25% dither fill */
+    oS.fillRect(x0,top,colW,1);                      /* solid rim on the area */
+  }
+
+  /* strip 2: winrate line over dashed 50% reference */
+  const [cvW,oW]=prep('trendWr');
+  oW.fillStyle='#FF48B0';
+  const y50=wrY(50);
+  for(let x=0;x<W;x+=6)oW.fillRect(x,y50,3,1);
+  function line(color,dx,dy,th){
+    oW.fillStyle=color;
+    for(let d=0;d<DAYS;d++){
+      const x0=d*colW+dx,y=wrY(wr[d])+dy;
+      oW.fillRect(x0,y,colW,th);
+      if(d>0){const py=wrY(wr[d-1])+dy,lo=Math.min(y,py),hi=Math.max(y,py);oW.fillRect(x0,lo,1,hi-lo+th)}
+    }
+  }
+  /* mis-registration ghost: faint (.28) and offset UP so it can't be read
+     as the pink dashed 50% reference below the line */
+  line('rgba(255,72,176,.28)',1,-1,2);
+  line('#00838A',0,0,2);
+  oW.fillStyle='#1f1c1a';oW.fillRect(W-2,wrY(wr[DAYS-1])-1,4,4); /* endpoint marker */
+
+  /* integer upscale: chunky pixels stay square; axis row matches canvas width */
+  const axis=document.getElementById('trendAxis');
+  function fit(){
+    const avail=cvS.parentElement.clientWidth-28; /* 22px ylab + 6px gap */
+    const s=Math.max(1,Math.min(3,Math.floor(avail/W)));
+    [cvS,cvW].forEach(c=>{c.style.width=(W*s)+'px';c.style.height=(H*s)+'px'});
+    axis.style.width=(W*s)+'px';
+  }
+  fit();
+  window.addEventListener('resize',fit);
+})();
+
+/* ---------- SIGNATURE EFFECT 3: freemium low-res proof print ----------
+   Drift chart drawn at 1/8 resolution with a 2x2 Bayer dither, upscaled
+   with imageSmoothingEnabled=false. Free users see the true SHAPE of the
+   drift — which cards are up, which are down — but no readable numbers. */
+(function(){
+  const cv=document.getElementById('ghost');
+  const W=44,H=27,off=document.createElement('canvas');off.width=W;off.height=H;
+  const o=off.getContext('2d'),rnd=mulberry32(2026);
+  o.fillStyle='#ffffff';o.fillRect(0,0,W,H);
+  const bayer=[[0,2],[3,1]];
+  function dRect(x0,y0,w,h,rgb,density){ /* 2x2 ordered dither fill */
+    o.fillStyle=rgb;
+    for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)
+      if(bayer[y&1][x&1]<density*4)o.fillRect(x,y,1,1);
+  }
+  /* six drift bars around a centre axis: teal right = teched in, pink left = trimmed */
+  const axis=22, rows=[[+9,.9],[+6,.75],[+3,.6],[-4,.6],[-7,.8],[-11,.95]];
+  rows.forEach((r,i)=>{
+    const y=2+i*4, len=r[0];
+    if(len>0)dRect(axis+1,y,len,3,'#00838A',r[1]);
+    else dRect(axis+len,y,-len,3,'#FF48B0',r[1]);
+    /* unreadable pseudo card-name: random pixel runs */
+    o.fillStyle='#1f1c1a';
+    for(let x=1;x<axis-2;x++)if(rnd()<.45)o.fillRect(x,y+1,1,1);
+  });
+  o.fillStyle='#1f1c1a';o.fillRect(axis,0,1,H); /* axis */
+  /* proof-print scuff noise */
+  o.fillStyle='rgba(31,28,26,.5)';
+  for(let i=0;i<70;i++)o.fillRect((rnd()*W)|0,(rnd()*H)|0,1,1);
+  const ctx=cv.getContext('2d');
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(off,0,0,W,H,0,0,cv.width,cv.height);
+})();
+
+/* share: mock — copies a permalink */
+document.getElementById('sharebtn').addEventListener('click',function(){
+  const url='https://metasurf.gg/modern/izzet-murktide';
+  if(navigator.share){navigator.share({title:'Izzet Murktide — MetaSurf',url}).catch(()=>{})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(url).catch(()=>{});this.textContent='COPIED ✓';setTimeout(()=>this.textContent='SHARE ⧉',1500)}
+});
+document.querySelector('.unlock').addEventListener('click',function(){
+  this.textContent='PRO — MOCKUP ONLY';setTimeout(()=>this.textContent='UNLOCK FULL RESOLUTION',1600);
+});
+</script>
+</body>
+</html>

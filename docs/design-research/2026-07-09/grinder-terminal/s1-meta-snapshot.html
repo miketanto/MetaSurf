@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS-01 // META SNAPSHOT — MetaSurf</title>
+<!--
+  MetaSurf design mockup — "The Grinder Terminal" — S1 Meta Snapshot
+  REFINED 2026-07-09 (v2). Single-file, no build step. All numbers are
+  placeholders (mockup only).
+
+  WHAT CHANGED vs 2026-07-08 (critique: data legibility):
+  1. HARD FONT CONTRACT — bitmap/pixel display type (Departure Mono local,
+     VT323 fallback) is now allowed ONLY at >=16px and ONLY on chrome:
+     logo, plate ID, DECODE chips, mover deltas, boot screen. Every data
+     value (share %, WR, CI, N, deltas) is IBM Plex Mono 500, 14px,
+     tabular-nums. Nothing numeric ever renders in a bitmap face.
+  2. VECTOR SPARKLINES — the block-glyph sparklines (▂▃▄▅…) are replaced
+     with inline SVG polylines (crisp 1.5px stroke + square terminal
+     end-cap). Data-ink is vector; terminal flavor moved to the FRAME:
+     dotted baseline, box-drawing section rules, prompt markers.
+  3. DEEPER PHOSPHOR ATMOSPHERE where it costs nothing: full-viewport
+     scanline film + CRT vignette at very low opacity (data sits far above
+     contrast threshold), glow discipline (glow ONLY on amber chrome,
+     never on data ink), a tmux-style fixed command bar, box-drawing
+     section headers, boot + format-switch re-paint micro-moments. All
+     motion gated behind prefers-reduced-motion.
+
+  FONT STRATEGY: 'Departure Mono' is local()-only in this mockup; VT323 is
+  the webfont fallback for LARGE display type only. All small type and all
+  data use IBM Plex Mono. Production self-hosts Departure Mono (SIL OFL).
+
+  ⚠ PRODUCTION NOTE — FREEMIUM SCRAMBLE: locked content (.scramble blocks)
+  is real-looking data hidden by a CSS filter + dither overlay. That is a
+  MOCKUP SHORTCUT ONLY: one devtools toggle reveals it. In production the
+  server MUST render decoy/placeholder values for free-tier clients;
+  premium data never ships in the DOM.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=VT323&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     HARD 5-COLOR BUDGET — nothing outside these custom properties.
+     green/red are reserved strictly for winrate/delta semantics.
+     ============================================================ */
+  :root{
+    --bg:        #0a0a0a;  /* near-black base            */
+    --fg:        #f2f0e6;  /* paper-white body/data      */
+    --amber:     #ffb000;  /* brand / active / cursor    */
+    --amber-dim: #8a6200;  /* low-confidence / caution   */
+    --win:       #33ff66;  /* favorable WR / up-delta    */
+    --win-dim:   #1a8038;  /* dim tier of win green      */
+    --loss:      #ff665e;  /* unfavorable WR / down-delta*/
+
+    /* DISPLAY stack — >=16px CHROME ONLY (logo, plate id, decode chips,
+       boot). Never on data values, never below 16px. */
+    --disp: 'Departure Mono','VT323',monospace;
+    /* DATA + BODY stack — everything numeric and every small size. */
+    --mono: 'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    /* glyph stack: box-drawing + geometric ▲▼▚█ are NOT guaranteed in
+       every mono face; pin fallbacks that carry them with mono metrics */
+    --glyph-stack: 'IBM Plex Mono','Menlo','Consolas','DejaVu Sans Mono','Noto Sans Symbols 2','Segoe UI Symbol',monospace;
+
+    --line: 1.25rem;         /* one grid line = 20px */
+
+    /* GLOW DISCIPLINE — one phosphor bloom, applied ONLY to amber chrome
+       (logo, section markers, decode chips, cursor). Data ink never glows:
+       bloom on small numerals is exactly what killed legibility in v1. */
+    --glow: 0 0 6px rgba(255,176,0,.5), 0 0 20px rgba(255,176,0,.16);
+    --glow-soft: 0 0 10px rgba(255,176,0,.22);
+
+    /* 4x4 Bayer dither tile (URL-encoded SVG) for signal-scramble */
+    --bayer: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%274%27%20height%3D%274%27%3E%3Cpath%20d%3D%27M0%200h1v1H0zM2%200h1v1H2zM1%201h1v1H1zM3%201h1v1H3zM0%202h1v1H0zM2%202h1v1H2zM1%203h1v1H1zM3%203h1v1H3z%27%20fill%3D%27%230a0a0a%27/%3E%3C/svg%3E");
+  }
+
+  @font-face{
+    font-family:'Departure Mono';
+    src: local('Departure Mono'), local('DepartureMono-Regular');
+    font-display: swap;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ font-size:16px; }
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:var(--line);
+    font-variant-numeric: tabular-nums;
+    -webkit-text-size-adjust:100%;
+    min-height:100vh;
+    /* clearance for the fixed command bar */
+    padding-bottom: calc(var(--line)*2.5);
+  }
+  ::selection{ background:var(--amber); color:var(--bg); }
+
+  /* ============================================================
+     PHOSPHOR FILM — full-viewport scanlines + CRT vignette.
+     Deliberately faint (peak 4% ink): atmosphere, not a filter on
+     the data. Static by default; the drift animation is gated.
+     ============================================================ */
+  body::before{ /* vignette — darkens edges, never the reading column */
+    content:""; position:fixed; inset:0; z-index:90; pointer-events:none;
+    background: radial-gradient(ellipse 120% 90% at 50% 40%,
+      transparent 60%, rgba(0,0,0,.42) 100%);
+  }
+  body::after{ /* scanlines */
+    content:""; position:fixed; inset:-4px 0 0 0; z-index:91; pointer-events:none;
+    background: repeating-linear-gradient(0deg,
+      rgba(242,240,230,.04) 0px, rgba(242,240,230,.04) 1px,
+      transparent 1px, transparent 4px);
+  }
+  @media (prefers-reduced-motion: no-preference){
+    body::after{ animation: raster 9s linear infinite; }
+    @keyframes raster{ to{ transform:translateY(4px); } }
+  }
+
+  .wrap{ max-width:88ch; margin:0 auto; padding:0 1ch; }
+
+  /* ============================================================
+     TYPE ROLES
+     .disp  — bitmap display, chrome only, >=16px enforced here
+     .data  — numeric ink: Plex 500 / 14px / tabular. THE legibility fix.
+     .micro — 11px Plex chrome labels
+     ============================================================ */
+  .disp{
+    font-family:var(--disp);
+    -webkit-font-smoothing:none;
+    font-smooth:never;
+    font-size:16px;            /* floor — chrome may go bigger, never smaller */
+    letter-spacing:0;
+  }
+  .data{
+    font-family:var(--mono);
+    font-weight:500;
+    font-size:14px;
+    font-variant-numeric: tabular-nums;
+    text-shadow:none;          /* data ink NEVER glows */
+  }
+  .micro{ font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+
+  .amber{ color:var(--amber); }
+  .dim{ color:var(--fg); opacity:.45; }
+  .up{ color:var(--win); }
+  .down{ color:var(--loss); }
+  .caution{ color:var(--amber); }
+  .glow{ text-shadow:var(--glow); }
+  /* terminals don't italicize — CI de-emphasis via size + opacity only */
+  .ci{ opacity:.55; font-size:12px; font-weight:400; }
+
+  a{ color:inherit; text-decoration:none; }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+  }
+
+  button{
+    font:inherit; color:inherit; background:none; border:0; cursor:pointer;
+    font-variant-numeric: tabular-nums;
+  }
+  button:focus-visible, a:focus-visible{ outline:1px solid var(--amber); outline-offset:1px; }
+
+  /* ============================================================
+     BLINKING BLOCK CURSOR — steps() so it snaps, no fade.
+     .stale variant = amber-dim: sync indicator, not a "live" lie.
+     ============================================================ */
+  .cursor{
+    display:inline-block; width:1ch; height:1em;
+    background:var(--amber); vertical-align:text-bottom;
+    box-shadow:var(--glow-soft);
+    animation: blink 1s steps(1,end) infinite;
+  }
+  .cursor.stale{ background:var(--amber-dim); box-shadow:none; animation-duration:2s; }
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ animation:none; }
+  }
+
+  /* ============================================================
+     HEADER CHROME
+     ============================================================ */
+  header.chrome{ position:relative; border-bottom:1px solid var(--amber-dim); }
+
+  .topbar{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:1ch; padding-top:calc(var(--line)*0.5); flex-wrap:wrap;
+  }
+  .logo{ font-size:26px; color:var(--amber); line-height:calc(var(--line)*1.5); text-shadow:var(--glow); }
+  .logo small{ font-size:16px; color:var(--fg); opacity:.45; text-shadow:none; }
+  .clockline{ white-space:nowrap; }
+  .clockline .synced{ color:var(--amber); }
+  .clockline .synced.stale-label{ color:var(--amber-dim); }
+
+  nav.mainnav{ padding:calc(var(--line)*0.25) 0; }
+  nav.mainnav a{ display:inline-block; padding:0 .5ch; margin-right:1ch; }
+  nav.mainnav a[aria-current="page"]{ background:var(--amber); color:var(--bg); font-weight:600; box-shadow:var(--glow-soft); }
+  nav.mainnav a:not([aria-current]):hover{ color:var(--amber); }
+
+  /* datasheet faceplate — spec values are DATA (Plex), plate id is chrome */
+  .faceplate{
+    border:1px solid var(--fg); margin:calc(var(--line)*0.5) 0;
+    padding: calc(var(--line)*0.25) 1ch;
+    position:relative;
+  }
+  .faceplate .plate-id{ color:var(--amber); font-size:16px; line-height:var(--line); text-shadow:var(--glow-soft); }
+  .faceplate .plate-row{ display:flex; flex-wrap:wrap; column-gap:2ch; align-items:baseline; }
+  .faceplate::after{ /* corner tick, pure text furniture */
+    content:"▞\FE0E▞\FE0E"; position:absolute; top:-1px; right:-1px;
+    font-family:var(--glyph-stack);
+    color:var(--amber-dim); font-size:11px; line-height:11px;
+    background:var(--bg); padding-left:.5ch;
+  }
+
+  /* format picker — scroller wrapped so an edge fade + » hint can signal
+     off-screen formats ([PAUPER]/[VINTAGE] at 390px) */
+  .fmtwrap{ position:relative; }
+  .fmtwrap::after{
+    content:"»"; position:absolute; right:0; top:0;
+    height:100%; width:6ch; text-align:right;
+    display:flex; align-items:center; justify-content:flex-end;
+    background:linear-gradient(90deg, rgba(10,10,10,0), var(--bg) 70%);
+    color:var(--amber); pointer-events:none;
+    transition:opacity .15s;
+  }
+  .fmtwrap.at-end::after{ opacity:0; }
+  .fmtrow{
+    display:flex; gap:0; overflow-x:auto; white-space:nowrap;
+    padding-bottom: calc(var(--line)*0.5);
+    scrollbar-width:none;
+  }
+  .fmtrow::-webkit-scrollbar{ display:none; }
+  .fmtrow .lbl{ margin-right:1ch; opacity:.45; flex:none; align-self:center; }
+  .fmt{ padding:0 .5ch; margin-right:1ch; flex:none; }
+  .fmt[aria-pressed="true"]{ background:var(--amber); color:var(--bg); font-weight:600; box-shadow:var(--glow-soft); }
+  .fmt[aria-pressed="false"]:hover{ color:var(--amber); }
+
+  /* ============================================================
+     SECTION FURNITURE — box-drawing header rails. The terminal
+     identity lives HERE (frame), not in the data marks.
+     ============================================================ */
+  section{ margin-top: var(--line); }
+  .sec-rail{
+    display:flex; align-items:baseline; gap:1ch;
+    color:var(--amber); margin-bottom: calc(var(--line)*0.25);
+  }
+  .sec-rail .corner{ font-family:var(--glyph-stack); opacity:.7; flex:none; }
+  .sec-rail .sec-title{ flex:none; text-shadow:var(--glow-soft); }
+  .sec-rail .fill{
+    flex:1; height:1px; align-self:center; margin-top:2px;
+    background-image:linear-gradient(90deg, var(--amber-dim) 0 60%, transparent 60% 100%);
+    background-size:8px 1px; opacity:.7;
+  }
+  .sec-rail .note{ flex:none; color:var(--fg); opacity:.45; text-transform:none; }
+
+  .rule{ overflow:hidden; white-space:nowrap; opacity:.35; user-select:none; font-family:var(--glyph-stack); }
+  .rule.amber-rule{ color:var(--amber); opacity:.6; }
+
+  /* status / fake-terminal loading lines — prompt marker in amber */
+  .statusline{ min-height: var(--line); opacity:.75; white-space:nowrap; overflow:hidden; }
+  .statusline .ok{ color:var(--win-dim); }
+  .prompt{ color:var(--amber); }
+
+  /* ============================================================
+     SIGNAL-SCRAMBLE (freemium) — dithered static + blur tease.
+     ⚠ MOCKUP ONLY: production renders server-side decoy data here.
+     ============================================================ */
+  .scramble{ position:relative; }
+  .scramble .payload{
+    filter: blur(3px) contrast(2);
+    user-select:none; pointer-events:none;
+  }
+  .scramble::before{
+    content:""; position:absolute; inset:0; z-index:3; pointer-events:none;
+    background-image: var(--bayer);
+    background-size:4px 4px;
+    opacity:.5;
+    image-rendering: pixelated;
+  }
+  .decode{
+    position:absolute; z-index:4; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background:var(--amber); color:var(--bg);
+    font-family:var(--disp);           /* chrome: bitmap face allowed */
+    -webkit-font-smoothing:none;
+    font-size:16px; text-transform:uppercase; letter-spacing:1px;
+    padding: calc(var(--line)*0.2) 1.5ch;
+    white-space:nowrap;
+    box-shadow:var(--glow);
+  }
+  .decode:hover{ background:var(--fg); box-shadow:none; }
+  .decode:active{ transform:translate(-50%,-50%) translateY(1px); }
+
+  /* movers carousel */
+  .movers-strip{
+    display:flex; gap:1ch; overflow-x:auto; padding-bottom:calc(var(--line)*0.25);
+    scrollbar-width:none;
+  }
+  .movers-strip::-webkit-scrollbar{ display:none; }
+  .mover{
+    flex:none; width:24ch; border:1px solid var(--amber-dim);
+    padding: calc(var(--line)*0.25) 1ch;
+  }
+  .mover .mv-name{ color:var(--fg); font-weight:600; }
+  .mover .mv-delta{ font-size:20px; line-height:calc(var(--line)*1.25); font-family:var(--disp); -webkit-font-smoothing:none; }
+  .mover .mv-vals{ opacity:.6; }
+
+  /* ============================================================
+     RANKED ARCHETYPE LIST — strict character grid.
+     Numeric tracks sized for 14px Plex data ink.
+     ============================================================ */
+  .listhead, .row{
+    display:grid;
+    grid-template-columns: 2ch minmax(0,1fr) 5.5ch 8.5ch 88px;
+    column-gap:1ch;
+    align-items:center;
+  }
+  .listhead{
+    color:var(--fg); opacity:.45;
+    border-bottom:1px solid var(--amber-dim);
+    padding-bottom: calc(var(--line)*0.25);
+    margin-bottom: calc(var(--line)*0.25);
+  }
+  .num, .share, .wr{ text-align:right; }
+  .trend{ text-align:right; }
+  .listhead .name{ text-align:left; }
+
+  .row{ width:100%; text-align:inherit; padding:3px 0; }
+  .row .gutter{ text-align:right; opacity:.35; font-size:12px; }
+  .row .name{
+    text-align:left; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+  }
+  .row .wr{ white-space:nowrap; }
+  .row .trend{
+    white-space:nowrap;
+    display:flex; align-items:center; justify-content:flex-end; gap:.75ch;
+  }
+  .row:hover .name{ color:var(--amber); }
+  .row:hover .gutter{ opacity:1; color:var(--amber); }
+  .row:focus-visible{ outline:1px solid var(--amber); outline-offset:-1px; }
+
+  /* row re-paint on load / format switch: 2-step CRT pop, no easing.
+     Delay set inline via --i. Reduced-motion: rows just appear. */
+  @media (prefers-reduced-motion: no-preference){
+    #rows .row, #rows .lown{
+      opacity:0;
+      animation: rowin .18s steps(2,end) forwards;
+      animation-delay: calc(var(--i,0) * 26ms);
+    }
+    @keyframes rowin{ from{ opacity:0; } to{ opacity:1; } }
+  }
+
+  /* low-sample flag: full-width second line, so the WR cell never
+     overflows its track at 390px */
+  .lown{
+    display:block;
+    text-align:left; color:var(--amber); opacity:.8;
+    padding-left:3ch;
+  }
+
+  /* ── VECTOR SPARKLINE ──────────────────────────────────────────
+     Crisp SVG data-ink: 1.5px polyline + square end-cap pixel.
+     No bloom, no bitmap. Dotted baseline = the only flavor allowed
+     inside the plot. Up/down carry EQUAL salience. */
+  svg.spark{ display:block; flex:none; overflow:visible; }
+  svg.spark .sp-line{ fill:none; stroke:currentColor; stroke-width:1.5; stroke-linejoin:miter; stroke-linecap:butt; }
+  svg.spark .sp-dot{ fill:currentColor; }
+  svg.spark .sp-base{ stroke:var(--fg); stroke-width:1; stroke-dasharray:1 3; opacity:.25; }
+  .s-up{ color:var(--win); }
+  .s-down{ color:var(--loss); }
+  .s-flat{ color:var(--fg); opacity:.6; }
+
+  .delta{ display:inline-block; min-width:4.5ch; text-align:right; font-family:var(--glyph-stack); font-weight:500; font-size:13px; }
+
+  /* expanded detail line under a tapped row */
+  .rowdetail{
+    color:var(--amber); opacity:.9;
+    padding-left:4ch;
+    white-space:nowrap; overflow:hidden;
+  }
+
+  .lockblock{ margin-top: calc(var(--line)*0.5); }
+
+  .legend{ margin-top: var(--line); opacity:.6; }
+  .legend .k{ white-space:nowrap; }
+  .legend .glyphs{ font-family:var(--glyph-stack); }
+
+  footer{ margin-top: calc(var(--line)*1.5); padding-bottom: var(--line); }
+  footer .ingest{ opacity:.6; }
+  footer .tier{ color:var(--amber-dim); }
+  footer .tier b{ color:var(--amber); font-weight:600; }
+
+  /* ============================================================
+     COMMAND BAR — tmux/vim status line pinned to the viewport.
+     Chrome only: 11px Plex, no data claims beyond the plate spec.
+     ============================================================ */
+  .cmdbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:95;
+    background:var(--bg);
+    border-top:1px solid var(--amber-dim);
+    display:flex; justify-content:space-between; gap:2ch;
+    padding: calc(var(--line)*0.3) 1ch;
+    white-space:nowrap; overflow:hidden;
+  }
+  .cmdbar .cb-seg{ opacity:.7; }
+  .cmdbar .cb-seg b{ color:var(--amber); font-weight:600; }
+  .cmdbar .cb-mode{
+    background:var(--amber); color:var(--bg); font-weight:600;
+    padding:0 1ch; margin-right:1ch;
+  }
+  .cmdbar .cb-right{ flex:none; }
+
+  /* ============================================================
+     BIOS BOOT — 600ms-class cold open, sessionStorage-gated
+     ============================================================ */
+  #boot{
+    position:fixed; inset:0; z-index:100; background:var(--bg);
+    padding: calc(var(--line)*1.5) 2ch;
+    font-family:var(--disp); -webkit-font-smoothing:none;
+    font-size:18px; line-height:calc(var(--line)*1.15);
+    display:none;
+  }
+  #boot.on{ display:block; }
+  #boot .b-amber{ color:var(--amber); text-shadow:var(--glow); }
+  #boot .b-ok{ color:var(--win-dim); }
+  #boot .b-bar{ font-family:var(--glyph-stack); letter-spacing:0; }
+  #boot .skip{ position:absolute; bottom:calc(var(--line)*2); left:2ch; opacity:.4; font-family:var(--mono); }
+
+  /* ============================================================
+     TOUCH TARGETS — on coarse pointers every tappable control gets
+     >=44px hit height (padding), desktop keeps full density.
+     ============================================================ */
+  @media (pointer:coarse){
+    .row{ padding:12px 0; }
+    .fmt{ padding-top:13px; padding-bottom:13px; }
+    nav.mainnav a{ padding-top:13px; padding-bottom:13px; }
+    .decode{ padding:12px 1.5ch; }
+  }
+
+  /* wider viewports: same grid, roomier tracks + N column + wider spark */
+  .col-n{ display:none; }
+  @media (min-width: 700px){
+    .wrap{ padding:0 2ch; }
+    .listhead, .row{
+      grid-template-columns: 3ch minmax(16ch,1fr) 6ch 7ch 10ch 132px;
+    }
+    .col-n{ display:block; text-align:right; }
+    .lown{ padding-left:4ch; }
+    .mover{ width:28ch; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ BIOS BOOT OVERLAY ══════════════════ -->
+<div id="boot" role="status" aria-live="polite">
+  <pre id="bootlines" style="font:inherit;white-space:pre-wrap"></pre>
+  <span class="cursor" aria-hidden="true"></span>
+  <div class="skip micro">any key / tap to skip</div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════════════ HEADER CHROME ══════════════════ -->
+<header class="chrome">
+  <div class="topbar">
+    <div class="logo disp">METASURF<small> v0.2</small></div>
+    <!-- cursor + label are tied to INGEST freshness, not wall clock:
+         "SYNCED hh:mm" blinks amber while fresh, amber-dim when stale -->
+    <div class="clockline micro">
+      <span id="synclabel" class="synced">SYNCED 03:12</span>
+      <span id="synccursor" class="cursor" aria-hidden="true"></span>
+    </div>
+  </div>
+
+  <nav class="mainnav micro" aria-label="Primary">
+    <a href="#" aria-current="page">[meta]</a>
+    <a href="#">[matrix]</a>
+    <a href="#">[decks]</a>
+    <a href="#" style="float:right" class="dim">[acct: guest]</a>
+  </nav>
+
+  <div class="faceplate">
+    <div class="plate-row">
+      <span class="plate-id disp">MS-01&nbsp;//&nbsp;META&nbsp;SNAPSHOT</span>
+    </div>
+    <div class="plate-row micro">
+      <span>FORMAT: <span class="data" style="font-size:11px" id="plate-fmt">MODERN</span></span>
+      <span>WINDOW: 14D</span>
+      <span>N=<span class="data" style="font-size:11px">4,213</span></span>
+      <span>CI: 95%</span>
+    </div>
+  </div>
+
+  <div class="fmtwrap">
+    <div class="fmtrow micro" role="group" aria-label="Format picker">
+      <span class="lbl">FMT&gt;</span>
+      <button class="fmt" aria-pressed="true">[MODERN]</button>
+      <button class="fmt" aria-pressed="false">[PIONEER]</button>
+      <button class="fmt" aria-pressed="false">[LEGACY]</button>
+      <button class="fmt" aria-pressed="false">[STANDARD]</button>
+      <button class="fmt" aria-pressed="false">[PAUPER]</button>
+      <button class="fmt" aria-pressed="false">[VINTAGE]</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════ BIGGEST MOVERS (free = scrambled tease) ══════════════════ -->
+<!-- ⚠ PRODUCTION NOTE: the payload below is mockup-only. Free-tier clients
+     must receive SERVER-RENDERED DECOY VALUES here — the CSS scramble is a
+     visual treatment, not an access control, and is defeatable in devtools. -->
+<section aria-labelledby="movers-h">
+  <div class="sec-rail micro">
+    <span class="corner" aria-hidden="true">┌─</span>
+    <span class="sec-title" id="movers-h">▚&#xFE0E; BIGGEST MOVERS · 7D</span>
+    <span class="fill" aria-hidden="true"></span>
+    <span class="note">signal encrypted — free tier</span>
+  </div>
+
+  <div class="scramble" id="movers-lock">
+    <div class="payload" aria-hidden="true">
+      <div class="movers-strip">
+        <div class="mover">
+          <div class="micro dim">SHARE Δ7D</div>
+          <div class="mv-name">Amulet Titan</div>
+          <div class="mv-delta up">▲&#xFE0E;2.1</div>
+          <div class="mv-vals data">6.9% → 9.3%</div>
+        </div>
+        <div class="mover">
+          <div class="micro dim">SHARE Δ7D</div>
+          <div class="mv-name">Burn</div>
+          <div class="mv-delta down">▼&#xFE0E;1.8</div>
+          <div class="mv-vals data">7.2% → 5.4%</div>
+        </div>
+        <div class="mover">
+          <div class="micro dim">WR Δ7D</div>
+          <div class="mv-name">Yawgmoth</div>
+          <div class="mv-delta up">▲&#xFE0E;1.4</div>
+          <div class="mv-vals data">51.2 → 52.6</div>
+        </div>
+        <div class="mover">
+          <div class="micro dim">SHARE Δ7D</div>
+          <div class="mv-name">Living End</div>
+          <div class="mv-delta down">▼&#xFE0E;0.9</div>
+          <div class="mv-vals data">7.0% → 6.1%</div>
+        </div>
+      </div>
+    </div>
+    <button class="decode" id="decode-movers">DECODE →</button>
+    <span class="sr-only">Biggest movers module is a premium feature. Upgrade to decode the 7-day share and winrate movers.</span>
+  </div>
+  <div class="statusline micro" id="movers-status"></div>
+</section>
+
+<div class="rule" aria-hidden="true">════════════════════════════════════════════════════════════════════════════════════════</div>
+
+<!-- ══════════════════ RANKED ARCHETYPE LIST ══════════════════ -->
+<section aria-labelledby="list-h">
+  <div class="sec-rail micro">
+    <span class="corner" aria-hidden="true">┌─</span>
+    <span class="sec-title" id="list-h">▚&#xFE0E; RANKED ARCHETYPES</span>
+    <span class="fill" aria-hidden="true"></span>
+    <span class="note">tap row → S3 detail</span>
+  </div>
+
+  <div class="statusline" id="agg-status"><span class="prompt">&gt;</span> aggregating 14d window… n=4,213</div>
+
+  <!-- Semantics: a list of row-buttons (each button carries a full aria-label),
+       NOT an ARIA table — a button-per-row layout can't express valid
+       rowindex/cell structure, so we don't pretend it can. The visual header
+       is decorative for AT. -->
+  <div id="archlist">
+    <div class="listhead micro" aria-hidden="true">
+      <span class="num">#</span>
+      <span class="name">ARCHETYPE</span>
+      <span class="col-n">N</span>
+      <span class="share">META%</span>
+      <span class="wr">WR ±CI</span>
+      <span class="trend">7D</span>
+    </div>
+    <!-- rows injected by JS from DATA (keeps grid + sr labels consistent) -->
+    <div id="rows" role="list" aria-label="Ranked archetypes, Modern, 14 day window"></div>
+  </div>
+
+  <!-- locked depth: ranks 13+ scrambled -->
+  <!-- ⚠ PRODUCTION NOTE: mockup-only payload; server must send decoy rows
+       to free-tier clients (see note at top of file). -->
+  <div class="scramble lockblock" id="tail-lock">
+    <div class="payload" aria-hidden="true">
+      <div id="tailrows"></div>
+    </div>
+    <button class="decode" id="decode-tail">DECODE 26 MORE →</button>
+    <span class="sr-only">Ranks 13 through 38 are a premium feature. Upgrade to decode the full archetype list.</span>
+  </div>
+  <div class="statusline micro" id="tail-status"></div>
+
+  <div class="legend micro">
+    <span class="k"><span class="up glyphs">▲&#xFE0E;</span><span class="down glyphs">▼&#xFE0E;</span> = Δ share 7d</span> ·
+    <span class="k"><span class="ci">±x.x</span> = 95% CI</span> ·
+    <span class="k"><span class="up">green</span>/<span class="down">red</span> WR = CI clear of 50%</span> ·
+    <span class="k"><span class="caution">n=xx</span> = low sample (n&lt;30)</span> ·
+    <span class="k">line = 7d share trend, ■ = today</span>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="rule amber-rule" aria-hidden="true">────────────────────────────────────────────────────────────────────────────────────────</div>
+  <div class="ingest micro">LAST INGEST 2026-07-08 03:12 UTC · NEXT 07:00 UTC · SRC: MTGO CHALLENGES + MELEE</div>
+  <div class="tier micro">TIER: <b>FREE</b> — TOP 12 OF 38 ARCHETYPES · MOVERS + MATRIX HISTORY LOCKED · <a href="#" class="amber">[UPGRADE]</a></div>
+  <div class="micro dim" style="margin-top:var(--line)">METASURF © 2026 · NOT AFFILIATED WITH WOTC · NUMBERS SHOWN ARE MOCKUP PLACEHOLDERS</div>
+</footer>
+
+</div><!-- /wrap -->
+
+<!-- ══════════════════ COMMAND BAR (tmux-style status line) ══════════════════ -->
+<div class="cmdbar micro" aria-label="Status bar">
+  <span class="cb-seg"><span class="cb-mode" id="cb-fmt">MODERN</span>MS-01 │ 14D │ N=<span class="data" style="font-size:11px">4,213</span></span>
+  <span class="cb-seg cb-right"><a href="#" class="amber">[UPGRADE]</a> · <span id="utcclock" class="data" style="font-size:11px">03:12:44Z</span> <span class="cursor" aria-hidden="true"></span></span>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var T0 = performance.now();   /* real telemetry for the status line */
+  var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* mock ingest timestamp — matches BIOS + footer copy */
+  var INGEST_UTC = Date.UTC(2026, 6, 8, 3, 12);   /* 2026-07-08 03:12 UTC */
+  var STALE_AFTER_H = 4;                          /* next ingest due 07:00 */
+
+  /* U+FE0E forces text presentation for ▲▼ on iOS (no emoji substitution) */
+  var UP_GLYPH = "▲︎", DOWN_GLYPH = "▼︎";
+
+  /* ── DATA (placeholder numbers, clearly mock) ───────────────
+     `hist` is the 7-day share series driving the VECTOR sparkline;
+     the last point equals the current share, d = last - first. */
+  var DATA = [
+    {r: 1, name:"Izzet Murktide",  n:598, share:"14.2", wr:52.1, ci:1.1, d:+0.8, hist:[13.4,13.5,13.7,13.8,13.9,14.0,14.2]},
+    {r: 2, name:"Rakdos Scam",     n:493, share:"11.7", wr:51.4, ci:1.2, d:-0.4, hist:[12.1,12.0,12.0,11.9,11.8,11.8,11.7]},
+    {r: 3, name:"Amulet Titan",    n:392, share:"9.3",  wr:53.0, ci:1.5, d:+2.1, hist:[7.2,7.5,7.9,8.3,8.6,9.0,9.3]},
+    {r: 4, name:"Yawgmoth",        n:329, share:"7.8",  wr:52.6, ci:1.6, d:+0.3, hist:[7.5,7.6,7.5,7.7,7.7,7.8,7.8]},
+    {r: 5, name:"Living End",      n:257, share:"6.1",  wr:49.8, ci:1.8, d:-0.9, hist:[7.0,6.9,6.7,6.5,6.4,6.2,6.1]},
+    {r: 6, name:"Burn",            n:228, share:"5.4",  wr:48.2, ci:1.9, d:-1.8, hist:[7.2,6.9,6.6,6.2,5.9,5.6,5.4]},
+    {r: 7, name:"Mono-Green Tron", n:211, share:"5.0",  wr:50.9, ci:2.0, d:+0.2, hist:[4.8,4.9,4.8,5.0,4.9,5.0,5.0]},
+    {r: 8, name:"Hammer Time",     n:194, share:"4.6",  wr:49.1, ci:2.1, d:-0.6, hist:[5.2,5.1,5.0,4.9,4.8,4.7,4.6]},
+    {r: 9, name:"Jeskai Control",  n:164, share:"3.9",  wr:50.2, ci:2.3, d:+0.1, hist:[3.8,3.9,3.8,3.9,4.0,3.9,3.9]},
+    {r:10, name:"Temur Rhinos",    n:143, share:"3.4",  wr:51.7, ci:2.4, d:+0.5, hist:[2.9,3.0,3.1,3.2,3.2,3.3,3.4]},
+    {r:11, name:"Dimir Mill",      n: 28, share:"0.9",  wr:53.8, ci:5.6, d:+0.4, hist:[0.5,0.5,0.6,0.7,0.7,0.8,0.9], lowN:true},
+    {r:12, name:"Goblins",         n: 21, share:"0.7",  wr:47.3, ci:6.4, d:-0.3, hist:[1.0,0.9,0.9,0.8,0.8,0.7,0.7], lowN:true}
+  ];
+  /* scrambled tail (mockup-only payload — see production note) */
+  var TAIL = [
+    {r:13, name:"Mono-Black Coffers", n:64, share:"2.1", wr:50.4, ci:3.9, d:+0.1, hist:[2.0,2.0,1.9,2.0,2.1,2.1,2.1]},
+    {r:14, name:"Merfolk",            n:51, share:"1.8", wr:47.9, ci:4.4, d:-0.5, hist:[2.3,2.2,2.1,2.0,1.9,1.9,1.8]},
+    {r:15, name:"Belcher",            n:40, share:"1.4", wr:49.2, ci:4.9, d:+0.3, hist:[1.1,1.2,1.2,1.3,1.3,1.4,1.4]}
+  ];
+
+  function pad2(x){ return (x<10?"0":"")+x; }
+  function trendClass(d){ return d > 0.15 ? "s-up" : (d < -0.15 ? "s-down" : "s-flat"); }
+  function trendWord(d){ return d > 0.15 ? "rising" : (d < -0.15 ? "falling" : "flat"); }
+
+  /* ── VECTOR SPARKLINE BUILDER ──────────────────────────────
+     Crisp polyline + square end-cap; dotted baseline is the only
+     "terminal" mark inside the plot. Normalized per-row (shape). */
+  var SPARK_W = window.matchMedia("(min-width: 700px)").matches ? 72 : 46;
+  var SPARK_H = 16;
+  function sparkSVG(hist, cls){
+    var w = SPARK_W, h = SPARK_H, pad = 2.5;
+    var min = Math.min.apply(null, hist), max = Math.max.apply(null, hist);
+    var span = (max - min) || 1;
+    var pts = hist.map(function(v, i){
+      var x = pad + i * (w - 2*pad) / (hist.length - 1);
+      var y = h - pad - (v - min) / span * (h - 2*pad);
+      return [x, y];
+    });
+    var str = pts.map(function(p){ return p[0].toFixed(1)+","+p[1].toFixed(1); }).join(" ");
+    var last = pts[pts.length - 1];
+    return '<svg class="spark '+cls+'" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" aria-hidden="true">'+
+      '<line class="sp-base" x1="'+pad+'" y1="'+(h-1)+'" x2="'+(w-pad)+'" y2="'+(h-1)+'"/>'+
+      '<polyline class="sp-line" points="'+str+'"/>'+
+      '<rect class="sp-dot" x="'+(last[0]-1.75).toFixed(1)+'" y="'+(last[1]-1.75).toFixed(1)+'" width="3.5" height="3.5"/>'+
+      '</svg>';
+  }
+
+  /* WR semantics honor the CI they sit next to:
+       green  only if the CI LOWER bound clears 50%  (wr - ci > 50)
+       red    only if the CI UPPER bound is below 50% (wr + ci < 50)
+       otherwise neutral — an interval spanning 50% is not a verdict.
+     Low-sample rows render amber + explicit low-sample line (never color alone). */
+  function wrClass(row){
+    if(row.lowN) return "caution";
+    if(row.wr - row.ci > 50) return "up";
+    if(row.wr + row.ci < 50) return "down";
+    return "";
+  }
+
+  function rowHTML(row){
+    var deltaCls  = row.d > 0 ? "up" : (row.d < 0 ? "down" : "dim");
+    var deltaGlyph= row.d > 0 ? UP_GLYPH : (row.d < 0 ? DOWN_GLYPH : "·");
+    var deltaVal  = Math.abs(row.d).toFixed(1);
+    var wrCls = wrClass(row);
+    var nCell = row.lowN
+      ? '<span class="caution data">'+row.n+'</span>'
+      : '<span class="dim data">'+row.n+'</span>';
+    var wrCell = '<span class="data '+wrCls+'">'+row.wr.toFixed(1)+'</span><span class="ci">±'+row.ci.toFixed(1)+'</span>';
+    return '<span class="gutter" aria-hidden="true">'+pad2(row.r)+'</span>'+
+      '<span class="name">'+row.name+'</span>'+
+      '<span class="col-n">'+nCell+'</span>'+
+      '<span class="share data">'+row.share+'%</span>'+
+      '<span class="wr">'+wrCell+'</span>'+
+      '<span class="trend">'+
+        sparkSVG(row.hist, trendClass(row.d))+
+        '<span class="delta '+deltaCls+'" aria-hidden="true">'+deltaGlyph+deltaVal+'</span>'+
+      '</span>';
+  }
+
+  function buildRow(row, idx){
+    var li = document.createElement("div");
+    li.setAttribute("role","listitem");
+
+    var b = document.createElement("button");
+    b.className = "row";
+    b.style.setProperty("--i", idx);
+    b.setAttribute("data-slug", row.name.toLowerCase().replace(/[^a-z0-9]+/g,"-"));
+
+    /* one accessible name per row-button — no fake table semantics */
+    var deltaVal = Math.abs(row.d).toFixed(1);
+    b.setAttribute("aria-label",
+      "Rank "+row.r+", "+row.name+", "+row.share+" percent meta share, "+
+      "winrate "+row.wr.toFixed(1)+" plus or minus "+row.ci.toFixed(1)+", "+
+      "sample "+row.n+(row.lowN ? ", low sample" : "")+", "+
+      "7 day trend "+trendWord(row.d)+", "+(row.d>0?"up ":(row.d<0?"down ":""))+deltaVal+" points. Opens archetype detail.");
+
+    b.innerHTML = rowHTML(row);
+    b.addEventListener("click", function(){ toggleDetail(b, row); });
+    li.appendChild(b);
+
+    if(row.lowN){
+      var flag = document.createElement("div");
+      flag.className = "lown micro";
+      flag.setAttribute("aria-hidden","true");
+      flag.style.setProperty("--i", idx);
+      flag.textContent = "└ low sample n="+row.n+" · wide ci";
+      li.appendChild(flag);
+    }
+    return li;
+  }
+
+  var openDetail = null;
+  function toggleDetail(rowEl, row){
+    if(openDetail && openDetail.parentNode){
+      var was = openDetail.previousSibling === rowEl;
+      openDetail.parentNode.removeChild(openDetail);
+      openDetail = null;
+      if(was) return;
+    }
+    var d = document.createElement("div");
+    d.className = "rowdetail micro";
+    d.setAttribute("role","status");
+    var msg = "> open ms://modern/"+rowEl.getAttribute("data-slug")+" … [S3 ARCHETYPE DETAIL — mockup]";
+    rowEl.insertAdjacentElement("afterend", d);
+    openDetail = d;
+    typeInto(d, msg, 6);
+  }
+
+  /* honest fake-terminal typing helper */
+  function typeInto(el, text, msPerChar, done){
+    if(REDUCED){ el.textContent = text; if(done) done(); return; }
+    var i = 0;
+    el.textContent = "";
+    (function tick(){
+      el.textContent = text.slice(0, ++i);
+      if(i < text.length) setTimeout(tick, msPerChar);
+      else if(done) done();
+    })();
+  }
+
+  /* ── render rows (main list + scrambled tail decoys) ─────── */
+  var rowsEl = document.getElementById("rows");
+  function renderRows(){
+    rowsEl.innerHTML = "";
+    DATA.forEach(function(r, i){ rowsEl.appendChild(buildRow(r, i)); });
+  }
+  renderRows();
+
+  var tailEl = document.getElementById("tailrows");
+  tailEl.innerHTML = TAIL.map(function(r){
+    return '<div class="row">'+rowHTML(r)+'</div>';
+  }).join("");
+
+  /* aggregation status resolves with a MEASURED elapsed time
+     (performance.now() since script start — real, not fabricated) */
+  var agg = document.getElementById("agg-status");
+  setTimeout(function(){
+    var elapsed = ((performance.now() - T0) / 1000).toFixed(2);
+    agg.innerHTML = '<span class="prompt">&gt;</span> aggregating 14d window… n=4,213 <span class="ok">ok '+elapsed+'s</span>';
+  }, REDUCED ? 0 : 900);
+
+  /* ── UTC clock (command bar) + ingest-freshness sync indicator ── */
+  var clock = document.getElementById("utcclock");
+  function tickClock(){
+    var d = new Date();
+    clock.textContent = pad2(d.getUTCHours())+":"+pad2(d.getUTCMinutes())+":"+pad2(d.getUTCSeconds())+"Z";
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* the blinking cursor belongs to the SYNC state, not the wall clock:
+     amber while data is fresh, amber-dim (and slower) once stale */
+  var syncLbl = document.getElementById("synclabel");
+  var syncCur = document.getElementById("synccursor");
+  function tickSync(){
+    var ageH = (Date.now() - INGEST_UTC) / 3.6e6;
+    var stale = ageH > STALE_AFTER_H || ageH < 0;
+    syncLbl.textContent = stale ? "SYNCED 03:12 · STALE" : "SYNCED 03:12";
+    syncLbl.classList.toggle("stale-label", stale);
+    syncCur.classList.toggle("stale", stale);
+  }
+  tickSync();
+  setInterval(tickSync, 60000);
+
+  /* ── DECODE chips: honest entitlement-check line ─────────── */
+  function wireDecode(btnId, statusId){
+    var btn = document.getElementById(btnId);
+    var st  = document.getElementById(statusId);
+    btn.addEventListener("click", function(){
+      typeInto(st, "> entitlement check… tier=FREE — DECODE requires PRO. [upgrade →]", 8);
+    });
+  }
+  wireDecode("decode-movers","movers-status");
+  wireDecode("decode-tail","tail-status");
+
+  /* ── BIOS BOOT: sessionStorage-gated cold open (~700ms) ──── */
+  var boot  = document.getElementById("boot");
+  var lines = document.getElementById("bootlines");
+  var BOOTTEXT = [
+    ["METASURF BIOS v0.2","b-amber"],
+    ["PHOSPHOR ██████████ OK","b-bar"],
+    ["LOADING MODERN SNAPSHOT...",""],
+    ["2,341 DECKS INDEXED · 4,213 MATCHES",""],
+    ["LAST INGEST 03:12 UTC",""],
+    ["OK","b-ok"]
+  ];
+  function killBoot(){
+    boot.classList.remove("on");
+    document.removeEventListener("keydown", killBoot);
+    boot.removeEventListener("click", killBoot);
+  }
+  if(!sessionStorage.getItem("ms_boot_seen") && !REDUCED){
+    sessionStorage.setItem("ms_boot_seen","1");
+    boot.classList.add("on");
+    document.addEventListener("keydown", killBoot);
+    boot.addEventListener("click", killBoot);
+    var i = 0;
+    (function next(){
+      if(!boot.classList.contains("on")) return;
+      if(i < BOOTTEXT.length){
+        var span = document.createElement("div");
+        if(BOOTTEXT[i][1]) span.className = BOOTTEXT[i][1];
+        span.textContent = BOOTTEXT[i][0];
+        lines.appendChild(span);
+        i++;
+        setTimeout(next, 100);
+      } else {
+        setTimeout(killBoot, 260);
+      }
+    })();
+  } else {
+    sessionStorage.setItem("ms_boot_seen","1");
+  }
+
+  /* format picker: mock toggle + CRT re-paint micro-moment
+     (rows restagger via the rowin animation; instant when reduced) */
+  var fmts = document.querySelectorAll(".fmt");
+  var cbFmt = document.getElementById("cb-fmt");
+  var plateFmt = document.getElementById("plate-fmt");
+  fmts.forEach(function(f){
+    f.addEventListener("click", function(){
+      fmts.forEach(function(g){ g.setAttribute("aria-pressed","false"); });
+      f.setAttribute("aria-pressed","true");
+      var name = f.textContent.replace(/[\[\]]/g,"");
+      cbFmt.textContent = name;
+      plateFmt.textContent = name;
+      renderRows(); /* re-injects rows → staggered rowin re-paint */
+      typeInto(agg, "> switching format… "+name+" snapshot is a mockup stub", 6);
+    });
+  });
+
+  /* format picker edge hint: hide the » fade once scrolled to the end */
+  var fmtWrap = document.querySelector(".fmtwrap");
+  var fmtRow  = document.querySelector(".fmtrow");
+  function fmtFade(){
+    fmtWrap.classList.toggle("at-end",
+      fmtRow.scrollLeft + fmtRow.clientWidth >= fmtRow.scrollWidth - 8);
+  }
+  fmtRow.addEventListener("scroll", fmtFade, {passive:true});
+  window.addEventListener("resize", fmtFade);
+  fmtFade();
+})();
+</script>
+</body>
+</html>

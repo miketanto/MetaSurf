@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>METASURF · PIT-WALL · S1 META SNAPSHOT · R2</title>
+
+<!--
+  PIT-WALL CONSOLE — REVISION 2026-07-09
+  Owner feedback applied:
+  1. All chart data-ink redrawn as crisp vector SVG (canvas pixel sparklines removed).
+     Retro flavor retained ONLY in chart framing: dashed grid plates, tick marks,
+     pixel-font labels. Data marks are anti-aliased vectors, always.
+  2. Analog number effects kept and amplified: DSEG seven-segment readouts (clock,
+     drilldown, NEXT-DL countdown in the tower header), quantized 8-tick roll-ups,
+     mechanical 2px press states, wire ticker, purple-sector movers.
+  3. Risograph grain gradients ported from the Overprint Bulletin mock (feTurbulence
+     1-bit speckle tile), recolored into the Pit-Wall palette (blue / orange / sector
+     purple on carbon) and used as ACCENT texture: header WR-scale ramp, movers
+     section wash, premium lock plates, unlock bar, footer. The freemium tease is now
+     a grain plate + quantized-blur redaction over crisp SVG — never pixelated data.
+
+  R3 additions (owner feedback 2026-07-09):
+  4. Representative card art per tower row (Scryfall art_crop, lazy-loaded, thin
+     pit-wall frame + slight desaturate) stacked above the CODE badge — grid
+     column count unchanged at every width; wide layout gets a taller tile.
+  5. Color-identity pips (WUBRG dots w/ 1px rim, colorless = gray diamond) on
+     the name line. Data: s1-archetype-visuals.json (pip-mined Apr–Jun 2024).
+  6. Sort + filter console: segmented SORT switch (SHARE/WR/Δ7D/N/NAME) and
+     color-pip + N≥500 filters, mechanical 2px press states. Sits under the
+     format picker on phones (h-scroll), docks into the tower header ≥1100px.
+     Re-sort recomputes P1..Pn and re-fires the quantized roll-ups + a one-shot
+     pos glitch; filtered-out rows collapse; result count prints when active.
+
+  R4 — ATTENTION-HIERARCHY REVISION (attention-art-spec.md, 2026-07-10):
+  7. A-tier HERO BAND (spec §1.1/§2.1): the P1 archetype's rep-card art crop
+     (tokens §4.4 recipe — saturate(.72) contrast(1.08) brightness(.72),
+     hard-light duotone tint, overlay riso grain, bottom scrim to
+     rgba(13,13,18,.88)) with the P1 name (42px Archivo) + SHARE/WR DSEG
+     readouts on the scrim stop, plus ART CROP credit. First after chrome,
+     largest element at 390px, spans both columns >=1100px. Re-renders when
+     sort/filter/format/wire-refresh changes P1 (roll-ups + one-shot glitch).
+  8. Sort/filter console collapsed behind a FILT ▸ disclosure (spec §1.4.2);
+     open state persists in-page only. The active-filter count chip stays
+     visible when collapsed. One control row above the tower: fmts + FILT.
+  9. Movers carousel demoted to L2 BELOW the tower in phone DOM order (spec
+     §1.2) — it no longer competes with the ticker as a second loud strip.
+     Wide layout unchanged (right rail, dock on top).
+  10. Chip budget ≤6 at 390px (spec §1.3): riso WR ramp relocated below the
+     tower; row CODE plates set in JetBrains Mono (were Press Start — with the
+     tower now starting above the fold each badge counted against the cap;
+     §1.5 prefers quiet rows). Plate framing + sector accent unchanged.
+-->
+
+<!-- Fonts: JetBrains Mono (tables), Press Start 2P (badges), Archivo Narrow (wordmark) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo+Narrow:wght@700&display=swap" rel="stylesheet">
+
+<style>
+/* DSEG7 Classic — seven-segment LED numerals (SIL OFL, served from npm CDN; self-host in prod) */
+@font-face{
+  font-family:'DSEG7';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+:root{
+  --bg:#0d0d12;          /* carbon black */
+  --bg2:#13131a;
+  --line:#23232e;
+  --grid:#262633;        /* chart framing plate — dims below data ink */
+  --txt:#f2f2f7;         /* cool white */
+  --dim:#8b8b99;
+  --win:#3b9dff;         /* favorable WR — blue side of CVD-safe diverging scale */
+  --loss:#ff7a1a;        /* unfavorable WR — orange side, never red/green */
+  --sector:#b45bff;      /* F1 purple — best-in-class movers only */
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --shadow:#000;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pix:'Press Start 2P',monospace;
+  --led:'DSEG7','JetBrains Mono',monospace;
+  --cond:'Archivo Narrow','Archivo',sans-serif;
+  /* riso speckle tile (ported from Overprint Bulletin): feTurbulence crushed to
+     1-bit via discrete alpha transfer. Used as a MASK so any Pit-Wall ink can
+     print through it as grain — the tile itself is colorless. */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important;}
+html{background:var(--bg);}
+body{
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px),
+    var(--bg);
+  color:var(--txt);
+  font-family:var(--mono);
+  font-size:13px;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;
+}
+
+/* pixel crosshair cursor — desktop garnish only */
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, .row, .fmt, .ticker, .mover{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+
+/* phone-first: centered 620px column. Goes fluid >=640px, splits into the
+   pit-wall spread >=1100px (see WIDESCREEN section). 390px layout untouched. */
+.shell{max-width:620px;margin:0 auto;}
+
+/* ============ RISO GRAIN UTILITIES ============ */
+/* grain gradient = colored gradient printed through the 1-bit speckle mask.
+   Accent only: every use sits behind or beside content, never on data marks
+   that are unlocked. */
+.grain{
+  position:absolute;inset:0;pointer-events:none;
+  -webkit-mask-image:var(--noise);mask-image:var(--noise);
+  -webkit-mask-size:64px 64px;mask-size:64px 64px;
+}
+
+/* ============ WIRE-FEED TICKER ============ */
+/* 44px tall = touch-min pause target; keyboard-operable (role=button + tabindex) */
+.ticker{
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+  font-size:11px;line-height:44px;height:44px;
+  user-select:none;
+  position:relative;
+}
+.ticker:focus-visible{outline:2px solid var(--sector);outline-offset:-2px;}
+.ticker::before{
+  content:'WIRE';
+  position:absolute;left:0;top:0;bottom:0;z-index:2;
+  background:var(--sector);color:var(--bg);
+  font-family:var(--pix);font-size:8px;line-height:44px;
+  padding:0 8px;
+}
+/* WIRE-badge offset lives on this non-animating clip wrapper — NOT inside the
+   translating track — so translateX(-50%) equals exactly one copy width (no seam). */
+.ticker-clip{
+  position:absolute;left:52px;right:36px;top:0;bottom:0;
+  overflow:hidden;white-space:nowrap;
+}
+.ticker-track{
+  display:inline-flex;
+  animation:tickscroll 55s linear infinite; /* duration recomputed by JS to ~35px/s */
+}
+.ticker-track span{padding-right:48px;}
+.ticker.paused .ticker-track{animation-play-state:paused;}
+.ticker-pause{
+  position:absolute;right:0;top:0;bottom:0;width:36px;z-index:2;
+  text-align:center;font-size:10px;color:var(--dim);
+  border-left:1px solid var(--line);background:var(--bg2);
+}
+.ticker .up{color:var(--win);} .ticker .dn{color:var(--loss);} .ticker .sec{color:var(--sector);}
+@keyframes tickscroll{to{transform:translateX(-50%);}}
+
+/* ============ HEADER ============ */
+header{padding:14px 12px 0;position:relative;}
+.masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;}
+.wordmark{font-family:var(--cond);font-weight:700;font-size:30px;line-height:.9;
+  letter-spacing:-.5px;text-transform:uppercase;}
+.wordmark .wm{display:inline-block;transform:scaleY(1.25);transform-origin:left bottom;}
+.wordmark small{display:block;font-family:var(--mono);font-size:9px;font-weight:400;
+  letter-spacing:3px;color:var(--dim);margin-top:4px;}
+.clock{text-align:right;font-size:22px;color:var(--txt);}
+/* LED readout: live value right-aligned in a fixed-width box (4ch = DSEG digit cells) */
+.led-wrap{position:relative;display:inline-block;font-family:var(--led);}
+.led-wrap .live{display:inline-block;min-width:4ch;text-align:right;}
+.clock-label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:2px;text-align:right;margin-bottom:3px;}
+
+/* riso WR-scale ramp: blue plate fades right, orange plate fades left, the
+   sector-purple plate prints where they'd cross — doubles as a legend for the
+   diverging winrate scale. Pure accent, aria-hidden. R4: relocated below the
+   tower (chip budget §1.3 — its pixel labels leave the first viewport). */
+.riso-ramp{position:relative;height:20px;margin:10px 12px 0;border:1px solid var(--line);background:var(--bg2);}
+.riso-ramp .grain{
+  background:
+    linear-gradient(90deg,  var(--win)  0%, rgba(59,157,255,.25) 34%, transparent 46%),
+    linear-gradient(270deg, var(--loss) 0%, rgba(255,122,26,.25) 34%, transparent 46%),
+    linear-gradient(90deg,  transparent 34%, var(--sector) 50%, transparent 66%);
+}
+.riso-ramp .ramp-l,.riso-ramp .ramp-r{
+  position:absolute;top:0;font-family:var(--pix);font-size:7px;line-height:20px;
+  color:var(--bg);padding:0 5px;z-index:1;
+}
+.riso-ramp .ramp-l{left:0;background:var(--win);}
+.riso-ramp .ramp-r{right:0;background:var(--loss);}
+
+/* ============ HERO BAND (R4 — attention spec §1.1 / §2.1 tier A) ============ */
+/* the P1 archetype's rep-card art crop as the page's single L0 zone: largest
+   element in the first viewport, first after chrome, carries the ONE display-
+   type statement. tokens §4.4 recipe verbatim; name + DSEG readouts sit only
+   on the full .88 carbon scrim stop (§2.2). */
+.heroband{
+  position:relative;overflow:hidden;margin-top:12px;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:#101018;
+  min-height:184px; /* ≥168px floor per spec §1.1 */
+  display:flex;flex-direction:column;justify-content:flex-end;
+}
+.hero-art{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:saturate(.72) contrast(1.08) brightness(.72); /* tokens §4.4 */
+}
+/* hard-light duotone: win-blue upper-left crossing to loss-orange lower-right */
+.hero-tint{
+  position:absolute;inset:0;pointer-events:none;mix-blend-mode:hard-light;
+  background:linear-gradient(115deg, rgba(59,157,255,.48), rgba(19,19,26,.18) 52%, rgba(255,122,26,.36));
+}
+/* riso speckle printed over the duotone — fades out before the readout zone */
+.heroband > .grain{
+  background:linear-gradient(180deg, rgba(59,157,255,.42), rgba(180,91,255,.20) 55%, transparent 76%);
+  mix-blend-mode:overlay;
+  -webkit-mask-size:48px 48px;mask-size:48px 48px;
+}
+/* bottom scrim reaches the full rgba(13,13,18,.88) stop under name + numerals */
+.hero-scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(13,13,18,.18), rgba(13,13,18,.30) 38%, rgba(13,13,18,.88) 72%, rgba(13,13,18,.90));
+}
+.hero-body{position:relative;padding:56px 12px 14px;}
+.hero-kicker{font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:6px;}
+.hero-name{
+  font-family:var(--cond);font-weight:700;font-size:42px;line-height:.9;
+  letter-spacing:-.5px;text-transform:uppercase;color:var(--txt);
+}
+.hero-stats{display:flex;gap:24px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.hero-led{font-size:28px;}
+.band-credit{
+  position:absolute;top:8px;right:8px;z-index:1;
+  font-size:9px;letter-spacing:1px;color:var(--dim);
+  background:rgba(13,13,18,.88);padding:3px 6px; /* §2.2 — text never on raw art */
+}
+@media (min-width:640px){ .heroband{min-height:210px;} .hero-name{font-size:52px;} }
+
+/* ============ CONTROL ROW + FILT DISCLOSURE (R4 — spec §1.4.2) ============ */
+/* one control row above the tower: format picker + collapsed FILT toggle.
+   The full sort/filter console expands in place; the active-filter count
+   stays visible while collapsed. */
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 12px 0;}
+.controls .fmts{flex:1 1 auto;min-width:0;margin:0;}
+.filtwrap{display:contents;} /* toggle bar + console wrap inside .controls */
+.filtbar{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+.filt-toggle{min-height:44px;} /* touch minimum, matches the format chips */
+.console[hidden]{display:none;} /* author display:flex beats UA [hidden] otherwise */
+.controls .console{flex:1 1 100%;margin:6px 0 0;}
+
+/* format picker */
+.fmts{display:flex;gap:6px;margin:12px 0 0;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.fmts::-webkit-scrollbar{display:none;}
+.fmt{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  min-height:44px;display:inline-flex;align-items:center; /* touch minimum */
+  padding:0 12px;
+  color:var(--dim);
+  background:var(--bg2);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  white-space:nowrap;
+}
+.fmt:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.fmt.on{color:var(--bg);background:var(--txt);border-color:var(--txt);}
+
+/* ============ SORT / FILTER CONSOLE (R3) ============ */
+/* mechanical console switches — same 2px press grammar as the format picker.
+   Phone: compact h-scroll bar under the format picker. >=1100px the bar is
+   reparented (JS seatConsole) into the tower header area and wraps instead. */
+.console{
+  display:flex;align-items:center;gap:6px;
+  margin:10px 0 0;padding-bottom:4px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.console::-webkit-scrollbar{display:none;}
+.con-label{font-size:9px;letter-spacing:2px;color:var(--dim);flex:0 0 auto;}
+.seg{display:inline-flex;flex:0 0 auto;}
+.sw{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  min-height:38px;padding:0 9px;display:inline-flex;align-items:center;
+  color:var(--dim);background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  white-space:nowrap;flex:0 0 auto;
+}
+.seg .sw:not(:first-child){border-left-width:0;}
+.sw:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.sw.on{color:var(--bg);background:var(--txt);border-color:var(--txt);}
+.sw[hidden]{display:none;} /* author display beats the UA [hidden] rule otherwise */
+.fpips{display:inline-flex;gap:4px;flex:0 0 auto;}
+.fpip{
+  min-height:38px;min-width:34px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;flex:0 0 auto;
+}
+.fpip .pip{width:12px;height:12px;opacity:.35;}
+.fpip:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.fpip.on{border-color:var(--txt);}
+.fpip.on .pip{opacity:1;}
+.con-count{font-size:9px;letter-spacing:1px;color:var(--sector);flex:0 0 auto;white-space:nowrap;}
+
+/* ============ MANA-COLOR PIPS (R3) ============ */
+/* authentic-feeling MTG color dots tuned for carbon; 1px rim so W/B read.
+   Colorless = single gray diamond. .pip beats the global border-radius reset
+   (both !important — higher specificity wins). */
+.pip{
+  width:9px;height:9px;box-sizing:border-box;
+  display:inline-block;flex:0 0 auto;
+  border:1px solid #565664;border-radius:50% !important;
+}
+.pip-W{background:#f8f6d8;}
+.pip-U{background:#b9d4ec;}
+.pip-B{background:#7d7673;border-color:#a6a1a0;}
+.pip-R{background:#e49977;}
+.pip-G{background:#a3c095;}
+.pip-C{background:#8b8b99;border-radius:0 !important;transform:rotate(45deg);width:8px;height:8px;}
+
+/* section labels */
+.seclabel{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:16px 12px 8px;
+  font-size:10px;letter-spacing:2px;color:var(--dim);
+}
+.seclabel b{color:var(--txt);font-weight:700;}
+.led-tiny{font-size:13px;color:var(--sector);}
+.dl-label{font-size:9px;letter-spacing:1px;color:var(--dim);margin-right:4px;}
+
+/* ============ PRO / chrome ============ */
+/* chrome gradient applied as a 2px frame — at 8px Press Start 2P a gradient text
+   fill reads as flat grey, so the chip border carries the chrome instead */
+.pro{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  display:inline-block;padding:2px;
+  background:var(--chrome);
+  box-shadow:2px 2px 0 var(--shadow);
+}
+.pro i{
+  font-style:normal;display:block;
+  padding:6px 8px;
+  background:#1a1a22;color:var(--txt);
+}
+
+/* ============ MOVERS CAROUSEL (free-tier tease) ============ */
+/* section wash: faint sector-purple grain gradient behind the carousel —
+   riso accent recolored into pit-wall purple, fading before the timing tower */
+.movsec{position:relative;}
+.movsec > .grain{
+  background:linear-gradient(180deg, rgba(180,91,255,.34), rgba(180,91,255,.10) 55%, transparent 92%);
+  -webkit-mask-size:48px 48px;mask-size:48px 48px;
+}
+.movsec > *{position:relative;}
+.movers{
+  display:flex;gap:8px;overflow-x:auto;padding:2px 12px 12px;
+  scrollbar-width:none;scroll-snap-type:x mandatory;
+}
+.movers::-webkit-scrollbar{display:none;}
+.mover{
+  flex:0 0 156px;scroll-snap-align:start;
+  background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  padding:8px;position:relative;
+  color:var(--txt);font-family:var(--mono);text-align:left;
+}
+.mover:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.mover-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.mover-code{font-family:var(--pix);font-size:8px;}
+.mover-delta{font-weight:700;font-size:12px;}
+/* crisp vector chart in a framed plate; blur + grain are on WRAPPERS, never
+   baked into the data marks */
+.chartbox{position:relative;--lockblur:0px;--lockgrain:0;}
+.mchart{display:block;width:140px;height:56px;}
+.mchart .gdata{filter:blur(var(--lockblur));}
+.chartbox.locked{--lockblur:4px;--lockgrain:.9;}
+.chartbox .grain{
+  background:linear-gradient(105deg, var(--sector), rgba(180,91,255,.45) 55%, rgba(180,91,255,.15));
+  -webkit-mask-size:48px 48px;mask-size:48px 48px;
+  opacity:var(--lockgrain);
+}
+/* static block below the chart — never overlaps the data */
+.mover-lock{
+  display:block;margin-top:6px;
+  font-size:9px;color:var(--dim);letter-spacing:1px;
+}
+.unlockbar{
+  margin:0 12px 4px;display:flex;align-items:center;gap:10px;
+  border:1px solid var(--line);background:var(--bg2);
+  padding:8px 10px;position:relative;overflow:hidden;
+  box-shadow:2px 2px 0 var(--shadow);
+}
+/* premium plate grain: purple ink through the speckle mask, left edge densest */
+.unlockbar > .grain{
+  background:linear-gradient(100deg, rgba(180,91,255,.55), rgba(180,91,255,.18) 45%, transparent 75%);
+}
+.unlockbar .txt1{flex:1;font-size:10px;color:var(--dim);letter-spacing:1px;position:relative;}
+.btn-unlock{
+  font-family:var(--pix);font-size:8px;line-height:1;
+  padding:9px 10px;color:var(--txt);
+  background:#1a1a22;border:1px solid var(--sector);
+  box-shadow:2px 2px 0 var(--shadow);
+  transition:transform 80ms, box-shadow 80ms;
+  position:relative;
+}
+.btn-unlock:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+
+/* ============ TIMING TOWER ============ */
+.tower{padding:0 12px;}
+.thead{
+  display:grid;grid-template-columns:20px 44px 1fr 120px 60px 46px;gap:8px;
+  padding:4px 8px 6px;font-size:9px;letter-spacing:1px;color:var(--dim);
+}
+.thead :nth-child(4){text-align:center;}
+.thead :nth-child(n+5){text-align:right;}
+.row{
+  display:grid;grid-template-columns:20px 44px 1fr 120px 60px 46px;gap:8px;align-items:center;
+  width:100%;text-align:left;
+  background:var(--bg2);border:1px solid var(--line);
+  box-shadow:2px 2px 0 var(--shadow);
+  padding:8px;margin-bottom:6px;
+  color:var(--txt);font-family:var(--mono);font-size:13px;
+  transition:transform 80ms, box-shadow 80ms;
+}
+.row:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--shadow);transition:none;}
+.row.sel{border-color:var(--txt);}
+.pos{font-weight:800;color:var(--dim);}
+.pos.p1{color:var(--txt);}
+/* R4: code plate set in mono (was Press Start 8px). With the hero band the
+   tower now starts inside the first viewport, so every row badge counted
+   against the §1.3 chip cap (≤6 @390); §1.5 prefers quiet feed rows. The
+   plate framing, footprint and sector accent are unchanged. */
+.code{
+  font-family:var(--mono);font-weight:800;font-size:10px;letter-spacing:1px;line-height:1;
+  padding:6px 0;text-align:center;
+  background:#1c1c26;border:1px solid var(--line);color:var(--txt);
+}
+.code.sector{border-color:var(--sector);color:var(--sector);}
+/* R3: representative card art stacked above the CODE badge in the same grid
+   column — column count unchanged at every width. Thin pit-wall frame, slight
+   desaturate; art stays recognizable. */
+.idcell{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.art{
+  display:block;width:100%;height:30px;object-fit:cover;
+  border:1px solid var(--line);background:#1c1c26;
+  filter:saturate(.78) contrast(1.05);
+}
+.namecell{min-width:0;}
+.nameline{display:flex;align-items:center;gap:6px;min-width:0;}
+.pips{display:inline-flex;gap:3px;flex:0 0 auto;}
+/* display:block — ellipsis is dead CSS on an inline span (no width to overflow) */
+.aname{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;}
+.shareline{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.sharebar{width:56px;height:6px;background:#1c1c26;border:1px solid var(--line);flex:0 0 56px;}
+.sharebar i{display:block;height:100%;background:var(--txt);}
+.sharev{font-size:11px;color:var(--dim);}
+/* crisp SVG sparkline, 120x36 CSS px. Framing (dashed grid + ticks) is the
+   retro plate; the data polyline is smooth anti-aliased vector ink. */
+.spark{width:120px;height:36px;display:block;justify-self:center;}
+/* narrow phones: drop the Δ7D column (still shown in movers + drilldown) and
+   tighten fixed columns so the name column keeps usable width */
+@media (max-width:479px){
+  .thead,.row{grid-template-columns:16px 40px 1fr 120px 56px;gap:6px;}
+  .thead .h-delta,.dcell{display:none;}
+  .art{height:28px;}
+}
+/* data-provenance footnote — colors_source caveat from s1-archetype-visuals.json */
+.colnote{padding:4px 12px 0;font-size:9px;letter-spacing:1px;line-height:1.7;color:var(--dim);}
+/* SAMPLE N column: exists in the DOM at every width, prints only >=1100px
+   where the tower can afford the extra telemetry */
+.ncell{display:none;text-align:right;font-size:11px;color:var(--dim);}
+.thead .h-n{display:none;}
+.wrcell{text-align:right;}
+.wr{font-weight:800;font-size:14px;}
+.wr.good{color:var(--win);} .wr.bad{color:var(--loss);} .wr.mid{color:var(--txt);}
+.ci{font-size:10px;color:var(--dim);display:block;}
+.dcell{text-align:right;}
+.delta{
+  display:inline-block;font-size:11px;font-weight:700;
+  padding:3px 4px;border:1px solid var(--line);background:#1c1c26;
+}
+.delta.up{color:var(--win);} .delta.dn{color:var(--loss);}
+.delta.sector{color:var(--bg);background:var(--sector);border-color:var(--sector);}
+
+/* glitch — ONE 2-frame RGB-split, fired on changed cells only, never loops */
+.glitch{display:inline-block;animation:glitch 200ms steps(2,end) 1;}
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0);transform:translateX(-3px);
+       text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0);transform:translateX(3px);
+       text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none;transform:none;text-shadow:none;}
+}
+
+/* ============ DRILLDOWN POPOVER (picked game tile) ============ */
+.drill{
+  margin:-2px 0 8px;padding:12px 10px 10px;
+  background:#101018;
+  border:6px solid transparent;
+  border-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><g fill="%23f2f2f7"><rect x="2" y="0" width="4" height="1"/><rect x="2" y="7" width="4" height="1"/><rect x="0" y="2" width="1" height="4"/><rect x="7" y="2" width="1" height="4"/><rect x="1" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="1" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/></g></svg>') 3 stretch;
+}
+.drill-grid{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;}
+.led-big{font-size:34px;}
+.led-mid{font-size:22px;}
+.led-label{font-size:9px;letter-spacing:2px;color:var(--dim);display:block;margin-bottom:4px;font-family:var(--mono);}
+.drill-meta{font-size:11px;color:var(--dim);line-height:1.8;}
+.drill-meta b{color:var(--txt);}
+.drill-hint{margin-top:8px;font-size:9px;letter-spacing:2px;color:var(--dim);}
+
+/* ============ FOOTER WORDMARK ============ */
+.foot{
+  padding:44px 12px 34px;overflow:hidden;position:relative;
+  border-top:1px solid var(--line);margin-top:26px;
+}
+/* closing grain sweep — blue-to-orange diverging ink, very low volume */
+.foot > .grain{
+  background:linear-gradient(90deg, rgba(59,157,255,.28), transparent 45%, transparent 55%, rgba(255,122,26,.28));
+  -webkit-mask-size:96px 96px;mask-size:96px 96px;
+}
+.foot > *{position:relative;}
+.foot .big{
+  font-family:var(--cond);font-weight:700;font-size:64px;line-height:.86;
+  text-transform:uppercase;letter-spacing:-1px;
+  transform:scaleY(1.5);transform-origin:left top;
+  margin-bottom:.46em; /* compensates scaleY overlap */
+  color:var(--txt);
+}
+.foot .big.hollow{
+  color:transparent;-webkit-text-stroke:1px #2e2e3a;
+}
+.foot .tag{margin-top:26px;font-size:10px;letter-spacing:2px;color:var(--dim);}
+@media (min-width:520px){ .foot .big{font-size:96px;} .wordmark{font-size:38px;} }
+
+/* ============ WIDESCREEN — PIT-WALL SPREAD ============ */
+/* Real timing screens are edge-to-edge dense. Mobile (<=620px) is untouched;
+   640-1100px the single column goes fluid; >=1100px the page splits:
+   timing tower = left spine with extra telemetry (N column, longer spark,
+   longer share bar), right rail = sticky pit board (movers stacked vertically
+   + docked drilldown). Ticker + header + footer span the full width. */
+
+/* drilldown dock: hidden below 1100px (drill stays inline under its row) */
+.docksec{display:none;}
+.dockbody{margin:0 12px;}
+.dock-empty{
+  border:1px dashed var(--line);background:var(--bg2);
+  padding:22px 12px;text-align:center;
+  font-size:9px;letter-spacing:2px;color:var(--dim);
+}
+
+@media (min-width:640px){
+  .shell{max-width:none;} /* fluid — no dead side gutters at laptop widths */
+}
+
+@media (min-width:1100px){
+  .shell{max-width:1720px;margin:0 auto;} /* sanity cap for ultra-wide */
+  .main{
+    display:grid;grid-template-columns:minmax(0,1fr) 400px;
+    column-gap:20px;align-items:start;
+  }
+  .col-tower{grid-column:1;grid-row:1;min-width:0;}
+  .col-side{
+    grid-column:2;grid-row:1;
+    position:sticky;top:0;
+    max-height:100dvh;overflow-y:auto;scrollbar-width:none;
+    border-left:1px solid var(--line);
+    padding-bottom:12px;
+    display:flex;flex-direction:column;
+  }
+  .col-side::-webkit-scrollbar{display:none;}
+  /* dock rides on top of the pit board so a tapped row's telemetry is
+     immediately visible; movers stack below it */
+  .docksec{order:-1;}
+
+  /* tower affords more columns at width: P ART/CODE NAME/SHARE 7D WR·CI N Δ7D
+     (art column widened 52->64px for the larger tile; name min trimmed 10px
+     so the grid still fits the 1100px tower spine with zero overflow) */
+  .thead,.row{grid-template-columns:26px 64px minmax(150px,1fr) 160px 76px 56px 52px;}
+  .thead .h-n,.ncell{display:block;}
+  .art{height:44px;} /* wide layout affords a slightly larger art tile */
+  .spark{width:160px;height:48px;} /* 10:3 ratio preserved — vector, stays crisp */
+  .sharebar{width:140px;flex:0 0 140px;}
+
+  /* hero band spans both columns (it sits above .main) and grows per tokens §7 */
+  .heroband{min-height:250px;}
+
+  /* FILT disclosure docks into the tower header area; the console wraps
+     instead of h-scrolling. Same nodes reparented — state survives. */
+  .col-tower .filtwrap{display:block;margin:0 12px 8px;}
+  .col-tower .filtbar{margin-bottom:6px;}
+  .col-tower .console{margin:0;flex-wrap:wrap;overflow:visible;}
+
+  /* movers: horizontal carousel -> stacked pit-board cards, charts full-bleed */
+  .movers{flex-direction:column;overflow-x:visible;scroll-snap-type:none;gap:10px;}
+  .mover{flex:0 0 auto;width:100%;}
+  .chartbox{display:block;}
+  .mchart{width:100%;height:auto;} /* viewBox scales the vector — never pixels */
+
+  .docksec{display:block;}
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  .ticker-track{animation:none;} /* static-first-N fallback */
+  .glitch{animation:none;}
+  .fmt,.row,.mover,.btn-unlock,.sw,.fpip{transition:none;}
+}
+</style>
+</head>
+<body>
+
+  <!-- results wire-feed — full-bleed at every width (identical on phones,
+       where .shell already fills the viewport) -->
+  <div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+       aria-label="results feed — tap or press Enter to pause">
+    <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+    <span class="ticker-pause" id="tickerPause" aria-hidden="true">&#10074;&#10074;</span>
+  </div>
+
+<div class="shell">
+
+  <header>
+    <div class="masthead">
+      <div class="wordmark"><span class="wm">Metasurf</span><small>PIT-WALL · META SNAPSHOT</small></div>
+      <div>
+        <div class="clock-label">LOCAL TIME</div>
+        <div class="clock"><span class="led-wrap"><span class="live" id="clock">--:--</span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- R4 HERO BAND (L0, spec §1.1/§2.1 tier A): the current P1 archetype's
+       rep-card art crop (URL from the embedded VIS data / s1-archetype-visuals
+       .json) under the duotone + riso grain treatment; P1 name/share/WR as the
+       readout on the .88 scrim stop. renderHero() re-targets it whenever the
+       sorted/filtered view changes P1. Spans both columns >=1100px. -->
+  <section class="heroband" aria-label="current tower leader">
+    <img class="hero-art" id="heroArt" alt="" decoding="async">
+    <span class="hero-tint" aria-hidden="true"></span>
+    <span class="grain" aria-hidden="true"></span>
+    <span class="hero-scrim" aria-hidden="true"></span>
+    <span class="band-credit" id="heroCredit" hidden></span>
+    <div class="hero-body">
+      <div class="hero-kicker" id="heroKicker">P1 · TIMING TOWER LEADER</div>
+      <h1 class="hero-name" id="heroName">—</h1>
+      <div class="hero-stats">
+        <span><span class="led-label">SHARE %</span><span class="led-wrap hero-led"><span class="live" id="heroShare">--.-</span></span></span>
+        <span><span class="led-label">WIN RATE %</span><span class="led-wrap hero-led" id="heroWrBox"><span class="live" id="heroWr">--.-</span></span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- R4: single control row (L3) — format picker + the FILT ▸ disclosure
+       (spec §1.4.2). The full sort/filter console expands in place below the
+       row; the active-filter count chip stays visible while collapsed.
+       >=1100px JS seatConsole() docks #filtwrap into the tower header area. -->
+  <div class="controls" id="controls">
+    <nav class="fmts" id="fmts" aria-label="format picker"></nav>
+    <div class="filtwrap" id="filtwrap">
+      <div class="filtbar">
+        <button class="sw filt-toggle" id="filtToggle" aria-expanded="false" aria-controls="console">FILT ▸</button>
+        <span class="con-count" id="filtCount" aria-live="polite"></span>
+      </div>
+      <div class="console" id="console" role="group" aria-label="sort and filter tower" hidden></div>
+    </div>
+  </div>
+
+  <!-- main spread: stacked on phones — tower first, movers demoted to L2 below
+       it (R4, spec §1.2); >=1100px a grid puts the tower left and the
+       pit-board rail right (grid placement is explicit, so DOM order is free) -->
+  <div class="main">
+
+    <!-- ranked timing tower — the left spine and the page's L1 instrument -->
+    <div class="col-tower">
+      <div class="seclabel">
+        <span><b>TIMING TOWER</b> · <span id="towerFmt">MODERN</span></span>
+        <span id="eventCount">— EVENTS · — DECKS</span>
+        <span><span class="dl-label">NEXT DL</span><span class="led-wrap led-tiny"><span class="live js-eta">--:--</span></span></span>
+      </div>
+      <div class="tower">
+        <div class="thead"><span>P</span><span>CODE</span><span>ARCHETYPE / SHARE</span><span>7D</span><span>WR·CI</span><span class="h-n">N</span><span class="h-delta">Δ7D</span></div>
+        <div id="rows"></div>
+      </div>
+      <!-- colors_source caveat — wording basis: s1-archetype-visuals.json note -->
+      <div class="colnote">COLORS: PIP-MINED FROM APR–JUN 2024 MTGO MAINBOARDS (COLOR COUNTS AT ≥10% OF PIPS) · REP CARDS: NAMESAKE PICKS — MTGOFORMATDATA RULE-FILE PORT PENDING</div>
+      <!-- riso grain ramp = winrate scale legend: blue favorable / orange
+           unfavorable, purple sector plate where the inks would overlap.
+           R4: relocated here from the header (chip budget §1.3). -->
+      <div class="riso-ramp" aria-hidden="true">
+        <span class="grain"></span>
+        <span class="ramp-l">WR+</span><span class="ramp-r">WR-</span>
+      </div>
+    </div>
+
+    <!-- right rail — L2 on phones (below the tower), sticky pit board >=1100px -->
+    <aside class="col-side">
+      <!-- biggest movers — free tier: crisp charts behind a riso grain plate + quantized blur -->
+      <section class="movsec" aria-label="biggest movers">
+        <span class="grain" aria-hidden="true"></span>
+        <div class="seclabel"><span><b>BIGGEST MOVERS</b> · 7D</span><span class="pro"><i>PRO</i></span></div>
+        <div class="movers" id="movers"></div>
+        <div class="unlockbar">
+          <span class="grain" aria-hidden="true"></span>
+          <span class="txt1" id="unlockTxt">FREE TIER — MOVERS PRINTED THROUGH GRAIN PLATE</span>
+          <button class="btn-unlock" id="unlockBtn">UNLOCK FULL RES</button>
+        </div>
+      </section>
+
+      <!-- drilldown dock — wide screens only; the same .drill element that
+           renders inline under a row on phones docks here instead -->
+      <div class="docksec" aria-label="drilldown dock">
+        <div class="seclabel"><span><b>DRILLDOWN</b></span><span id="dockState">STANDBY</span></div>
+        <div class="dockbody" id="dock"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <footer class="foot">
+    <span class="grain" aria-hidden="true"></span>
+    <div class="big">Metasurf</div>
+    <div class="big hollow" id="footFmt">Modern</div>
+    <div class="tag">WEEK 27 · 2026 · SAMPLE DATA — MOCKUP ONLY</div>
+  </footer>
+</div>
+
+<script>
+'use strict';
+/* =================================================================
+   PIT-WALL CONSOLE — S1 META SNAPSHOT (R2, 2026-07-09)
+   All numbers are placeholder mock data for visual design only.
+   ================================================================= */
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = () => RM.matches;
+/* widescreen breakpoint — must match the CSS pit-wall-spread media query.
+   Crossing it re-seats an open drilldown between inline (phone) and the
+   right-rail dock (wide); resize listener is a fallback for environments
+   where emulated viewports don't dispatch matchMedia change events. */
+const WIDE = matchMedia('(min-width: 1100px)');
+let wasWide = WIDE.matches;
+function reseatDrill(){
+  if (WIDE.matches === wasWide) return;
+  wasWide = WIDE.matches;
+  seatConsole(); // sort/filter bar migrates header <-> tower header with the layout
+  renderTower(false);
+}
+WIDE.addEventListener('change', reseatDrill);
+addEventListener('resize', reseatDrill);
+
+/* ---- mock datasets (placeholder numbers) ---- */
+const DATA = {
+  MODERN: [
+    {code:'MURK', name:'Izzet Murktide',     share:14.2, wr:52.8, ci:1.4, delta:+0.4, n:1204},
+    {code:'SCAM', name:'Rakdos Scam',        share:11.8, wr:53.6, ci:1.6, delta:-0.8, n:986},
+    {code:'TITN', name:'Amulet Titan',       share:8.9,  wr:55.1, ci:1.9, delta:+1.1, n:712},
+    {code:'YAWG', name:'Yawgmoth',           share:7.4,  wr:54.2, ci:2.1, delta:+0.2, n:598},
+    {code:'LEND', name:'Living End',         share:6.1,  wr:51.9, ci:2.3, delta:+2.3, n:487},
+    {code:'TRON', name:'Mono-Green Tron',    share:5.6,  wr:49.4, ci:2.2, delta:-0.5, n:451},
+    {code:'BURN', name:'Burn',               share:4.8,  wr:47.2, ci:2.4, delta:-1.2, n:390},
+    {code:'HAMR', name:'Hammer Time',        share:4.1,  wr:48.8, ci:2.6, delta:-0.3, n:332},
+    {code:'RHNO', name:'Crashing Footfalls', share:3.7,  wr:50.6, ci:2.7, delta:+0.6, n:298},
+    {code:'JUND', name:'Jund Saga',          share:3.2,  wr:46.9, ci:2.9, delta:-0.9, n:254},
+  ],
+  PIONEER: [
+    {code:'PHNX', name:'Izzet Phoenix',      share:13.5, wr:52.1, ci:1.5, delta:+0.9, n:1010},
+    {code:'VAMP', name:'Rakdos Vampires',    share:12.7, wr:54.8, ci:1.6, delta:-1.4, n:920},
+    {code:'AMLA', name:'Amalia Combo',       share:9.3,  wr:53.2, ci:1.9, delta:+1.8, n:745},
+    {code:'LOTS', name:'Lotus Field',        share:7.2,  wr:51.4, ci:2.2, delta:+0.3, n:566},
+    {code:'CNVK', name:'Boros Convoke',      share:6.4,  wr:49.8, ci:2.3, delta:-0.6, n:498},
+    {code:'AZCT', name:'Azorius Control',    share:5.8,  wr:48.1, ci:2.4, delta:-0.2, n:443},
+    {code:'DEVO', name:'Mono-G Devotion',    share:4.9,  wr:47.6, ci:2.6, delta:-1.1, n:371},
+    {code:'SPRT', name:'Mono-U Spirits',     share:4.2,  wr:50.2, ci:2.7, delta:+0.5, n:308},
+  ],
+  LEGACY: [
+    {code:'DLVR', name:'Temur Delver',       share:15.8, wr:51.7, ci:1.3, delta:-0.7, n:1322},
+    {code:'REAN', name:'Reanimator',         share:10.4, wr:54.4, ci:1.7, delta:+2.6, n:844},
+    {code:'DNT',  name:'Death & Taxes',      share:8.6,  wr:52.3, ci:1.9, delta:+0.4, n:690},
+    {code:'LNDS', name:'Lands',              share:6.2,  wr:49.1, ci:2.3, delta:-0.3, n:502},
+    {code:'DOOM', name:'Doomsday',           share:5.7,  wr:53.8, ci:2.4, delta:+1.2, n:461},
+    {code:'PNTR', name:'Painter',            share:4.9,  wr:48.6, ci:2.6, delta:-0.9, n:377},
+    {code:'CEPH', name:'Cephalid Breakfast', share:4.3,  wr:51.2, ci:2.7, delta:+0.8, n:319},
+    {code:'8CST', name:'8-Cast',             share:3.8,  wr:47.9, ci:2.8, delta:-1.5, n:280},
+  ],
+};
+const META = {
+  MODERN:  {events:12, decks:2143, week:'WEEK 27'},
+  PIONEER: {events:9,  decks:1688, week:'WEEK 27'},
+  LEGACY:  {events:7,  decks:1409, week:'WEEK 27'},
+};
+
+/* ---- R3: representative card art + color identity per archetype ----
+   Source: docs/design-research/2026-07-09/s1-archetype-visuals.json —
+   Scryfall art_crop URLs verbatim; colors pip-mined from real MTGO
+   mainboards Apr–Jun 2024 (see .colnote caveat in the tower footer). */
+const VIS = {
+  MODERN: {
+    'Izzet Murktide':     {card:'Murktide Regent',           art:'https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708', colors:['U','R']},
+    'Rakdos Scam':        {card:'Grief',                     art:'https://cards.scryfall.io/art_crop/front/e/6/e6befbc4-1320-4f26-bd9f-b1814fedda10.jpg?1782704685', colors:['B','R']},
+    'Amulet Titan':       {card:'Amulet of Vigor',           art:'https://cards.scryfall.io/art_crop/front/9/9/997bc933-ac30-477b-a4e1-5333b796a99d.jpg?1782715540', colors:['G']},
+    'Yawgmoth':           {card:'Yawgmoth, Thran Physician', art:'https://cards.scryfall.io/art_crop/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1782735245', colors:['B','G']},
+    'Living End':         {card:'Living End',                art:'https://cards.scryfall.io/art_crop/front/b/1/b1eede29-17a4-437f-a5c2-e24cccbc6a33.jpg?1782741862', colors:['U','B','G']},
+    'Mono-Green Tron':    {card:'Karn Liberated',            art:'https://cards.scryfall.io/art_crop/front/4/b/4b0c6662-4dde-40a2-97e0-0318478c0367.jpg?1782744061', colors:['B','G']},
+    'Burn':               {card:'Lava Spike',                art:'https://cards.scryfall.io/art_crop/front/7/9/79c21c1f-eaa4-454d-a1c7-b41466d0a428.jpg?1782747024', colors:['R']},
+    'Hammer Time':        {card:'Colossus Hammer',           art:'https://cards.scryfall.io/art_crop/front/8/9/897a134e-7e61-4fe1-bbae-23ef1fe5c0cf.jpg?1782704085', colors:['W']},
+    'Crashing Footfalls': {card:'Crashing Footfalls',        art:'https://cards.scryfall.io/art_crop/front/a/8/a8cca2a2-69e3-4136-936c-7a2774c19351.jpg?1782708457', colors:['W','U','G']},
+    'Jund Saga':          {card:"Urza's Saga",               art:'https://cards.scryfall.io/art_crop/front/c/1/c1e0f201-42cb-46a1-901a-65bb4fc18f6c.jpg?1782704580', colors:['B','R','G']},
+  },
+  PIONEER: {
+    'Izzet Phoenix':      {card:'Arclight Phoenix',          art:'https://cards.scryfall.io/art_crop/front/d/e/def7f05b-6e63-4828-a92c-ce7921bbdf4e.jpg?1782731143', colors:['U','R']},
+    'Rakdos Vampires':    {card:'Vein Ripper',               art:'https://cards.scryfall.io/art_crop/front/0/7/078933b3-6d82-45f2-94e8-addf54cf1704.jpg?1782693884', colors:['B','R']},
+    'Amalia Combo':       {card:'Amalia Benavides Aguirre',  art:'https://cards.scryfall.io/art_crop/front/9/a/9acf80a5-f2ca-45b4-aca8-fbc690e35401.jpg?1782694434', colors:['W','B','G']},
+    'Lotus Field':        {card:'Lotus Field',               art:'https://cards.scryfall.io/art_crop/front/e/e/ee5ac47c-e8b6-400e-b91e-a7cd0f952cf1.jpg?1782683085', colors:['U','B','G']},
+    'Boros Convoke':      {card:'Knight-Errant of Eos',      art:'https://cards.scryfall.io/art_crop/front/a/b/ab2ad652-2406-491a-9f22-23e974f943d7.jpg?1782697812', colors:['W','R']},
+    'Azorius Control':    {card:'Teferi, Hero of Dominaria', art:'https://cards.scryfall.io/art_crop/front/5/d/5d10b752-d9cb-419d-a5c4-d4ee1acb655e.jpg?1782710071', colors:['W','U']},
+    'Mono-G Devotion':    {card:'Nykthos, Shrine to Nyx',    art:'https://cards.scryfall.io/art_crop/front/8/3/834b27a0-dfd7-4f96-8cde-cacac4b24acc.jpg?1782713715', colors:['G']},
+    'Mono-U Spirits':     {card:'Supreme Phantom',           art:'https://cards.scryfall.io/art_crop/front/c/b/cbf4ca25-73cc-45ba-bed5-dbaa517e8bb8.jpg?1782703249', colors:['W','U']},
+  },
+  LEGACY: {
+    'Temur Delver':       {card:'Delver of Secrets // Insectile Aberration', art:'https://cards.scryfall.io/art_crop/front/6/9/6904ea20-e504-47da-95a0-08739fdde260.jpg?1782726841', colors:['U','R']},
+    'Reanimator':         {card:'Entomb',                    art:'https://cards.scryfall.io/art_crop/front/3/c/3caa9c55-5e3b-436b-84a9-b7ccebf63799.jpg?1782735264', colors:['U','B']},
+    'Death & Taxes':      {card:'Thalia, Guardian of Thraben', art:'https://cards.scryfall.io/art_crop/front/c/9/c9f8b8fb-1cd8-450e-a1fe-892e7a323479.jpg?1782703167', colors:['W']},
+    'Lands':              {card:'Life from the Loam',        art:'https://cards.scryfall.io/art_crop/front/c/d/cdb6432f-3f56-4c92-b09a-2a5b64620c04.jpg?1782686867', colors:['G']},
+    'Doomsday':           {card:'Doomsday',                  art:'https://cards.scryfall.io/art_crop/front/7/2/72cd296e-e550-46bf-9378-586a24c9b2a7.jpg?1782681989', colors:['U','B']},
+    'Painter':            {card:"Painter's Servant",         art:'https://cards.scryfall.io/art_crop/front/b/e/be407a81-b25a-4e5d-845e-be0cc0d18db8.jpg?1782716095', colors:['U','R']},
+    'Cephalid Breakfast': {card:'Cephalid Illusionist',      art:'https://cards.scryfall.io/art_crop/front/d/c/dceb8cf5-b31a-400e-aea5-ad0c3552d697.jpg?1782719318', colors:['W','U']},
+    '8-Cast':             {card:'Thought Monitor',           art:'https://cards.scryfall.io/art_crop/front/1/8/18a6ea89-417c-4ee0-a410-8a0067b92967.jpg?1782685664', colors:['U']},
+  },
+};
+const visOf = a => VIS[curFmt][a.name] || {card:'', art:'', colors:[]};
+const FORMATS = Object.keys(DATA);
+let curFmt = 'MODERN';
+let openCode = null;               // drilldown state
+const shown = {};                  // last displayed values, keyed FORMAT:CODE
+const shownKey = (fmt, code) => fmt + ':' + code; // format-scoped — codes may collide across formats
+
+/* ---- R3: sort + filter state (applies within the active format tab) ---- */
+const PIPC = ['W','U','B','R','G'];
+const MIN_N = 500;
+let sortKey = 'SHARE';             // SHARE (default) | WR | D7 | N | NAME
+const colorFilter = new Set();     // archetype passes if it contains ALL selected
+let minNOn = false;
+const SORTS = {
+  SHARE:(a,b)=>b.share-a.share,
+  WR:   (a,b)=>b.wr-a.wr,
+  D7:   (a,b)=>b.delta-a.delta,
+  N:    (a,b)=>b.n-a.n,
+  NAME: (a,b)=>a.name.localeCompare(b.name),
+};
+/* the tower's current view: filter then sort. Locked/teased rows would flow
+   through here like any other row — redaction is presentation, not data. */
+function viewList(){
+  return DATA[curFmt]
+    .filter(a=>{
+      const cs = visOf(a).colors;
+      for (const c of colorFilter) if (!cs.includes(c)) return false;
+      return !minNOn || a.n >= MIN_N;
+    })
+    .sort(SORTS[sortKey]);
+}
+const filtersActive = () => colorFilter.size > 0 || minNOn;
+
+/* mana pips: colors array (already WUBRG-ordered) -> dots; colorless -> gray diamond */
+function pipsHTML(colors){
+  if (!colors.length) return '<i class="pip pip-C" title="COLORLESS"></i>';
+  return colors.map(c=>`<i class="pip pip-${c}" title="${c}"></i>`).join('');
+}
+
+/* deterministic pseudo-random spark series per archetype code */
+function seedRand(str){ let h=2166136261; for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619);} return ()=>{h=Math.imul(h^h>>>15,2246822507);h=Math.imul(h^h>>>13,3266489909);return ((h^=h>>>16)>>>0)/4294967296;}; }
+function sparkSeries(a){
+  const r = seedRand(a.code+curFmt), pts=[];
+  let v = a.wr - a.delta;
+  for(let i=0;i<7;i++){ pts.push(v); v += a.delta/6 + (r()-0.5)*1.6; }
+  pts[6] = a.wr;
+  return pts;
+}
+
+/* ---- helpers ---- */
+const $ = s => document.querySelector(s);
+const wrClass = wr => wr>52 ? 'good' : wr<48 ? 'bad' : 'mid';
+const fmt1 = v => v.toFixed(1);
+function biggestMoverCode(list){ return list.reduce((a,b)=>Math.abs(b.delta)>Math.abs(a.delta)?b:a).code; }
+
+/* IntersectionObserver gate — only roll up numbers that are on screen.
+   Freshly-rendered rows haven't been reported by IO yet, so fall back to a
+   synchronous rect check for elements IO hasn't classified. */
+const visible = new WeakSet(), ioSeen = new WeakSet();
+const io = new IntersectionObserver(es=>{ for(const e of es){ ioSeen.add(e.target);
+  e.isIntersecting?visible.add(e.target):visible.delete(e.target);} },{threshold:0.1});
+function onScreen(el){
+  const host = el.closest('.row') || el;
+  if (ioSeen.has(host)) return visible.has(host);
+  const r = host.getBoundingClientRect();
+  return r.top < innerHeight && r.bottom > 0;
+}
+
+/* quantized arcade roll-up: 8 discrete ticks, <=600ms, reduced-motion gated.
+   DELIBERATE DEVIATION from the spec's CountUp.js: this hand-rolled ~15-line
+   equivalent keeps the mockup a single offline file with zero JS dependencies;
+   behavior matches the spec (8 discrete ticks, 480ms<=600ms, IO-gated,
+   matchMedia reduced-motion check). Swap for CountUp.js in production if the
+   dependency is acceptable. */
+function rollup(el, from, to, render){
+  if (reduced() || !onScreen(el)){ el.textContent = render(to); return; }
+  const TICKS=8, DUR=480; let i=0;
+  const step=()=>{
+    i++;
+    const v = from + (to-from)*(i/TICKS);
+    el.textContent = render(i===TICKS ? to : Math.round(v*10)/10);
+    if(i<TICKS) setTimeout(step, DUR/TICKS);
+  };
+  step();
+}
+
+/* R3 art lazy-load fallback: loading="lazy" stays on the tag, but embedded
+   preview panes report visibilityState:hidden, where native lazy (and IO)
+   never fire even for in-viewport images. Same rect-check pattern as
+   onScreen(): promote art within 200px of the viewport to eager — a no-op
+   wherever native lazy already fetched; offscreen art stays deferred. */
+function loadArtInView(){
+  document.querySelectorAll('img.art[loading="lazy"]').forEach(im=>{
+    const r = im.getBoundingClientRect();
+    if (r.top < innerHeight + 200 && r.bottom > -200) im.loading = 'eager';
+  });
+}
+addEventListener('scroll', loadArtInView, {passive:true});
+
+/* one-shot glitch frame on a changed cell */
+function glitch(el){
+  if (reduced()) return;
+  el.classList.remove('glitch'); void el.offsetWidth; // restart
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+
+/* =================================================================
+   CHARTS — crisp vector SVG (R2 rewrite)
+   RULE (owner feedback): retro flavor lives in the FRAMING ONLY —
+   dashed grid plates, tick marks, pixel labels. The data marks
+   (polyline, area, endpoint dot) are precise anti-aliased vectors.
+   No image-rendering:pixelated, no low-res buffers, ever.
+   ================================================================= */
+
+/* 7-day sparkline: 120x36, padded 3px; dashed midline + day ticks as framing */
+function sparkSVG(pts, color){
+  const W=120, H=36, P=3;
+  const mn=Math.min(...pts), mx=Math.max(...pts), rg=(mx-mn)||1;
+  const X=i=>P+i*(W-2*P)/(pts.length-1);
+  const Y=v=>H-P-(v-mn)/rg*(H-2*P);
+  const line=pts.map((v,i)=>X(i).toFixed(1)+','+Y(v).toFixed(1)).join(' ');
+  const ticks=pts.map((_,i)=>`<line x1="${X(i).toFixed(1)}" y1="${H-2}" x2="${X(i).toFixed(1)}" y2="${H}" stroke="#3a3a48" stroke-width="1"/>`).join('');
+  const ex=X(pts.length-1).toFixed(1), ey=Y(pts[pts.length-1]).toFixed(1);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="#262633" stroke-width="1" stroke-dasharray="1 3"/>
+    ${ticks}
+    <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2"
+      stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${ex}" cy="${ey}" r="2.4" fill="${color}"/>
+  </svg>`;
+}
+
+/* 28-day mover chart: 140x56; week-boundary ticks + dashed midline as framing,
+   smooth polyline + 13% area fill as data ink */
+function moverSVG(a, color){
+  const W=140, H=56, P=2;
+  const r=seedRand('mv'+a.code+curFmt); const pts=[];
+  let v=H/2 - a.delta*6;
+  for(let i=0;i<28;i++){ pts.push(Math.max(P+4,Math.min(H-P-4,v))); v -= a.delta*0.45 + (r()-0.5)*4; }
+  const X=i=>P+i*(W-2*P)/27;
+  const line=pts.map((p,i)=>X(i).toFixed(1)+','+p.toFixed(1)).join(' ');
+  const weeks=[7,14,21].map(i=>`<line x1="${X(i).toFixed(1)}" y1="0" x2="${X(i).toFixed(1)}" y2="${H}" stroke="#262633" stroke-width="1" stroke-dasharray="2 4"/>`).join('');
+  const ex=X(27).toFixed(1), ey=pts[27].toFixed(1);
+  return `<svg class="mchart" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <rect x="0.5" y="0.5" width="${W-1}" height="${H-1}" fill="none" stroke="#23232e" stroke-width="1"/>
+    <line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="#262633" stroke-width="1" stroke-dasharray="1 3"/>
+    ${weeks}
+    <g class="gdata">
+      <polygon points="${P},${H-P} ${line} ${W-P},${H-P}" fill="${color}" opacity=".13"/>
+      <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2"
+        stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${ex}" cy="${ey}" r="2.4" fill="${color}"/>
+    </g>
+  </svg>`;
+}
+
+/* ================= FORMAT PICKER ================= */
+function renderFmts(){
+  $('#fmts').innerHTML = FORMATS.map(f=>
+    `<button class="fmt ${f===curFmt?'on':''}" data-f="${f}">${f}</button>`).join('');
+  $('#fmts').querySelectorAll('.fmt').forEach(b=>b.addEventListener('click',()=>{
+    if(b.dataset.f===curFmt) return;
+    curFmt = b.dataset.f; openCode=null;
+    renderFmts(); updateConsole(); renderTower(true); renderMovers(); renderChrome();
+  }));
+}
+
+function renderChrome(){
+  $('#towerFmt').textContent = curFmt;
+  $('#footFmt').textContent = curFmt;
+  const m = META[curFmt];
+  $('#eventCount').textContent = `${m.events} EVENTS · ${m.decks} DECKS`;
+}
+
+/* ================= SORT / FILTER CONSOLE (R3) ================= */
+const SORT_OPTS = [['SHARE','SHARE'],['WR','WR'],['D7','Δ7D'],['N','N'],['NAME','NAME']];
+function buildConsole(){
+  const con = $('#console');
+  con.innerHTML = `
+    <span class="con-label">SORT</span>
+    <div class="seg" role="group" aria-label="sort tower by">
+      ${SORT_OPTS.map(([k,l])=>`<button class="sw" data-sort="${k}" aria-pressed="false">${l}</button>`).join('')}
+    </div>
+    <span class="con-label">FILT</span>
+    <div class="fpips" role="group" aria-label="filter by color (archetype must contain all selected)">
+      ${PIPC.map(c=>`<button class="fpip" data-c="${c}" aria-pressed="false" aria-label="filter color ${c}"><i class="pip pip-${c}"></i></button>`).join('')}
+    </div>
+    <button class="sw" id="minNBtn" aria-pressed="false">N≥${MIN_N}</button>
+    <button class="sw" id="clrBtn" hidden>CLR</button>`;
+  con.querySelectorAll('[data-sort]').forEach(b=>b.addEventListener('click', ()=>setSort(b.dataset.sort)));
+  con.querySelectorAll('.fpip').forEach(b=>b.addEventListener('click', ()=>{
+    const c = b.dataset.c;
+    colorFilter.has(c) ? colorFilter.delete(c) : colorFilter.add(c);
+    filterChanged();
+  }));
+  $('#minNBtn').addEventListener('click', ()=>{ minNOn = !minNOn; filterChanged(); });
+  $('#clrBtn').addEventListener('click', ()=>{ colorFilter.clear(); minNOn = false; filterChanged(); });
+  $('#filtToggle').addEventListener('click', ()=>setFiltOpen(!filtOpen));
+  setFiltOpen(filtOpen);
+  updateConsole();
+}
+/* R4 FILT ▸ disclosure (spec §1.4.2): the console collapses behind one chip.
+   Open state persists IN-PAGE ONLY (a variable — survives re-seats and
+   re-renders, resets on reload; no storage). The #filtCount chip lives in the
+   always-visible bar, so an active filter still prints while collapsed. */
+let filtOpen = false;
+function setFiltOpen(open){
+  filtOpen = open;
+  $('#console').hidden = !open;
+  const t = $('#filtToggle');
+  t.setAttribute('aria-expanded', String(open));
+  t.textContent = open ? 'FILT ▾' : 'FILT ▸';
+  t.classList.toggle('on', open);
+}
+function updateConsole(){
+  const con = $('#console');
+  con.querySelectorAll('[data-sort]').forEach(b=>{
+    const on = b.dataset.sort===sortKey;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+  });
+  con.querySelectorAll('.fpip').forEach(b=>{
+    const on = colorFilter.has(b.dataset.c);
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+  });
+  const nBtn = $('#minNBtn');
+  nBtn.classList.toggle('on', minNOn); nBtn.setAttribute('aria-pressed', String(minNOn));
+  $('#clrBtn').hidden = !filtersActive();
+  $('#filtCount').textContent = filtersActive()
+    ? `${viewList().length}/${DATA[curFmt].length} SHOWN` : '';
+}
+/* re-sort feels mechanical: wipe the roll-up cache for this format so every
+   readout re-runs its quantized 8-tick roll-up, then one-shot glitch the
+   recomputed P positions. Values never change — animation only. */
+function setSort(k){
+  if (sortKey===k) return;
+  sortKey = k;
+  for (const key of Object.keys(shown)) if (key.startsWith(curFmt+':')) delete shown[key];
+  updateConsole();
+  renderTower(true);
+  if (!reduced()) document.querySelectorAll('#rows .pos').forEach(glitch);
+}
+function filterChanged(){
+  updateConsole();
+  renderTower(false); // filtered-out rows collapse — no gaps, no re-roll
+}
+/* phones: the FILT disclosure lives beside the format picker; >=1100px the
+   whole #filtwrap (toggle bar + console) docks into the tower header area.
+   Same nodes reparented — open state and listeners survive. */
+function seatConsole(){
+  const wrap = $('#filtwrap');
+  if (WIDE.matches){
+    const tower = document.querySelector('.col-tower .tower');
+    tower.parentNode.insertBefore(wrap, tower);
+  } else {
+    $('#controls').appendChild(wrap);
+  }
+}
+
+/* ================= HERO BAND (R4) ================= */
+/* L0 zone: whoever is P1 in the CURRENT sorted+filtered view owns the band —
+   art crop, name, SHARE/WR DSEG, kicker and ART CROP credit all re-target
+   when sort/filter/format/wire-refresh changes the leader. Numbers re-run the
+   quantized roll-up on change; the name fires the one-shot glitch (both
+   reduced-motion gated). Art URLs come from VIS (s1-archetype-visuals.json). */
+let heroShown = null; // last displayed {name, share, wr}
+function renderHero(){
+  const a = viewList()[0];
+  const img = $('#heroArt'), credit = $('#heroCredit'),
+        nameEl = $('#heroName'), kick = $('#heroKicker'),
+        shEl = $('#heroShare'), wrEl = $('#heroWr'), wrBox = $('#heroWrBox');
+  if (!a){ // filters excluded every archetype — unlit state (ext §3), no art
+    img.removeAttribute('src'); img.style.visibility = 'hidden';
+    credit.hidden = true;
+    nameEl.textContent = 'NO MATCH';
+    kick.textContent = 'FILTERS EXCLUDE EVERY ARCHETYPE · CLR TO RESTORE';
+    shEl.textContent = '--.-'; wrEl.textContent = '--.-';
+    wrBox.style.color = 'var(--dim)';
+    heroShown = null;
+    return;
+  }
+  const v = visOf(a), m = META[curFmt];
+  const sortLbl = SORT_OPTS.find(([k])=>k===sortKey)[1];
+  const changed = !heroShown || heroShown.name !== a.name;
+  if (v.art){
+    if (img.getAttribute('src') !== v.art) img.src = v.art; // eager — L0 is never lazy
+    img.style.visibility = 'visible';
+    img.alt = v.card;
+  } else { img.removeAttribute('src'); img.style.visibility = 'hidden'; img.alt = ''; }
+  credit.hidden = !v.card;
+  credit.textContent = v.card ? 'ART CROP: ' + v.card.toUpperCase() : '';
+  nameEl.textContent = a.name;
+  kick.textContent = `P1 BY ${sortLbl} · ${curFmt} · ${m.week}` + (filtersActive() ? ' · FILTERED VIEW' : '');
+  wrBox.style.color = a.wr>52 ? '#3b9dff' : a.wr<48 ? '#ff7a1a' : '#f2f2f7';
+  const from = heroShown || {share: 0, wr: a.wr - 4};
+  if (changed || from.share !== a.share) rollup(shEl, from.share, a.share, fmt1);
+  else shEl.textContent = fmt1(a.share);
+  if (changed || from.wr !== a.wr) rollup(wrEl, from.wr, a.wr, fmt1);
+  else wrEl.textContent = fmt1(a.wr);
+  if (changed && heroShown) glitch(nameEl); // leader handover — one-shot, never loops
+  heroShown = {name: a.name, share: a.share, wr: a.wr};
+}
+
+/* ================= TIMING TOWER ================= */
+function renderTower(animate){
+  const full = DATA[curFmt];
+  const list = viewList(); // R3: filtered + sorted view; P1..Pn = view rank
+  const maxShare = Math.max(...full.map(a=>a.share)); // bar scale stays stable under filters
+  const hot = biggestMoverCode(full);
+  const box = $('#rows');
+  box.innerHTML = '';
+  list.forEach((a,i)=>{
+    const v = visOf(a);
+    const row = document.createElement('button');
+    row.className = 'row' + (openCode===a.code?' sel':'');
+    row.dataset.code = a.code;
+    row.setAttribute('aria-expanded', openCode===a.code ? 'true' : 'false'); // row is a disclosure toggle
+    const dc = a.code===hot ? 'sector' : (a.delta>=0?'up':'dn');
+    const col = a.code===hot ? '#b45bff' : (a.delta>=0 ? '#3b9dff' : '#ff7a1a');
+    row.innerHTML = `
+      <span class="pos ${i===0?'p1':''}">${i+1}</span>
+      <span class="idcell">
+        ${v.art?`<img class="art" src="${v.art}" alt="${v.card.replace(/"/g,'&quot;')}" loading="lazy" decoding="async">`:''}
+        <span class="code ${a.code===hot?'sector':''}">${a.code}</span>
+      </span>
+      <span class="namecell">
+        <span class="nameline">
+          <span class="aname">${a.name}</span>
+          <span class="pips" role="img" aria-label="colors: ${v.colors.join(' ')||'colorless'}">${pipsHTML(v.colors)}</span>
+        </span>
+        <span class="shareline">
+          <span class="sharebar"><i style="width:${(a.share/maxShare*100).toFixed(0)}%"></i></span>
+          <span class="sharev"><span class="js-share">${fmt1(a.share)}</span>%</span>
+        </span>
+      </span>
+      ${sparkSVG(sparkSeries(a), col)}
+      <span class="wrcell">
+        <span class="wr ${wrClass(a.wr)} js-wr">${fmt1(a.wr)}</span>
+        <span class="ci">±${fmt1(a.ci)}</span>
+      </span>
+      <span class="ncell">${a.n}</span>
+      <span class="dcell"><span class="delta ${dc}">${a.delta>=0?'+':''}${fmt1(a.delta)}${a.delta>=0?'▲':'▼'}</span></span>`;
+    box.appendChild(row);
+    io.observe(row);
+
+    /* roll-up + single glitch on changed cells (cache keyed by format+code) */
+    const wrEl = row.querySelector('.js-wr'), shEl = row.querySelector('.js-share');
+    const prev = shown[shownKey(curFmt, a.code)];
+    if (animate){
+      requestAnimationFrame(()=>{ // let IO settle
+        rollup(wrEl, prev?prev.wr:a.wr-4, a.wr, fmt1);
+        rollup(shEl, prev?prev.share:0,   a.share, fmt1);
+        if (prev && prev.wr!==a.wr)    glitch(wrEl);
+        if (prev && prev.share!==a.share) glitch(shEl);
+      });
+    }
+    shown[shownKey(curFmt, a.code)] = {wr:a.wr, share:a.share};
+
+    row.addEventListener('click', ()=>toggleDrill(a));
+    /* phones: drill renders inline under its row; wide screens dock it instead */
+    if (openCode===a.code && !WIDE.matches) box.appendChild(buildDrill(a));
+  });
+  setTimeout(loadArtInView, 0); // promote in-viewport art after layout (rAF stalls in hidden panes)
+  renderDock();
+  renderHero(); // the L0 band always mirrors the current view's P1
+}
+
+/* drilldown popover — DSEG seven-segment readout */
+function buildDrill(a){
+  const d = document.createElement('div');
+  d.className = 'drill';
+  d.innerHTML = `
+    <div class="drill-grid">
+      <div>
+        <span class="led-label">WIN RATE %</span>
+        <span class="led-wrap led-big" style="color:${a.wr>52?'#3b9dff':a.wr<48?'#ff7a1a':'#f2f2f7'}">
+          <span class="live js-ledwr">${fmt1(a.wr)}</span>
+        </span>
+      </div>
+      <div>
+        <span class="led-label">SAMPLE N</span>
+        <span class="led-wrap led-mid"><span class="live">${a.n}</span></span>
+      </div>
+      <div class="drill-meta">
+        CI 95% <b>±${fmt1(a.ci)}</b><br>
+        SHARE <b>${fmt1(a.share)}%</b> · Δ7D <b>${a.delta>=0?'+':''}${fmt1(a.delta)}</b>
+      </div>
+    </div>
+    <div class="drill-hint">TAP ROW AGAIN TO CLOSE · FULL SHEET IN S3 →</div>`;
+  const led = d.querySelector('.js-ledwr');
+  if(!reduced()){
+    const TICKS=8, DUR=480; let i=0, from=a.wr-6;
+    const step=()=>{ i++; const v=from+(a.wr-from)*(i/TICKS);
+      led.textContent = fmt1(i===TICKS?a.wr:Math.round(v*10)/10);
+      if(i<TICKS) setTimeout(step,DUR/TICKS); };
+    step();
+  }
+  return d;
+}
+function toggleDrill(a){
+  openCode = (openCode===a.code) ? null : a.code;
+  renderTower(false); // re-render sets .sel + aria-expanded on the new state
+}
+
+/* wide screens: the drilldown docks as a persistent right-rail panel instead
+   of popping inline. Same buildDrill() output — DSEG readout, roll-up and all. */
+function renderDock(){
+  const dock = $('#dock'), state = $('#dockState');
+  const a = DATA[curFmt].find(x=>x.code===openCode);
+  const p = a ? viewList().findIndex(x=>x.code===a.code) : -1; // rank in the current sorted/filtered view
+  state.textContent = a ? `${a.code} · ${p>=0 ? 'P'+(p+1) : 'FILTERED'}` : 'STANDBY';
+  dock.innerHTML = '';
+  if (a && WIDE.matches) dock.appendChild(buildDrill(a));
+  else dock.innerHTML = '<div class="dock-empty">NO SELECTION — TAP A TOWER ROW</div>';
+}
+
+/* ================= MOVERS — grain-plate free tier =================
+   R2: the free-tier tease is a riso grain plate (sector-purple speckle
+   gradient) plus a quantized blur on the SVG data group. The data marks
+   underneath stay crisp vectors — redaction is a wrapper, never baked in.
+   MOCK ONLY: in production the locked chart must be a server-rendered
+   redacted image; true values never reach the free-tier DOM. */
+let unlocked = false;
+
+function moverList(){
+  return [...DATA[curFmt]].sort((x,y)=>Math.abs(y.delta)-Math.abs(x.delta)).slice(0,4);
+}
+function renderMovers(){
+  const box = $('#movers');
+  box.innerHTML='';
+  const hot = biggestMoverCode(DATA[curFmt]);
+  moverList().forEach(a=>{
+    const card = document.createElement('button');
+    card.className='mover';
+    const col = a.code===hot ? '#b45bff' : (a.delta>=0?'#3b9dff':'#ff7a1a');
+    /* free tier masks the exact delta — direction only, value behind the paywall */
+    const deltaTxt = unlocked
+      ? `${a.delta>=0?'+':''}${fmt1(a.delta)}${a.delta>=0?'▲':'▼'}`
+      : `${a.delta>=0?'+':'−'}?.?${a.delta>=0?'▲':'▼'}`;
+    card.innerHTML = `
+      <span class="mover-top">
+        <span class="mover-code" style="color:${col}">${a.code}</span>
+        <span class="mover-delta" style="color:${col}">${deltaTxt}</span>
+      </span>
+      <span class="chartbox ${unlocked?'':'locked'}">
+        ${moverSVG(a, col)}
+        <span class="grain" aria-hidden="true"></span>
+      </span>
+      <span class="mover-lock">${unlocked?'FULL RES':'LOCKED · GRAIN PLATE'}</span>`;
+    box.appendChild(card);
+  });
+}
+/* the upgrade animation IS the mechanic: quantized 8-step lift of the grain
+   plate + blur (4px -> 0), same mechanical cadence as the number roll-ups */
+$('#unlockBtn').addEventListener('click', ()=>{
+  if(unlocked) return;
+  unlocked = true;
+  const finish = ()=>{
+    renderMovers(); // re-render reveals the real deltas + FULL RES captions, no plate
+    $('#unlockTxt').textContent='PRO PREVIEW — FULL-RESOLUTION MOVERS';
+    $('#unlockBtn').textContent='PRO ✓';
+  };
+  if(reduced()){ finish(); return; }
+  const boxes = document.querySelectorAll('.chartbox');
+  const steps=[3.5,3,2.5,2,1.5,1,.5,0]; let i=0;
+  const tick=()=>{
+    boxes.forEach(b=>{
+      b.style.setProperty('--lockblur', steps[i]+'px');
+      b.style.setProperty('--lockgrain', (steps[i]/4*.9).toFixed(2));
+    });
+    if(++i<steps.length) setTimeout(tick,90); else finish();
+  };
+  tick();
+});
+
+/* ================= TICKER ================= */
+const FEED = [
+  `MODERN CHALLENGE 64 · 1st <span class="sec">RAKDOS SCAM</span>`,
+  `LIVING END <span class="up">+2.3% ▲</span>`,
+  `PIONEER CHALLENGE 32 · 1st IZZET PHOENIX`,
+  `REANIMATOR <span class="up">+2.6% ▲</span> LEGACY`,
+  `BURN <span class="dn">−1.2% ▼</span> MODERN`,
+  `AMULET TITAN WR 55.1 <span class="up">±1.9</span>`,
+  `NEXT DOWNLOAD <span class="js-eta sec">00:24</span> · SOURCE: SAMPLE WIRE`,
+];
+(function initTicker(){
+  const tk = $('#ticker'), track = $('#tickerTrack');
+  const half = FEED.map(s=>`<span>${s}</span>`).join('');
+  track.innerHTML = half + half; /* duplicated track for seamless loop */
+  /* pin speed to ~35px/s regardless of copy width */
+  requestAnimationFrame(()=>{
+    const w = track.scrollWidth/2;
+    if (w>0) track.style.animationDuration = (w/35).toFixed(1)+'s';
+  });
+  const setPaused = p=>{
+    tk.classList.toggle('paused', p);
+    tk.setAttribute('aria-pressed', String(p));
+    $('#tickerPause').textContent = p ? '▶' : '❚❚';
+  };
+  tk.addEventListener('click', ()=>setPaused(!tk.classList.contains('paused')));
+  tk.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setPaused(!tk.classList.contains('paused')); }
+  });
+})();
+
+/* ---- simulated wire refresh: the NEXT DOWNLOAD countdown actually fires ----
+   Perturbs a few rows of the current format so the one-shot RGB-split glitch
+   (fired only on changed cells) is reachable in the mockup. */
+const ETA_START = 24, ETA_RESET = 45;
+let eta = ETA_START;
+const wireRand = seedRand('wire-refresh-2026w27');
+function wireRefresh(){
+  const list = DATA[curFmt];
+  const idx = new Set();
+  while (idx.size < Math.min(3, list.length)) idx.add(Math.floor(wireRand()*list.length));
+  idx.forEach(i=>{
+    const a = list[i];
+    a.wr    = Math.round((a.wr    + (wireRand()>0.5?1:-1)*(0.1 + Math.round(wireRand()*3)/10))*10)/10;
+    a.share = Math.max(0.5, Math.round((a.share + (wireRand()-0.5)*0.4)*10)/10);
+  });
+  renderTower(true); // shown{} diff -> roll-ups + single glitch on the changed cells
+}
+setInterval(()=>{
+  eta--;
+  if (eta<=0){ wireRefresh(); eta = ETA_RESET; }
+  const t = String(Math.floor(eta/60)).padStart(2,'0')+':'+String(eta%60).padStart(2,'0');
+  document.querySelectorAll('.js-eta').forEach(e=>e.textContent=t);
+}, 1000);
+
+/* ================= CLOCK ================= */
+function tickClock(){
+  const d=new Date();
+  $('#clock').textContent = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 30000);
+
+/* ================= BOOT ================= */
+renderFmts(); renderChrome(); buildConsole(); seatConsole(); renderMovers(); renderTower(true);
+</script>
+</body>
+</html>

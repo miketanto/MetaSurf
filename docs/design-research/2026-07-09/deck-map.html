@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — Deck Map (Pit-Wall Console)</title>
+<!--
+  DECK MAP — S12 (card2vec 2D scatter as a product surface) · Pit-Wall Console v3 system
+  Built from docs/design-research/2026-07-09/pit-wall-tokens.md + extension-spec.md (§4.2 compiled
+  stamp, §2 T3 register, §5 V-PANEL, §6 S12).
+
+  GROUNDING / HONESTY LEDGER
+  - Archetype names, WUBRG color identities, rep-card names and per-archetype deck_sample counts:
+    s1-archetype-visuals.json → formats.MODERN (10 archetypes), copied VERBATIM.
+    Colors are pip-mined from real Apr–Jun 2024 MTGO mainboards (per that file's note).
+    N=6,242 decks printed in the chrome is the sum of those 10 real deck_sample values,
+    computed at render.
+  - The docked decklist is REAL: deck-viewer-data.json — Modern Challenge 64, 2024-06-18,
+    1st Place, Azja, archetype_hint "Izzet Wizards" (mtgo.com). Card names, counts, types,
+    mana costs, Scryfall image URLs and USD prices copied verbatim; every total on the deck
+    plate is Σ computed from the list at render.
+  - The EMERGING cluster's provisional descriptor uses a real card from that decklist
+    ("Snapcaster Mage") + the deck's real UR color pair. Its counts/dates are PLACEHOLDER,
+    labeled.
+  - POINT POSITIONS ARE SYNTHETIC DEMO GEOMETRY (seeded PRNG) — labeled in the map chrome,
+    the legend, the provenance line and the footer. They are NOT computed card2vec embeddings.
+    Per-cluster point counts are scaled from the real deck_sample values (sample/6).
+  - All winrates on this page are PLACEHOLDER (labeled); CI = 95% normal approx computed at
+    render from the stated placeholder counts; below-floor prints unlit --.-
+  - No /map endpoint exists in api_shapes (riftbound-games-ground.json) — the endpoint chip
+    is explicitly marked PROPOSED.
+  - Attribution: NO topdeck.gg rows feed this page (every number is mtgo.com pip-mine /
+    mtgo.com decklist / Scryfall prices), so the extension-spec §4.1 credit chip is suppressed
+    per its own render rule. Decklists from mtgo.com; card images (c) Wizards of the Coast,
+    served via Scryfall — footer credit.
+
+  PRODUCTION NOTE (mock-only caveat): the DRIFT-TRAILS lock demo toggle is presentation-only.
+  In production the gate is server-side (entitlements module); the free tier receives masked
+  payloads, never true values in the DOM.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NO "88:88" ghost underlay anywhere — lit segments only (tokens §2.2). */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+/* ============ TOKENS (canonical :root, tokens §1.1) ============ */
+:root{
+  --bg:#0d0d12;
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;
+  --loss:#ff7a1a;
+  --acc:#b45bff;
+  --shadow:#000000;
+  --provisional:#b9b9c3;   /* T3 descriptor register — extension-spec §2 T3 */
+  --dash:#3a3a48;          /* chart-framing gray for dashed T3 frames */
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --pix:'Press Start 2P',monospace;
+  --mono:'JetBrains Mono',monospace;
+  --seg:'DSEG7Classic','JetBrains Mono',monospace;
+  /* colorless 1-bit speckle MASK (tokens §4.1) — the density wash prints through this */
+  --noise1:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* white overlay grain band (tokens §4.3) */
+  --grainW:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* dark multiply grain + coarse misprint blobs (tokens §4.2, veil) */
+  --grainD:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.06  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noiseC:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.32' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1 0 0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0 0.05  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='56' height='56' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* ============ RESET (tokens §3.1 — no rounded corners, ever) ============ */
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  background:var(--bg);
+  background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+  color:var(--ink);
+  font:400 13px/1.45 var(--mono);
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{ color:inherit; }
+button{ font:inherit; color:inherit; background:none; border:0; }
+img{ max-width:100%; display:block; }
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+.sr-only{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap;
+}
+
+/* pixel crosshair garnish — desktop only (tokens §3.5) */
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, .ticker, a, canvas, .maplabel{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, pointer;}
+}
+
+/* ============ PRESS PHYSICS (tokens §3.3) ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;
+}
+
+/* ============ WIRE TICKER (tokens §5.1) ============ */
+.ticker{
+  position:sticky; top:0; z-index:70;
+  height:30px; background:var(--panel);
+  border-bottom:1px solid var(--line);
+  font-size:11px; letter-spacing:.04em;
+  white-space:nowrap; user-select:none;
+}
+.ticker:focus-visible{ outline:2px solid var(--acc); outline-offset:-2px; }
+.ticker .wire-badge{
+  position:absolute; left:0; top:0; bottom:0; z-index:2;
+  display:flex; align-items:center; padding:0 8px;
+  font-family:var(--pix); font-size:8px; line-height:1;
+  color:var(--bg); background:var(--loss);
+}
+.ticker-clip{ position:absolute; left:52px; right:36px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{
+  display:inline-flex; align-items:center; height:30px;
+  white-space:nowrap; will-change:transform;
+  animation:tickscroll 42s linear infinite;
+}
+.ticker-track span{ padding-right:48px; }
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.ticker-pause{
+  position:absolute; right:0; top:0; bottom:0;
+  display:flex; align-items:center; padding:0 10px;
+  color:var(--dim); font-size:9px;
+}
+.ticker .up{color:var(--win);} .ticker .dn{color:var(--loss);} .ticker .sec{color:var(--acc);} .ticker .mut{color:var(--dim);}
+
+/* ============ LAYOUT ============ */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+.layout{ max-width:680px; margin:0 auto; padding:0 12px; }
+main{ min-width:0; }
+.rail{ display:none; }
+@media (min-width:640px){ .wrap,.layout{ max-width:none; padding:0 20px; } }
+@media (min-width:1100px){
+  .wrap{ max-width:1560px; padding:0 32px; }
+  .layout{
+    max-width:1560px; padding:0 32px;
+    display:grid; grid-template-columns:minmax(0,1fr) 400px; column-gap:20px;
+  }
+  .rail{
+    display:block; min-width:0;
+    position:sticky; top:42px; align-self:start;
+    max-height:calc(100dvh - 42px); overflow-y:auto; scrollbar-width:none;
+    border-left:1px solid var(--line); padding-left:20px; padding-bottom:24px;
+  }
+  .rail::-webkit-scrollbar{ display:none; }
+}
+
+/* ============ HEADER ============ */
+header.page{ padding-top:16px; }
+.brandrow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.wordmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.9;
+  font-size:22px;
+}
+.pro{ padding:2px; background:var(--chrome); display:inline-block; }
+.pro i{
+  display:block; font-style:normal; font-family:var(--pix); font-size:8px; line-height:1;
+  padding:6px 8px; background:#1a1a22; color:var(--ink);
+}
+.gamechip{
+  font-family:var(--pix); font-size:7px; line-height:1.6;
+  padding:5px 7px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+}
+.gamechip b{ color:var(--ink); font-weight:400; }
+h1.title{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; letter-spacing:-.01em; line-height:.92;
+  font-size:44px; margin-top:14px;
+}
+h1.title .hollow{ color:transparent; -webkit-text-stroke:1px #3a3a46; }
+@media (min-width:768px){ h1.title{ font-size:58px; } .wordmark{ font-size:26px; } }
+@media (min-width:1100px){ h1.title{ font-size:64px; } }
+.grainband{
+  height:8px; position:relative; margin:10px 0 12px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--win));
+  opacity:.22; z-index:-1;
+}
+.endpoint{
+  display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:11px; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line);
+  padding:5px 8px; letter-spacing:.04em;
+}
+.endpoint b{ color:var(--ink); font-weight:700; }
+.endpoint .pixtag{ font-family:var(--pix); font-size:7px; color:var(--loss); }
+.prov{
+  font-size:10px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.08em; line-height:1.7; margin-top:10px;
+}
+.prov b{ color:var(--ink); font-weight:700; }
+.caveat{
+  display:inline-flex; align-items:center; gap:6px;
+  font:400 9px var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; margin-top:8px;
+}
+.caveat b{ color:var(--ink); font-weight:700; }
+
+/* ============ DSEG STAT TILES (tokens §5.3) ============ */
+.stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:14px; }
+@media (min-width:720px){ .stats{ grid-template-columns:repeat(4,1fr); } }
+.cell{ padding:12px 12px 10px; text-align:left; min-width:0; }
+.cell .lbl{
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+  display:flex; justify-content:space-between; gap:6px;
+}
+.cell .seg7{
+  font-family:var(--seg); font-weight:700;
+  font-size:26px; line-height:1.15; display:inline-block; margin-top:6px;
+}
+.cell .unit{ font-size:11px; color:var(--dim); font-family:var(--mono); }
+.cell .sub{ font-size:9px; color:var(--dim); margin-top:2px; display:block; letter-spacing:.05em; }
+.cell.win .seg7{ color:var(--win); }
+
+/* ============ MTG identity pips (tokens §1.4 — sanctioned circle exception) ============ */
+.pips{ display:inline-flex; gap:3px; align-items:center; flex:none; }
+.pip{ width:9px; height:9px; border:1px solid #565664; border-radius:50% !important; flex:none; }
+.pip-W{background:#f8f6d8;} .pip-U{background:#b9d4ec;}
+.pip-B{background:#7d7673;border-color:#a6a1a0;}
+.pip-R{background:#e49977;} .pip-G{background:#a3c095;}
+
+/* ============ SECTION HEADS / CREDIT CHIP (extension-spec §4.1) ============ */
+.sect{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  margin:18px 0 8px;
+}
+.sectionlbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.sectionlbl b{ color:var(--ink); }
+.credit{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink); background:var(--panel2); border:1px solid var(--line);
+  padding:4px 7px; text-decoration:none;
+}
+.credit span{ color:var(--dim); font-weight:400; }
+
+/* ============ FLY-TO CLUSTER CHIP STRIP (search-to-fly, S12 mobile pattern) ======= */
+.clchips{
+  display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+  padding:2px 2px 6px; margin-top:4px;
+  -webkit-overflow-scrolling:touch;
+}
+.clchips::-webkit-scrollbar{ display:none; }
+@media (min-width:1100px){ .clchips{ flex-wrap:wrap; overflow:visible; } }
+.clchip{
+  display:inline-flex; align-items:center; gap:6px; flex:none;
+  min-height:38px; padding:0 10px;
+  font:700 11px var(--mono); color:var(--dim);
+}
+.clchip.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.clchip.on .pip{ border-color:var(--bg); }
+.clchip.em{
+  border:1px dashed var(--dash); box-shadow:none;
+  font-weight:400; color:var(--provisional);
+}
+.clchip.em.on{ color:var(--bg); background:var(--provisional); border-color:var(--provisional); }
+/* T3 chip has no shadow to drop — 1px sink keeps the everything-tappable press grammar */
+.clchip.em:active{ transform:translate(1px,1px); }
+.clchip.trk{ border-color:var(--acc); color:var(--acc); }
+.clchip .dia{ color:var(--acc); font-size:12px; }
+.clchip.trk.on{ color:var(--bg); background:var(--acc); border-color:var(--acc); }
+.clchip.trk.on .dia{ color:var(--bg); }
+
+/* ============ THE MAP PLATE ============ */
+.mapwrap{
+  position:relative; margin-top:6px;
+  background:#0a0a0f;                       /* chart plate background (tokens §1.3) */
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  overflow:hidden;
+  height:min(62vh,520px); min-height:380px;
+}
+@media (min-width:1100px){ .mapwrap{ height:calc(100dvh - 260px); min-height:520px; max-height:780px; } }
+#wash{
+  position:absolute; inset:0; pointer-events:none;
+  -webkit-mask-image:var(--noise1); mask-image:var(--noise1);
+  -webkit-mask-size:56px 56px; mask-size:56px 56px;
+  opacity:.8;
+}
+/* drag-latch: one-finger page scroll passes through until the map is tapped once,
+   then the map claims the gesture (touch-action:none). Avoids the 62vh scroll trap. */
+#map{ position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:pan-y; }
+#map.latched{ touch-action:none; }
+#map:focus-visible{ outline:2px solid var(--acc); outline-offset:-3px; }
+.maplabels{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.maplabel{
+  position:absolute; left:0; top:0; pointer-events:auto;
+  display:inline-flex; align-items:center; gap:6px;
+  max-width:190px; min-height:30px; padding:4px 8px;
+  background:rgba(20,20,26,.88); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  font:700 11px/1.2 var(--mono); color:var(--ink);
+  white-space:nowrap;
+  transform:translate(-50%,-130%);
+}
+.maplabel .nm{ overflow:hidden; text-overflow:ellipsis; display:block; }
+.maplabel.on{ border-color:var(--ink); }
+/* T3 EMERGING label — dashed frame, no hard shadow, mono-400 provisional (extension-spec §2) */
+.maplabel.em{
+  border:1px dashed var(--dash); box-shadow:none;
+  font-weight:400; color:var(--provisional);
+  background:rgba(13,13,18,.88);
+}
+.maplabel.em .tagem{
+  font-family:var(--pix); font-size:7px; line-height:1.6; color:var(--dim);
+  border:1px dashed var(--dash); background:var(--panel2); padding:2px 4px;
+}
+.maplabel.em{ max-width:250px; }
+.maplabel.em.on{ border-color:var(--provisional); }
+@media (max-width:479px){
+  .maplabel{ max-width:150px; font-size:10px; }
+  .maplabel.em{ max-width:210px; }
+}
+/* S12: cluster labels are primary tap targets — 44px floor on coarse pointers (tokens §3.4) */
+@media (pointer:coarse){
+  .maplabel{ min-height:44px; }
+}
+
+/* map corner chrome */
+.mapchip-syn{
+  position:absolute; left:8px; top:8px; z-index:3;
+  font:400 9px var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:rgba(20,20,26,.92);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; max-width:calc(100% - 128px);   /* leave room for the zoom readout */
+}
+.mapchip-syn b{ color:var(--ink); }
+.mapstamp{
+  position:absolute; left:8px; bottom:8px; z-index:3;
+  display:inline-flex; align-items:baseline; gap:6px;
+  background:rgba(20,20,26,.92); border:1px solid var(--line);
+  padding:4px 7px;
+}
+.mapstamp .slbl{ font-size:8px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+.mapstamp .sseg{ font-family:var(--seg); font-weight:700; font-size:12px; color:var(--ink); }
+.zoomctl{
+  position:absolute; right:8px; bottom:8px; z-index:3;
+  display:flex; flex-direction:column; gap:6px;
+}
+.zbtn{
+  width:44px; height:44px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:10px; line-height:1; color:var(--ink);
+}
+.zbtn.trk{ color:var(--acc); border-color:var(--acc); }
+.zreadout{
+  position:absolute; right:8px; top:8px; z-index:3;
+  display:inline-flex; align-items:baseline; gap:4px;
+  background:rgba(20,20,26,.92); border:1px solid var(--line); padding:4px 7px;
+}
+.zreadout .sseg{ font-family:var(--seg); font-weight:700; font-size:12px; color:var(--ink); }
+.zreadout .unit{ font-size:9px; color:var(--dim); }
+
+/* pit-board tooltip (fine pointer only) */
+#tip{
+  position:absolute; z-index:5; display:none; pointer-events:none;
+  min-width:170px; max-width:230px;
+  background:var(--panel2); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:7px 9px;
+}
+#tip .tnm{ font:700 12px var(--mono); color:var(--ink); display:flex; gap:6px; align-items:center; }
+#tip .tnm.em{ font-weight:400; color:var(--provisional); }
+#tip .twr{ margin-top:4px; }
+#tip .twr .sseg{ font-family:var(--seg); font-weight:700; font-size:16px; }
+#tip .twr .sseg.pos{ color:var(--win); } #tip .twr .sseg.neg{ color:var(--loss); } #tip .twr .sseg.neu{ color:var(--ink); } #tip .twr .sseg.floor{ color:var(--dim); }
+#tip .twr .unit{ font-size:9px; color:var(--dim); }
+#tip .tln{ font-size:9px; color:var(--dim); letter-spacing:.05em; text-transform:uppercase; line-height:1.6; margin-top:2px; }
+#tip .tln b{ color:var(--ink); }
+@media (hover:none){ #tip{ display:none !important; } }
+
+/* fixed anti-over-reading caption (S12 spec) + legend */
+.mapcaption{
+  font-size:9px; color:var(--dim); letter-spacing:.07em; text-transform:uppercase;
+  line-height:1.7; margin-top:8px;
+}
+.mapcaption b{ color:var(--ink); }
+.maplegend{
+  display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center;
+  font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase;
+  margin-top:6px; padding:7px 9px;
+  background:var(--panel); border:1px solid var(--line);
+}
+.maplegend .k{ display:inline-flex; align-items:center; gap:5px; }
+/* dot swatches are inline SVG circles (canvas-style data marks) — no new
+   border-radius exception; tokens §3.1 sanctions only .pip */
+.maplegend svg{ flex:none; display:block; }
+.lg-em{ width:12px; height:12px; border:1px dashed var(--provisional); background:transparent; }
+.lg-trk{ color:var(--acc); font-size:11px; }
+.lg-hull{ width:14px; height:10px; border:1px solid #8a8a96; background:rgba(180,160,140,.25); }
+
+/* ============ RECOMPILE / DEMO BAR ============ */
+.demobar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin:12px 0 0; padding:10px;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+}
+.demobar .lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; }
+.sw{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  min-height:38px; padding:0 12px; display:inline-flex; align-items:center; gap:6px;
+  color:var(--dim); background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none; -webkit-tap-highlight-color:transparent;
+}
+.sw:active{ transform:translate(2px,2px); box-shadow:0 0 0 0 var(--shadow); transition:none; }
+.sw.on{ color:var(--bg); background:var(--ink); border-color:var(--ink); }
+.demobar .note{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.6; }
+.demobar .note b{ color:var(--ink); }
+
+/* ============ INSPECTOR (dock ≥1100px / bottom sheet <1100px) ============ */
+#sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  display:none;
+  background:var(--bg);
+  border-top:1px solid var(--ink);
+  box-shadow:0 -4px 0 0 var(--shadow);
+}
+#sheet.open{ display:block; }
+@media (min-width:1100px){ #sheet{ display:none !important; } }
+.sheethead{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:6px 12px; border-bottom:1px solid var(--line); background:var(--panel);
+}
+.sheethead .shlbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.sheethead .shlbl b{ color:var(--ink); }
+#sheetClose{ width:44px; height:38px; display:inline-flex; align-items:center; justify-content:center; font-family:var(--pix); font-size:9px; }
+.sheetscroll{ max-height:52dvh; overflow-y:auto; padding:10px 12px 14px; }
+
+.insp-empty{
+  font-size:10px; color:var(--dim); letter-spacing:.07em; text-transform:uppercase;
+  line-height:1.8; padding:12px; border:1px dashed var(--dash);
+}
+.iplate{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  padding:10px 12px; margin-bottom:10px;
+}
+.iplate.selc{ border-color:var(--ink); }
+.ihead{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ihead .cnm{ font:700 14px var(--mono); color:var(--ink); }
+.ihead .cnm.em{ font-weight:400; color:var(--provisional); }
+.tag-em{
+  font-family:var(--pix); font-size:7px; line-height:1.6; color:var(--dim);
+  border:1px dashed var(--dash); background:var(--panel2); padding:3px 5px;
+}
+.tag-t1{
+  font-family:var(--pix); font-size:7px; line-height:1.6; color:var(--dim);
+  border:1px solid var(--line); background:var(--panel2); padding:3px 5px;
+}
+.ireads{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.iread .rlbl{ display:block; font-size:9px; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+.iread .sseg{ font-family:var(--seg); font-weight:700; font-size:22px; }
+.iread .sseg.pos{ color:var(--win); } .iread .sseg.neg{ color:var(--loss); } .iread .sseg.neu{ color:var(--ink); } .iread .sseg.floor{ color:var(--dim); }
+.iread .unit{ font-size:10px; color:var(--dim); }
+.iread .rsub{ display:block; font-size:9px; color:var(--dim); letter-spacing:.04em; text-transform:uppercase; line-height:1.5; }
+.iread .rsub b{ color:var(--ink); }
+.sharebar{ height:6px; background:#1c1c26; border:1px solid var(--line); margin-top:4px; }
+.sharebar i{ display:block; height:100%; background:var(--ink); }
+.iprov{
+  font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase;
+  line-height:1.7; margin-top:10px; border-top:1px dashed var(--dash); padding-top:6px;
+}
+.iprov b{ color:var(--ink); }
+.ibtn{
+  display:inline-flex; align-items:center; gap:6px;
+  min-height:40px; padding:0 12px; margin-top:10px;
+  font-family:var(--pix); font-size:8px; color:var(--acc);
+  border-color:var(--acc);
+}
+
+/* deck plate (real list — inspector dock pattern, tokens §5.7) */
+.deckhead{
+  position:relative; padding:10px 12px;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); margin-bottom:10px;
+}
+.deckhead::before{
+  content:""; position:absolute; left:0; right:0; top:0; height:4px;
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.dk-event{ font:700 13px var(--mono); color:var(--ink); margin-top:4px; }
+.dk-meta{ font-size:10px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7; margin-top:2px; }
+.dk-meta b{ color:var(--ink); }
+.dk-meta .first{ color:var(--acc); }          /* 1st-place = purple, sanctioned (tokens §5.5) */
+.dk-counts{ display:flex; gap:14px; margin-top:8px; }
+.dk-counts .sseg{ font-family:var(--seg); font-weight:700; font-size:18px; color:var(--win); }
+.dk-counts .side .sseg{ color:var(--loss); }
+.dk-counts .unit{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+.copybar{
+  width:100%; min-height:40px; margin-top:10px;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--pix); font-size:8px; color:var(--ink);
+}
+.listpanel{
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow); padding:8px 10px; margin-bottom:10px;
+}
+.grp-head{
+  display:flex; align-items:baseline; gap:8px; padding:4px 0 3px;
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim);
+}
+.grp-head .gct{ font-family:var(--seg); font-weight:700; font-size:12px; color:var(--ink); }
+.grp-head::after{ content:""; flex:1; border-top:1px solid var(--line); transform:translateY(-3px); }
+.crow{
+  display:flex; align-items:center; gap:8px;
+  width:100%; text-align:left;
+  min-height:32px; padding:3px 2px;
+  background:transparent; border:none; border-bottom:1px solid #1e1e26;
+  color:var(--ink); font-family:inherit; font-size:12.5px;
+  -webkit-tap-highlight-color:transparent;
+}
+@media (pointer:coarse){ .crow{ min-height:40px; } }
+.crow:last-child{ border-bottom:none; }
+.crow .ct{
+  font-family:var(--seg); font-weight:700;
+  font-size:13px; width:22px; flex:none; text-align:right; color:var(--win);
+}
+.crow .thumb{
+  width:34px; height:24px; flex:none;
+  object-fit:cover; object-position:50% 18%;
+  border:1px solid var(--line); background:#0f0f15;
+  filter:saturate(.85) contrast(1.04);
+}
+.crow .nm{ flex:1; min-width:0; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.crow .cpips{ display:inline-flex; gap:2px; flex:none; align-items:center; }
+.cpip{
+  width:13px; height:13px; flex:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:6px; line-height:1;
+  border:1px solid var(--line); color:var(--bg); background:#8a8a96;
+}
+.cpip.u{ background:var(--win); } .cpip.r{ background:var(--loss); }
+.crow .nocost{ font-size:8px; color:#3a3a46; letter-spacing:.08em; }
+.crow .pr{ flex:none; width:52px; text-align:right; font-size:11px; color:var(--dim); }
+.sbpane{ border-color:var(--loss); }
+.sbpane .grp-head{ color:var(--loss); }
+.sbpane .crow .ct{ color:var(--loss); }
+.dk-totals{
+  font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7;
+  padding:7px 9px; background:var(--panel2); border:1px solid var(--line); margin-bottom:10px;
+}
+.dk-totals b{ color:var(--ink); }
+
+/* ============ DRIFT-TRAILS PRO MODULE (V-PANEL, extension-spec §5) ============ */
+.driftmod{ margin-top:16px; background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); }
+.driftmod .dm-head{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  padding:8px 10px; border-bottom:1px solid var(--line);
+  font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase;
+}
+.driftmod .dm-head b{ color:var(--ink); }
+.h-viz{ position:relative; }
+.h-viz .data{ transition:filter 600ms steps(6,end); padding:10px; }
+.h-viz.locked .data{ filter:blur(3.5px) saturate(.75); }
+.riso-veil{
+  position:absolute; inset:0; z-index:2;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  background-image:var(--noiseC), var(--grainD),
+    linear-gradient(105deg, rgba(59,157,255,.50), rgba(13,13,18,.30) 46%, rgba(255,122,26,.46));
+  background-blend-mode:multiply, multiply, normal;
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 700ms steps(12,end);
+}
+.h-viz.unlocked .riso-veil{ clip-path:inset(0 0 0 100%); pointer-events:none; }
+.veil-chip{
+  font-family:var(--pix); font-size:8px; padding:6px 8px 5px;
+  background:rgba(13,13,18,.88); border:1px solid #3c3c46; letter-spacing:1px; color:var(--ink);
+}
+.btn-unlock{
+  min-height:38px; padding:0 12px;
+  display:inline-flex; align-items:center;
+  font-family:var(--pix); font-size:8px; color:var(--ink);
+  border:1px solid var(--acc);
+  background-image:var(--grainW), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+  text-shadow:1px 1px 0 var(--shadow);
+}
+.dm-foot{ padding:7px 10px; font-size:9px; color:var(--dim); letter-spacing:.05em; text-transform:uppercase; line-height:1.6; border-top:1px solid var(--line); }
+.dm-foot b{ color:var(--ink); }
+
+/* method plate */
+.plate{
+  margin-top:16px; padding:10px 12px;
+  background:var(--panel); border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+}
+.plate .plbl{ display:block; font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; margin-bottom:6px; }
+.plate .plbl b{ color:var(--ink); }
+.plate p{ font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:.05em; line-height:1.8; }
+.plate p b{ color:var(--ink); }
+.plate p + p{ margin-top:6px; }
+
+/* ============ GLITCH (tokens §6.3, one-shot only) ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+
+/* ============ FOOTER ============ */
+footer{ margin-top:28px; padding-bottom:34px; }
+.riso-divider{
+  height:10px;
+  background-image:var(--grainD), linear-gradient(90deg, var(--win), var(--loss));
+  background-blend-mode:multiply, normal;
+  opacity:.55;
+}
+.foot-inner{ padding-top:16px; }
+.footmark{
+  font-family:'Archivo',sans-serif; font-weight:900;
+  font-stretch:62%; font-variation-settings:'wdth' 62;
+  text-transform:uppercase; line-height:.9; letter-spacing:-.01em;
+  font-size:46px;
+}
+.footmark .hollow{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+@media (min-width:768px){ .footmark{ font-size:72px; } }
+.fine{
+  font-size:9px; color:var(--dim); text-transform:uppercase;
+  letter-spacing:.07em; line-height:1.8; margin-top:12px;
+}
+.fine a{ color:var(--ink); }
+.fine b{ color:var(--ink); }
+
+/* ============ REDUCED MOTION CONTRACT (tokens §6.6) ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .ticker-pause{ display:none; }
+  .glitch{ animation:none; }
+  .press, .press:active, .sw, .sw:active{ transition:none; }
+  .riso-veil, .h-viz .data{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= WIRE TICKER ================= -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false"
+     aria-label="Results wire ticker. Tap to pause.">
+  <span class="wire-badge" aria-hidden="true">WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="tickerTrack"></div></div>
+  <span class="ticker-pause" id="tickerPause" aria-hidden="true">&#10074;&#10074;</span>
+</div>
+
+<!-- ================= HEADER ================= -->
+<header class="page wrap">
+  <div class="brandrow">
+    <span class="wordmark">MetaSurf</span>
+    <span class="pro"><i>PRO</i></span>
+    <span class="gamechip">GAME <b>MTG</b> · FORMAT <b>MODERN</b> · FULL TELEMETRY</span>
+  </div>
+  <h1 class="title" id="pageTitle">Deck Map<br><span class="hollow">Card2Vec Field</span></h1>
+  <div class="grainband" aria-hidden="true"></div>
+  <div class="endpoint">
+    <b>/v1/mtg/modern/map</b>
+    <span class="pixtag">PROPOSED — NOT IN API</span>
+    <span>COMPILED ARTIFACT · WEEKLY SWEEP</span>
+  </div>
+  <p class="prov" id="pageProv">
+    SAMPLE <b>APR–JUN 2024 MTGO PIP-MINE</b> · N=<b id="provDecks">—</b> DECKS ·
+    <b>10</b> CURATED HULLS + <b>1</b> EMERGING · AS-OF <b>2026-07-08</b>
+  </p>
+  <div class="caveat" role="note">
+    POINT GEOMETRY IS <b>SYNTHETIC DEMO DATA</b> — NOT COMPUTED CARD2VEC EMBEDDINGS ·
+    ALL WINRATES <b>PLACEHOLDER</b>
+  </div>
+</header>
+
+<!-- ================= BODY GRID ================= -->
+<div class="layout">
+  <main>
+
+    <!-- stat tiles -->
+    <section class="stats" id="statsSec" aria-label="Map totals">
+      <div class="press cell">
+        <span class="lbl">Hulls</span>
+        <span class="seg7 roll" data-target="10" data-dec="0">0</span><span class="unit"> +1 EMRG</span>
+        <span class="sub">CURATED NAMES · PORT PENDING</span>
+      </div>
+      <div class="press cell">
+        <span class="lbl">Points</span>
+        <span class="seg7 roll" id="segPts" data-dec="0">0</span>
+        <span class="sub">SYNTHETIC DEMO GEOMETRY</span>
+      </div>
+      <div class="press cell win">
+        <span class="lbl">Decks</span>
+        <span class="seg7 roll" id="segDecks" data-dec="0">0</span>
+        <span class="sub">Σ REAL PIP-MINE SAMPLES</span>
+      </div>
+      <div class="press cell">
+        <span class="lbl">Noise</span>
+        <span class="seg7 roll" id="segNoise" data-dec="0">0</span><span class="unit"> PTS</span>
+        <span class="sub">UNCLUSTERED (HDBSCAN −1) · SYNTHETIC</span>
+      </div>
+    </section>
+
+    <!-- fly-to strip -->
+    <section aria-label="Fly to cluster">
+      <div class="sect">
+        <span class="sectionlbl">FLY-TO <b>CLUSTER</b> — TAP TO CENTER &amp; INSPECT</span>
+        <!-- extension-spec §4.1 credit chip renders only when the module's rows include that
+             source — no topdeck.gg rows feed this page, so the slot is empty here -->
+      </div>
+      <div class="clchips" id="clchips" role="group" aria-label="Cluster quick-select"></div>
+    </section>
+
+    <!-- the map -->
+    <section aria-label="Deck similarity map">
+      <div class="mapwrap" id="mapwrap">
+        <div id="wash" aria-hidden="true"></div>
+        <canvas id="map" tabindex="0" role="application"
+          aria-label="Deck similarity scatter map. 10 curated archetype clusters plus one emerging cluster. Drag to pan, pinch or use plus and minus keys to zoom, arrow keys pan, 0 resets, T flies to the tracked list. Tap a dot to inspect it. Point positions are synthetic demo geometry."></canvas>
+        <!-- labels are real focusable controls — no aria-hidden (it would nullify their
+             aria-labels while leaving them in the tab order); sr-only list below supplements -->
+        <div class="maplabels" id="maplabels"></div>
+        <div class="mapchip-syn"><b>SYNTHETIC DEMO GEOMETRY</b> — POSITIONS ARE NOT COMPUTED EMBEDDINGS</div>
+        <div class="zreadout"><span class="sseg" id="zoomVal">1.0</span><span class="unit">× ZOOM</span></div>
+        <div class="mapstamp"><span class="slbl">Layout compiled</span><span class="sseg" id="stampSeg">2026-07-08</span></div>
+        <div class="zoomctl">
+          <button class="press zbtn trk" id="zTrk" title="Fly to tracked list" aria-label="Fly to tracked list">◆</button>
+          <button class="press zbtn" id="zIn" aria-label="Zoom in">+</button>
+          <button class="press zbtn" id="zOut" aria-label="Zoom out">−</button>
+          <button class="press zbtn" id="zReset" aria-label="Reset view">⌂</button>
+        </div>
+        <div id="tip" aria-hidden="true"></div>
+      </div>
+      <p class="mapcaption">
+        <b>POSITION = DECK SIMILARITY, NOT STRENGTH</b> · SAMPLE: APR–JUN 2024 MTGO PIP-MINE ·
+        N=<b id="capDecks">—</b> DECKS · AS-OF <b>2026-07-08</b> · DOT = ONE DECKLIST
+        (<b>SYNTHETIC DEMO GEOMETRY</b>, COUNTS SCALED FROM REAL PER-ARCHETYPE SAMPLES ÷6) ·
+        ON TOUCH, <b>TAP THE MAP ONCE TO ARM PAN/PINCH</b> — ONE-FINGER SCROLL PASSES THROUGH UNTIL THEN
+      </p>
+      <div class="maplegend" aria-label="Map legend">
+        <span class="k"><i class="lg-hull"></i> HULL TINT = COLOR IDENTITY (PIP-MINED) — NEVER PERFORMANCE</span>
+        <span class="k"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#cdb9a9" stroke="#565664"/></svg> CLUSTERED LIST</span>
+        <span class="k"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="5" r="3.5" fill="#4a4a56"/></svg> NOISE / UNCLUSTERED</span>
+        <span class="k"><i class="lg-em"></i> DASHED = EMERGING (T3, UNNAMED)</span>
+        <span class="k"><span class="lg-trk">◆</span> TRACKED 1ST-PLACE LIST (REAL)</span>
+      </div>
+      <!-- screen-reader alternative to the canvas -->
+      <ul class="sr-only" id="srClusters" aria-label="Clusters on this map"></ul>
+    </section>
+
+    <!-- recompile demo -->
+    <div class="demobar">
+      <span class="lbl">Layout sweep</span>
+      <button class="sw" id="btnRecompile" aria-label="Recompile layout (demo)">RECOMPILE ▸</button>
+      <span class="note" id="recompNote">WEEKLY IN PRODUCTION — RE-SEEDS THE <b>DEMO</b> GEOMETRY HERE ·
+      ONE-SHOT GLITCH ON REFRESH (TOKENS §6.3)</span>
+    </div>
+
+    <!-- mobile home for inspector-adjacent modules; reparented to rail ≥1100px -->
+    <div id="infraSlot">
+      <!-- DRIFT TRAILS — V-PANEL premium gate over genuinely drawn (placeholder-labeled) vectors -->
+      <section class="driftmod" aria-label="Centroid drift trails (PRO)">
+        <div class="dm-head">
+          <span>CENTROID <b>DRIFT</b> · 8 SWEEPS</span>
+          <span class="pro"><i>PRO</i></span>
+        </div>
+        <div class="h-viz locked" id="driftViz">
+          <div class="data">
+            <svg viewBox="0 0 360 130" width="100%" height="130" role="img"
+                 aria-label="Centroid drift trails, placeholder series, locked behind PRO">
+              <line x1="0" y1="65" x2="360" y2="65" stroke="#26262f" stroke-dasharray="1 3"/>
+              <line x1="90" y1="0" x2="90" y2="130" stroke="#22222b" stroke-dasharray="1 3"/>
+              <line x1="180" y1="0" x2="180" y2="130" stroke="#22222b" stroke-dasharray="1 3"/>
+              <line x1="270" y1="0" x2="270" y2="130" stroke="#22222b" stroke-dasharray="1 3"/>
+              <!-- placeholder drift polylines — crisp vector data-ink -->
+              <polyline points="40,96 78,88 112,90 150,78 187,72 224,74 262,60 300,56"
+                        fill="none" stroke="#3b9dff" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="300" cy="56" r="3" fill="#3b9dff"/>
+              <polyline points="52,30 90,38 128,36 165,46 202,44 240,52 278,50 316,58"
+                        fill="none" stroke="#ff7a1a" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="316" cy="58" r="3" fill="#ff7a1a"/>
+              <polyline points="30,64 68,62 106,68 144,64 182,70 220,66 258,72 296,70"
+                        fill="none" stroke="#8a8a96" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="296" cy="70" r="3" fill="#8a8a96"/>
+              <text x="6" y="14" fill="#8a8a96" font-family="'Press Start 2P',monospace" font-size="6">DRIFT / SWEEP</text>
+              <text x="252" y="124" fill="#8a8a96" font-family="'JetBrains Mono',monospace" font-size="8">PLACEHOLDER SERIES</text>
+            </svg>
+          </div>
+          <div class="riso-veil" id="driftVeil">
+            <span class="veil-chip" id="driftChip">PRO · LOCKED</span>
+            <button class="btn-unlock" id="driftUnlock">UNLOCK DRIFT ▸ (DEMO)</button>
+          </div>
+        </div>
+        <div class="dm-foot">
+          WEEK-OVER-WEEK HULL CENTROID PATHS — <b>PLACEHOLDER SERIES, NOT MEASURED</b> ·
+          PRODUCTION GATE IS SERVER-SIDE; FREE TIER GETS MASKED PAYLOADS
+        </div>
+      </section>
+
+      <!-- method plate -->
+      <section class="plate" aria-label="How the map is built">
+        <span class="plbl">HOW THE <b>MAP</b> IS BUILT</span>
+        <p>NIGHTLY: DECK VECTORIZER → HDBSCAN CLUSTERS (M1 PIPELINE) · WEEKLY: 2D LAYOUT COMPILE, STAMPED ON THE PLATE.</p>
+        <p>HULLS + NAMES RENDER ONLY FOR <b>RULE-FILE ARCHETYPES</b> (MTGOFORMATDATA PORT). MACHINE-DETECTED CLUSTERS STAY <b>DASHED / EMERGING</b> UNTIL A RULE FILE LANDS — NAMES ARE NEVER AUTO-AUTHORED.</p>
+        <p>AXES ARE UNITLESS EMBEDDING DIMENSIONS — <b>ONLY DISTANCE MEANS ANYTHING</b>, AND ONLY LOCALLY.</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- instrument rail (≥1100px) -->
+  <aside class="rail" id="rail" aria-label="Map instrument rail">
+    <div class="sect" style="margin-top:14px">
+      <span class="sectionlbl">DECK <b>INSPECTOR</b></span>
+      <span class="sectionlbl" id="railHint">TAP A DOT</span>
+    </div>
+    <div id="railHome"></div>
+  </aside>
+</div>
+
+<!-- mobile bottom sheet (inspector home <1100px) -->
+<div id="sheet" role="dialog" aria-modal="false" aria-label="Deck inspector">
+  <div class="sheethead">
+    <span class="shlbl">DECK <b>INSPECTOR</b></span>
+    <button class="press" id="sheetClose" aria-label="Close inspector">✕</button>
+  </div>
+  <div class="sheetscroll" id="sheetHome"></div>
+</div>
+
+<!-- the single inspector node — reparented between sheet and rail (tokens §7.4) -->
+<div hidden id="inspStore"><div id="inspector" aria-live="polite"></div></div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="riso-divider" aria-hidden="true"></div>
+  <div class="wrap foot-inner">
+    <div class="footmark">MetaSurf<br><span class="hollow">Deck Map</span></div>
+    <p class="fine">
+      MOCKUP · DECK MAP (S12). POINT POSITIONS ARE <b>SYNTHETIC DEMO GEOMETRY</b> (SEEDED PRNG) —
+      NOT COMPUTED CARD2VEC EMBEDDINGS. ALL WINRATES AND THE EMERGING CLUSTER'S COUNTS ARE
+      <b>PLACEHOLDER — NOT MEASURED FROM REAL EVENTS</b>; CI = 95% NORMAL APPROX COMPUTED AT RENDER.<br>
+      REAL GROUNDING: ARCHETYPE NAMES, WUBRG COLOR IDENTITIES AND PER-ARCHETYPE DECK SAMPLES FROM THE
+      2026-07-09 GROUNDING MINE (MODERN, APR–JUN 2024 MTGO MAINBOARDS; COLORS PIP-MINED AT ≥10% OF PIPS) ·
+      RULE-FILE PORT PENDING (OWNER FLAG). THE TRACKED DECKLIST IS REAL:
+      <a href="https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1812647519" target="_blank" rel="noopener">MODERN CHALLENGE 64 · 2024-06-18 · 1ST · AZJA</a>
+      (MTGO.COM) — PRICES FROM THE SCRYFALL 2026-07-08 SNAPSHOT, ONE CANONICAL PRINTING PER CARD;
+      TOTALS Σ COMPUTED FROM THE LIST.<br>
+      DECKLISTS FROM MAGIC ONLINE (MTGO.COM) ·
+      CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL.<br>
+      PRODUCTION GATE IS SERVER-SIDE — THE FREE TIER NEVER RECEIVES TRUE VALUES IN THE DOM.
+    </p>
+  </div>
+</footer>
+
+<script>
+/* =================================================================
+   DECK MAP — geometry is SYNTHETIC (seeded PRNG, labeled on-page).
+   Real data: archetype names/colors/deck_sample (s1-archetype-visuals
+   .json, MODERN) and the Azja decklist (deck-viewer-data.json).
+   ================================================================= */
+'use strict';
+const $  = s => document.querySelector(s);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- grounding: 10 MODERN archetypes (VERBATIM) ----------------
+   name / colors / deck_sample copied from s1-archetype-visuals.json.
+   center/spread = synthetic layout knobs. ph_g/ph_w = PLACEHOLDER games/wins. */
+const ARCH = [
+  {name:'Rakdos Scam',        colors:['B','R'],     sample:1966, cx:620, cy:620, sx:100, sy:78,  ph_g:412, ph_w:214},
+  {name:'Yawgmoth',           colors:['B','G'],     sample:1041, cx:470, cy:810, sx:82,  sy:58,  ph_g:236, ph_w:127},
+  {name:'Amulet Titan',       colors:['G'],         sample:919,  cx:800, cy:240, sx:80,  sy:62,  ph_g:198, ph_w:104},
+  {name:'Izzet Murktide',     colors:['U','R'],     sample:717,  cx:290, cy:280, sx:74,  sy:60,  ph_g:171, ph_w:82},
+  {name:'Living End',         colors:['U','B','G'], sample:679,  cx:150, cy:650, sx:66,  sy:52,  ph_g:150, ph_w:71},
+  {name:'Burn',               colors:['R'],         sample:281,  cx:140, cy:120, sx:46,  sy:38,  ph_g:64,  ph_w:29},
+  {name:'Jund Saga',          colors:['B','R','G'], sample:257,  cx:360, cy:520, sx:50,  sy:40,  ph_g:52,  ph_w:27},
+  {name:'Crashing Footfalls', colors:['W','U','G'], sample:146,  cx:85,  cy:420, sx:42,  sy:34,  ph_g:38,  ph_w:20},
+  {name:'Mono-Green Tron',    colors:['B','G'],     sample:123,  cx:865, cy:470, sx:40,  sy:34,  ph_g:31,  ph_w:14},
+  {name:'Hammer Time',        colors:['W'],         sample:113,  cx:645, cy:95,  sx:38,  sy:30,  ph_g:24,  ph_w:13}
+];
+/* T3 emerging cluster — descriptor uses a REAL card from the tracked decklist
+   ("Snapcaster Mage") + the deck's real UR pair. n/first_seen PLACEHOLDER. */
+const EMERGING = {
+  name:'UNNAMED: UR — SNAPCASTER MAGE',
+  colors:['U','R'], n:14, first:'2026-06-27',
+  cx:430, cy:165, sx:26, sy:22, ph_g:18, ph_w:9
+};
+const WR_FLOOR = 40;   /* WR noise floor in decided games — printed where used */
+
+/* ---------------- grounding: the REAL tracked decklist (VERBATIM) ----------------
+   deck-viewer-data.json — Modern Challenge 64 · 2024-06-18 · 1st · Azja ·
+   archetype_hint "Izzet Wizards". count/name/mana/type/cmc/img_small/usd copied verbatim. */
+const DECK = {
+  event:'Modern Challenge 64', date:'2024-06-18', player:'Azja', result:'1st Place',
+  hint:'Izzet Wizards', format:'Modern',
+  uri:'https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1812647519',
+  main:[
+    {c:4,n:'Counterspell',m:'{U}{U}',t:'Instant',cmc:2,img:'https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884',usd:3.71},
+    {c:2,n:'Dress Down',m:'{1}{U}',t:'Enchantment',cmc:2,img:'https://cards.scryfall.io/small/front/0/4/04f9f061-67b8-4427-9fcb-b3ccfee8fc5d.jpg?1782704716',usd:0.53},
+    {c:4,n:'Flame of Anor',m:'{1}{U}{R}',t:'Instant',cmc:3,img:'https://cards.scryfall.io/small/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120',usd:4.34},
+    {c:1,n:'Flooded Strand',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/8/f/8f85e12c-196b-4459-b81f-0c9c854e9f57.jpg?1782691197',usd:15.64},
+    {c:2,n:'Force of Negation',m:'{1}{U}{U}',t:'Instant',cmc:3,img:'https://cards.scryfall.io/small/front/1/8/1825a719-1b2a-4af9-9cd2-7cb497cd0317.jpg?1782737934',usd:52.82},
+    {c:3,n:'Galvanic Discharge',m:'{R}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/3/2/32aa6e33-221f-414c-9b51-850d97a7e051.jpg?1782691296',usd:0.30},
+    {c:1,n:'Hall of Storm Giants',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/b/f/bf8f052d-8840-4905-a807-9a305f4fd8f7.jpg?1782704291',usd:0.42},
+    {c:2,n:'Invert Polarity',m:'{U}{U}{R}',t:'Instant',cmc:3,img:'https://cards.scryfall.io/small/front/d/c/dcee6a8a-c3a8-43bc-beb9-be30d03ab952.jpg?1782691225',usd:0.52},
+    {c:4,n:'Island',m:'',t:'Basic Land — Island',cmc:0,img:'https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662',usd:0.18},
+    {c:4,n:'Lightning Bolt',m:'{R}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979',usd:0.83},
+    {c:2,n:'Misty Rainforest',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/8/8/88231c0d-0cc8-44ec-bf95-81d1710ac141.jpg?1782704585',usd:36.17},
+    {c:1,n:'Otawara, Soaring City',m:'',t:'Legendary Land',cmc:0,img:'https://cards.scryfall.io/small/front/4/8/486d7edc-d983-41f0-8b78-c99aecd72996.jpg?1782702159',usd:27.49},
+    {c:2,n:'Polluted Delta',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/6/e/6e288374-2b71-4ace-b1d2-a19fee6cb4af.jpg?1782691195',usd:19.27},
+    {c:4,n:'Preordain',m:'{U}',t:'Sorcery',cmc:1,img:'https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813',usd:0.42},
+    {c:2,n:'Scalding Tarn',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/7/1/71e491c5-8c07-449b-b2f1-ffa052e6d311.jpg?1782704583',usd:40.40},
+    {c:1,n:'Sink into Stupor // Soporific Springs',m:'{1}{U}{U}',t:'Instant // Land',cmc:3,img:'https://cards.scryfall.io/small/front/5/3/5358b87a-1a29-426d-b165-40c97da2c14d.jpg?1782691170',usd:5.45},
+    {c:4,n:'Snapcaster Mage',m:'{1}{U}',t:'Creature — Human Wizard',cmc:2,img:'https://cards.scryfall.io/small/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477',usd:18.52},
+    {c:1,n:'Spell Snare',m:'{U}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089',usd:0.30},
+    {c:3,n:'Spirebluff Canal',m:'',t:'Land',cmc:0,img:'https://cards.scryfall.io/small/front/5/9/59a04e16-a767-4112-ab01-6ca1b09c286c.jpg?1782691926',usd:5.25},
+    {c:3,n:'Steam Vents',m:'',t:'Land — Island Mountain',cmc:0,img:'https://cards.scryfall.io/small/front/b/6/b66daa94-d367-4812-9f18-f35378c1febb.jpg?1782683912',usd:12.96},
+    {c:1,n:'Stern Scolding',m:'{U}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207',usd:0.30},
+    {c:3,n:'Subtlety',m:'{2}{U}{U}',t:'Creature — Elemental Incarnation',cmc:4,img:'https://cards.scryfall.io/small/front/7/0/701256d5-1389-48b7-9581-d6037209bd06.jpg?1782731086',usd:15.06},
+    {c:4,n:'Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar',m:'{U}',t:'Legendary Creature — Moonfolk Wizard // Legendary Planeswalker — Tamiyo',cmc:1,img:'https://cards.scryfall.io/small/front/2/a/2a717b98-cdac-416d-bf6c-f6b6638e65d1.jpg?1782691169',usd:15.14},
+    {c:2,n:'Thundering Falls',m:'',t:'Land — Island Mountain',cmc:0,img:'https://cards.scryfall.io/small/front/1/7/17260fff-b239-4af4-9306-3236ae3fa5a5.jpg?1782693773',usd:14.43}
+  ],
+  side:[
+    {c:2,n:'Consign to Memory',m:'{U}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/b/c/bc95af55-d1dd-4fe6-adb0-3ad6db20d986.jpg?1782691362',usd:3.46},
+    {c:2,n:'Magus of the Moon',m:'{2}{R}',t:'Creature — Human Wizard',cmc:3,img:'https://cards.scryfall.io/small/front/7/c/7c9bd75c-9606-4607-bfa6-d6acdee12820.jpg?1782741825',usd:3.95},
+    {c:3,n:'Obsidian Charmaw',m:'{3}{R}{R}',t:'Creature — Dragon',cmc:5,img:'https://cards.scryfall.io/small/front/e/e/ee6d08be-a6fc-44a5-932d-b6a8705534c0.jpg?1782704654',usd:1.56},
+    {c:1,n:'Spell Snare',m:'{U}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/b/7/b7551b61-656e-4f37-b9da-73174db983b7.jpg?1782684089',usd:0.30},
+    {c:2,n:'Stern Scolding',m:'{U}',t:'Instant',cmc:1,img:'https://cards.scryfall.io/small/front/3/c/3ca1e1de-b916-445f-b3b2-0f4d0cc7ceeb.jpg?1782697207',usd:0.30},
+    {c:2,n:"Tishana's Tidebinder",m:'{2}{U}',t:'Creature — Merfolk Wizard',cmc:3,img:'https://cards.scryfall.io/small/front/9/0/907b3d1d-8c85-4707-80b5-c4d832df9846.jpg?1782694545',usd:2.47},
+    {c:2,n:'Unlicensed Hearse',m:'{2}',t:'Artifact — Vehicle',cmc:2,img:'https://cards.scryfall.io/small/front/9/3/93ee60f7-31dd-4bc6-b71f-57a1a0d19d20.jpg?1782701515',usd:0.38}
+  ]
+};
+
+/* ---------------- pip palette (tokens §1.4) + tint blending ---------------- */
+const PIPHEX = {W:'#f8f6d8', U:'#b9d4ec', B:'#7d7673', R:'#e49977', G:'#a3c095'};
+function hex2rgb(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+function tintOf(colors){
+  const rgbs = colors.map(c=>hex2rgb(PIPHEX[c]));
+  let r=0,g=0,b=0;
+  rgbs.forEach(v=>{ r+=v[0]; g+=v[1]; b+=v[2]; });
+  r/=rgbs.length; g/=rgbs.length; b/=rgbs.length;
+  const m=(r+g+b)/3, k=1.55;                       /* saturation push so blends stay tellable */
+  const cl=v=>Math.max(24,Math.min(244,Math.round(m+(v-m)*k)));
+  return [cl(r),cl(g),cl(b)];
+}
+const rgba = (t,a)=>`rgba(${t[0]},${t[1]},${t[2]},${a})`;
+ARCH.forEach(a=>a.tint=tintOf(a.colors));
+EMERGING.tint=[185,185,195];                       /* --provisional */
+
+/* ---------------- seeded PRNG + synthetic point field ---------------- */
+function mulberry32(seed){
+  return function(){
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t>>>15, t | 1);
+    t ^= t + Math.imul(t ^ t>>>7, t | 61);
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+let SEED = 20260708;
+let pts = [], hulls = [], emHull = [], trackedPt = null, noiseCount = 0;
+
+function gauss(rng){ /* Box–Muller */
+  let u=0,v=0;
+  while(u===0)u=rng(); while(v===0)v=rng();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+function convexHull(P){ /* Andrew monotone chain */
+  const s=[...P].sort((a,b)=>a.x-b.x||a.y-b.y);
+  if(s.length<3) return s;
+  const cross=(o,a,b)=>(a.x-o.x)*(b.y-o.y)-(a.y-o.y)*(b.x-o.x);
+  const lo=[],hi=[];
+  for(const p of s){ while(lo.length>=2&&cross(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop(); lo.push(p); }
+  for(let i=s.length-1;i>=0;i--){ const p=s[i]; while(hi.length>=2&&cross(hi[hi.length-2],hi[hi.length-1],p)<=0)hi.pop(); hi.push(p); }
+  lo.pop(); hi.pop();
+  return lo.concat(hi);
+}
+function genPoints(){
+  const rng = mulberry32(SEED);
+  pts = []; hulls = [];
+  ARCH.forEach((a,ci)=>{
+    const n = Math.round(a.sample/6);              /* counts scaled from REAL samples */
+    const th = rng()*Math.PI, cos=Math.cos(th), sin=Math.sin(th);
+    const cp = [];
+    for(let i=0;i<n;i++){
+      const gx=gauss(rng)*a.sx*0.5, gy=gauss(rng)*a.sy*0.5;
+      const p={ x:a.cx+gx*cos-gy*sin, y:a.cy+gx*sin+gy*cos, c:ci };
+      pts.push(p); cp.push(p);
+    }
+    hulls[ci]=convexHull(cp);
+  });
+  /* emerging cluster */
+  const ep=[];
+  for(let i=0;i<EMERGING.n;i++){
+    const p={ x:EMERGING.cx+gauss(rng)*EMERGING.sx*0.55, y:EMERGING.cy+gauss(rng)*EMERGING.sy*0.55, c:'em' };
+    pts.push(p); ep.push(p);
+  }
+  /* tracked real list — a point inside the emerging cluster */
+  trackedPt = { x:EMERGING.cx+8, y:EMERGING.cy-6, c:'em', tracked:true };
+  pts.push(trackedPt); ep.push(trackedPt);
+  emHull = convexHull(ep);
+  /* HDBSCAN noise (−1) — unclustered lists */
+  noiseCount = 88;
+  for(let i=0;i<noiseCount;i++){
+    pts.push({ x:40+rng()*920, y:40+rng()*920, c:-1 });
+  }
+}
+
+/* ---------------- view state / canvas ---------------- */
+const canvas = $('#map'), ctx = canvas.getContext('2d');
+const wrapEl = $('#mapwrap'), washEl = $('#wash'), labelsEl = $('#maplabels');
+let W=0, H=0, DPR=1;
+let view = { s:1, tx:0, ty:0 };                    /* screen = world*s + t */
+let baseS = 1;
+let selCluster = null;                             /* index | 'em' | null */
+let selPoint = null;
+
+function fitView(){
+  const pad = 0.06;
+  baseS = Math.min(W/(1000*(1+pad*2)), H/(1000*(1+pad*2)));
+  view.s = baseS;
+  view.tx = (W-1000*baseS)/2;
+  view.ty = (H-1000*baseS)/2;
+}
+const w2sX = x => x*view.s+view.tx, w2sY = y => y*view.s+view.ty;
+const s2wX = x => (x-view.tx)/view.s, s2wY = y => (y-view.ty)/view.s;
+function clampView(){
+  view.s = Math.max(baseS*0.7, Math.min(baseS*9, view.s));
+  const mX=W*0.55, mY=H*0.55;
+  view.tx = Math.max(W-1000*view.s-mX, Math.min(mX, view.tx));
+  view.ty = Math.max(H-1000*view.s-mY, Math.min(mY, view.ty));
+}
+function resize(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  const r = wrapEl.getBoundingClientRect();
+  W = Math.round(r.width); H = Math.round(r.height);
+  canvas.width = W*DPR; canvas.height = H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  fitView(); render();
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  ctx.clearRect(0,0,W,H);
+
+  /* quantized framing ticks (chart chrome, not data) */
+  ctx.strokeStyle='#22222b'; ctx.lineWidth=1; ctx.setLineDash([1,3]);   /* tokens §1.3 framing gray */
+  const step=125*view.s;
+  if(step>18){
+    ctx.beginPath();
+    for(let gx=0;gx<=1000;gx+=125){ const x=Math.round(w2sX(gx))+.5; ctx.moveTo(x,0); ctx.lineTo(x,H); }
+    for(let gy=0;gy<=1000;gy+=125){ const y=Math.round(w2sY(gy))+.5; ctx.moveTo(0,y); ctx.lineTo(W,y); }
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  /* hull fills + strokes — crisp vector */
+  hulls.forEach((h,ci)=>{
+    if(h.length<3) return;
+    const a=ARCH[ci], on = selCluster===ci, dimmed = selCluster!==null && !on;
+    ctx.beginPath();
+    h.forEach((p,i)=> i?ctx.lineTo(w2sX(p.x),w2sY(p.y)):ctx.moveTo(w2sX(p.x),w2sY(p.y)));
+    ctx.closePath();
+    ctx.fillStyle=rgba(a.tint, on?0.16:(dimmed?0.03:0.08));
+    ctx.fill();
+    ctx.lineWidth=on?2:1.25;
+    ctx.strokeStyle=on?'#f2f2f7':rgba(a.tint, dimmed?0.2:0.5);
+    ctx.stroke();
+  });
+  /* emerging hull — dashed halo, no fill (T3) */
+  if(emHull.length>=3){
+    const on = selCluster==='em';
+    ctx.beginPath();
+    emHull.forEach((p,i)=> i?ctx.lineTo(w2sX(p.x),w2sY(p.y)):ctx.moveTo(w2sX(p.x),w2sY(p.y)));
+    ctx.closePath();
+    ctx.setLineDash([5,4]);
+    ctx.lineWidth=on?2:1.25;
+    ctx.strokeStyle=on?'#f2f2f7':'rgba(185,185,195,.55)';
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  /* dots */
+  const r = Math.max(1.6, Math.min(3.4, 2.1*Math.sqrt(view.s/baseS)));
+  pts.forEach(p=>{
+    if(p.tracked) return;
+    const x=w2sX(p.x), y=w2sY(p.y);
+    if(x<-6||y<-6||x>W+6||y>H+6) return;
+    let fill;
+    if(p.c===-1) fill='rgba(74,74,86,.75)';
+    else if(p.c==='em') fill='rgba(185,185,195,.85)';
+    else{
+      const a=ARCH[p.c], dimmed = selCluster!==null && selCluster!==p.c;
+      fill=rgba(a.tint.map(v=>Math.min(255,v+26)), dimmed?0.3:0.88);
+    }
+    ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fillStyle=fill; ctx.fill();
+  });
+
+  /* selected point ring */
+  if(selPoint && !selPoint.tracked){
+    ctx.beginPath(); ctx.arc(w2sX(selPoint.x),w2sY(selPoint.y),r+4,0,6.2832);
+    ctx.lineWidth=2; ctx.strokeStyle='#f2f2f7'; ctx.stroke();
+  }
+  /* tracked 1st-place list — purple diamond (1st place = purple, sanctioned) */
+  if(trackedPt){
+    const x=w2sX(trackedPt.x), y=w2sY(trackedPt.y), d=6.5;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(Math.PI/4);
+    ctx.fillStyle='#b45bff'; ctx.fillRect(-d/2,-d/2,d,d);
+    ctx.lineWidth=1.5;
+    ctx.strokeStyle=(selPoint===trackedPt)?'#f2f2f7':'#0d0d12';
+    ctx.strokeRect(-d/2,-d/2,d,d);
+    ctx.restore();
+    if(selPoint===trackedPt){
+      ctx.beginPath(); ctx.arc(x,y,d+5,0,6.2832);
+      ctx.lineWidth=1.5; ctx.strokeStyle='#b45bff'; ctx.stroke();
+    }
+  }
+
+  updateWash(); updateLabels(); updateZoomReadout();
+}
+
+/* density riso-grain wash — gradients print through the 1-bit speckle mask (tokens §4.1) */
+function updateWash(){
+  const grads = ARCH.map(a=>{
+    const R = Math.max(a.sx,a.sy)*2.3*view.s;
+    return `radial-gradient(circle ${R.toFixed(0)}px at ${w2sX(a.cx).toFixed(0)}px ${w2sY(a.cy).toFixed(0)}px, ${rgba(a.tint,.5)}, ${rgba(a.tint,.16)} 55%, transparent 78%)`;
+  });
+  washEl.style.background = grads.join(',');
+}
+
+/* semantic labels — DOM overlay, cool-white UI face (names are not numbers) */
+const labelEls = [];
+function buildLabels(){
+  labelsEl.innerHTML='';
+  labelEls.length=0;
+  ARCH.forEach((a,ci)=>{
+    const el=document.createElement('button');
+    el.className='maplabel'; el.type='button';
+    el.setAttribute('aria-label',`Select cluster ${a.name}`);
+    el.innerHTML=`<span class="pips">${a.colors.map(c=>`<i class="pip pip-${c}"></i>`).join('')}</span><span class="nm">${a.name}</span>`;
+    el.addEventListener('click',e=>{ e.stopPropagation(); selectCluster(ci,true); });
+    labelsEl.appendChild(el);
+    labelEls.push({el, ci});
+  });
+  const em=document.createElement('button');
+  em.className='maplabel em'; em.type='button';
+  em.setAttribute('aria-label','Select emerging cluster, unnamed: U R, Snapcaster Mage');
+  em.innerHTML=`<span class="tagem">EMERGING</span><span class="nm">${EMERGING.name}</span>`;
+  em.addEventListener('click',e=>{ e.stopPropagation(); selectCluster('em',true); });
+  labelsEl.appendChild(em);
+  labelEls.push({el:em, ci:'em'});
+}
+function updateLabels(){
+  labelEls.forEach(({el,ci})=>{
+    const a = ci==='em'?EMERGING:ARCH[ci];
+    const x=w2sX(a.cx), y=w2sY(a.cy);
+    const vis = x>-80&&y>-30&&x<W+80&&y<H+40;
+    el.style.display = vis?'inline-flex':'none';
+    if(vis) el.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-130%)`;
+    el.classList.toggle('on', selCluster===ci);
+  });
+}
+function updateZoomReadout(){
+  $('#zoomVal').textContent=(view.s/baseS).toFixed(1);
+}
+
+/* ---------------- interactions: pan / pinch / wheel / tap ---------------- */
+const pointers = new Map();
+let moved = 0, pinchD0 = 0, pinchS0 = 1;
+
+canvas.addEventListener('pointerdown',e=>{
+  canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  moved=0;
+  if(pointers.size===2){
+    const [p1,p2]=[...pointers.values()];
+    pinchD0=Math.hypot(p1.x-p2.x,p1.y-p2.y); pinchS0=view.s;
+  }
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId)) return;
+  const prev=pointers.get(e.pointerId);
+  const dx=e.clientX-prev.x, dy=e.clientY-prev.y;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===1){
+    moved+=Math.abs(dx)+Math.abs(dy);
+    if(moved>4){ view.tx+=dx; view.ty+=dy; clampView(); requestRender(); }
+  }else if(pointers.size===2){
+    moved=99;
+    const [p1,p2]=[...pointers.values()];
+    const d=Math.hypot(p1.x-p2.x,p1.y-p2.y);
+    if(pinchD0>0){
+      const rect=canvas.getBoundingClientRect();
+      const mx=(p1.x+p2.x)/2-rect.left, my=(p1.y+p2.y)/2-rect.top;
+      const wx=s2wX(mx), wy=s2wY(my);
+      view.s=pinchS0*(d/pinchD0);
+      clampView();
+      view.tx=mx-wx*view.s; view.ty=my-wy*view.s;
+      clampView(); requestRender();
+    }
+  }
+});
+function endPointer(e){
+  if(!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  if(pointers.size===0 && moved<=4 && e.type==='pointerup'){
+    const rect=canvas.getBoundingClientRect();
+    tapAt(e.clientX-rect.left, e.clientY-rect.top, e.pointerType);
+  }
+}
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',endPointer);
+
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  zoomAt(mx,my, Math.exp(-e.deltaY*0.0016));
+},{passive:false});
+canvas.addEventListener('dblclick',e=>{
+  const rect=canvas.getBoundingClientRect();
+  zoomAt(e.clientX-rect.left, e.clientY-rect.top, 1.6);
+});
+function zoomAt(mx,my,f){
+  const wx=s2wX(mx), wy=s2wY(my);
+  view.s*=f; clampView();
+  view.tx=mx-wx*view.s; view.ty=my-wy*view.s;
+  clampView(); requestRender();
+}
+
+/* nearest-point hit-find with max-radius clamp (S12 spec) */
+function nearestPoint(sx,sy,maxPx){
+  const wx=s2wX(sx), wy=s2wY(sy), maxW=maxPx/view.s;
+  let best=null, bd=maxW*maxW;
+  for(const p of pts){
+    const dx=p.x-wx, dy=p.y-wy, d=dx*dx+dy*dy;
+    if(d<bd){ bd=d; best=p; }
+  }
+  return best;
+}
+function tapAt(sx,sy,ptype){
+  canvas.classList.add('latched');   /* first tap arms touch pan/pinch (drag-latch) */
+  const p = nearestPoint(sx,sy, ptype==='touch'?26:16);
+  if(p){
+    selPoint=p;
+    selCluster=(p.c===-1)?null:p.c;
+    renderInspector(); openSheet();
+  }else{
+    selPoint=null; selCluster=null;
+    renderInspector(); closeSheet();
+  }
+  syncChips(); requestRender();
+}
+
+/* keyboard on canvas */
+canvas.addEventListener('keydown',e=>{
+  const P=40;
+  let handled=true;
+  switch(e.key){
+    case 'ArrowLeft': view.tx+=P; break;
+    case 'ArrowRight':view.tx-=P; break;
+    case 'ArrowUp':   view.ty+=P; break;
+    case 'ArrowDown': view.ty-=P; break;
+    case '+': case '=': zoomAt(W/2,H/2,1.3); return;
+    case '-': case '_': zoomAt(W/2,H/2,1/1.3); return;
+    case '0': fitView(); break;
+    case 't': case 'T': flyToTracked(); return;
+    default: handled=false;
+  }
+  if(handled){ e.preventDefault(); clampView(); requestRender(); }
+});
+
+/* rAF-coalesced render — setTimeout fallback because rAF is throttled to zero in
+   hidden/embedded viewports (same failure mode as IO/native-lazy, tokens §6.1/§7.5) */
+let rafPending=false;
+function requestRender(){
+  if(rafPending) return;
+  rafPending=true;
+  const flush=()=>{ if(!rafPending) return; rafPending=false; render(); };
+  requestAnimationFrame(flush);
+  setTimeout(flush,60);
+}
+
+/* fly-to — quantized 8-step cadence (motion grammar §6), instant under RM */
+function flyTo(wx,wy,targetS){
+  const s1=targetS, tx1=W/2-wx*s1, ty1=H/2-wy*s1;
+  if(RM){ view.s=s1; view.tx=tx1; view.ty=ty1; clampView(); requestRender(); return; }
+  const s0=view.s, tx0=view.tx, ty0=view.ty, TICKS=8;
+  let i=0;
+  clearInterval(flyTo._t);
+  flyTo._t=setInterval(()=>{
+    i++;
+    const k=i/TICKS;
+    view.s=s0+(s1-s0)*k; view.tx=tx0+(tx1-tx0)*k; view.ty=ty0+(ty1-ty0)*k;
+    if(i>=TICKS){ clearInterval(flyTo._t); clampView(); }
+    requestRender();
+  },40);
+}
+function flyToTracked(){
+  selPoint=trackedPt; selCluster='em';
+  renderInspector(); openSheet(); syncChips();
+  flyTo(trackedPt.x, trackedPt.y, baseS*3.2);
+}
+
+/* ---------------- hover tooltip (fine pointer only) ---------------- */
+const tip=$('#tip');
+const FINE = matchMedia('(hover:hover) and (pointer:fine)').matches;
+if(FINE){
+  let tipRaf=false;
+  canvas.addEventListener('pointermove',e=>{
+    if(pointers.size>0){ tip.style.display='none'; return; }
+    if(tipRaf) return; tipRaf=true;
+    requestAnimationFrame(()=>{
+      tipRaf=false;
+      const rect=canvas.getBoundingClientRect();
+      const sx=e.clientX-rect.left, sy=e.clientY-rect.top;
+      const p=nearestPoint(sx,sy,14);
+      if(!p){ tip.style.display='none'; return; }
+      tip.innerHTML=tipHTML(p);
+      tip.style.display='block';
+      const tw=tip.offsetWidth, th=tip.offsetHeight;
+      let x=sx+14, y=sy-th-10;
+      if(x+tw>W-6) x=sx-tw-14;
+      if(y<6) y=sy+16;
+      tip.style.left=x+'px'; tip.style.top=y+'px';
+    });
+  });
+  canvas.addEventListener('pointerleave',()=>{ tip.style.display='none'; });
+}
+function wrOf(g,w){
+  if(g<WR_FLOOR) return null;
+  const p=w/g, ci=1.96*Math.sqrt(p*(1-p)/g)*100;
+  return {wr:p*100, ci};
+}
+const wrClass = wr => wr>52?'pos':(wr<48?'neg':'neu');
+function tipHTML(p){
+  if(p.tracked){
+    return `<div class="tnm"><span style="color:var(--acc)">◆</span> TRACKED LIST — ${DECK.player}</div>
+      <div class="tln"><b>${DECK.event}</b> · ${DECK.date} · <b style="color:var(--acc)">1ST</b></div>
+      <div class="tln">HINT: ${DECK.hint.toUpperCase()} · REAL LIST — TAP TO DOCK</div>`;
+  }
+  if(p.c===-1){
+    return `<div class="tnm" style="color:var(--dim)">NOISE — UNCLUSTERED</div>
+      <div class="tln">HDBSCAN LABEL <b>−1</b> · SYNTHETIC DEMO POINT</div>`;
+  }
+  if(p.c==='em'){
+    const w=wrOf(EMERGING.ph_g,EMERGING.ph_w);
+    return `<div class="tnm em">${EMERGING.name}</div>
+      <div class="twr">${w?`<span class="sseg ${wrClass(w.wr)}">${w.wr.toFixed(1)}</span><span class="unit"> % ±${w.ci.toFixed(1)}</span>`
+        :`<span class="sseg floor">--.-</span><span class="unit"> %</span>`}</div>
+      <div class="tln">${w?`N=<b>${EMERGING.ph_g}</b> GAMES · PLACEHOLDER`:`NOISE FLOOR — N=${EMERGING.ph_g} &lt; ${WR_FLOOR}`}</div>
+      <div class="tln"><b>${EMERGING.n}</b> LISTS (PLCHLDR) · GEOMETRY SYNTHETIC</div>`;
+  }
+  const a=ARCH[p.c], w=wrOf(a.ph_g,a.ph_w);   /* w is null below the noise floor — guard like the em branch */
+  return `<div class="tnm">${a.name}</div>
+    <div class="twr">${w?`<span class="sseg ${wrClass(w.wr)}">${w.wr.toFixed(1)}</span><span class="unit"> % ±${w.ci.toFixed(1)}</span>`
+      :`<span class="sseg floor">--.-</span><span class="unit"> %</span>`}</div>
+    <div class="tln">${w?`N=<b>${a.ph_g}</b> GAMES · <b>WR PLACEHOLDER</b>`:`NOISE FLOOR — N=${a.ph_g} &lt; ${WR_FLOOR}`}</div>
+    <div class="tln">SAMPLE <b>${a.sample.toLocaleString('en-US')}</b> DECKS (REAL) · GEOMETRY SYNTHETIC</div>`;
+}
+
+/* ---------------- fly-to chip strip ---------------- */
+const chipsEl=$('#clchips');
+function buildChips(){
+  chipsEl.innerHTML='';
+  ARCH.forEach((a,ci)=>{
+    const b=document.createElement('button');
+    b.className='press clchip'; b.type='button';
+    b.dataset.ci=ci;
+    b.setAttribute('aria-pressed','false');
+    b.innerHTML=`<span class="pips">${a.colors.map(c=>`<i class="pip pip-${c}"></i>`).join('')}</span>${a.name}`;
+    b.addEventListener('click',()=>selectCluster(ci,true));
+    chipsEl.appendChild(b);
+  });
+  const em=document.createElement('button');
+  em.className='clchip em'; em.type='button'; em.dataset.ci='em';
+  em.setAttribute('aria-pressed','false');
+  em.textContent='UNNAMED: UR — SNAPCASTER MAGE';
+  em.addEventListener('click',()=>selectCluster('em',true));
+  chipsEl.appendChild(em);
+  const trk=document.createElement('button');
+  trk.className='press clchip trk'; trk.type='button'; trk.dataset.ci='trk';
+  trk.setAttribute('aria-pressed','false');
+  trk.innerHTML='<span class="dia">◆</span>TRACKED LIST — AZJA';
+  trk.addEventListener('click',flyToTracked);
+  chipsEl.appendChild(trk);
+}
+function syncChips(){
+  chipsEl.querySelectorAll('[data-ci]').forEach(b=>{
+    const on = b.dataset.ci==='trk' ? selPoint===trackedPt
+             : String(selCluster)===b.dataset.ci;
+    b.classList.toggle('on',on);
+    b.setAttribute('aria-pressed',String(on));
+  });
+}
+function selectCluster(ci,fly){
+  selCluster=ci;
+  if(selPoint && selPoint.c!==ci) selPoint=null;
+  renderInspector(); openSheet(); syncChips();
+  const a = ci==='em'?EMERGING:ARCH[ci];
+  if(fly) flyTo(a.cx,a.cy, Math.max(view.s, baseS*2.1));
+  requestRender();
+}
+
+/* ---------------- inspector (dock/sheet — tokens §5.7 pattern) ---------------- */
+const insp=$('#inspector');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const totalDecks = ARCH.reduce((s,a)=>s+a.sample,0);   /* Σ real samples = 6,242 */
+const maxShare = Math.max(...ARCH.map(a=>a.sample))/totalDecks*100;   /* share-bar denominator computed from displayed data (tokens §8) */
+
+function costPips(m){
+  if(!m) return '<span class="nocost">LAND</span>';
+  const toks=m.match(/{([^}]+)}/g)||[];
+  return '<span class="cpips">'+toks.map(t=>{
+    const v=t.slice(1,-1);
+    const cls=v==='U'?' u':(v==='R'?' r':'');
+    return `<span class="cpip${cls}">${esc(v)}</span>`;
+  }).join('')+'</span>';
+}
+function crowHTML(c){
+  return `<div class="crow">
+    <span class="ct">${c.c}</span>
+    <img class="thumb" src="${c.img}" alt="" loading="lazy" decoding="async">
+    <span class="nm" title="${esc(c.n)}">${esc(c.n)}</span>
+    ${costPips(c.m)}
+    <span class="pr">$${(c.c*c.usd).toFixed(2)}</span>
+  </div>`;
+}
+function groupOf(c){
+  const t=c.t.toLowerCase();
+  if(t.includes('land')&&!t.includes('//')) return 'LANDS';
+  if(t.startsWith('instant // land')) return 'SPELLS';
+  if(t.includes('creature')) return 'CREATURES';
+  if(t.includes('instant')||t.includes('sorcery')) return 'SPELLS';
+  return 'OTHER';
+}
+function deckPlateHTML(){
+  const mainCt=DECK.main.reduce((s,c)=>s+c.c,0);       /* 60 — computed */
+  const sideCt=DECK.side.reduce((s,c)=>s+c.c,0);       /* 14 — computed */
+  const mainUsd=DECK.main.reduce((s,c)=>s+c.c*c.usd,0);
+  const sideUsd=DECK.side.reduce((s,c)=>s+c.c*c.usd,0);
+  const groups={CREATURES:[],SPELLS:[],OTHER:[],LANDS:[]};
+  DECK.main.forEach(c=>groups[groupOf(c)].push(c));
+  const gHTML=Object.entries(groups).filter(([,v])=>v.length).map(([g,v])=>{
+    const n=v.reduce((s,c)=>s+c.c,0);
+    return `<div class="grp-head"><span>${g}</span><span class="gct">${n}</span></div>`+
+      v.map(crowHTML).join('');
+  }).join('');
+  return `
+  <div class="deckhead">
+    <div class="dk-meta"><span class="first">◆ TRACKED — REAL LIST</span> · <a href="${DECK.uri}" target="_blank" rel="noopener">MTGO.COM ↗</a></div>
+    <div class="dk-event">${DECK.event}</div>
+    <div class="dk-meta"><b>${DECK.date}</b> · <b class="first">1ST PLACE</b> · <b>${DECK.player}</b> · HINT: <b>${DECK.hint.toUpperCase()}</b></div>
+    <div class="dk-counts">
+      <span><span class="sseg">${mainCt}</span> <span class="unit">MAIN</span></span>
+      <span class="side"><span class="sseg">${sideCt}</span> <span class="unit">SIDE</span></span>
+      <span><span class="sseg" style="color:var(--ink)">${(mainUsd+sideUsd).toFixed(0)}</span> <span class="unit">$ USD</span></span>
+    </div>
+    <button class="press copybar" id="copyDeck">⧉ COPY DECKLIST</button>
+  </div>
+  <div class="listpanel">${gHTML}</div>
+  <div class="listpanel sbpane">
+    <div class="grp-head"><span>SIDEBOARD</span><span class="gct">${sideCt}</span></div>
+    ${DECK.side.map(crowHTML).join('')}
+  </div>
+  <div class="dk-totals">
+    ROW PRICE = COUNT × UNIT · MAIN $<b>${mainUsd.toFixed(2)}</b> · SIDE $<b>${sideUsd.toFixed(2)}</b>
+    — <b>Σ COMPUTED FROM LIST</b> · SCRYFALL 2026-07-08 SNAPSHOT, ONE CANONICAL PRINTING PER CARD
+  </div>`;
+}
+function clusterPlateHTML(ci){
+  const em = ci==='em';
+  const a = em?EMERGING:ARCH[ci];
+  const w = wrOf(a.ph_g,a.ph_w);
+  const share = em?null:(a.sample/totalDecks*100);
+  const head = em
+    ? `<span class="tag-em">EMERGING</span><span class="cnm em">${EMERGING.name}</span>`
+    : `<span class="pips">${a.colors.map(c=>`<i class="pip pip-${c}"></i>`).join('')}</span>
+       <span class="cnm">${a.name}</span><span class="tag-t1">CURATED (PORT PENDING)</span>`;
+  const wrHTML = w
+    ? `<span class="sseg ${wrClass(w.wr)}">${w.wr.toFixed(1)}</span><span class="unit"> %</span>
+       <span class="rsub">±${w.ci.toFixed(1)} CI95 · N=<b>${a.ph_g}</b> GAMES · <b>PLACEHOLDER</b></span>`
+    : `<span class="sseg floor">--.-</span><span class="unit"> %</span>
+       <span class="rsub">NOISE FLOOR — N=${a.ph_g} &lt; ${WR_FLOOR} GAMES</span>`;
+  const shareHTML = em
+    ? `<span class="sseg neu">${EMERGING.n}</span><span class="unit"> LISTS</span>
+       <span class="rsub"><b>PLACEHOLDER</b> · FIRST SEEN ${EMERGING.first} (PLCHLDR)</span>`
+    : `<span class="sseg neu">${share.toFixed(1)}</span><span class="unit"> %</span>
+       <div class="sharebar"><i style="width:${Math.min(100,share/maxShare*100).toFixed(0)}%"></i></div>
+       <span class="rsub">OF PIP-MINE SAMPLE · N=<b>${a.sample.toLocaleString('en-US')}</b> DECKS (REAL)</span>`;
+  const prov = em
+    ? `TOP SIGNAL: <b>SNAPCASTER MAGE</b> · LIFT <b>--.-</b> (PLACEHOLDER — NOT MEASURED)<br>
+       AUTO-CLUSTERED (T3) · NAME PENDING RULE FILE — NEVER AUTO-AUTHORED ·
+       DESCRIPTOR = COLOUR GROUP + TOP SIGNATURE CARD · GEOMETRY <b>SYNTHETIC</b>`
+    : `NAME + COLORS: RULE-FILE / PIP-MINE (APR–JUN 2024 MTGO, REAL) ·
+       HULL + DOT POSITIONS <b>SYNTHETIC DEMO GEOMETRY</b>`;
+  return `
+  <div class="iplate selc">
+    <div class="ihead">${head}</div>
+    <div class="ireads">
+      <div class="iread"><span class="rlbl">Match WR</span>${wrHTML}</div>
+      <div class="iread"><span class="rlbl">${em?'Cluster size':'Meta share'}</span>${shareHTML}</div>
+    </div>
+    <div class="iprov">${prov}</div>
+  </div>`;
+}
+function pointPlateHTML(){
+  return `
+  <div class="iplate">
+    <div class="ihead"><span class="cnm" style="font-size:12px">POINT — LIST PAYLOAD NOT WIRED</span></div>
+    <div class="iprov" style="border-top:none;padding-top:0;margin-top:4px">
+      THIS MOCK WIRES <b>ONE REAL LIST</b> — THE ◆ MARKER (AZJA, 1ST, MODERN CHALLENGE 64).
+      EVERY OTHER DOT IS SYNTHETIC GEOMETRY WITH NO DECK BEHIND IT.
+    </div>
+    <button class="press ibtn" id="goTracked">◆ FLY TO TRACKED LIST</button>
+  </div>`;
+}
+function noisePlateHTML(){
+  return `
+  <div class="iplate">
+    <div class="ihead"><span class="cnm" style="color:var(--dim)">NOISE — UNCLUSTERED</span></div>
+    <div class="iprov" style="border-top:none;padding-top:0;margin-top:4px">
+      HDBSCAN LABEL <b>−1</b> — LISTS THE CLUSTERING DECLINED TO ASSIGN.
+      SHOWN SO THE MAP NEVER PRETENDS FULL COVERAGE. SYNTHETIC DEMO POINT.
+    </div>
+  </div>`;
+}
+function renderInspector(){
+  let html='';
+  if(selPoint===trackedPt){
+    html = clusterPlateHTML('em') + deckPlateHTML();
+  }else if(selPoint && selPoint.c===-1){
+    html = noisePlateHTML();
+  }else if(selCluster!==null){
+    html = clusterPlateHTML(selCluster);
+    if(selPoint) html += pointPlateHTML();
+  }else{
+    html = `<div class="insp-empty">TAP A DOT OR A CLUSTER LABEL.<br>
+      ◆ = THE ONE REAL LIST WIRED IN THIS MOCK (AZJA · 1ST · MODERN CHALLENGE 64 · 2024-06-18).<br>
+      POINT GEOMETRY IS SYNTHETIC DEMO DATA.</div>`;
+  }
+  insp.innerHTML=html;
+  const g=$('#goTracked'); if(g) g.addEventListener('click',flyToTracked);
+  const cp=$('#copyDeck'); if(cp) cp.addEventListener('click',copyDeck);
+  const rh=$('#railHint');
+  if(rh) rh.textContent = selCluster!==null||selPoint ? '' : 'TAP A DOT';
+}
+
+/* copy decklist — clipboard API + textarea fallback (tokens §5.11) */
+function copyDeck(){
+  const total=DECK.main.reduce((s,c)=>s+c.c,0)+DECK.side.reduce((s,c)=>s+c.c,0);
+  const txt = DECK.main.map(c=>`${c.c} ${c.n}`).join('\n') + '\n\n' +
+              DECK.side.map(c=>`${c.c} ${c.n}`).join('\n');
+  const done=()=>{
+    const b=$('#copyDeck'); if(!b) return;
+    b.textContent=`✓ COPIED — ${total} CARDS`;
+    glitch(b);
+    setTimeout(()=>{ const b2=$('#copyDeck'); if(b2) b2.textContent='⧉ COPY DECKLIST'; },1800);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done));
+  }else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  const ta=document.createElement('textarea');
+  ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta); done();
+}
+
+/* ---------------- bottom sheet (mobile) ---------------- */
+const sheet=$('#sheet');
+function openSheet(){ if(!wideMQ.matches && (selCluster!==null||selPoint)) sheet.classList.add('open'); }
+function closeSheet(){ sheet.classList.remove('open'); }
+function dismissSheet(){                            /* modal contract (tokens §5.7): */
+  closeSheet(); selPoint=null; selCluster=null;     /* Escape closes + focus returns to the map */
+  renderInspector(); syncChips(); requestRender();
+  canvas.focus({preventScroll:true});
+}
+$('#sheetClose').addEventListener('click',dismissSheet);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && sheet.classList.contains('open')) dismissSheet();
+});
+
+/* ---------------- glitch (tokens §6.3) ---------------- */
+function glitch(el){
+  if(RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend',()=>el.classList.remove('glitch'),{once:true});
+}
+
+/* ---------------- recompile demo — one-shot glitch on data refresh ---------------- */
+$('#btnRecompile').addEventListener('click',()=>{
+  SEED+=1;
+  genPoints(); updateStats();
+  glitch($('#stampSeg')); glitch($('#pageTitle'));
+  labelEls.forEach(l=>glitch(l.el));
+  $('#recompNote').innerHTML=`DEMO GEOMETRY RE-SEEDED (SEED <b>${SEED}</b>) — PRODUCTION RECOMPILES WEEKLY · GLITCH IS ONE-SHOT`;
+  if(selPoint){                                      /* points regenerated — remap or drop */
+    selPoint = selPoint.tracked ? trackedPt : null;
+    renderInspector();
+  }
+  requestRender();
+});
+
+/* ---------------- drift-trails demo gate ---------------- */
+$('#driftUnlock').addEventListener('click',()=>{
+  const v=$('#driftViz');
+  glitch($('#driftChip'));
+  v.classList.remove('locked'); v.classList.add('unlocked');
+  $('#driftChip').textContent='PRO · UNLOCKED (DEMO)';
+});
+
+/* ---------------- stats + roll-ups (tokens §6.1) ---------------- */
+function rollup(el,target,dec){
+  if(RM){ el.textContent=Number(target).toFixed(dec); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/[^0-9.\-]/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v=start+(target-start)*(i/TICKS);
+    el.textContent=(i>=TICKS)?Number(target).toFixed(dec):v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  },DUR/TICKS);
+}
+/* roll-ups animate only while the tiles are on screen (tokens §6.1) — IO tracks
+   visibility; the synchronous rect check seeds the flag before the first callback */
+let statsInView=(()=>{ const r=$('#statsSec').getBoundingClientRect(); return r.bottom>0 && r.top<innerHeight; })();
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{ es.forEach(en=>{ statsInView=en.isIntersecting; }); },{threshold:.15})
+    .observe($('#statsSec'));
+}
+function updateStats(){
+  $('#segPts').dataset.target=pts.length;
+  $('#segDecks').dataset.target=totalDecks;
+  $('#segNoise').dataset.target=noiseCount;
+  document.querySelectorAll('.roll').forEach(el=>{
+    const t=parseFloat(el.dataset.target), d=parseInt(el.dataset.dec||'0',10);
+    if(statsInView){ rollup(el,t,d); }
+    else{ clearInterval(el._roll); el.textContent=Number(t).toFixed(d); }
+  });
+  $('#provDecks').textContent=totalDecks.toLocaleString('en-US');
+  $('#capDecks').textContent=totalDecks.toLocaleString('en-US');
+}
+
+/* ---------------- sr-only cluster summary ---------------- */
+(function srList(){
+  const ul=$('#srClusters');
+  ARCH.forEach(a=>{
+    const li=document.createElement('li');
+    li.textContent=`${a.name}: colors ${a.colors.join(' ')}, ${a.sample} decks in the real pip-mine sample. Point positions synthetic.`;
+    ul.appendChild(li);
+  });
+  const li=document.createElement('li');
+  li.textContent='Emerging (unnamed) cluster: U R, top signature card Snapcaster Mage. Counts placeholder.';
+  ul.appendChild(li);
+})();
+
+/* ---------------- ticker ---------------- */
+/* Real items cite the grounding files; placeholder items say so. */
+const FEED_ITEMS=[
+  `MODERN CHALLENGE 64 · 2024-06-18 · <span class="sec">1ST AZJA</span> · IZZET WIZARDS (HINT) — TRACKED ◆`,
+  `MAP SWEEP 2026-07-08 · <span class="sec">10 HULLS + 1 EMERGING</span> · MODERN`,
+  `UNNAMED: UR — SNAPCASTER MAGE <span class="mut">· EMERGING (T3) · COUNTS PLACEHOLDER</span>`,
+  `PIP-MINE APR–JUN 2024 · <span class="up">N=6,242 DECKS</span> · 10 ARCHETYPES`,
+  `<span class="mut">DEMO WIRE — GEOMETRY SYNTHETIC · WR PLACEHOLDER</span>`
+];
+(function initTicker(){
+  const tk=$('#ticker'), track=$('#tickerTrack');
+  const half=FEED_ITEMS.map(s=>`<span>${s}</span>`).join('');
+  track.innerHTML=half+half;                       /* duplicated once → -50% seamless loop */
+  const setSpeed=()=>{ track.style.animationDuration=((track.scrollWidth/2)/35)+'s'; };
+  setSpeed();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(setSpeed);
+  const toggle=()=>{
+    const p=tk.classList.toggle('paused');
+    tk.setAttribute('aria-pressed',String(p));
+    $('#tickerPause').innerHTML=p?'&#9654;':'&#10074;&#10074;';
+  };
+  tk.addEventListener('click',toggle);
+  tk.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }
+  });
+})();
+
+/* ---------------- wide reparenting (tokens §7.4) ---------------- */
+const wideMQ=matchMedia('(min-width:1100px)');
+let wideApplied=null;
+const infraSlot=$('#infraSlot');
+function layoutWide(){
+  const w=wideMQ.matches;
+  if(w===wideApplied) return;
+  wideApplied=w;
+  if(w){
+    closeSheet();
+    $('#railHome').appendChild(insp);
+    $('#rail').appendChild(infraSlot);
+  }else{
+    $('#sheetHome').appendChild(insp);
+    document.querySelector('main').appendChild(infraSlot);
+    openSheet();
+  }
+}
+layoutWide();
+wideMQ.addEventListener('change',layoutWide);
+window.addEventListener('resize',layoutWide);
+
+/* ---------------- zoom buttons ---------------- */
+$('#zIn').addEventListener('click',()=>zoomAt(W/2,H/2,1.35));
+$('#zOut').addEventListener('click',()=>zoomAt(W/2,H/2,1/1.35));
+$('#zReset').addEventListener('click',()=>{ fitView(); requestRender(); });
+$('#zTrk').addEventListener('click',flyToTracked);
+
+/* ---------------- boot ---------------- */
+genPoints();
+buildLabels();
+buildChips();
+renderInspector();
+resize();
+updateStats();
+if('ResizeObserver' in window){
+  new ResizeObserver(()=>resize()).observe(wrapEl);
+}else{
+  window.addEventListener('resize',resize);
+}
+</script>
+</body>
+</html>

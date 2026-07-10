@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaSurf — Best Decks · Pit-Wall Console</title>
+<!--
+  BEST DECKS (/best-decks) — winner-decks module, Pit-Wall Console system.
+  Built from docs/design-research/2026-07-09/pit-wall-tokens.md +
+  extension-spec.md (multi-game livery, pip silhouettes, caveat chrome, V-FEED gate).
+
+  DATA PROVENANCE (nothing invented):
+  · MTG rows: archetype-page-data.json (Izzet Murktide v3 capture, notable 1st places +
+    league 5-0 feed rows) + deck-viewer-data.json (Azja, Modern Challenge 64 2024-06-18,
+    1st Place, full 60+14 list with Scryfall 2026-07-08 prices).
+  · One Piece rows: tests/fixtures/onepiece.limitlesstcg.com/tournaments.html
+    (25 events — every listing row names a winner; 7 names are wrapped in the
+    schema-documented <span class="lotp-name"> plain-name wrapper, verified 2026-07-09)
+    + t431.html / t424.html standings fixtures
+    (winning deck labels: Purple Enel OP15-058, Black Imu OP13-079).
+    NO One Piece images hotlinked — color-framed placeholders per grounding policy.
+  · Riftbound: riftbound-games-ground.json — catalogue facts only; NO match data exists,
+    so the feed renders wired-up-and-waiting with unlit readouts. No Riot CDN images.
+  · PRODUCTION NOTE: the PRO gate here is presentation-only. Real gate is server-side
+    (entitlements module); free tier receives only the crisp head rows — the locked tail
+    never ships true values to the free-tier DOM.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Press+Start+2P&family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+/* DSEG7 Classic — SIL OFL. Self-host in production; CDN for mockup.
+   NOTE: no "88:88" ghost underlay anywhere — lit segments only. */
+@font-face{
+  font-family:'DSEG7Classic';
+  src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');
+  font-weight:700; font-display:swap;
+}
+
+/* ============ tokens (canonical :root, pit-wall-tokens.md §1) ============ */
+:root{
+  --bg:#0d0d12;
+  --panel:#14141a;
+  --panel2:#191921;
+  --line:#2b2b35;
+  --ink:#f2f2f7;
+  --dim:#8a8a96;
+  --win:#3b9dff;
+  --loss:#ff7a1a;
+  --acc:#b45bff;
+  --shadow:#000000;
+  --provisional:#b9b9c3;
+  --chrome:linear-gradient(45deg,#999 5%,#fff 10%,#ccc 30%,#ddd 50%,#ccc 70%,#fff 80%,#999 95%);
+  --pix:'Press Start 2P',monospace;
+  --liv:#3b9dff;   /* livery accent — set per active game by JS (MTG = default chrome) */
+  /* colorless 1-bit speckle mask (tokens §4.1) */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.6 0.6 0.6 0 -0.9'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='48' height='48' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* white overlay grain band (tokens §4.3) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* dark multiply grain + coarse misprint blobs (tokens §4.2, for the veil) */
+  --grainD:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0 0.06  0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  --noiseC:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.32' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1 0 0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0 0.05  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='56' height='56' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* ============ reset (tokens §3.1 — no rounded corners, ever) ============ */
+*{ box-sizing:border-box; margin:0; padding:0; border-radius:0 !important; }
+html{ background:var(--bg); }
+body{
+  background:var(--bg);
+  background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 6px);
+  color:var(--ink);
+  font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.45;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+a{ color:inherit; }
+button{ font:inherit; color:inherit; }
+img{ max-width:100%; }
+:focus-visible{ outline:2px solid var(--acc); outline-offset:2px; }
+
+@media (hover:hover) and (pointer:fine){
+  body{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23f2f2f7"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+  button, a, .press{cursor:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"><g fill="%23b45bff"><rect x="7" y="0" width="3" height="6"/><rect x="7" y="11" width="3" height="6"/><rect x="0" y="7" width="6" height="3"/><rect x="11" y="7" width="6" height="3"/></g></svg>') 8 8, crosshair;}
+}
+
+/* ============ press physics (tokens §3.3) ============ */
+.press{
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:2px 2px 0 0 var(--shadow);
+  transform:translate(0,0);
+  transition:transform 80ms steps(2,end), box-shadow 80ms steps(2,end);
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.press:active{
+  transform:translate(2px,2px);
+  box-shadow:0 0 0 0 var(--shadow);
+  transition:none;
+}
+
+/* ============ wire ticker (tokens §5.1) ============ */
+.ticker{
+  position:sticky; top:0; z-index:50; height:30px;
+  background:var(--panel); border-bottom:1px solid var(--line);
+  display:flex; align-items:stretch; overflow:hidden;
+}
+.ticker .wbadge{
+  font-family:var(--pix); font-size:8px; line-height:1;
+  display:flex; align-items:center; gap:5px; padding:0 8px;
+  background:var(--acc); color:var(--bg); flex:0 0 auto; z-index:2;
+}
+.ticker .wbadge .dot{ width:6px; height:6px; background:var(--loss); animation:wdot 1.2s steps(2,end) infinite; }
+@keyframes wdot{ 50%{ opacity:.25; } }
+.ticker-clip{ position:absolute; left:52px; right:36px; top:0; bottom:0; overflow:hidden; }
+.ticker-track{
+  display:inline-flex; align-items:center; height:30px; white-space:nowrap;
+  will-change:transform; animation:tickscroll 42s linear infinite;
+}
+@keyframes tickscroll{ to{ transform:translateX(-50%); } }
+.ticker.paused .ticker-track{ animation-play-state:paused; }
+.titem{ font-size:11px; letter-spacing:.04em; color:var(--dim); padding:0 18px; }
+.titem b{ color:var(--ink); font-weight:700; }
+.titem .up{ color:var(--win); } .titem .pu{ color:var(--acc); } .titem .dn{ color:var(--loss); }
+.tpause{
+  position:absolute; right:0; top:0; bottom:0; width:36px; border:0; border-left:1px solid var(--line);
+  background:var(--panel2); color:var(--dim); font-family:var(--pix); font-size:8px; z-index:2;
+}
+
+/* ============ header ============ */
+.wrap{ max-width:680px; margin:0 auto; padding:0 12px; }
+header.page-head{ padding:18px 0 0; }
+.brandline{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.brand{ font-family:var(--pix); font-size:10px; letter-spacing:1px; }
+.brand i{ font-style:normal; color:var(--acc); }
+.gameind{
+  font-family:var(--pix); font-size:7px; line-height:1; padding:6px 8px 5px;
+  background:var(--panel2); border:1px solid var(--liv); color:var(--liv);
+  letter-spacing:1px;
+}
+.pagetitle{
+  font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase;
+  letter-spacing:-.01em; line-height:.92; font-size:44px; margin:14px 0 10px;
+}
+.pagetitle .thin{ color:transparent; -webkit-text-stroke:1px #2e2e3a; }
+.grainband{
+  height:8px; position:relative; margin:0 0 6px;
+  background-image:var(--grain), linear-gradient(90deg, var(--liv), var(--acc));
+  background-size:120px 120px, 100% 100%;
+  background-blend-mode:overlay, normal;
+}
+.grainband::before{
+  content:""; position:absolute; inset:0; transform:translate(2px,2px);
+  background:linear-gradient(90deg, var(--acc), var(--liv));
+  opacity:.22; z-index:-1;
+}
+.pageprov{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; line-height:1.7; }
+.pageprov b{ color:var(--ink); }
+
+/* ============ game tabs (livery slot: switcher) ============ */
+.tabbar{
+  position:sticky; top:30px; z-index:40;
+  background:var(--bg); border-bottom:1px solid var(--line);
+  padding:10px 0;
+}
+.tabbar .tabrow{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+.tabbar .tabrow::-webkit-scrollbar{ display:none; }
+.gametab{
+  flex:1 0 auto; min-height:48px; min-width:148px;
+  display:flex; flex-direction:column; justify-content:center; gap:5px;
+  padding:7px 10px 6px; text-align:left;
+  color:var(--dim);
+}
+.gametab .gname{ font-family:var(--pix); font-size:8px; line-height:1; letter-spacing:1px; color:var(--ink); }
+.gametab .gbadge{ font-family:var(--pix); font-size:7px; line-height:1.5; letter-spacing:.5px; } /* extension §0 maturity chip = 7px; tokens §2.1 floor for pixel-font chrome */
+.gametab.on{ border-color:var(--tabliv, var(--ink)); box-shadow:inset 0 -3px 0 0 var(--tabliv, var(--ink)), 2px 2px 0 0 var(--shadow); }
+.gametab.on .gname{ color:var(--tabliv, var(--ink)); }
+.gametab[aria-pressed="true"]{ background:var(--panel2); }
+
+/* ============ DSEG stat tiles (tokens §5.3) ============ */
+.tiles{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0; }
+.cell{ padding:12px 12px 10px; text-align:left; width:100%; }
+.cell .lbl{ font-size:10px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; display:flex; justify-content:space-between; gap:6px; }
+.cell .seg{ font-family:'DSEG7Classic','JetBrains Mono',monospace; font-weight:700; font-size:26px; line-height:1.15; display:inline-block; margin-top:6px; }
+.cell .seg.lit{ color:var(--ink); }
+.cell.win .seg.lit{ color:var(--win); }
+.cell.price .seg.lit{ color:var(--loss); }
+.cell .seg.off{ color:#3a3a48; }
+.cell .unit{ font-size:11px; color:var(--dim); font-family:'JetBrains Mono',monospace; margin-left:4px; }
+.cell .sub{ font-size:9px; color:var(--dim); margin-top:4px; display:block; letter-spacing:.06em; text-transform:uppercase; line-height:1.5; }
+
+/* ============ caveat chrome (extension §3) ============ */
+.caveats{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px; }
+.caveat{
+  display:inline-block;
+  font:400 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--dim); background:var(--panel2);
+  border:1px solid var(--line); border-left:3px solid var(--loss);
+  padding:4px 7px; line-height:1.6;
+}
+.caveat b{ color:var(--ink); font-weight:700; }
+
+/* credit chip (extension §4.1) */
+.credit{
+  display:inline-flex; align-items:center; gap:5px;
+  font:700 9px 'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink); background:var(--panel2); border:1px solid var(--line);
+  padding:4px 7px; text-decoration:none;
+}
+.credit span{ color:var(--dim); font-weight:400; }
+
+/* ============ feed section head ============ */
+.sechead{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  margin:16px 0 8px;
+}
+.sechead .slbl{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; }
+.sechead .slbl b{ color:var(--ink); }
+.prov{ font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; line-height:1.7; }
+.prov b{ color:var(--ink); }
+
+/* ============ winner rows ============ */
+.thead{
+  display:none;
+  font-size:9px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase;
+  padding:0 10px 4px;
+}
+.rowwrap{ display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:6px; margin-bottom:6px; } /* 44px deeplink gutter = tokens §3.4 touch floor */
+.wrow{
+  display:grid; grid-template-columns:42px minmax(0,1fr) auto; gap:8px; align-items:center;
+  padding:8px 10px; font-size:13px; text-align:left; width:100%;
+  min-height:44px;
+}
+.wrow.sel{ border-color:var(--ink); box-shadow:inset 0 0 0 2px var(--ink), 2px 2px 0 0 var(--shadow); }
+.wrow .dateb{ display:flex; flex-direction:column; gap:1px; }
+.wrow .dateb .dd{ font-weight:800; font-size:12px; line-height:1.1; }
+.wrow .dateb .dy{ font-size:9px; color:var(--dim); letter-spacing:.08em; }
+.wrow .mid{ min-width:0; }
+.archline{ display:flex; align-items:center; gap:6px; min-width:0; }
+.archthumb{
+  width:38px; height:26px; object-fit:cover; flex:0 0 auto;
+  border:1px solid var(--line); filter:saturate(.78) contrast(1.05);
+}
+.archname{
+  display:block; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;
+}
+.archname.na{ font-weight:400; color:var(--provisional); font-size:11px; }
+.axischip{
+  flex:0 0 auto; font-family:var(--pix); font-size:7px; line-height:1; padding:3px 4px 2px;
+  color:var(--dim); background:var(--panel2); border:1px solid var(--line); letter-spacing:.5px;
+}
+.setid{ flex:0 0 auto; font-size:10px; color:var(--dim); }
+.evline{
+  display:block; font-size:11px; color:var(--dim); margin-top:2px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.evline b{ color:var(--ink); font-weight:700; }
+.erachip{
+  display:inline-block; font-size:9px; padding:1px 4px; border:1px solid var(--line);
+  background:var(--panel2); color:var(--dim); margin-left:4px; letter-spacing:.06em;
+}
+.metaline{ display:flex; align-items:center; gap:8px; font-size:10px; color:var(--dim); margin-top:3px; flex-wrap:wrap; }
+.metaline .price{ color:var(--loss); font-weight:700; }
+.nolist{ color:var(--provisional); }   /* used in both metaline and the label-less evline */
+.wrow .rblock{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.reschip{
+  font-family:var(--pix); font-size:7px; line-height:1; padding:4px 5px 3px;
+  border:1px solid var(--line); background:var(--panel2); color:var(--ink); letter-spacing:.5px;
+  white-space:nowrap;
+}
+.reschip.first{ color:var(--acc); border-color:var(--acc); }
+.badge-league{
+  font-family:var(--pix); font-size:7px; line-height:1; padding:4px 5px 3px;
+  border:1px solid #1f4e80; background:var(--panel2); color:var(--win); letter-spacing:.5px; white-space:nowrap;
+}
+.plaque{
+  font-size:11px; letter-spacing:3px; white-space:nowrap; line-height:1;
+  padding:3px 4px 3px 7px; border:1px solid var(--line); background:var(--panel2);
+}
+.plaque .on{ color:var(--loss); }
+.plaque .off{ color:#3a3a48; }
+.plaque.na{ color:#3a3a48; font-size:9px; letter-spacing:.08em; padding:4px 5px; }
+.fieldn{ font-size:9px; color:var(--dim); letter-spacing:.05em; line-height:1; } /* field size readable at a glance, not hover-only */
+.deeplink{
+  display:flex; align-items:center; justify-content:center; text-decoration:none;
+  font-family:var(--pix); font-size:9px; color:var(--dim); min-height:44px;
+}
+.deeplink:hover, .deeplink:focus-visible{ color:var(--ink); border-color:var(--ink); }
+
+/* MTG pips (tokens §1.4 VERBATIM — the ONE border-radius exception).
+   CANON DECISION 2026-07-09: MTG pips take tokens §1.4 fills; the registry pipPalette
+   (riftbound-games-ground.json) is canonical only for the NON-MTG pip systems below.
+   Recorded in pit-wall-tokens.md §1.4. */
+.pips{ display:inline-flex; gap:3px; align-items:center; flex:0 0 auto; }
+.pip{ width:9px; height:9px; border:1px solid #565664; border-radius:50% !important; }
+.pip-W{background:#f8f6d8;} .pip-U{background:#b9d4ec;} .pip-B{background:#7d7673;border-color:#a6a1a0;}
+.pip-R{background:#e49977;} .pip-G{background:#a3c095;}
+.pip-C{background:#8b8b99;border-radius:0 !important;transform:rotate(45deg);width:8px;height:8px;}
+
+/* One Piece octagons (extension §1 — scale S 10px, split duals; scale M 16px letter) */
+.opip{
+  width:10px; height:10px; flex:0 0 auto;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+}
+.opipwrap{ padding:1px; background:rgba(242,242,247,.25); flex:0 0 auto;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%); }
+.opipwrap.k{ background:#a6a1a0; }
+.opM{
+  width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--pix); font-size:6px; line-height:1;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%);
+}
+/* scale-M rim (extension §1.4): default 1px rgba rim; Black (#2b2b33 = 1.31:1 on
+   --panel) takes the bright #a6a1a0 rim — same rule as the scale-S .opipwrap */
+.opMwrap{ padding:1px; background:rgba(242,242,247,.25); display:inline-flex; flex:0 0 auto;
+  clip-path:polygon(25% 0,75% 0,100% 25%,100% 75%,75% 100%,25% 100%,0 75%,0 25%); }
+.opMwrap.k{ background:#a6a1a0; }
+.opfuse{ display:inline-flex; gap:0; }
+
+/* Riftbound twin domain plates (extension §1.2 scale M) */
+.rbplate{
+  width:20px; height:16px; display:inline-flex; align-items:center; justify-content:center; /* extension §1.2: 20×16 */
+  font-family:var(--pix); font-size:6px; line-height:1;
+  border:1px solid rgba(242,242,247,.25);
+}
+.rbfuse{ display:inline-flex; } .rbfuse .rbplate:not(:first-child){ border-left-width:0; }
+
+/* pip legend strip (extension §1.5) */
+.pipkey{
+  display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center;
+  font-size:9px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase;
+  padding:8px 10px; background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow);
+}
+.pipkey .pk{ display:inline-flex; align-items:center; gap:4px; }
+
+/* ============ V-FEED premium veil (extension §5) ============ */
+.locked-tail{ position:relative; }
+.locked-tail .tailrows{ transition:filter 600ms steps(6,end); }
+.locked-tail.locked .tailrows{ filter:blur(3.5px) saturate(.75); pointer-events:none; }
+.riso-veil > div{ position:sticky; top:110px; }   /* chip stays reachable on a tall locked tail */
+.riso-veil{
+  position:absolute; inset:0; z-index:2;
+  display:flex; align-items:flex-start; justify-content:center; padding-top:34px;
+  background-image:var(--noiseC), var(--grainD),
+    linear-gradient(105deg, rgba(59,157,255,.50), rgba(13,13,18,.30) 46%, rgba(255,122,26,.46));
+  background-blend-mode:multiply, multiply, normal;
+  clip-path:inset(0 0 0 0);
+  transition:clip-path 700ms steps(12,end);
+}
+.locked-tail.unlocked .riso-veil{ clip-path:inset(0 0 0 100%); pointer-events:none; }
+.locked-tail.unlocked .tailrows{ filter:none; pointer-events:auto; }
+.veil-chip{
+  font-family:var(--pix); font-size:8px; line-height:1.6; text-align:center; padding:8px 10px 7px;
+  background:rgba(13,13,18,.88); border:1px solid #3c3c46; letter-spacing:1px; color:var(--ink);
+}
+.veil-chip .pro{ display:inline-block; padding:2px; background:var(--chrome); margin-right:6px; vertical-align:middle; }
+.veil-chip .pro i{ font-style:normal; display:block; padding:3px 5px 2px; background:#1a1a22; color:var(--ink); font-size:7px; }
+.btn-unlock{
+  display:block; margin:8px auto 0; font-family:var(--pix); font-size:7px; letter-spacing:1px;
+  padding:8px 10px 7px; color:var(--bg); border:1px solid var(--acc);
+  background-image:var(--grain), linear-gradient(90deg, var(--win), var(--acc));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal;
+  min-height:44px;   /* tokens §3.4 — primary control floor */
+}
+
+/* ============ empty state (riftbound) ============ */
+.emptyfeed{
+  border:1px dashed #3a3a48; padding:22px 14px; text-align:center; color:var(--dim);
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase; line-height:2;
+}
+.emptyfeed .bigseg{ font-family:'DSEG7Classic',monospace; font-weight:700; font-size:34px; color:#3a3a48; display:block; margin:6px 0; }
+
+/* ============ spotlight (rail dock ≥1100 / inline on mobile) ============ */
+.spot{ margin:18px 0; position:relative; background:var(--panel); border:1px solid var(--line); box-shadow:4px 4px 0 0 var(--shadow); }
+.spot::before{ content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background-image:var(--grain), linear-gradient(90deg, var(--liv), var(--acc));
+  background-size:120px 120px, 100% 100%; background-blend-mode:overlay, normal; }
+.spot .spad{ padding:14px 12px 12px; }
+.spot h2{ font-size:10px; letter-spacing:.14em; color:var(--dim); text-transform:uppercase; font-weight:400; margin-bottom:10px; }
+.spot h2 b{ color:var(--ink); }
+.spot .sname{ font-weight:800; font-size:16px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.spot .sev{ font-size:11px; color:var(--dim); margin-top:3px; line-height:1.6; }
+.spot .sev b{ color:var(--ink); }
+.spot .statgrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+.spot .scell{ background:var(--panel2); border:1px solid var(--line); padding:8px 9px 7px; }
+.spot .scell .lbl{ font-size:9px; color:var(--dim); letter-spacing:.1em; text-transform:uppercase; display:block; }
+.spot .scell .seg{ font-family:'DSEG7Classic',monospace; font-weight:700; font-size:20px; margin-top:4px; display:inline-block; }
+.spot .scell .seg.price{ color:var(--loss); }
+.spot .scell .seg.off{ color:#3a3a48; }
+.spot .scell .unit{ font-size:10px; color:var(--dim); margin-left:3px; }
+.spot .scell .sub{ font-size:8px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; display:block; margin-top:3px; line-height:1.5; }
+.spot .artplate{ position:relative; margin-top:10px; border:1px solid var(--line); overflow:hidden; }
+.spot .artplate img{ display:block; width:100%; height:96px; object-fit:cover; filter:saturate(.72) contrast(1.08) brightness(.72); }
+.spot .artplate .tint{ position:absolute; inset:0;
+  background:linear-gradient(112deg, rgba(59,157,255,.42) 0%, rgba(13,13,18,.05) 48%, rgba(255,122,26,.38) 100%);
+  mix-blend-mode:hard-light; pointer-events:none; }
+.spot .artplate .cred{ position:absolute; right:4px; bottom:3px; font-size:8px; letter-spacing:.08em; color:rgba(242,242,247,.75); text-transform:uppercase; background:rgba(13,13,18,.6); padding:1px 4px; }
+.leaderframe{
+  margin-top:10px; display:flex; gap:10px; align-items:stretch;
+}
+.leaderframe .cardph{
+  flex:0 0 84px; height:116px; position:relative;
+  border:2px solid var(--phc,#7b4fa6); background:var(--panel2);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center; padding:6px;
+}
+.leaderframe .cardph .grain{ position:absolute; inset:0; pointer-events:none;
+  -webkit-mask-image:var(--noise); mask-image:var(--noise); -webkit-mask-size:64px 64px; mask-size:64px 64px;
+  background:linear-gradient(180deg, var(--phc,#7b4fa6), transparent 80%); opacity:.5; }
+.leaderframe .cardph .nm{ font-family:var(--pix); font-size:7px; line-height:1.7; color:var(--ink); position:relative; }
+.leaderframe .cardph .id{ font-size:9px; color:var(--dim); position:relative; }
+.leaderframe .cardph .noimg{ font-size:7px; color:var(--dim); letter-spacing:.08em; position:relative; }
+.podium{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:5px; }
+.podium .prow{ display:flex; align-items:center; gap:6px; font-size:11px; min-width:0; }
+.podium .prow .pl{ font-family:'DSEG7Classic',monospace; font-weight:700; font-size:13px; width:20px; flex:0 0 auto; color:var(--dim); }
+.podium .prow:first-child .pl{ color:var(--acc); }
+.podium .prow .who{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.podium .prow .who b{ font-weight:700; }
+.podium .prow .who span{ color:var(--dim); }
+.toplist{ margin-top:10px; }
+.toplist .trow{ display:flex; align-items:center; gap:8px; font-size:12px; padding:3px 0; border-bottom:1px dashed #22222b; }
+.toplist .trow:last-child{ border-bottom:0; }
+.toplist .cnt{ font-family:'DSEG7Classic',monospace; font-weight:700; font-size:13px; color:var(--win); width:18px; flex:0 0 auto; }
+.toplist .cn{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; display:block; }
+.toplist .thm{ width:26px; height:19px; object-fit:cover; border:1px solid var(--line); filter:saturate(.78) contrast(1.05); flex:0 0 auto; }
+.spot .slink{ display:inline-flex; align-items:center; gap:6px; margin-top:12px; text-decoration:none;
+  font-family:var(--pix); font-size:7px; letter-spacing:1px; padding:8px 9px 7px; color:var(--ink); min-height:44px; } /* tokens §3.4 */
+.spot .snote{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.7; margin-top:10px; }
+
+/* star scale legend */
+.starkey{ margin-top:12px; font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.8;
+  padding:8px 10px; background:var(--panel); border:1px solid var(--line); box-shadow:2px 2px 0 0 var(--shadow); }
+.starkey b{ color:var(--loss); letter-spacing:2px; }
+.starkey i{ font-style:normal; color:var(--win); }
+
+/* ============ glitch (tokens §6.3) ============ */
+@keyframes glitch{
+  0%  {clip-path:inset(0 0 52% 0); transform:translate(-2px,0); text-shadow:2px 0 var(--win), -2px 0 var(--loss);}
+  50% {clip-path:inset(46% 0 0 0); transform:translate(2px,0);  text-shadow:-2px 0 var(--win), 2px 0 var(--loss);}
+  100%{clip-path:none; transform:none; text-shadow:none;}
+}
+.glitch{ animation:glitch 240ms steps(2,jump-none) 1; }
+
+/* ============ footer ============ */
+.riso-divider{
+  height:10px; margin-top:26px;
+  background-image:var(--grainD), linear-gradient(90deg, var(--win), var(--loss));
+  background-blend-mode:multiply, normal;
+  opacity:.55;
+}
+footer.pagefoot{ padding:18px 0 40px; }
+.wordmark{
+  font-family:'Archivo',sans-serif; font-weight:900; font-stretch:62%;
+  font-variation-settings:'wdth' 62; text-transform:uppercase; line-height:.9; font-size:46px;
+}
+.wordmark .hollow{ color:transparent; -webkit-text-stroke:1px #3a3a46; display:block; }
+.fine{ font-size:9px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; line-height:1.8; margin-top:12px; }
+.fine b{ color:var(--ink); }
+.fine a{ color:var(--ink); }
+
+/* ============ layout: wide spread ≥1100 (tokens §7.3) ============ */
+.spread{ display:block; }
+#railcol{ display:none; }
+@media (min-width:600px){
+  .wrap{ max-width:720px; }
+  .pagetitle{ font-size:58px; }
+  .tiles{ grid-template-columns:repeat(3,1fr); }
+  .wordmark{ font-size:64px; }
+}
+@media (min-width:1100px){
+  .wrap{ max-width:1400px; padding:0 24px; }
+  .spread{ display:grid; grid-template-columns:minmax(0,1fr) 380px; column-gap:24px; align-items:start; }
+  /* sticky budget (tokens §7.1): ticker 30px + tabbar (10px pad + 48px tabs +
+     10px pad + 1px border) = 99px — rail top sits exactly on that line */
+  #railcol{
+    display:block; position:sticky; top:99px; max-height:calc(100dvh - 103px);
+    overflow-y:auto; scrollbar-width:none; border-left:1px solid var(--line); padding-left:24px;
+  }
+  #railcol::-webkit-scrollbar{ display:none; }
+  /* thead mirrors the full rowwrap geometry: 54px date col + wrow 12px side padding,
+     right inset 62px = 12px wrow padding + 6px rowwrap gap + 44px deeplink gutter */
+  .thead{ display:grid; grid-template-columns:54px minmax(0,1fr) auto; gap:8px; padding:0 62px 4px 12px; }
+  .wrow{ grid-template-columns:54px minmax(0,1fr) auto; padding:9px 12px; }
+  .archthumb{ width:44px; height:30px; }
+  .spot{ margin:0 0 14px; }
+}
+@media (max-width:479px){
+  .wrow{ grid-template-columns:38px minmax(0,1fr) auto; gap:6px; }
+  .gametab{ min-width:126px; }
+  .archthumb{ width:30px; height:22px; }   /* name column keeps usable width (tokens §7.1) */
+  /* extension §2 T2: dense rows show the set-id only when the label collides;
+     at phone width the always-rendered id + era chips squeeze .archname to
+     "Purpl…" — drop them here so the name survives. Both stay in the spotlight,
+     and the era stays readable from ≥480px up. */
+  .wrow .setid, .wrow .erachip{ display:none; }
+  /* the LISTING ONLY chip duplicates the evline's DECK LABEL NOT CAPTURED text —
+     hide only that variant so label-less rows keep the full event name */
+  .wrow .axischip.lonly{ display:none; }
+}
+
+/* ============ reduced-motion contract (tokens §6.6) ============ */
+@media (prefers-reduced-motion:reduce){
+  .ticker-track{ animation:none; }
+  .ticker .wbadge .dot{ animation:none; }
+  .glitch{ animation:none; }
+  .press, .press:active{ transition:none; }
+  .riso-veil{ transition:none; }
+  .locked-tail .tailrows{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= WIRE TICKER (real results only) ================= -->
+<div class="ticker" id="ticker" role="button" tabindex="0" aria-pressed="false" aria-label="results wire — tap to pause">
+  <span class="wbadge"><span class="dot"></span>WIRE</span>
+  <div class="ticker-clip"><div class="ticker-track" id="ticktrack"></div></div>
+  <button class="tpause" id="tpause" tabindex="-1" aria-hidden="true">❚❚</button>
+</div>
+
+<div class="wrap">
+  <header class="page-head">
+    <div class="brandline">
+      <span class="brand">META<i>SURF</i> // PIT-WALL</span>
+      <span class="gameind" id="gameind">GAME: MTG — MODERN</span>
+    </div>
+    <h1 class="pagetitle">Best Decks <span class="thin">/ winner wire</span></h1>
+    <div class="grainband" role="presentation"></div>
+    <p class="pageprov">EVENT-WINNING DECKS, RANKED BY DATE · <b>MOCK BUILD AS-OF 2026-07-09</b> · EVERY ROW BELOW IS A REAL RESULT READ FROM THE PROJECT'S CAPTURES — COVERAGE IS THE CAPTURE SLICE, NOT A FULL LEDGER</p>
+  </header>
+
+  <!-- ================= GAME SWITCHER (livery slot #1) =================
+       plain press-toggle buttons (tokens §5.4) — not ARIA tabs: no tabpanel
+       relationship or arrow-key roving is implemented, so aria-pressed is the
+       honest semantic -->
+  <nav class="tabbar" aria-label="game switcher">
+    <div class="tabrow" id="tabrow"></div>
+  </nav>
+
+  <div class="spread">
+    <main id="maincol">
+      <!-- stat tiles -->
+      <div class="tiles" id="tiles" aria-live="polite"></div>
+
+      <!-- caveat chrome -->
+      <div class="caveats" id="caveats"></div>
+
+      <!-- pip legend strip — at first chip use per page (extension §1.5): feed rows
+           render chips above the spotlight block on mobile, so the key sits here -->
+      <div id="pipkeydock"></div>
+
+      <!-- feed -->
+      <div class="sechead">
+        <span class="slbl">▙ WINNER <b>FEED</b></span>
+        <span class="prov" id="feedprov"></span>
+      </div>
+      <div class="thead"><span>DATE</span><span>DECK · EVENT · PILOT</span><span style="text-align:right">RESULT · GRADE</span></div>
+      <div id="feed"></div>
+
+      <!-- provenance footnote for the active zone -->
+      <p class="prov" id="zoneprov" style="margin-top:10px"></p>
+
+      <!-- mobile home of the spotlight + legends (reparented into #railcol ≥1100px) -->
+      <div id="spotdockmobile"></div>
+    </main>
+
+    <aside id="railcol" aria-label="winner spotlight rail"></aside>
+  </div>
+
+  <div class="riso-divider" role="presentation"></div>
+  <footer class="pagefoot">
+    <div class="wordmark">MetaSurf<span class="hollow">Best Decks</span></div>
+    <p class="fine" id="finefoot"></p>
+  </footer>
+</div>
+
+<!-- spotlight + legends live in one node so listeners/state survive reparenting (tokens §7.4) -->
+<template id="spotshell"></template>
+
+<script>
+'use strict';
+/* ============================================================ helpers */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $  = (s,el)=> (el||document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function glitch(el){
+  if(RM || !el) return;
+  el.classList.remove('glitch'); void el.offsetWidth;
+  el.classList.add('glitch');
+  el.addEventListener('animationend', ()=>el.classList.remove('glitch'), {once:true});
+}
+/* quantized arcade roll-up — 8 ticks, snap exact (tokens §6.1) */
+function fmtVal(v,dec){ return Number(v).toFixed(dec); }
+function rollup(el, target, dec){
+  if(RM){ el.textContent = fmtVal(target,dec); return; }
+  const TICKS=8, DUR=600, start=parseFloat((el.textContent||'0').replace(/,/g,''))||0;
+  let i=0;
+  clearInterval(el._roll);
+  el._roll=setInterval(()=>{
+    i++;
+    const v = start + (target-start)*(i/TICKS);
+    el.textContent = (i>=TICKS) ? fmtVal(target,dec) : v.toFixed(dec);
+    if(i>=TICKS) clearInterval(el._roll);
+  }, DUR/TICKS);
+}
+const io = ('IntersectionObserver' in window) ? new IntersectionObserver(ents=>{
+  ents.forEach(e=>{
+    if(e.isIntersecting && !e.target._done){
+      e.target._done = true;
+      rollup(e.target, parseFloat(e.target.dataset.target), parseInt(e.target.dataset.dec||'0',10));
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.2}) : null;
+function armRoll(el){
+  /* fixed-width live box (tokens §2.2): reserve the final value's width in ch
+     (DSEG digit cells) so the unit span doesn't shift sideways during the roll */
+  el.style.minWidth = fmtVal(parseFloat(el.dataset.target), parseInt(el.dataset.dec||'0',10)).length + 'ch';
+  /* synchronous fallback for freshly rendered elements already in view */
+  const r = el.getBoundingClientRect();
+  if(r.top < innerHeight && r.bottom > 0){
+    el._done = true;
+    rollup(el, parseFloat(el.dataset.target), parseInt(el.dataset.dec||'0',10));
+  } else if(io){ io.observe(el); }
+  else { el.textContent = fmtVal(el.dataset.target, parseInt(el.dataset.dec||'0',10)); }
+}
+
+/* star grade — scale printed in the legend (tokens §5.5) */
+function starsFor(players){
+  if(players==null) return null;
+  if(players<32) return 1;
+  if(players<64) return 2;
+  if(players<128) return 3;
+  if(players<256) return 4;
+  return 5;
+}
+function plaqueHTML(players, league){
+  if(league) return '<span class="badge-league">LEAGUE 5-0</span>';
+  const n = starsFor(players);
+  if(n==null) return '<span class="plaque na" title="field size not captured in grounding">FIELD N/R</span>';
+  return '<span class="plaque" role="img" aria-label="event grade '+n+' of 5, field '+players+' players" title="'+players+' players">'
+    + '<span class="on">'+'★'.repeat(n)+'</span><span class="off">'+'★'.repeat(5-n)+'</span></span>'
+    + '<span class="fieldn">'+players.toLocaleString('en-US')+'</span>';   /* n printed, not hover-only */
+}
+
+/* ============================================================ pip systems */
+const MTG_ORDER = ['W','U','B','R','G','C'];
+function mtgPips(colors, note){
+  const cs = MTG_ORDER.filter(c=>colors.includes(c));
+  const lbl = 'colors: '+cs.join(', ') + (note ? ' — '+note.toLowerCase() : '');
+  return '<span class="pips" role="img" aria-label="'+esc(lbl)+'"'+(note?' title="'+esc(note)+'"':'')+'>'
+    + cs.map(c=>'<i class="pip pip-'+c+'"></i>').join('') + '</span>';
+}
+/* One Piece — registry pipPalette verbatim (riftbound-games-ground.json) */
+const OP_PAL = {Red:'#d3492f',Green:'#3e9c62',Blue:'#3b7bd0',Purple:'#7b4fa6',Black:'#2b2b33',Yellow:'#e0b73a'};
+const OP_LETTER = {Red:'R',Green:'G',Blue:'B',Purple:'P',Black:'K',Yellow:'Y'};   /* K = CMYK key-plate (extension §1.3) */
+const OP_FG = {Red:'#0d0d12',Green:'#0d0d12',Blue:'#0d0d12',Purple:'#f3eafd',Black:'#c9c4d2',Yellow:'#0d0d12'};
+function opPipS(colors){ /* scale S: 10px octagon, dual = hard 50/50 diagonal split */
+  const lbl = 'colors: '+colors.join(', ').toLowerCase();
+  let bg;
+  if(colors.length===2) bg = 'linear-gradient(135deg,'+OP_PAL[colors[0]]+' 0 50%,'+OP_PAL[colors[1]]+' 50% 100%)';
+  else bg = OP_PAL[colors[0]];
+  const rim = colors.includes('Black') ? ' k' : '';
+  return '<span class="opipwrap'+rim+'" role="img" aria-label="'+lbl+'"><span class="opip" style="background:'+bg+'"></span></span>';
+}
+function opPipM(colors){ /* scale M: fused 16px letter octagons, rimmed per extension §1.4 */
+  const lbl = 'colors: '+colors.join(', ').toLowerCase();
+  return '<span class="opfuse" role="img" aria-label="'+lbl+'">'
+    + colors.map(c=>'<span class="opMwrap'+(c==='Black'?' k':'')+'">'
+      + '<span class="opM" style="background:'+OP_PAL[c]+';color:'+OP_FG[c]+'">'+OP_LETTER[c]+'</span></span>').join('')
+    + '</span>';
+}
+/* Riftbound domain plates — provisional hues from the registry (owner to bless) */
+const RB_PAL = {Body:'#3e9c62',Calm:'#3aa7a3',Chaos:'#a54fc4',Fury:'#d3492f',Mind:'#3b7bd0',Order:'#c9a13b'};
+const RB_CODE = {Body:'BO',Calm:'CA',Chaos:'CH',Fury:'FU',Mind:'MI',Order:'OR'};
+const RB_FG = {Body:'#0d0d12',Calm:'#0d0d12',Chaos:'#0d0d12',Fury:'#0d0d12',Mind:'#0d0d12',Order:'#241d07'};
+function rbPlates(domains){
+  return '<span class="rbfuse" role="img" aria-label="domains: '+domains.join(', ').toLowerCase()+'">'
+    + domains.map(d=>'<span class="rbplate" style="background:'+RB_PAL[d]+';color:'+RB_FG[d]+'">'+RB_CODE[d]+'</span>').join('')
+    + '</span>';
+}
+
+/* ============================================================ DATA
+   All rows below are verbatim from grounding — see file-head comment. */
+
+/* Azja winner deck — deck-viewer-data.json. Totals recomputed at render from this list. */
+const AZJA_MAIN = [
+  [4,'Counterspell',3.71,1.09,'https://cards.scryfall.io/small/front/4/f/4f616706-ec97-4923-bb1e-11a69fbaa1f8.jpg?1782689884'],
+  [4,'Flame of Anor',null,null,'https://cards.scryfall.io/small/front/0/4/04779a7e-b453-48b9-b392-6d6fd0b8d283.jpg?1782697120'],
+  [4,'Island',null,null,'https://cards.scryfall.io/small/front/5/a/5a74175b-2418-4226-8435-1490532e644f.jpg?1782681662'],
+  [4,'Lightning Bolt',null,null,'https://cards.scryfall.io/small/front/7/6/7673784e-db4b-43a1-8d55-1bb9fc1e284f.jpg?1782681979'],
+  [4,'Preordain',null,null,'https://cards.scryfall.io/small/front/d/d/dd29a0e5-c1de-4e8a-8866-715e9f9cde1f.jpg?1782686813'],
+  [4,'Snapcaster Mage',null,null,'https://cards.scryfall.io/small/front/2/2/22b36ad5-bf4d-436a-9c3c-fa4acd0052fe.jpg?1782726477']
+];
+/* full-list price totals for Azja, from deck-viewer-data.json `totals` (computed there
+   from all 24 main + 7 side entries; verified this session: 651.15+26.10 / 335.80+71.85) */
+const AZJA_TOTALS = { usd: 651.15 + 26.10, tix: 335.80 + 71.85, cards: 60 + 14 };
+
+const MURKTIDE_ART = 'https://cards.scryfall.io/art_crop/front/2/0/20c4aae1-7665-4df7-bd51-a1d95bf8a17d.jpg?1782704708';
+
+const DATA = {
+  mtg: {
+    label:'MTG', fmt:'MODERN', accent:'#f2f2f7', tabliv:'#f2f2f7',
+    badge:'FULL TELEMETRY',
+    rows: [
+      /* Morrison90: page archetype label is “Izzet Murktide”, but the on-file list in
+         archetype-page-data.json `latest` is U/B — MAINBOARD colored pips U 27 / B 24,
+         zero R (Grief, Fatal Push, Psychic Frog, Thoughtseize; verified this session —
+         the sideboard adds no colored pips, so the 75 gives the same split).
+         PIP BASIS (one convention page-wide, tokens §5.10): mainboard colored pips.
+         Row pips derive from the on-file list, same rule as Azja; label stays the
+         capture's page assignment with a LIST-COLORS qualifier on the pips. */
+      { date:'2024-06-19', ev:'Modern League', league:true, players:null, result:'5-0',
+        player:'Morrison90', arch:'Izzet Murktide', colors:['U','B'], thumb:MURKTIDE_ART, thumbAlt:'Murktide Regent art crop',
+        uri:'https://www.mtgo.com/decklist/modern-league-2024-06-198225',
+        price:null, listNote:'FULL 75 ON FILE', fullList:true,
+        pipNote:'COLORS PIP-MINED FROM THE ON-FILE MAINBOARD (U 52.9% / B 47.1% OF COLORED PIPS) — “IZZET MURKTIDE” IS THE CAPTURE PAGE’S ARCHETYPE ASSIGNMENT',
+        spot:{kind:'murktide', note:'LEAGUE 5-0 ROW FROM THE IZZET MURKTIDE V3 PAGE FEED (ARCHETYPE-PAGE-DATA.JSON “LATEST”) · FULL LIST IN CAPTURE · NO LIST PRICING IN THIS CAPTURE · PIPS SHOW THE ON-FILE MAINBOARD’S COLORS (U 52.9% / B 47.1%) — THE U/R ARCHETYPE NAME IS THE PAGE’S ASSIGNMENT, NOT THIS LIST'} },
+      { date:'2024-06-19', ev:'Modern League', league:true, players:null, result:'5-0',
+        player:'i_b_TRUE', arch:'Izzet Murktide', colors:['U','R'], thumb:MURKTIDE_ART, thumbAlt:'Murktide Regent art crop', /* on-file mainboard pip-mined U 34 / R 19 — matches the page label */
+        uri:'https://www.mtgo.com/decklist/modern-league-2024-06-198225',
+        price:null, listNote:'FULL 75 ON FILE', fullList:true,
+        spot:{kind:'murktide', note:'LEAGUE 5-0 ROW FROM THE IZZET MURKTIDE V3 PAGE FEED (ARCHETYPE-PAGE-DATA.JSON “LATEST”) · FULL LIST IN CAPTURE · NO LIST PRICING IN THIS CAPTURE'} },
+      { date:'2024-06-18', ev:'Modern Challenge 64', league:false, players:null, result:'1ST',
+        player:'Azja', arch:'Izzet Wizards', colors:['U','R'], thumb:null, archHint:true,
+        uri:'https://www.mtgo.com/decklist/modern-challenge-64-2024-06-1812647519',
+        price:AZJA_TOTALS.usd, listNote:'LIST PRICE — COMPUTED', fullList:true, /* full 60+14 in deck-viewer-data.json */
+        spot:{kind:'azja'} },
+      { date:'2024-06-14', ev:'Modern Challenge 32', league:false, players:81, result:'1ST',
+        player:'O_danielakos', arch:'Izzet Murktide', colors:['U','R'], thumb:MURKTIDE_ART, thumbAlt:'Murktide Regent art crop',
+        uri:'https://www.mtgo.com/decklist/modern-challenge-32-2024-06-1412647457',
+        price:null, listNote:'60 MAIN ON FILE',
+        spot:{kind:'murktide', note:'NOTABLE 1ST-PLACE FINISH FROM THE IZZET MURKTIDE V3 PAGE (81-PLAYER CHALLENGE) · PER-DECK PRICE NOT DERIVABLE — CARD LIST NOT IN CAPTURE'} },
+      { date:'2024-05-13', ev:'Modern Challenge 64', league:false, players:68, result:'1ST',
+        player:'Mogged', arch:'Izzet Murktide', colors:['U','R'], thumb:MURKTIDE_ART, thumbAlt:'Murktide Regent art crop',
+        uri:'https://www.mtgo.com/decklist/modern-challenge-64-2024-05-1312637347',
+        price:null, listNote:'60 MAIN ON FILE',
+        spot:{kind:'murktide', note:'NOTABLE 1ST-PLACE FINISH FROM THE IZZET MURKTIDE V3 PAGE (68-PLAYER CHALLENGE) · PER-DECK PRICE NOT DERIVABLE — CARD LIST NOT IN CAPTURE'} }
+    ],
+    feedprov:'MODERN · 5 ROWS · AS-OF CAPTURE 2024-06-19',
+    caveats: [
+      'MOCK SLICE — ROWS ARE THE 1ST-PLACE + LEAGUE 5-0 RESULTS PRESENT IN THE V3 CAPTURES, <b>NOT A FULL WINNER LEDGER</b>'
+    ],
+    zoneprov:'SOURCE: MTGO.COM DECKLIST PAGES (V3 CAPTURE WINDOW 2024-04-01 → 2024-06-19; MURKTIDE PAGE BACKED BY N=717 DECKS / 234 EVENTS) · PRICES: SCRYFALL 2026-07-08 SNAPSHOT, ONE CANONICAL PRINTING PER CARD · PIP BASIS: MAINBOARD COLORED PIPS (ONE CONVENTION PAGE-WIDE) · IZZET WIZARDS IS THE CAPTURE’S ARCHETYPE HINT — RULE-FILE PORT PENDING',
+    freeRows: 5   /* whole capture slice free — V-FEED gate demos on the deep OP feed */
+  },
+
+  onepiece: {
+    label:'ONE PIECE', fmt:'STANDARD', accent:'#e0b73a', tabliv:'#e0b73a',
+    badge:'LIMITED SAMPLE — 849 ONLINE MATCHES',
+    rows: [
+      { date:'2026-07-05', ev:'Treasure Cup Bielefeld', era:'OP16', players:764, result:'1ST', player:'Hrvoje Hedžet', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/444' },
+      { date:'2026-07-04', ev:'Regional Bielefeld', era:'OP16', players:1541, result:'1ST', player:'Luka Forjan',
+        deck:{name:'Enel', colors:['Purple'], setId:'OP15-058'}, uri:'https://onepiece.limitlesstcg.com/tournaments/431',
+        spot:{kind:'bielefeld'} },
+      { date:'2026-06-28', ev:'Treasure Cup Toulouse', era:'OP16', players:769, result:'1ST', player:'David Melendo Villena', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/420' },
+      { date:'2026-06-27', ev:'Regional Toulouse', era:'OP16', players:1024, result:'1ST', player:'Giorgio Saraniero', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/415' },
+      { date:'2026-05-17', ev:'Treasure Cup Toronto', era:'OP15', players:512, result:'1ST', player:'Kevin Pires', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/401' },
+      { date:'2026-05-16', ev:'Regional Toronto', era:'OP15', players:1024, result:'1ST', player:'Luka Forjan', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/392' },
+      { date:'2026-05-16', ev:'Treasure Cup Toronto', era:'OP15', players:256, result:'1ST', player:'Richard Yam', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/426' },
+      { date:'2026-05-09', ev:'Regional Barcelona', era:'OP15', players:1024, result:'1ST', player:'Stefano Fabri', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/395' },
+      { date:'2026-05-03', ev:'Treasure Cup Warsaw', era:'OP15', players:258, result:'1ST', player:'Magicjaspe', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/405' },
+      { date:'2026-05-02', ev:'Regional Warsaw', era:'OP15', players:514, result:'1ST', player:'Enricomaria Rustico', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/394' },
+      { date:'2026-05-02', ev:'Regional São Paulo', era:'OP15', players:768, result:'1ST', player:'LGsus', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/399' },
+      { date:'2026-04-12', ev:'Treasure Cup Lille', era:'OP15', players:999, result:'1ST', player:'Show', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/388' },
+      { date:'2026-04-11', ev:'Regional Lille', era:'OP15', players:1536, result:'1ST', player:'Luigi Amato', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/381' },
+      { date:'2026-03-29', ev:'Treasure Cup Pomona, CA', era:'OP14.5', players:1024, result:'1ST', player:'ewin', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/386' },
+      { date:'2026-03-28', ev:'Regional Pomona, CA', era:'OP14.5', players:1336, result:'1ST', player:'Phi Nguyen', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/379' },
+      { date:'2026-03-21', ev:'Regional Melbourne', era:'OP14.5', players:712, result:'1ST', player:'Joshua Allcock', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/382' },
+      { date:'2026-03-21', ev:'Regional Bonn', era:'OP14.5', players:1024, result:'1ST', player:'Kaiwin', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/380' },
+      { date:'2026-03-21', ev:'Regional Mesquite, TX', era:'OP14.5', players:1388, result:'1ST', player:'Jeffrey Lee', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/378' },
+      { date:'2026-03-14', ev:'World Finals 2026', era:'OP14', players:34, result:'1ST', player:'Wasinha',
+        deck:{name:'Imu', colors:['Black'], setId:'OP13-079'}, uri:'https://onepiece.limitlesstcg.com/tournaments/424',
+        spot:{kind:'worldfinals'} },
+      { date:'2026-03-14', ev:'ChinoizeCup Season Qualifier #1', era:'OP14.5', players:171, result:'1ST', player:'Nikolay Baydanov', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/425' },
+      { date:'2026-02-14', ev:'Championship Finals Las Vegas', era:'OP14', players:1000, result:'1ST', player:'Everydayclutch', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/373' },
+      { date:'2026-01-24', ev:'Championship Finals Melbourne', era:'OP14', players:1064, result:'1ST', player:'Siris Wang', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/374' },
+      { date:'2026-01-17', ev:'Championship Finals Mexico City', era:'OP13', players:1352, result:'1ST', player:'Gabriel Dantas Giodani', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/376' },
+      { date:'2025-12-13', ev:'Regional Peoria, IL', era:'OP13', players:832, result:'1ST', player:'Alexander Gonzalez', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/329' },
+      { date:'2025-12-13', ev:'Regional Pasadena, CA', era:'OP13', players:512, result:'1ST', player:'Steven Bahk', deck:null, uri:'https://onepiece.limitlesstcg.com/tournaments/330' }
+    ],
+    feedprov:'STANDARD · 25 ROWS · LISTING CAPTURE 2026-07-08',
+    caveats: [
+      /* extension §3 canonical wording — share-only mode */
+      'SHARE-ONLY FEED — <b>NO PAIRINGS PUBLISHED</b> · WINRATES UNAVAILABLE',
+      'DECK LABELS ON <b>2 OF 25</b> ROWS — STANDINGS ARCHIVED FOR T431 + T424 ONLY'
+    ],
+    zoneprov:'SOURCE: ONEPIECE.LIMITLESSTCG.COM /TOURNAMENTS (FIXTURE CAPTURE 2026-07-08) · 25 EVENTS LISTED, ALL 25 WINNER CELLS NAME A WINNER (7 NAMES WRAPPED IN THE SCHEMA-DOCUMENTED LOTP-NAME SPAN — A PLAIN NAME WRAPPER) · CARDS CITED BY SET+NUMBER ID, NEVER BARE NAME · NO ONE PIECE IMAGES HOTLINKED — COLOR-FRAMED PLACEHOLDERS',
+    freeRows: 6,   /* per-page knob — DEVIATION: extension §5 specifies "first 3 rows
+                      crisp" as the V-FEED default; this page deliberately frees 6 so the
+                      full latest-month block stays readable. Production reads the
+                      crisp-head count from entitlements config, not a constant. */
+    credit:{ name:'ONEPIECE.LIMITLESSTCG.COM', url:'https://onepiece.limitlesstcg.com/tournaments' }
+  },
+
+  riftbound: {
+    label:'RIFTBOUND', fmt:'CONSTRUCTED', accent:'#3aa7a3', tabliv:'#3aa7a3',
+    badge:'CATALOGUE ONLY — NO MATCH DATA',
+    rows: [],
+    feedprov:'CONSTRUCTED · 0 ROWS · NO EVENT SOURCE',
+    caveats: [
+      '<b>NO MATCH DATA FEED — CATALOGUE ONLY</b> · NO RIFTBOUND DECKLISTS, EVENTS OR WINRATES EXIST IN THE REPO'
+    ],
+    zoneprov:'CATALOGUE: RIFTCODEX COMMUNITY API CAPTURE 2026-07-08 — 1,064 PRINTINGS / 36 BASE LEGENDS / SETS OGN·SFD·UNL (VEN ANNOUNCED 2026-07-31, NO CARDS YET) · NO RIOT API, NO RIOT CDN IMAGES (OWNER TOS DECISION) · NOTHING ON THIS TAB IS A MEASURED RESULT',
+    freeRows: 0
+  }
+};
+
+/* ============================================================ ticker */
+const TICK_ITEMS = [   /* one date format on the wire: ISO, matching the row data */
+  '<b>2026-07-04</b> · REGIONAL BIELEFELD (1,541) · <span class="pu">1ST</span> LUKA FORJAN — PURPLE ENEL',
+  '<b>2024-06-18</b> · MODERN CHALLENGE 64 · <span class="pu">1ST</span> AZJA — IZZET WIZARDS',
+  '<b>2026-07-05</b> · TREASURE CUP BIELEFELD (764) · <span class="pu">1ST</span> HRVOJE HEDŽET',
+  '<b>2024-06-14</b> · MODERN CHALLENGE 32 (81) · <span class="pu">1ST</span> O_DANIELAKOS — IZZET MURKTIDE',
+  '<b>2026-03-14</b> · WORLD FINALS 2026 (34) · <span class="pu">1ST</span> WASINHA — BLACK IMU',
+  '<b>2024-06-19</b> · MODERN LEAGUE · <span class="up">5-0</span> MORRISON90 · <span class="up">5-0</span> I_B_TRUE',
+  '<span class="dn">RIFTBOUND</span> · CATALOGUE ONLY — AWAITING FIRST EVENT SOURCE',
+  'SYNC <b>2026-07-09</b> · MOCK BUILD — CAPTURE SLICES, NOT LIVE'
+];
+(function initTicker(){
+  const track = $('#ticktrack');
+  const half = TICK_ITEMS.map(t=>'<span class="titem">'+t+'</span>').join('');
+  track.innerHTML = half + half;   /* duplicated once; -50% = one copy width */
+  function speed(){
+    const w = track.scrollWidth/2;
+    track.style.animationDuration = (w/35)+'s';
+  }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(speed);
+  speed();
+  const tick = $('#ticker'), pbtn = $('#tpause');
+  function toggle(){
+    const paused = tick.classList.toggle('paused');
+    tick.setAttribute('aria-pressed', paused);
+    pbtn.textContent = paused ? '▶' : '❚❚';
+  }
+  tick.addEventListener('click', toggle);
+  tick.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+  if(RM){ track.style.animation='none'; pbtn.style.display='none'; }
+})();
+
+/* ============================================================ tabs */
+let activeGame = 'mtg';
+(function initTabs(){
+  const row = $('#tabrow');
+  row.innerHTML = Object.keys(DATA).map(g=>{
+    const d = DATA[g];
+    return '<button class="gametab press" data-game="'+g+'" aria-pressed="'+(g===activeGame)+'"'
+      + ' style="--tabliv:'+d.tabliv+'">'
+      + '<span class="gname">'+esc(d.label)+'</span>'
+      + '<span class="gbadge">'+esc(d.badge)+'</span>'
+      + '</button>';
+  }).join('');
+  row.querySelectorAll('.gametab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.game===activeGame) return;
+      activeGame = btn.dataset.game;
+      row.querySelectorAll('.gametab').forEach(b=>{
+        b.classList.toggle('on', b.dataset.game===activeGame);
+        b.setAttribute('aria-pressed', b.dataset.game===activeGame);
+      });
+      renderGame(true);
+    });
+  });
+  row.querySelector('[data-game="'+activeGame+'"]').classList.add('on');
+})();
+
+/* ============================================================ row rendering */
+function rowHTML(g, r, idx){
+  const d = new Date(r.date+'T00:00:00');
+  const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const dd = String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()];
+  const dy = "'"+String(d.getFullYear()).slice(2);
+
+  let archHtml='', metaHtml='';
+  let evHtml = '<b>'+esc(r.ev)+'</b>'+(r.era?'<span class="erachip">'+esc(r.era)+'</span>':'');
+  if(g==='mtg'){
+    const thumb = r.thumb
+      ? '<img class="archthumb" src="'+r.thumb+'" alt="'+esc(r.thumbAlt||'')+'" loading="lazy" decoding="async">'
+      : '';
+    archHtml = '<span class="archline">'+thumb
+      + '<span class="archname">'+esc(r.arch)+'</span>'
+      + mtgPips(r.colors, r.pipNote)   /* pips = on-file list colors where a list exists */
+      + (r.archHint ? '<span class="axischip" title="capture archetype hint — rule-file port pending">HINT</span>' : '')
+      + '</span>';
+    const price = r.price!=null
+      ? '<span class="price">$'+r.price.toFixed(2)+'</span> <span>'+esc(r.listNote)+'</span>'
+      : '<span>PRICE —</span> <span>'+esc(r.listNote)+'</span>';
+    metaHtml = '<span class="metaline"><span>'+esc(r.player)+'</span>·'+price+'</span>';
+  }
+  else if(g==='onepiece'){
+    if(r.deck){
+      archHtml = '<span class="archline">'
+        + opPipS(r.deck.colors)
+        + '<span class="archname">'+esc(r.deck.colors.join('/'))+' '+esc(r.deck.name)+'</span>'
+        + '<span class="axischip">LEADER</span>'
+        + '<span class="setid">('+esc(r.deck.setId)+')</span>'
+        + '</span>';
+    } else {
+      /* no deck label on file → the EVENT leads the row; the caveat drops to the
+         meta slot (the LISTING ONLY chip already carries the why) */
+      archHtml = '<span class="archline">'
+        + '<span class="archname">'+esc(r.ev)+'</span>'
+        + '<span class="axischip lonly" title="only the listing page is archived — winner deck label lives on the event page">LISTING ONLY</span>'
+        + '</span>';
+      evHtml = '<span class="nolist">DECK LABEL NOT CAPTURED</span>'
+        + (r.era?'<span class="erachip">'+esc(r.era)+'</span>':'');
+    }
+    metaHtml = '<span class="metaline"><span>'+esc(r.player)+'</span>·<span>NO RECORD — SHARE-ONLY SOURCE</span></span>';
+  }
+
+  return '<div class="rowwrap">'
+    + '<button class="wrow press" data-idx="'+idx+'" aria-expanded="false" aria-label="'+esc(r.ev)+' '+r.date+', winner '+esc(r.player)+'">'
+    +   '<span class="dateb"><span class="dd">'+dd+'</span><span class="dy">'+dy+'</span></span>'
+    +   '<span class="mid">'+archHtml
+    +     '<span class="evline">'+evHtml+'</span>'
+    +     metaHtml
+    +   '</span>'
+    +   '<span class="rblock">'
+    +     (r.league ? '' : '<span class="reschip first">'+esc(r.result)+'</span>')
+    +     plaqueHTML(r.players, r.league)
+    +   '</span>'
+    + '</button>'
+    + '<a class="deeplink press" href="'+r.uri+'" target="_blank" rel="noopener" aria-label="open source page for '+esc(r.ev)+'">↗</a>'
+    + '</div>';
+}
+
+/* ============================================================ tiles */
+function tilesHTML(g){
+  const d = DATA[g];
+  if(g==='mtg'){
+    const full = d.rows.filter(r=>r.fullList).length; /* genuinely computed from displayed rows — each full-list row carries fullList:true */
+    return tile('WINNER ROWS', d.rows.length, 0, '', '1ST-PLACE + LEAGUE 5-0 IN CAPTURE', '')
+      + tile('FULL LISTS', full, 0, '', 'ROWS WITH COMPLETE DECKLIST ON FILE', '')
+      + tile('AZJA LIST', AZJA_TOTALS.usd, 2, 'USD', 'COMPUTED FROM '+AZJA_TOTALS.cards+' CARDS · SCRYFALL 2026-07-08', 'price');
+  }
+  if(g==='onepiece'){
+    const maxField = Math.max(...d.rows.map(r=>r.players));
+    const labeled = d.rows.filter(r=>r.deck).length; /* computed from displayed rows */
+    return tile('WINNERS ON FILE', d.rows.length, 0, '', 'EVERY LISTED EVENT NAMES ITS WINNER', '')
+      + tile('DECK LABELS', labeled, 0, 'OF '+d.rows.length, 'STANDINGS ARCHIVED FOR T431 + T424 ONLY', '')
+      /* neutral field-size metric → ink, not --win (tokens §1.2/§2.2: blue is
+         reserved for favorable-WR semantics) */
+      + tile('LARGEST FIELD', maxField, 0, 'PLAYERS', 'REGIONAL BIELEFELD 2026-07-04', '');
+  }
+  /* riftbound */
+  return '<div class="cell press"><span class="lbl">WINNER ROWS</span>'
+    + '<span class="seg off">--</span><span class="unit">ROWS</span>'
+    + '<span class="sub">NO MATCH DATA — UNLIT, NEVER FAKED</span></div>'
+    + tile('BASE LEGENDS', 36, 0, '', 'RIFTCODEX CAPTURE 2026-07-08', '')
+    + tile('PRINTINGS', 1064, 0, '', '11×100-PAGE CAPTURE · 979 PLAYABLE NAMES', '');
+}
+/* DELIBERATE: DSEG7 has no comma glyph, so tile values render unseparated (1541);
+   prose keeps '1,541'. Accepted inconsistency — segment displays never show commas. */
+function tile(lbl, val, dec, unit, sub, cls){
+  return '<div class="cell press '+(cls||'')+'"><span class="lbl">'+lbl+'</span>'
+    + '<span class="seg lit roll" data-target="'+val+'" data-dec="'+dec+'">0</span>'
+    + (unit?'<span class="unit">'+unit+'</span>':'')
+    + '<span class="sub">'+sub+'</span></div>';
+}
+
+/* ============================================================ spotlight */
+function spotHTML(g, r){
+  const d = DATA[g];
+  let body='';
+  if(g==='mtg' && r.spot && r.spot.kind==='azja'){
+    body = '<div class="sname">'+mtgPips(r.colors)+' '+esc(r.arch)
+      + ' <span class="axischip" title="capture archetype hint — rule-file port pending">HINT</span></div>'
+      + '<p class="sev"><b>'+esc(r.ev)+'</b> · '+r.date+' · 1ST PLACE · PILOT <b>'+esc(r.player)+'</b></p>'
+      + '<div class="statgrid">'
+      +   '<div class="scell"><span class="lbl">LIST PRICE</span><span class="seg price roll" data-target="'+AZJA_TOTALS.usd.toFixed(2)+'" data-dec="2">0</span><span class="unit">USD</span><span class="sub">Σ COUNT×UNIT — COMPUTED FROM LIST</span></div>'
+      +   '<div class="scell"><span class="lbl">LIST PRICE</span><span class="seg price roll" data-target="'+AZJA_TOTALS.tix.toFixed(2)+'" data-dec="2">0</span><span class="unit">TIX</span><span class="sub">SCRYFALL 2026-07-08 SNAPSHOT</span></div>'
+      + '</div>'
+      + '<div class="toplist" aria-label="top mainboard counts">'
+      + AZJA_MAIN.map(c=>'<div class="trow"><span class="cnt">'+c[0]+'</span><img class="thm" src="'+c[4]+'" alt="" loading="lazy" decoding="async"><span class="cn">'+esc(c[1])+'</span></div>').join('')
+      + '</div>'
+      + '<p class="snote">FIRST 6 OF 7 FOUR-OF MAINS SHOWN — 7TH IS TAMIYO, INQUISITIVE STUDENT (24 UNIQUE MAIN · 7 SIDE) · COLORS PIP-MINED FROM THE MAINBOARD (≥10% OF COLORED PIPS: U 77.2% / R 22.8%)</p>'
+      + '<a class="slink press" href="'+r.uri+'" target="_blank" rel="noopener">OPEN ON MTGO.COM ↗</a>';
+  }
+  else if(g==='mtg'){
+    body = '<div class="sname">'+mtgPips(r.colors, r.pipNote)+' '+esc(r.arch)+'</div>'
+      + '<p class="sev"><b>'+esc(r.ev)+'</b> · '+r.date+' · '+(r.league?'LEAGUE 5-0':'1ST PLACE'+(r.players?' OF '+r.players:''))+' · PILOT <b>'+esc(r.player)+'</b></p>'
+      + '<div class="artplate"><img src="'+MURKTIDE_ART+'" alt="Murktide Regent art crop" loading="lazy" decoding="async"><span class="tint"></span><span class="cred">ART CROP: MURKTIDE REGENT</span></div>'
+      + '<div class="statgrid">'
+      +   '<div class="scell"><span class="lbl">ARCHETYPE MEAN</span><span class="seg price roll" data-target="730.00" data-dec="2">0</span><span class="unit">USD</span><span class="sub">N=165 PRICED OF 717 DECKS — NOT THIS LIST</span></div>'
+      +   '<div class="scell"><span class="lbl">ARCHETYPE MEAN</span><span class="seg price roll" data-target="290.32" data-dec="2">0</span><span class="unit">TIX</span><span class="sub">N=388 PRICED OF 717 DECKS</span></div>'
+      + '</div>'
+      + '<p class="snote">'+esc(r.spot.note)+'</p>'
+      + '<a class="slink press" href="'+r.uri+'" target="_blank" rel="noopener">OPEN ON MTGO.COM ↗</a>';
+  }
+  else if(g==='onepiece' && r.spot && r.spot.kind==='bielefeld'){
+    body = '<div class="sname">'+opPipM(['Purple'])+' Purple Enel <span class="axischip">LEADER</span> <span class="setid">(OP15-058)</span></div>'
+      + '<p class="sev"><b>Regional Bielefeld</b> · 2026-07-04 · 1,541 PLAYERS · OP16 · 1ST <b>Luka Forjan</b></p>'
+      + '<div class="leaderframe">'
+      +   '<div class="cardph" style="--phc:#7b4fa6"><span class="grain"></span><span class="nm">ENEL</span><span class="id">OP15-058</span><span class="noimg">NO IMAGE — PLACEHOLDER</span></div>'
+      +   '<div class="podium" aria-label="published podium, top cut of 64">'
+      +     '<div class="prow"><span class="pl">1</span>'+opPipM(['Purple'])+'<span class="who"><b>Purple Enel</b> <span>— Luka Forjan</span></span></div>'
+      +     '<div class="prow"><span class="pl">2</span>'+opPipM(['Red','Black'])+'<span class="who"><b>Red/Black Koby</b> <span>— Marc@@@1</span></span></div>'
+      +     '<div class="prow"><span class="pl">3</span>'+opPipM(['Green','Blue'])+'<span class="who"><b>Green/Blue Luffy</b> <span>— Sammy Wang</span></span></div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="statgrid">'
+      +   '<div class="scell"><span class="lbl">WINNER MAIN</span><span class="seg roll" data-target="50" data-dec="0">0</span><span class="unit">+1 LEADER</span><span class="sub">LIST 6508: CHARACTER 27 · EVENT 23</span></div>'
+      +   '<div class="scell"><span class="lbl">PUBLISHED CUT</span><span class="seg roll" data-target="64" data-dec="0">0</span><span class="unit">OF 1541</span><span class="sub">TOP-CUT SHARE — TOP 64 PUBLISHED OF 1,541 ENTRIES</span></div>'
+      + '</div>'
+      + '<p class="snote">CARDS CITED BY SET+NUMBER ID · WINNER LIST ARCHIVED AS FIXTURE DECKLIST-6508 · PRICE — NOT DERIVABLE (NO OP PRICE SOURCE INGESTED)</p>'
+      + '<a class="slink press" href="'+r.uri+'" target="_blank" rel="noopener">OPEN EVENT PAGE ↗</a>';
+  }
+  else if(g==='onepiece' && r.spot && r.spot.kind==='worldfinals'){
+    body = '<div class="sname">'+opPipM(['Black'])+' Black Imu <span class="axischip">LEADER</span> <span class="setid">(OP13-079)</span></div>'
+      + '<p class="sev"><b>World Finals 2026</b> · 2026-03-14 · 34 PLAYERS · OP14 · 1ST <b>Wasinha</b></p>'
+      + '<div class="leaderframe">'
+      +   '<div class="cardph" style="--phc:#2b2b33;border-color:#a6a1a0"><span class="grain" style="background:linear-gradient(180deg,#a6a1a0,transparent 80%)"></span><span class="nm">IMU</span><span class="id">OP13-079</span><span class="noimg">NO IMAGE — PLACEHOLDER</span></div>'
+      +   '<div class="podium" aria-label="published podium, top 8 of 34">'
+      +     '<div class="prow"><span class="pl">1</span>'+opPipM(['Black'])+'<span class="who"><b>Black Imu</b> <span>— Wasinha</span></span></div>'
+      +     '<div class="prow"><span class="pl">2</span>'+opPipM(['Blue','Purple'])+'<span class="who"><b>Blue/Purple Luffy</b> <span>— Han Yong Tee</span></span></div>'
+      +     '<div class="prow"><span class="pl">3</span>'+opPipM(['Red','Blue'])+'<span class="who"><b>Red/Blue Ace</b> <span>— Johnson</span></span></div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="statgrid">'
+      +   '<div class="scell"><span class="lbl">PUBLISHED CUT</span><span class="seg roll" data-target="8" data-dec="0">0</span><span class="unit">OF 34</span><span class="sub">7 DECKLISTS FOR 8 ROWS — RANK 6 MISSING</span></div>'
+      +   '<div class="scell"><span class="lbl">FIELD GRADE</span><span class="seg roll" data-target="2" data-dec="0">0</span><span class="unit">/5 ★</span><span class="sub">34 PLAYERS → ★★ (32–63)</span></div>'
+      + '</div>'
+      + '<p class="snote">WINNER NAMED ON THE LISTING · DECK LABEL READ FROM THE ARCHIVED T424 STANDINGS (BLACK IMU, OP13-079) · NO RECORDS PUBLISHED FOR OFFLINE EVENTS</p>'
+      + '<a class="slink press" href="'+r.uri+'" target="_blank" rel="noopener">OPEN EVENT PAGE ↗</a>';
+  }
+  else if(g==='onepiece'){
+    body = '<div class="sname">'+esc(r.ev)+'</div>'
+      + '<p class="sev">'+r.date+' · '+r.players.toLocaleString('en-US')+' PLAYERS · '+esc(r.era)+' · 1ST <b>'+esc(r.player)+'</b></p>'
+      + '<p class="snote" style="margin-top:12px">DECK LABEL NOT CAPTURED — ONLY THE /TOURNAMENTS LISTING PAGE IS ARCHIVED FOR THIS EVENT. THE WINNING DECK LABEL LIVES ON THE EVENT PAGE, WHICH THIS MOCK DOES NOT FABRICATE.</p>'
+      + '<a class="slink press" href="'+r.uri+'" target="_blank" rel="noopener">OPEN EVENT PAGE ↗</a>';
+  }
+  return '<h2>▙ WINNER <b>SPOTLIGHT</b></h2>' + body;
+}
+
+/* pip key renders in #pipkeydock, ABOVE the feed — extension §1.5 wants the legend
+   strip at first chip use per page, and feed-row octagons appear well before the
+   spotlight block at 390px */
+function pipkeyHTML(g){
+  if(g==='onepiece'){
+    return '<div class="pipkey" style="margin:0 0 12px" aria-label="color key">'
+      + Object.keys(OP_PAL).map(c=>'<span class="pk">'+opPipM([c])+' '+c.toUpperCase()+'</span>').join('')
+      + '</div>';
+  }
+  if(g==='riftbound'){
+    return '<div class="pipkey" style="margin:0 0 12px" aria-label="domain key">'
+      + Object.keys(RB_PAL).map(dd=>'<span class="pk">'+rbPlates([dd])+' '+dd.toUpperCase()+'</span>').join('')
+      + '</div>';
+  }
+  return '';
+}
+function legendsHTML(g){
+  return '<div class="starkey" role="img" aria-label="event grade scale by field size">'
+    + 'EVENT GRADE — FIELD SIZE: <b>★</b> &lt;32 · <b>★★</b> 32–63 · <b>★★★</b> 64–127 · <b>★★★★</b> 128–255 · <b>★★★★★</b> 256+ · <i>LEAGUE = 5-0, SIZE UNREPORTED</i>'
+    + '</div>';
+}
+
+/* ============================================================ render */
+let selIdx = null;
+function renderGame(fromTab){
+  const g = activeGame, d = DATA[g];
+  document.documentElement.style.setProperty('--liv', d.accent);
+
+  const ind = $('#gameind');
+  ind.textContent = 'GAME: '+d.label+' — '+d.fmt;
+  glitch(ind);
+
+  /* tiles */
+  const tiles = $('#tiles');
+  tiles.innerHTML = tilesHTML(g);
+  tiles.querySelectorAll('.roll').forEach(armRoll);
+  tiles.querySelectorAll('.seg').forEach(s=>glitch(s));
+
+  /* caveats + credit */
+  $('#caveats').innerHTML = d.caveats.map(c=>'<span class="caveat">'+c+'</span>').join('')
+    + (d.credit ? ' <a class="credit" href="'+d.credit.url+'" target="_blank" rel="noopener"><span>DATA:</span> '+esc(d.credit.name)+' ↗</a>' : '');
+
+  $('#feedprov').textContent = d.feedprov;
+  $('#zoneprov').textContent = d.zoneprov;
+  $('#pipkeydock').innerHTML = pipkeyHTML(g);
+
+  /* feed with V-FEED gate (extension §5): head rows crisp, ONE veil over the tail */
+  const feed = $('#feed');
+  if(!d.rows.length){
+    feed.innerHTML = '<div class="emptyfeed">MODULE WIRED — AWAITING FIRST EVENT SOURCE'
+      + '<span class="bigseg">--.-</span>'
+      + 'WINNER ROWS RENDER HERE THE DAY A RIFTBOUND EVENT FEED LANDS.<br>'
+      + 'NEXT SET: <b style="color:var(--ink)">VENDETTA (VEN)</b> — ANNOUNCED 2026-07-31, NO CARDS YET.</div>';
+  } else {
+    const head = d.rows.slice(0, d.freeRows).map((r,i)=>rowHTML(g,r,i)).join('');
+    const tail = d.rows.slice(d.freeRows).map((r,i)=>rowHTML(g,r,i+d.freeRows)).join('');
+    const nLocked = d.rows.length - d.freeRows;
+    /* locked tail is inert: aria-hidden alone leaves descendants keyboard-focusable
+       (veil bypass, WCAG 4.1.2). inert removes them from tab order + hit testing. */
+    feed.innerHTML = head + (nLocked>0
+      ? '<div class="locked-tail locked" id="lockedtail">'
+        + '<div class="tailrows" aria-hidden="true" inert>'+tail+'</div>'
+        + '<div class="riso-veil"><div>'
+        +   '<div class="veil-chip"><span class="pro"><i>PRO</i></span>'+nLocked+' MORE ROWS — LOCKED'
+        +   '<button class="btn-unlock press" id="unlockbtn">UNLOCK FULL WIRE ▸</button></div>'
+        + '</div></div>'
+        + '</div>'
+      : '');
+    /* row select -> spotlight */
+    function bindRow(btn){
+      btn.addEventListener('click', ()=>{
+        feed.querySelectorAll('.wrow').forEach(b=>{ b.classList.remove('sel'); b.setAttribute('aria-expanded','false'); });
+        btn.classList.add('sel');
+        btn.setAttribute('aria-expanded','true');
+        selIdx = parseInt(btn.dataset.idx,10);
+        renderSpot();
+        const sp = $('#spotnode');
+        if(sp && !matchMedia('(min-width:1100px)').matches)
+          sp.scrollIntoView({block:'nearest', behavior: RM?'auto':'smooth'});
+      });
+    }
+    /* bind ONLY the crisp head rows now — locked rows get no listeners until unlock */
+    feed.querySelectorAll(':scope > .rowwrap .wrow').forEach(bindRow);
+    /* legacy fallback: browsers without inert still must not tab into the tail */
+    const tr0 = feed.querySelector('.tailrows');
+    if(tr0 && !('inert' in tr0)) tr0.querySelectorAll('button,a').forEach(el=>el.tabIndex=-1);
+    const ub = $('#unlockbtn');
+    if(ub) ub.addEventListener('click', e=>{
+      e.stopPropagation();
+      /* mock unlock — production gate is server-side; free DOM never holds true values */
+      const lt = $('#lockedtail');
+      lt.classList.remove('locked'); lt.classList.add('unlocked');
+      const tr = lt.querySelector('.tailrows');
+      tr.removeAttribute('aria-hidden');
+      tr.removeAttribute('inert');
+      tr.querySelectorAll('[tabindex="-1"]').forEach(el=>el.removeAttribute('tabindex'));
+      tr.querySelectorAll('.wrow').forEach(bindRow);   /* listeners attach only once unlocked */
+      lt.querySelectorAll('.dd').forEach(x=>glitch(x));
+    });
+  }
+
+  /* spotlight defaults to the first row that has a rich spot, else first row */
+  if(fromTab){
+    const RICH = ['azja','bielefeld','worldfinals'];
+    selIdx = d.rows.findIndex(r=>r.spot && RICH.includes(r.spot.kind));
+    if(selIdx<0) selIdx = d.rows.findIndex(r=>r.spot);
+    if(selIdx<0) selIdx = d.rows.length ? 0 : null;
+    const selBtn = feed.querySelector('.wrow[data-idx="'+selIdx+'"]');
+    if(selBtn){ selBtn.classList.add('sel'); selBtn.setAttribute('aria-expanded','true'); }
+  }
+  renderSpot();
+}
+function renderSpot(){
+  const g = activeGame, d = DATA[g];
+  const dock = $('#spotnode');
+  if(selIdx==null || !d.rows.length){
+    dock.querySelector('.spad').innerHTML = '<h2>▙ WINNER <b>SPOTLIGHT</b></h2>'
+      + '<p class="snote">NO ROWS ON THIS FEED — SPOTLIGHT UNLIT.</p>'
+      + '<div class="statgrid"><div class="scell"><span class="lbl">WINNER</span><span class="seg off">--.-</span></div>'
+      + '<div class="scell"><span class="lbl">FIELD</span><span class="seg off">--.-</span></div></div>';
+  } else {
+    dock.querySelector('.spad').innerHTML = spotHTML(g, d.rows[selIdx]);
+    dock.querySelectorAll('.roll').forEach(armRoll);
+  }
+  $('#spotlegends').innerHTML = legendsHTML(g);
+}
+
+/* spotlight node — built once, reparented across the 1100px breakpoint (tokens §7.4) */
+(function initSpotNode(){
+  const holder = document.createElement('div');
+  holder.id = 'spotnode';
+  holder.innerHTML = '<section class="spot" aria-live="polite"><div class="spad"></div></section><div id="spotlegends"></div>';
+  $('#spotdockmobile').appendChild(holder);
+})();
+const wideMQ = matchMedia('(min-width:1100px)');
+let wideApplied = null;
+function layoutWide(){
+  const w = wideMQ.matches;
+  if(w === wideApplied) return;
+  wideApplied = w;
+  const node = $('#spotnode');
+  if(w) $('#railcol').appendChild(node);
+  else  $('#spotdockmobile').appendChild(node);
+}
+layoutWide();
+wideMQ.addEventListener('change', layoutWide);   /* sanctioned reparenting pattern
+  (tokens §7.4): matchMedia change + resize listener, no polling. Devtools-driven
+  viewport emulation that dispatches neither event will miss the reparent — real
+  window resizes always fire these. */
+window.addEventListener('resize', layoutWide);
+
+/* footer fine print */
+$('#finefoot').innerHTML =
+  'BEST DECKS — PIT-WALL CONSOLE MOCKUP · BUILT 2026-07-09 FROM CAPTURED DATA ONLY<br>'
+  + 'MTG ROWS: <b>MTGO.COM DECKLIST CAPTURES</b> (V3 WINDOW 2024-04-01 → 2024-06-19) — DECKLISTS FROM MAGIC ONLINE (<a href="https://www.mtgo.com/decklists" target="_blank" rel="noopener">MTGO.COM</a>) · '
+  + 'ONE PIECE ROWS: <b>ONEPIECE.LIMITLESSTCG.COM</b> FIXTURE CAPTURE 2026-07-08 (<a href="https://onepiece.limitlesstcg.com/tournaments" target="_blank" rel="noopener">SOURCE ↗</a>) · '
+  + 'RIFTBOUND: RIFTCODEX CATALOGUE CAPTURE 2026-07-08 — NO RIOT ASSETS<br>'
+  + 'TOPDECK.GG ATTRIBUTION SLOT RESERVED — NO TOPDECK-SOURCED ROWS ON THIS PAGE · '
+  + 'PRICES: SCRYFALL BULK 2026-07-08 SNAPSHOT, ONE CANONICAL PRINTING PER CARD · '
+  + 'CARD IMAGES © WIZARDS OF THE COAST, SERVED VIA SCRYFALL · '
+  + 'PRODUCTION GATE IS SERVER-SIDE (ENTITLEMENTS) — THIS PAGE’S PRO VEIL IS PRESENTATION-ONLY';
+
+/* first render */
+renderGame(true);
+</script>
+</body>
+</html>

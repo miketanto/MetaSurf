@@ -1,0 +1,1650 @@
+{
+ "meta": {
+  "generated": "2026-07-09",
+  "generated_by": "grounding miner (Claude Code subagent), all numbers computed from local files this session",
+  "repo": "/Users/michaelsutanto/MetaSurf (branch multi-tcg-wave1)",
+  "sources_read": [
+   "web/lib/games/onepiece.ts",
+   "web/lib/games/index.ts",
+   "web/lib/games/types.ts",
+   "config/formats.json (onepiece block)",
+   "archetypes/definitions/onepiece/leaders-generated.json",
+   "archetypes/definitions/onepiece/PROVENANCE.md",
+   "data/onepiece-cache/Tournaments/** (37 event JSONs, 1054 decks)",
+   "data/onepiece-raw/onepiece.limitlesstcg.com/** (26 raw HTML pages)",
+   "data/onepiece-raw/play.limitlesstcg.com/** (details/standings/pairings JSONs)",
+   "data/punk-records/english/** (card DB, commit 96e41c4b8c1ccb301f5645c9fcf74ed29f8f8aba, fetched 2026-07-03)",
+   "api/schemas.py, api/routes.py, api/queries.py (matchup serving)",
+   "web/app/[game]/[format]/matchups/page.tsx"
+  ]
+ },
+ "games_registry": {
+  "source": "web/lib/games/onepiece.ts + config/formats.json",
+  "game_slug": "onepiece",
+  "route_pattern": "/{game}/{format}/... ; unknown game slug falls back to mtg (web/lib/games/index.ts)",
+  "format": "standard",
+  "zones": {
+   "leader": {
+    "min": 1,
+    "max": 1
+   },
+   "main": {
+    "min": 50,
+    "max": 50
+   }
+  },
+  "zone_map_source_names": {
+   "Leader": "leader",
+   "Mainboard": "main"
+  },
+  "archetype_axis": "leader",
+  "pip_palette": {
+   "Red": {
+    "bg": "#d3492f",
+    "fg": "#fdeae6"
+   },
+   "Green": {
+    "bg": "#3e9c62",
+    "fg": "#e9f7ee"
+   },
+   "Blue": {
+    "bg": "#3b7bd0",
+    "fg": "#eaf2fd"
+   },
+   "Purple": {
+    "bg": "#7b4fa6",
+    "fg": "#f3eafd"
+   },
+   "Black": {
+    "bg": "#2b2b33",
+    "fg": "#c9c4d2"
+   },
+   "Yellow": {
+    "bg": "#e0b73a",
+    "fg": "#3d3410"
+   },
+   "—": {
+    "bg": "#8a919e",
+    "fg": "#12151b"
+   }
+  },
+  "pip_order": [
+   "Red",
+   "Green",
+   "Blue",
+   "Purple",
+   "Black",
+   "Yellow",
+   "—"
+  ],
+  "colorless_code": "— (defensive fallback only; no colorless OP card observed in punk-records)",
+  "type_group_order": [
+   "Leader",
+   "Character",
+   "Event",
+   "Stage",
+   "Other"
+  ],
+  "pip_label_note": "ColorPips renders the full code text; OP pips currently show full colour words (per onepiece.ts NOTE, short labels are an open owner call)",
+  "archetype_label_convention": "'<colors joined with \\'/\\'>' + ' ' + leader printed name; 22 of 136 leader labels are id-disambiguated e.g. 'Red/Green Monkey.D.Luffy (OP13-001)' (archetypes/definitions/onepiece/leaders-generated.json: leader_rules=136, labels_id_disambiguated=22)",
+  "matchup_api_shape": {
+   "endpoint": "GET /matchups (api/routes.py)",
+   "response": "{game, format, as_of, archetypes:[{archetype_id,name}], cells:[{arch_a,arch_b,p_a_beats_b,ci_lo,ci_hi,n_matches}]}",
+   "web_grid_note": "web matchups page currently slices axis to TOP_N=8 ordered by metagame share (web/app/[game]/[format]/matchups/page.tsx); this grounding provides 13 for a 13x13 matrix"
+  }
+ },
+ "archetypes_top13": [
+  {
+   "label": "Purple Enel",
+   "decks": 145
+  },
+  {
+   "label": "Blue/Yellow Nami",
+   "decks": 129
+  },
+  {
+   "label": "Green/Blue Monkey.D.Luffy",
+   "decks": 112
+  },
+  {
+   "label": "Red/Blue Portgas.D.Ace",
+   "decks": 95
+  },
+  {
+   "label": "Black Imu",
+   "decks": 81
+  },
+  {
+   "label": "Purple/Yellow Donquixote Rosinante",
+   "decks": 75
+  },
+  {
+   "label": "Green Dracule Mihawk",
+   "decks": 57
+  },
+  {
+   "label": "Red/Blue Lucy",
+   "decks": 49
+  },
+  {
+   "label": "Black/Yellow Marshall.D.Teach",
+   "decks": 37
+  },
+  {
+   "label": "Red/Green Monkey.D.Luffy (OP13-001)",
+   "decks": 24
+  },
+  {
+   "label": "Blue/Yellow Boa Hancock",
+   "decks": 19
+  },
+  {
+   "label": "Blue/Purple Sanji",
+   "decks": 19
+  },
+  {
+   "label": "Blue/Purple Monkey.D.Luffy",
+   "decks": 18
+  }
+ ],
+ "archetypes_provenance": "deck counts over all 1054 decks in the 37 cached events under data/onepiece-cache/Tournaments (2025-12-13..2026-07-08); labels via leader card id -> archetypes/definitions/onepiece/leaders-generated.json; 0 unresolved leaders",
+ "colors": {
+  "single_colors": [
+   "Red",
+   "Green",
+   "Blue",
+   "Purple",
+   "Black",
+   "Yellow"
+  ],
+  "source": "punk-records cards colors field; six colours only, exactly matching web/lib/games/onepiece.ts pipOrder",
+  "dual_color_combos_observed": [
+   {
+    "combo": "Red/Green",
+    "cards": 8,
+    "example_leader": {
+     "id": "EB01-001",
+     "name": "Kouzuki Oden"
+    }
+   },
+   {
+    "combo": "Blue/Purple",
+    "cards": 6,
+    "example_leader": {
+     "id": "EB01-021",
+     "name": "Hannyabal"
+    }
+   },
+   {
+    "combo": "Black/Yellow",
+    "cards": 6,
+    "example_leader": {
+     "id": "EB01-040",
+     "name": "Kyros"
+    }
+   },
+   {
+    "combo": "Red/Blue",
+    "cards": 6,
+    "example_leader": {
+     "id": "EB03-001",
+     "name": "Nefeltari Vivi"
+    }
+   },
+   {
+    "combo": "Red/Purple",
+    "cards": 6,
+    "example_leader": {
+     "id": "OP06-001",
+     "name": "Uta"
+    }
+   },
+   {
+    "combo": "Red/Black",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP02-002",
+     "name": "Monkey.D.Garp"
+    }
+   },
+   {
+    "combo": "Green/Blue",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP02-026",
+     "name": "Sanji"
+    }
+   },
+   {
+    "combo": "Green/Yellow",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP03-022",
+     "name": "Arlong"
+    }
+   },
+   {
+    "combo": "Blue/Black",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP04-039",
+     "name": "Rebecca"
+    }
+   },
+   {
+    "combo": "Blue/Yellow",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP04-040",
+     "name": "Queen"
+    }
+   },
+   {
+    "combo": "Purple/Yellow",
+    "cards": 4,
+    "example_leader": {
+     "id": "OP04-058",
+     "name": "Crocodile"
+    }
+   },
+   {
+    "combo": "Green/Purple",
+    "cards": 3,
+    "example_leader": {
+     "id": "EB02-010",
+     "name": "Monkey.D.Luffy"
+    }
+   },
+   {
+    "combo": "Red/Yellow",
+    "cards": 3,
+    "example_leader": {
+     "id": "EB04-001",
+     "name": "Jewelry Bonney"
+    }
+   },
+   {
+    "combo": "Purple/Black",
+    "cards": 3,
+    "example_leader": {
+     "id": "OP02-072",
+     "name": "Zephyr"
+    }
+   },
+   {
+    "combo": "Green/Black",
+    "cards": 3,
+    "example_leader": {
+     "id": "OP04-020",
+     "name": "Issho"
+    }
+   }
+  ],
+  "note": "all 15 possible two-colour pairs occur; no card with >2 colours and no colourless card observed among 2634 base cards"
+ },
+ "decklists": [
+  {
+   "event": "Regional Bielefeld",
+   "event_date": "2026-07-04",
+   "event_uri": "https://onepiece.limitlesstcg.com/tournaments/431",
+   "player": "Luka Forjan",
+   "result": "1st Place",
+   "decklist_uri": "https://onepiece.limitlesstcg.com/decks/list/6508",
+   "archetype_label": "Purple Enel",
+   "leader": {
+    "id": "OP15-058",
+    "name": "Enel",
+    "colors": [
+     "Purple"
+    ],
+    "category": "Leader",
+    "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-058.png?260701"
+   },
+   "mainboard_total_cards": 50,
+   "mainboard": [
+    {
+     "id": "OP05-077",
+     "name": "Gamma Knife",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 2,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP05-077.png?260701"
+    },
+    {
+     "id": "OP09-072",
+     "name": "Franky",
+     "count": 3,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP09-072.png?260701"
+    },
+    {
+     "id": "OP10-067",
+     "name": "Senor Pink",
+     "count": 2,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 5,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP10-067.png?260701"
+    },
+    {
+     "id": "OP12-063",
+     "name": "Vinsmoke Reiju",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP12-063.png?260701"
+    },
+    {
+     "id": "OP12-071",
+     "name": "Charlotte Pudding",
+     "count": 3,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP12-071.png?260701"
+    },
+    {
+     "id": "OP13-076",
+     "name": "Divine Departure",
+     "count": 1,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-076.png?260701"
+    },
+    {
+     "id": "OP15-061",
+     "name": "Ohm",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-061.png?260701"
+    },
+    {
+     "id": "OP15-066",
+     "name": "Satori",
+     "count": 3,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-066.png?260701"
+    },
+    {
+     "id": "OP15-067",
+     "name": "Shura",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-067.png?260701"
+    },
+    {
+     "id": "OP15-074",
+     "name": "Varie",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-074.png?260701"
+    },
+    {
+     "id": "OP15-075",
+     "name": "El Thor",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-075.png?260701"
+    },
+    {
+     "id": "OP15-076",
+     "name": "Lightning Beast Kiten",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-076.png?260701"
+    },
+    {
+     "id": "OP15-077",
+     "name": "Lightning Dragon",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-077.png?260701"
+    },
+    {
+     "id": "OP15-078",
+     "name": "Mamaragan",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": null,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-078.png?260701"
+    },
+    {
+     "id": "OP15-118",
+     "name": "Enel",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 6,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP15-118.png?260701"
+    }
+   ],
+   "source_file": "data/onepiece-cache/Tournaments/onepiece.limitlesstcg.com/2026/07/04/standard-op-431.json"
+  },
+  {
+   "event": "World Finals 2026",
+   "event_date": "2026-03-14",
+   "event_uri": "https://onepiece.limitlesstcg.com/tournaments/424",
+   "player": "Wasinha",
+   "result": "1st Place",
+   "decklist_uri": "https://onepiece.limitlesstcg.com/decks/list/6025",
+   "archetype_label": "Black Imu",
+   "leader": {
+    "id": "OP13-079",
+    "name": "Imu",
+    "colors": [
+     "Black"
+    ],
+    "category": "Leader",
+    "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-079.png?260701"
+   },
+   "mainboard_total_cards": 50,
+   "mainboard": [
+    {
+     "id": "OP05-082",
+     "name": "Shirahoshi",
+     "count": 2,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP05-082.png?260701"
+    },
+    {
+     "id": "OP05-097",
+     "name": "Mary Geoise",
+     "count": 1,
+     "category": "Stage",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP05-097.png?260701"
+    },
+    {
+     "id": "OP11-097",
+     "name": "After All These Years I'm Losing My Edge!!!",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP11-097.png?260701"
+    },
+    {
+     "id": "OP13-080",
+     "name": "St. Ethanbaron V. Nusjuro",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 6,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-080.png?260701"
+    },
+    {
+     "id": "OP13-082",
+     "name": "Five Elders",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 10,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-082.png?260701"
+    },
+    {
+     "id": "OP13-083",
+     "name": "St. Jaygarcia Saturn",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-083.png?260701"
+    },
+    {
+     "id": "OP13-084",
+     "name": "St. Shepherd Ju Peter",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 7,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-084.png?260701"
+    },
+    {
+     "id": "OP13-086",
+     "name": "Saint Shalria",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-086.png?260701"
+    },
+    {
+     "id": "OP13-089",
+     "name": "St. Topman Warcury",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-089.png?260701"
+    },
+    {
+     "id": "OP13-091",
+     "name": "St. Marcus Mars",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 6,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-091.png?260701"
+    },
+    {
+     "id": "OP13-092",
+     "name": "Saint Mjosgard",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Black"
+     ],
+     "cost": 2,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-092.png?260701"
+    },
+    {
+     "id": "OP13-096",
+     "name": "The Five Elders Are at Your Service!!!",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-096.png?260701"
+    },
+    {
+     "id": "OP13-098",
+     "name": "Never Existed... in the First Place...",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-098.png?260701"
+    },
+    {
+     "id": "OP13-099",
+     "name": "The Empty Throne",
+     "count": 1,
+     "category": "Stage",
+     "colors": [
+      "Black"
+     ],
+     "cost": 7,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-099.png?260701"
+    },
+    {
+     "id": "OP14-096",
+     "name": "Ground Death",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Black"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP14-096.png?260701"
+    }
+   ],
+   "source_file": "data/onepiece-cache/Tournaments/onepiece.limitlesstcg.com/2026/03/14/standard-op-424.json"
+  },
+  {
+   "event": "Treasure Cup Pomona, CA",
+   "event_date": "2026-03-29",
+   "event_uri": "https://onepiece.limitlesstcg.com/tournaments/386",
+   "player": "ewin",
+   "result": "1st Place",
+   "decklist_uri": "https://onepiece.limitlesstcg.com/decks/list/6217",
+   "archetype_label": "Blue/Purple Monkey.D.Luffy",
+   "leader": {
+    "id": "OP11-040",
+    "name": "Monkey.D.Luffy",
+    "colors": [
+     "Blue",
+     "Purple"
+    ],
+    "category": "Leader",
+    "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP11-040.png?260701"
+   },
+   "mainboard_total_cards": 50,
+   "mainboard": [
+    {
+     "id": "EB01-061",
+     "name": "Mr.2.Bon.Kurei(Bentham)",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/EB01-061.png?260701"
+    },
+    {
+     "id": "EB03-034",
+     "name": "Charlotte Linlin",
+     "count": 3,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 7,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/EB03-034.png?260701"
+    },
+    {
+     "id": "OP01-070",
+     "name": "Dracule Mihawk",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 9,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP01-070.png?260701"
+    },
+    {
+     "id": "OP04-056",
+     "name": "Gum-Gum Red Roc",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 6,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP04-056.png?260701"
+    },
+    {
+     "id": "OP05-067",
+     "name": "Zoro-Juurou",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 3,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP05-067.png?260701"
+    },
+    {
+     "id": "OP06-047",
+     "name": "Charlotte Pudding",
+     "count": 1,
+     "category": "Character",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 4,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP06-047.png?260701"
+    },
+    {
+     "id": "OP06-119",
+     "name": "Sanji",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 9,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP06-119.png?260701"
+    },
+    {
+     "id": "OP08-076",
+     "name": "It's to Die For...",
+     "count": 3,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 3,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP08-076.png?260701"
+    },
+    {
+     "id": "OP09-078",
+     "name": "Gum-Gum Giant",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP09-078.png?260701"
+    },
+    {
+     "id": "OP11-054",
+     "name": "Nami",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 5,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP11-054.png?260701"
+    },
+    {
+     "id": "OP11-080",
+     "name": "Gear Two",
+     "count": 4,
+     "category": "Event",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP11-080.png?260701"
+    },
+    {
+     "id": "OP13-043",
+     "name": "Otama",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Blue"
+     ],
+     "cost": 1,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-043.png?260701"
+    },
+    {
+     "id": "P-107",
+     "name": "Gol.D.Roger",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 8,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/P-107.png?260701"
+    },
+    {
+     "id": "ST18-001",
+     "name": "Uso-Hachi",
+     "count": 4,
+     "category": "Character",
+     "colors": [
+      "Purple"
+     ],
+     "cost": 3,
+     "image_url": "https://en.onepiece-cardgame.com/images/cardlist/card/ST18-001.png?260701"
+    }
+   ],
+   "source_file": "data/onepiece-cache/Tournaments/onepiece.limitlesstcg.com/2026/03/29/standard-op-386.json"
+  }
+ ],
+ "events": [
+  {
+   "name": "Regional Peoria, IL",
+   "date": "2025-12-13",
+   "players": 832,
+   "players_approximate": false,
+   "format_tag": "OP13",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/329",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2025/12/13/tournament-329.html",
+    "data/onepiece-cache/Tournaments/... standard-op-329.json"
+   ],
+   "attribution": "Data by The Egman (youtube.com/@TheEgman)"
+  },
+  {
+   "name": "Championship Finals Mexico City",
+   "date": "2026-01-17",
+   "players": 1352,
+   "players_approximate": false,
+   "format_tag": "OP13",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/376",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/01/17/tournament-376.html",
+    "data/onepiece-cache/Tournaments/... standard-op-376.json"
+   ],
+   "attribution": null
+  },
+  {
+   "name": "Championship Finals Las Vegas",
+   "date": "2026-02-14",
+   "players": 1000,
+   "players_approximate": true,
+   "format_tag": "OP14",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/373",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/02/14/tournament-373.html",
+    "data/onepiece-cache/Tournaments/... standard-op-373.json"
+   ],
+   "attribution": "Data by The Egman (youtube.com/@TheEgman)"
+  },
+  {
+   "name": "World Finals 2026",
+   "date": "2026-03-14",
+   "players": 34,
+   "players_approximate": false,
+   "format_tag": "OP14",
+   "published_decklists": 7,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/424",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/03/14/tournament-424.html",
+    "data/onepiece-cache/Tournaments/... standard-op-424.json"
+   ],
+   "attribution": null
+  },
+  {
+   "name": "Regional Mesquite, TX",
+   "date": "2026-03-21",
+   "players": 1388,
+   "players_approximate": false,
+   "format_tag": "OP14.5",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/378",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/03/21/tournament-378.html",
+    "data/onepiece-cache/Tournaments/... standard-op-378.json"
+   ],
+   "attribution": "Data by The Egman (youtube.com/@TheEgman)"
+  },
+  {
+   "name": "Regional Bonn",
+   "date": "2026-03-21",
+   "players": 1024,
+   "players_approximate": false,
+   "format_tag": "OP14.5",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/380",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/03/21/tournament-380.html",
+    "data/onepiece-cache/Tournaments/... standard-op-380.json"
+   ],
+   "attribution": "Data by The Egman (youtube.com/@TheEgman)"
+  },
+  {
+   "name": "Treasure Cup Pomona, CA",
+   "date": "2026-03-29",
+   "players": 1024,
+   "players_approximate": false,
+   "format_tag": "OP14.5",
+   "published_decklists": 8,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/386",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/03/29/tournament-386.html",
+    "data/onepiece-cache/Tournaments/... standard-op-386.json"
+   ],
+   "attribution": "Data by The Egman (youtube.com/@TheEgman)"
+  },
+  {
+   "name": "Regional Barcelona",
+   "date": "2026-05-09",
+   "players": 1024,
+   "players_approximate": false,
+   "format_tag": "OP15",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/395",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/05/09/tournament-395.html",
+    "data/onepiece-cache/Tournaments/... standard-op-395.json"
+   ],
+   "attribution": null
+  },
+  {
+   "name": "Regional Toulouse",
+   "date": "2026-06-27",
+   "players": 1024,
+   "players_approximate": false,
+   "format_tag": "OP16",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/415",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/06/27/tournament-415.html",
+    "data/onepiece-cache/Tournaments/... standard-op-415.json"
+   ],
+   "attribution": null
+  },
+  {
+   "name": "ChinoizeCup #78 Wednesday",
+   "date": "2026-07-01",
+   "players": 64,
+   "players_approximate": false,
+   "format_tag": null,
+   "published_decklists": 64,
+   "source": "https://play.limitlesstcg.com/tournament/6a3ce60283fd320299bcfbf4",
+   "source_files": [
+    "data/onepiece-raw/play.limitlesstcg.com/2026/07/01/6a3ce60283fd320299bcfbf4-details.json"
+   ],
+   "organizer": "Tcglive",
+   "phases": [
+    {
+     "phase": 1,
+     "type": "SWISS",
+     "rounds": 6,
+     "mode": "BO1"
+    }
+   ],
+   "attribution": null
+  },
+  {
+   "name": "Regional Bielefeld",
+   "date": "2026-07-04",
+   "players": 1541,
+   "players_approximate": false,
+   "format_tag": "OP16",
+   "published_decklists": 64,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/431",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/07/04/tournament-431.html",
+    "data/onepiece-cache/Tournaments/... standard-op-431.json"
+   ],
+   "attribution": null
+  },
+  {
+   "name": "MON MON BOX TURNERING",
+   "date": "2026-07-04",
+   "players": 50,
+   "players_approximate": false,
+   "format_tag": null,
+   "published_decklists": 50,
+   "source": "https://play.limitlesstcg.com/tournament/6a4664c3c87cd9ff0a31533d",
+   "source_files": [
+    "data/onepiece-raw/play.limitlesstcg.com/2026/07/04/6a4664c3c87cd9ff0a31533d-details.json"
+   ],
+   "organizer": "Stockholm One Piece TCG",
+   "phases": [
+    {
+     "phase": 1,
+     "type": "SWISS",
+     "rounds": 6,
+     "mode": "BO1"
+    },
+    {
+     "phase": 2,
+     "type": "SINGLE_BRACKET",
+     "rounds": 1,
+     "mode": "BO3"
+    }
+   ],
+   "attribution": null
+  },
+  {
+   "name": "Treasure Cup Bielefeld",
+   "date": "2026-07-05",
+   "players": 764,
+   "players_approximate": false,
+   "format_tag": "OP16",
+   "published_decklists": 32,
+   "source": "https://onepiece.limitlesstcg.com/tournaments/444",
+   "source_files": [
+    "data/onepiece-raw/onepiece.limitlesstcg.com/2026/07/05/tournament-444.html",
+    "data/onepiece-cache/Tournaments/... standard-op-444.json"
+   ],
+   "attribution": null
+  }
+ ],
+ "events_note": "players = official count from the event page infobox (onepiece.limitlesstcg.com raw HTML) or the play.limitlesstcg.com details JSON; published_decklists = decks in the cached JSON (top-cut publication, NOT the full field). Championship Finals Las Vegas count is marked approximate on the source page (players_approximate=true).",
+ "matchup_matrix_sample": {
+  "kind": "REAL (derived), sparse",
+  "axis": [
+   "Purple Enel",
+   "Blue/Yellow Nami",
+   "Green/Blue Monkey.D.Luffy",
+   "Red/Blue Portgas.D.Ace",
+   "Black Imu",
+   "Purple/Yellow Donquixote Rosinante",
+   "Green Dracule Mihawk",
+   "Red/Blue Lucy",
+   "Black/Yellow Marshall.D.Teach",
+   "Red/Green Monkey.D.Luffy (OP13-001)",
+   "Blue/Yellow Boa Hancock",
+   "Blue/Purple Sanji",
+   "Blue/Purple Monkey.D.Luffy"
+  ],
+  "cells": [
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Purple/Yellow Donquixote Rosinante",
+    "wins_a": 13,
+    "wins_b": 17,
+    "draws": 0,
+    "n_decided_games": 30,
+    "p_a_beats_b": 0.433,
+    "wilson95_lo": 0.274,
+    "wilson95_hi": 0.608
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 21,
+    "wins_b": 9,
+    "draws": 0,
+    "n_decided_games": 30,
+    "p_a_beats_b": 0.7,
+    "wilson95_lo": 0.521,
+    "wilson95_hi": 0.833
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Green/Blue Monkey.D.Luffy",
+    "wins_a": 15,
+    "wins_b": 8,
+    "draws": 0,
+    "n_decided_games": 23,
+    "p_a_beats_b": 0.652,
+    "wilson95_lo": 0.449,
+    "wilson95_hi": 0.812
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Green/Blue Monkey.D.Luffy",
+    "wins_a": 15,
+    "wins_b": 5,
+    "draws": 0,
+    "n_decided_games": 20,
+    "p_a_beats_b": 0.75,
+    "wilson95_lo": 0.531,
+    "wilson95_hi": 0.888
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 10,
+    "wins_b": 6,
+    "draws": 0,
+    "n_decided_games": 16,
+    "p_a_beats_b": 0.625,
+    "wilson95_lo": 0.386,
+    "wilson95_hi": 0.815
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 3,
+    "wins_b": 10,
+    "draws": 0,
+    "n_decided_games": 13,
+    "p_a_beats_b": 0.231,
+    "wilson95_lo": 0.082,
+    "wilson95_hi": 0.503
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Red/Blue Portgas.D.Ace",
+    "wins_a": 6,
+    "wins_b": 7,
+    "draws": 0,
+    "n_decided_games": 13,
+    "p_a_beats_b": 0.462,
+    "wilson95_lo": 0.232,
+    "wilson95_hi": 0.709
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 8,
+    "wins_b": 5,
+    "draws": 0,
+    "n_decided_games": 13,
+    "p_a_beats_b": 0.615,
+    "wilson95_lo": 0.355,
+    "wilson95_hi": 0.823
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Purple/Yellow Donquixote Rosinante",
+    "wins_a": 6,
+    "wins_b": 6,
+    "draws": 0,
+    "n_decided_games": 12,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.254,
+    "wilson95_hi": 0.746
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Blue/Yellow Nami",
+    "wins_a": 4,
+    "wins_b": 7,
+    "draws": 0,
+    "n_decided_games": 11,
+    "p_a_beats_b": 0.364,
+    "wilson95_lo": 0.152,
+    "wilson95_hi": 0.646
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 5,
+    "wins_b": 6,
+    "draws": 0,
+    "n_decided_games": 11,
+    "p_a_beats_b": 0.455,
+    "wilson95_lo": 0.213,
+    "wilson95_hi": 0.72
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Purple/Yellow Donquixote Rosinante",
+    "wins_a": 6,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 10,
+    "p_a_beats_b": 0.6,
+    "wilson95_lo": 0.313,
+    "wilson95_hi": 0.832
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 7,
+    "wins_b": 3,
+    "draws": 0,
+    "n_decided_games": 10,
+    "p_a_beats_b": 0.7,
+    "wilson95_lo": 0.397,
+    "wilson95_hi": 0.892
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 5,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 9,
+    "p_a_beats_b": 0.556,
+    "wilson95_lo": 0.267,
+    "wilson95_hi": 0.811
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Green Dracule Mihawk",
+    "wins_a": 7,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 9,
+    "p_a_beats_b": 0.778,
+    "wilson95_lo": 0.453,
+    "wilson95_hi": 0.937
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 5,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 9,
+    "p_a_beats_b": 0.556,
+    "wilson95_lo": 0.267,
+    "wilson95_hi": 0.811
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Purple/Yellow Donquixote Rosinante",
+    "wins_a": 7,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 9,
+    "p_a_beats_b": 0.778,
+    "wilson95_lo": 0.453,
+    "wilson95_hi": 0.937
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 6,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 8,
+    "p_a_beats_b": 0.75,
+    "wilson95_lo": 0.409,
+    "wilson95_hi": 0.929
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 3,
+    "wins_b": 5,
+    "draws": 1,
+    "n_decided_games": 8,
+    "p_a_beats_b": 0.375,
+    "wilson95_lo": 0.137,
+    "wilson95_hi": 0.694
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 4,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 8,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.215,
+    "wilson95_hi": 0.785
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 5,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 7,
+    "p_a_beats_b": 0.714,
+    "wilson95_lo": 0.359,
+    "wilson95_hi": 0.918
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 2,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 6,
+    "p_a_beats_b": 0.333,
+    "wilson95_lo": 0.097,
+    "wilson95_hi": 0.7
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Green Dracule Mihawk",
+    "wins_a": 3,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.6,
+    "wilson95_lo": 0.231,
+    "wilson95_hi": 0.882
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Green Dracule Mihawk",
+    "wins_a": 3,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.6,
+    "wilson95_lo": 0.231,
+    "wilson95_hi": 0.882
+   },
+   {
+    "arch_a": "Green/Blue Monkey.D.Luffy",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 4,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.8,
+    "wilson95_lo": 0.376,
+    "wilson95_hi": 0.964
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 1,
+    "wins_b": 4,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.2,
+    "wilson95_lo": 0.036,
+    "wilson95_hi": 0.624
+   },
+   {
+    "arch_a": "Red/Blue Lucy",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 5,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.566,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Black/Yellow Marshall.D.Teach",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 4,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.8,
+    "wilson95_lo": 0.376,
+    "wilson95_hi": 0.964
+   },
+   {
+    "arch_a": "Black/Yellow Marshall.D.Teach",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 3,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 5,
+    "p_a_beats_b": 0.6,
+    "wilson95_lo": 0.231,
+    "wilson95_hi": 0.882
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Red/Blue Portgas.D.Ace",
+    "wins_a": 2,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.15,
+    "wilson95_hi": 0.85
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Green Dracule Mihawk",
+    "wins_a": 3,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.75,
+    "wilson95_lo": 0.301,
+    "wilson95_hi": 0.954
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Green Dracule Mihawk",
+    "wins_a": 2,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.15,
+    "wilson95_hi": 0.85
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 2,
+    "wins_b": 2,
+    "draws": 1,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.15,
+    "wilson95_hi": 0.85
+   },
+   {
+    "arch_a": "Purple/Yellow Donquixote Rosinante",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 1,
+    "wins_b": 3,
+    "draws": 0,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.25,
+    "wilson95_lo": 0.046,
+    "wilson95_hi": 0.699
+   },
+   {
+    "arch_a": "Red/Blue Lucy",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 1,
+    "wins_b": 3,
+    "draws": 0,
+    "n_decided_games": 4,
+    "p_a_beats_b": 0.25,
+    "wilson95_lo": 0.046,
+    "wilson95_hi": 0.699
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Red/Blue Portgas.D.Ace",
+    "wins_a": 1,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 3,
+    "p_a_beats_b": 0.333,
+    "wilson95_lo": 0.061,
+    "wilson95_hi": 0.792
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 2,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 3,
+    "p_a_beats_b": 0.667,
+    "wilson95_lo": 0.208,
+    "wilson95_hi": 0.939
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 3,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 3,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.438,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Green Dracule Mihawk",
+    "arch_b": "Black/Yellow Marshall.D.Teach",
+    "wins_a": 1,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 3,
+    "p_a_beats_b": 0.333,
+    "wilson95_lo": 0.061,
+    "wilson95_hi": 0.792
+   },
+   {
+    "arch_a": "Black/Yellow Marshall.D.Teach",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 2,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 3,
+    "p_a_beats_b": 0.667,
+    "wilson95_lo": 0.208,
+    "wilson95_hi": 0.939
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 1,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 2,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.095,
+    "wilson95_hi": 0.905
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 2,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 2,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.342,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Red/Blue Portgas.D.Ace",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 0,
+    "wins_b": 2,
+    "draws": 0,
+    "n_decided_games": 2,
+    "p_a_beats_b": 0.0,
+    "wilson95_lo": 0,
+    "wilson95_hi": 0.658
+   },
+   {
+    "arch_a": "Green Dracule Mihawk",
+    "arch_b": "Red/Blue Lucy",
+    "wins_a": 2,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 2,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.342,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 1,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 2,
+    "p_a_beats_b": 0.5,
+    "wilson95_lo": 0.095,
+    "wilson95_hi": 0.905
+   },
+   {
+    "arch_a": "Purple Enel",
+    "arch_b": "Blue/Purple Sanji",
+    "wins_a": 1,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.207,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 1,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.207,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Blue/Yellow Nami",
+    "arch_b": "Blue/Purple Sanji",
+    "wins_a": 1,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.207,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Green Dracule Mihawk",
+    "arch_b": "Red/Green Monkey.D.Luffy (OP13-001)",
+    "wins_a": 1,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.207,
+    "wilson95_hi": 1
+   },
+   {
+    "arch_a": "Green Dracule Mihawk",
+    "arch_b": "Blue/Yellow Boa Hancock",
+    "wins_a": 0,
+    "wins_b": 1,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 0.0,
+    "wilson95_lo": 0,
+    "wilson95_hi": 0.793
+   },
+   {
+    "arch_a": "Green Dracule Mihawk",
+    "arch_b": "Blue/Purple Monkey.D.Luffy",
+    "wins_a": 1,
+    "wins_b": 0,
+    "draws": 0,
+    "n_decided_games": 1,
+    "p_a_beats_b": 1.0,
+    "wilson95_lo": 0.207,
+    "wilson95_hi": 1
+   }
+  ],
+  "provenance": "aggregated from round-by-round pairings in 10 play.limitlesstcg.com events cached under data/onepiece-cache (2026-07-01..2026-07-08): 849 matches where both players' decklists resolved to a leader label; Result parsed as 'p1wins-p2wins-draws'; p_a_beats_b = wins_a/(wins_a+wins_b) over decided games; CI is Wilson 95% (computed here, NOT the API's rollup values — no live rollup_matchups table was queried)",
+  "coverage_note": "51 of 78 unordered top-13 pairs have at least one decided game; the remaining 27 cells have NO local data and must be rendered as labeled placeholders. Many nonzero cells are tiny-n (median n is single-digit): always show n and the interval."
+ },
+ "card_images": {
+  "hosting": "https://en.onepiece-cardgame.com/images/cardlist/card/<CARD-ID>.png?<cachebuster> — Bandai's official EN card-list site. These URLs come from the punk-records catalogue (img_full_url); they are NOT locally mirrored files.",
+  "coverage": "2634 of 2634 base card ids have img_full_url",
+  "url_pattern_example": "https://en.onepiece-cardgame.com/images/cardlist/card/OP13-001.png?260701",
+  "alt_art_note": "promo/alt printings carry suffixed ids (e.g. OP01-001_p1) with their own image URLs; decklists reference base ids",
+  "policy_note": "no owner ToS decision on hotlinking en.onepiece-cardgame.com is recorded in this repo (unlike the Riftbound/Riot ban). Per task rules these URLs exist in grounding data, but mockups should be prepared to fall back to color-framed placeholders."
+ },
+ "attribution": {
+  "limitless": "event and decklist pages are onepiece.limitlesstcg.com / play.limitlesstcg.com; every event row carries its source URL",
+  "egman": "several Regional/Championship pages credit 'Data by The Egman' (https://www.youtube.com/@TheEgman) in the infobox — events flagged with attribution field; keep a visible attribution slot for these",
+  "topdeck": "no TopDeck-sourced One Piece data found locally"
+ },
+ "gaps": [
+  "No live DB was queried: archetype_id integers (MatchupAxis.archetype_id) and the API's rollup_matchups values are not in this file; the matrix here is recomputed from raw pairings, not the served rollup.",
+  "onepiece.limitlesstcg.com cached events have Rounds=null (standings only), so all matchup data comes from 10 online play.limitlesstcg.com events in a single week (2026-07-01..07-08); offline Regional matchups are not derivable locally.",
+  "27 of 78 top-13 matrix cells have zero local games — must be placeholders.",
+  "No metagame-share time series / rollup snapshots for onepiece found locally (only raw events).",
+  "No locally hosted card image files anywhere under data/ — only remote URLs in punk-records.",
+  "Sideboards do not exist in OP (leader+50 main only) — no sideboard grounding by design.",
+  "web matchups page currently caps the grid at TOP_N=8; a 13-wide matrix exceeds what the shipped UI shows today.",
+  "play.limitlesstcg details JSONs have format:null — the OP set-format tag (OP13..OP16) is only on onepiece.limitlesstcg.com pages."
+ ]
+}

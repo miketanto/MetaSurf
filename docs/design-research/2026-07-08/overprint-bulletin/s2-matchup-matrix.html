@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MetaSurf — S2 Matchup Matrix — Overprint Bulletin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f1e8;
+    --ink:#1f1c1a;
+    --teal:#00838A;
+    --pink:#FF48B0;
+    --plum:#5c2a52;
+    --pink-deep:#c2187f; /* text-weight pink: ~5:1 on paper, used wherever pink must be read */
+    --yellow:#ffe800;
+    --cell:44px; /* never below the 44px tap-target guideline */
+    --gray:#8a857c;
+    --hair:rgba(31,28,26,.18);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.12  0 0 0 0 0.11  0 0 0 0 0.10  0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.32' numOctaves='1' stitchTiles='stitch'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 1 0 0'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.12  0 0 0 0 0.11  0 0 0 0 0.10  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='56' height='56' filter='url(%23m)'/%3E%3C/svg%3E");
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{background:var(--paper)}
+  body{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:13px;
+    font-variant-numeric:tabular-nums;
+    color:var(--ink);
+    background:var(--paper) var(--grain);
+    background-blend-mode:multiply;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:720px;margin:0 auto;padding:14px 12px 64px}
+  /* no narrow-viewport shrink: cells stay >=44px and the wrap scrolls instead */
+  @media (min-width:600px){ :root{--cell:56px} .sheet{padding:26px 24px 80px} }
+
+  .sk{font-family:"Silkscreen",monospace;font-weight:400;font-size:8px;letter-spacing:.06em;text-transform:uppercase}
+  .serif{font-family:"Instrument Serif",serif;font-weight:400}
+
+  /* ============ masthead ============ */
+  .brandline{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:6px}
+  .brandline .logo{font-weight:700;font-size:13px;letter-spacing:.04em}
+  .brandline .logo em{font-style:normal;color:var(--teal)}
+  .brandline .issue{font-size:10px;color:var(--ink);opacity:.75}
+  h1.masthead{
+    font-size:clamp(23px,7vw,40px);line-height:1.05;margin:14px 0 4px;letter-spacing:.01em;
+    /* misregistration: pink + teal plates offset 1.5px off the ink plate */
+    text-shadow:1.5px 1px 0 rgba(255,72,176,.45), -1.5px -1px 0 rgba(0,131,138,.4);
+  }
+  .deck-line{font-size:11px;margin-bottom:10px;opacity:.85}
+  .deck-line b{font-weight:700}
+  .rule-2c{height:5px;margin:10px 0 0;position:relative}
+  .rule-2c::before,.rule-2c::after{content:"";position:absolute;left:0;right:0;height:2px}
+  .rule-2c::before{top:0;background:var(--teal)}
+  .rule-2c::after{top:2px;left:2px;background:var(--pink);mix-blend-mode:multiply}
+
+  /* nav tabs S1/S2/S3 */
+  nav.screens{display:flex;gap:6px;margin:12px 0 20px}
+  nav.screens a{
+    text-decoration:none;color:var(--ink);border:1.5px solid var(--ink);
+    padding:5px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.05em;background:transparent;
+  }
+  nav.screens a.on{background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 var(--pink)}
+  nav.screens a span{opacity:.6;font-weight:400}
+
+  /* ============ section head ============ */
+  h2.sec{font-size:26px;margin:4px 0 2px}
+  h2.sec .no{color:var(--pink)}
+  .sec-sub{font-style:italic;font-size:16px;margin-bottom:14px}
+  .sec-sub.serif{color:var(--ink)}
+
+  /* yellow highlighter swipe */
+  .hl{
+    background:linear-gradient(97deg, transparent 0 1.5%, var(--yellow) 3% 97%, transparent 98.5%);
+    box-decoration-break:clone;-webkit-box-decoration-break:clone;
+    padding:1px 5px;mix-blend-mode:multiply;
+  }
+  .movers-note{font-size:11px;margin:0 0 14px}
+  .movers-note .g{font-weight:700}
+
+  /* ============ halftone legend ============ */
+  .legend{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:12px;font-size:10px}
+  .legend .key{display:flex;align-items:center;gap:6px}
+  .swatch{width:26px;height:26px;position:relative;isolation:isolate;border:1px solid var(--hair);flex:none}
+
+  /* ============ THE HALFTONE RECIPE (signature effect #1) ============
+     layer 1 (.ht):   soft-edged grayscale dot lattice, crisped by filter:contrast(16)
+     layer 2 (.tint): spot ink, mix-blend-mode:lighten  -> black dots take the ink
+     layer 3 (.pap):  paper color, mix-blend-mode:multiply -> white ground returns to paper,
+                      ink dots pick up the warm paper cast (the riso overprint multiply)
+     dot radius --r is set per cell from |winrate - 50|: density IS the data. */
+  .ht{position:absolute;inset:0;z-index:0;
+    background-color:#fff;
+    background-image:radial-gradient(circle at 50% 50%, #000 calc(var(--r,1.2px) - 1.1px), #fff var(--r,1.2px));
+    background-size:5.5px 5.5px;
+    filter:contrast(16);
+  }
+  .tint{position:absolute;inset:0;z-index:1;background:var(--c,var(--gray));mix-blend-mode:lighten}
+  .pap{position:absolute;inset:0;z-index:2;background:var(--paper);mix-blend-mode:multiply}
+  /* low-n dither: coarse turbulence blobs (baseFrequency .32) at .8 opacity so a
+     noisy cell reads as damaged print even at arm's length; the ~ on the numeral
+     is the second, glyph-level channel for the same fact */
+  .noise{position:absolute;inset:0;z-index:3;background-image:var(--noise);opacity:.8;mix-blend-mode:multiply;image-rendering:pixelated}
+
+  /* ============ matrix ============ */
+  .matrix-wrap{overflow:auto;max-height:72vh;border:2px solid var(--ink);background:var(--paper);
+    box-shadow:3px 3px 0 rgba(0,131,138,.35), -2px -2px 0 rgba(255,72,176,.28)}
+  table.matrix{border-collapse:separate;border-spacing:0;width:max-content}
+  table.matrix th, table.matrix td{border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+  table.matrix thead th{
+    position:sticky;top:0;z-index:6;background:var(--paper);
+    height:30px;min-width:var(--cell);text-align:center;vertical-align:middle;
+    font-family:"Silkscreen",monospace;font-weight:400;font-size:8px;letter-spacing:.04em;
+    border-bottom:2px solid var(--ink);
+  }
+  table.matrix tbody th{
+    position:sticky;left:0;z-index:5;background:var(--paper);
+    width:46px;min-width:46px;text-align:center;vertical-align:middle;
+    font-family:"Silkscreen",monospace;font-weight:400;font-size:8px;letter-spacing:.04em;
+    border-right:2px solid var(--ink);
+  }
+  table.matrix th.corner{position:sticky;left:0;top:0;z-index:7;background:var(--paper);
+    border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);
+    font-size:8px;line-height:1.5;padding:2px 3px;text-align:left}
+  table.matrix th.corner .you{color:var(--teal)}
+  table.matrix th.corner .opp{color:var(--pink)}
+
+  td.cell{
+    position:relative;isolation:isolate;cursor:pointer;
+    width:var(--cell);min-width:var(--cell);height:var(--cell);padding:0;
+  }
+  td.cell:focus-visible{outline:2px dashed var(--plum);outline-offset:-3px}
+  td.cell .val{
+    position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;
+    font-size:9px;font-weight:700;color:var(--ink);
+    text-shadow:0 0 3px var(--paper),0 0 3px var(--paper),0 0 2px var(--paper);
+  }
+  @media (min-width:600px){ td.cell .val{font-size:11px} }
+  td.cell .val i{font-style:normal;font-size:7px;transform:translateY(-.5px)}
+  td.cell.unf .val i{color:var(--pink-deep)}
+  td.cell.fav .val i{color:var(--teal)}
+  td.cell .val i.lo{color:var(--plum);font-size:9px;font-weight:700;transform:none} /* ~ = n<50 */
+  td.diag{
+    width:var(--cell);min-width:var(--cell);height:var(--cell);
+    background:repeating-linear-gradient(45deg, transparent 0 3px, rgba(31,28,26,.14) 3px 4px);
+  }
+  /* tapped cell: ink keyline + deliberately misregistered pink/teal plates */
+  td.cell.sel{z-index:4}
+  td.cell.sel::after{
+    content:"";position:absolute;inset:0;z-index:5;pointer-events:none;
+    outline:2px solid var(--ink);outline-offset:-2px;
+    box-shadow:2px 2px 0 rgba(255,72,176,.85), -2px -2px 0 rgba(0,131,138,.8);
+  }
+  @media (prefers-reduced-motion: no-preference){
+    td.cell{transition:transform .08s ease-out}
+    td.cell:hover{transform:translateY(-1px)}
+  }
+
+  .matrix-foot{font-size:10px;opacity:.75;margin:8px 0 0}
+  .matrix-foot .noisy-chip{display:inline-block;width:12px;height:12px;vertical-align:-2px;
+    background-image:var(--noise);border:1px solid var(--hair);margin:0 2px}
+
+  /* code key */
+  .codekey{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 18px;margin:14px 0 0;font-size:10px}
+  @media (min-width:600px){ .codekey{grid-template-columns:repeat(4,1fr)} }
+  .codekey .k{font-family:"Silkscreen",monospace;font-size:8px;display:inline-block;min-width:30px;color:var(--plum)}
+
+  /* ============ tap drawer ============ */
+  .drawer{
+    margin-top:18px;border:2px solid var(--ink);background:var(--paper);
+    box-shadow:3px 3px 0 rgba(92,42,82,.3);
+  }
+  .drawer-head{display:flex;justify-content:flex-start;align-items:center;gap:10px;
+    padding:8px 12px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
+  .drawer-head .pair{font-weight:700;font-size:13px}
+  .drawer-head .win{margin-left:auto}
+  /* ============ signature effect #2: ink-and-registration thumbnails ============
+     specimen archetype art, Atkinson-dithered on LINEAR luminance at 28x38,
+     upscaled with image-rendering:pixelated, multiplied over the archetype's
+     spot-color layer; the frame carries a 1.5px two-plate misregistration.
+     production build replaces the procedural art with real card art dithered
+     at build time (node canvas-dither -> PNG-8), same CSS stack. */
+  .thumbs{display:flex;gap:8px;flex:none}
+  .thumb{width:42px;height:57px;position:relative;flex:none;border:1.5px solid var(--ink);
+    background:var(--tc,var(--gray));
+    box-shadow:1.5px 1px 0 rgba(255,72,176,.55), -1.5px -1px 0 rgba(0,131,138,.5)}
+  .thumb canvas{width:100%;height:100%;display:block;mix-blend-mode:multiply;image-rendering:pixelated}
+  .drawer-head .pair .vs{color:var(--pink-deep);padding:0 2px}
+  .drawer-head .names{font-size:10px;opacity:.75;width:100%}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media (min-width:600px){ .stats{grid-template-columns:repeat(4,1fr)} }
+  .stat{padding:10px 12px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+  .stat .lab{font-family:"Silkscreen",monospace;font-size:8px;letter-spacing:.05em;opacity:.85;display:block;margin-bottom:2px}
+  .stat .num{font-size:20px;font-weight:700;line-height:1.1}
+  .stat .num.up{color:var(--teal)} .stat .num.dn{color:var(--pink-deep)}
+  .stat .sub{font-size:10px;opacity:.7}
+  .ci-track{position:relative;height:8px;background:rgba(31,28,26,.1);margin-top:6px}
+  .ci-track .fill{position:absolute;top:0;bottom:0;background:var(--teal)}
+  .ci-track .fill.dn{background:var(--pink-deep)}
+  .ci-track .mid{position:absolute;top:-3px;bottom:-3px;width:2px;left:50%;background:var(--ink)}
+  .drawer-note{padding:10px 12px;font-style:italic;font-size:15px;border-top:1px solid var(--hair)}
+  .drawer-cta{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--hair);flex-wrap:wrap}
+
+  .chip{display:inline-block;font-family:"Silkscreen",monospace;font-weight:400;font-size:8px;
+    letter-spacing:.05em;text-transform:uppercase;padding:3px 6px 2px;line-height:1}
+  .chip.pro{background:var(--plum);color:var(--paper)}
+  .chip.new{background:var(--pink-deep);color:var(--paper)}
+  .chip.d7{border:1px solid var(--ink);color:var(--ink)}
+
+  /* ============ evolution control + premium ghost ============ */
+  .evo-bar{display:flex;align-items:center;gap:8px;margin:22px 0 0}
+  .seg{display:flex;border:1.5px solid var(--ink)}
+  .seg button{
+    appearance:none;border:0;background:transparent;color:var(--ink);cursor:pointer;
+    font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:700;letter-spacing:.06em;
+    padding:6px 12px 5px;display:flex;align-items:center;gap:6px;
+  }
+  .seg button+button{border-left:1.5px solid var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .seg button.gated[aria-pressed="true"]{background:var(--plum)}
+
+  .ghost-panel{margin-top:10px;border:2px solid var(--plum);position:relative;background:var(--paper)}
+  .ghost-panel[hidden]{display:none}
+  .ghost-head{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding:7px 10px;border-bottom:2px solid var(--plum);font-size:10px;font-weight:700;letter-spacing:.05em}
+  .ghost-body{position:relative}
+  canvas#ghostc{display:block;width:100%;height:170px;image-rendering:pixelated;image-rendering:crisp-edges}
+  .unlock{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    text-align:center;padding:12px;
+  }
+  .unlock .chip.unlock-chip{background:var(--plum);color:var(--paper);font-size:8px;padding:6px 10px 5px;
+    box-shadow:2px 2px 0 rgba(255,72,176,.7), -2px -2px 0 rgba(0,131,138,.6)}
+  .unlock p{font-size:10px;max-width:250px;background:var(--paper);padding:2px 6px;border:1px solid var(--hair)}
+  .unlock .price{font-style:italic;font-size:14px;background:var(--paper);padding:1px 8px;border:1px solid var(--hair)}
+
+  /* grainy divider — where a competitor puts gloss, we put grain */
+  .divider{height:14px;margin:26px 0 14px;background-image:var(--grain),
+    linear-gradient(90deg,var(--teal),var(--pink));
+    background-blend-mode:multiply;opacity:.85}
+
+  footer{font-size:10px;opacity:.7;margin-top:10px}
+  footer .sk{font-size:8px}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ============ masthead ============ -->
+  <header>
+    <div class="brandline">
+      <span class="logo">META<em>SURF</em></span>
+      <span class="issue">BULLETIN No. 027 · MODERN · 2026-07-08</span>
+    </div>
+    <h1 class="masthead serif">THE MODERN REPORT — WEEK 27</h1>
+    <p class="deck-line"><b>4,182 decks</b> · 61 events · sample window 7D · <span class="sk chip new">NEW</span> <span class="sk chip d7">7D</span></p>
+    <div class="rule-2c" aria-hidden="true"></div>
+    <nav class="screens" aria-label="Screens">
+      <a href="s1-meta-snapshot.html"><span>S1</span> SNAPSHOT</a>
+      <a href="#" class="on" aria-current="page"><span>S2</span> MATCHUPS</a>
+      <a href="#"><span>S3</span> ARCHETYPE</a>
+    </nav>
+  </header>
+
+  <!-- ============ S2: matchup matrix ============ -->
+  <main>
+    <h2 class="sec serif"><span class="no">§2</span> MATCHUP MATRIX</h2>
+    <p class="sec-sub serif">Row plays against column. Ink density is the size of the edge off 50% — read it like a press sheet.</p>
+
+    <p class="movers-note"><span class="hl"><span class="g">BIGGEST SHIFT ↗</span> AMT vs TRN +6.8 over 7D</span></p>
+
+    <!-- legend swatch radii are computed from the same formula as the cells:
+         r = 0.9 + (|wr-50| capped 18)/18 * 1.7  ->  1.37px at the 55/45 cutoffs, 2.32px at 65 -->
+    <div class="legend">
+      <span class="key"><span class="swatch" aria-hidden="true"><span class="ht" style="--r:1.37px"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span></span>FAVORED ≥55 ▲</span>
+      <span class="key"><span class="swatch" aria-hidden="true"><span class="ht" style="--r:1.37px"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span></span>DOG ≤45 ▼</span>
+      <span class="key"><span class="swatch" aria-hidden="true"><span class="ht" style="--r:2.32px"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span></span>HEAVIER INK = BIGGER EDGE (65 shown)</span>
+      <span class="key"><span class="swatch" aria-hidden="true"><span class="ht" style="--r:1.37px"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span></span>NOISY n&lt;50 ~</span>
+    </div>
+
+    <div class="matrix-wrap" role="region" aria-label="Matchup winrate matrix, scrollable">
+      <table class="matrix" id="matrix">
+        <thead>
+          <tr>
+            <th class="corner sk"><span class="opp">OPP →</span><br><span class="you">YOU ↓</span></th>
+            <th scope="col" title="Izzet Murktide">IZM</th>
+            <th scope="col" title="Rakdos Scam">RKS</th>
+            <th scope="col" title="Amulet Titan">AMT</th>
+            <th scope="col" title="Yawgmoth">YWG</th>
+            <th scope="col" title="Living End">LVE</th>
+            <th scope="col" title="Burn">BRN</th>
+            <th scope="col" title="Mono-Green Tron">TRN</th>
+            <th scope="col" title="Hammer Time">HMR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row" title="Izzet Murktide">IZM</th>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.60px" data-i="0" data-j="1" aria-label="Izzet Murktide vs Rakdos Scam: 57.4 percent winrate, 213 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">57<i>▲</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.46px" data-i="0" data-j="2" aria-label="Izzet Murktide vs Amulet Titan: 44.1 percent winrate, 188 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">44<i>▼</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.01px" data-i="0" data-j="3" aria-label="Izzet Murktide vs Yawgmoth: 51.2 percent winrate, 96 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">51<i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:2.02px" data-i="0" data-j="4" aria-label="Izzet Murktide vs Living End: 61.9 percent winrate, 142 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">62<i>▲</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.06px" data-i="0" data-j="5" aria-label="Izzet Murktide vs Burn: 48.3 percent winrate, 77 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">48<i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.37px" data-i="0" data-j="6" aria-label="Izzet Murktide vs Mono-Green Tron: 55 percent winrate, 64 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">55<i>▲</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.71px" data-i="0" data-j="7" aria-label="Izzet Murktide vs Hammer Time: 58.6 percent winrate, 121 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">59<i>▲</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Rakdos Scam">RKS</th>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.60px" data-i="1" data-j="0" aria-label="Rakdos Scam vs Izzet Murktide: 42.6 percent winrate, 213 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">43<i>▼</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.10px" data-i="1" data-j="2" aria-label="Rakdos Scam vs Amulet Titan: 47.9 percent winrate, 154 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">48<i>·</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.61px" data-i="1" data-j="3" aria-label="Rakdos Scam vs Yawgmoth: 42.5 percent winrate, 88 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">43<i>▼</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.19px" data-i="1" data-j="4" aria-label="Rakdos Scam vs Living End: 53.1 percent winrate, 117 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">53<i>·</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.11px" data-i="1" data-j="5" aria-label="Rakdos Scam vs Burn: 52.2 percent winrate, 61 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">52<i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.88px" data-i="1" data-j="6" aria-label="Rakdos Scam vs Mono-Green Tron: 60.4 percent winrate, 73 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">60<i>▲</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:0.95px" data-i="1" data-j="7" aria-label="Rakdos Scam vs Hammer Time: 49.5 percent winrate, 104 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">50<i>·</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Amulet Titan">AMT</th>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.46px" data-i="2" data-j="0" aria-label="Amulet Titan vs Izzet Murktide: 55.9 percent winrate, 188 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">56<i>▲</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.10px" data-i="2" data-j="1" aria-label="Amulet Titan vs Rakdos Scam: 52.1 percent winrate, 154 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">52<i>·</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.45px" data-i="2" data-j="3" aria-label="Amulet Titan vs Yawgmoth: 55.8 percent winrate, 69 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">56<i>▲</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.97px" data-i="2" data-j="4" aria-label="Amulet Titan vs Living End: 38.7 percent winrate, 58 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">39<i>▼</i></span></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:1.35px" data-i="2" data-j="5" aria-label="Amulet Titan vs Burn: 45.2 percent winrate, 49 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">45<i class="lo">~</i><i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:2.17px" data-i="2" data-j="6" aria-label="Amulet Titan vs Mono-Green Tron: 63.5 percent winrate, 81 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">64<i>▲</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.16px" data-i="2" data-j="7" aria-label="Amulet Titan vs Hammer Time: 52.8 percent winrate, 93 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">53<i>·</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Yawgmoth">YWG</th>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.01px" data-i="3" data-j="0" aria-label="Yawgmoth vs Izzet Murktide: 48.8 percent winrate, 96 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">49<i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.61px" data-i="3" data-j="1" aria-label="Yawgmoth vs Rakdos Scam: 57.5 percent winrate, 88 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">58<i>▲</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.45px" data-i="3" data-j="2" aria-label="Yawgmoth vs Amulet Titan: 44.2 percent winrate, 69 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">44<i>▼</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:0.98px" data-i="3" data-j="4" aria-label="Yawgmoth vs Living End: 49.1 percent winrate, 44 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">49<i class="lo">~</i><i>·</i></span></td>
+            <td class="cell unf lown" tabindex="0" role="button" style="--r:1.75px" data-i="3" data-j="5" aria-label="Yawgmoth vs Burn: 41 percent winrate, 39 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span><span class="val">41<i class="lo">~</i><i>▼</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.63px" data-i="3" data-j="6" aria-label="Yawgmoth vs Mono-Green Tron: 57.7 percent winrate, 52 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">58<i>▲</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:2.43px" data-i="3" data-j="7" aria-label="Yawgmoth vs Hammer Time: 66.2 percent winrate, 71 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">66<i>▲</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Living End">LVE</th>
+            <td class="cell unf" tabindex="0" role="button" style="--r:2.02px" data-i="4" data-j="0" aria-label="Living End vs Izzet Murktide: 38.1 percent winrate, 142 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">38<i>▼</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.19px" data-i="4" data-j="1" aria-label="Living End vs Rakdos Scam: 46.9 percent winrate, 117 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">47<i>·</i></span></td>
+            <td class="cell fav" tabindex="0" role="button" style="--r:1.97px" data-i="4" data-j="2" aria-label="Living End vs Amulet Titan: 61.3 percent winrate, 58 matches"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="val">61<i>▲</i></span></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:0.98px" data-i="4" data-j="3" aria-label="Living End vs Yawgmoth: 50.9 percent winrate, 44 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">51<i class="lo">~</i><i>·</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell unf lown" tabindex="0" role="button" style="--r:1.52px" data-i="4" data-j="5" aria-label="Living End vs Burn: 43.4 percent winrate, 28 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span><span class="val">43<i class="lo">~</i><i>▼</i></span></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:1.36px" data-i="4" data-j="6" aria-label="Living End vs Mono-Green Tron: 54.9 percent winrate, 47 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">55<i class="lo">~</i><i>·</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.20px" data-i="4" data-j="7" aria-label="Living End vs Hammer Time: 46.8 percent winrate, 55 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">47<i>·</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Burn">BRN</th>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.06px" data-i="5" data-j="0" aria-label="Burn vs Izzet Murktide: 51.7 percent winrate, 77 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">52<i>·</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.11px" data-i="5" data-j="1" aria-label="Burn vs Rakdos Scam: 47.8 percent winrate, 61 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">48<i>·</i></span></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:1.35px" data-i="5" data-j="2" aria-label="Burn vs Amulet Titan: 54.8 percent winrate, 49 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">55<i class="lo">~</i><i>·</i></span></td>
+            <td class="cell fav lown" tabindex="0" role="button" style="--r:1.75px" data-i="5" data-j="3" aria-label="Burn vs Yawgmoth: 59 percent winrate, 39 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="noise"></span><span class="val">59<i class="lo">~</i><i>▲</i></span></td>
+            <td class="cell fav lown" tabindex="0" role="button" style="--r:1.52px" data-i="5" data-j="4" aria-label="Burn vs Living End: 56.6 percent winrate, 28 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="noise"></span><span class="val">57<i class="lo">~</i><i>▲</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell fav lown" tabindex="0" role="button" style="--r:2.04px" data-i="5" data-j="6" aria-label="Burn vs Mono-Green Tron: 62.1 percent winrate, 33 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="noise"></span><span class="val">62<i class="lo">~</i><i>▲</i></span></td>
+            <td class="cell unf lown" tabindex="0" role="button" style="--r:1.40px" data-i="5" data-j="7" aria-label="Burn vs Hammer Time: 44.7 percent winrate, 41 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span><span class="val">45<i class="lo">~</i><i>▼</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Mono-Green Tron">TRN</th>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.37px" data-i="6" data-j="0" aria-label="Mono-Green Tron vs Izzet Murktide: 45 percent winrate, 64 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">45<i>▼</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.88px" data-i="6" data-j="1" aria-label="Mono-Green Tron vs Rakdos Scam: 39.6 percent winrate, 73 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">40<i>▼</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:2.17px" data-i="6" data-j="2" aria-label="Mono-Green Tron vs Amulet Titan: 36.5 percent winrate, 81 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">37<i>▼</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.63px" data-i="6" data-j="3" aria-label="Mono-Green Tron vs Yawgmoth: 42.3 percent winrate, 52 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">42<i>▼</i></span></td>
+            <td class="cell even lown" tabindex="0" role="button" style="--r:1.36px" data-i="6" data-j="4" aria-label="Mono-Green Tron vs Living End: 45.1 percent winrate, 47 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="noise"></span><span class="val">45<i class="lo">~</i><i>·</i></span></td>
+            <td class="cell unf lown" tabindex="0" role="button" style="--r:2.04px" data-i="6" data-j="5" aria-label="Mono-Green Tron vs Burn: 37.9 percent winrate, 33 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span><span class="val">38<i class="lo">~</i><i>▼</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+            <td class="cell unf lown" tabindex="0" role="button" style="--r:1.85px" data-i="6" data-j="7" aria-label="Mono-Green Tron vs Hammer Time: 39.9 percent winrate, 26 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="noise"></span><span class="val">40<i class="lo">~</i><i>▼</i></span></td>
+          </tr>
+          <tr>
+            <th scope="row" title="Hammer Time">HMR</th>
+            <td class="cell unf" tabindex="0" role="button" style="--r:1.71px" data-i="7" data-j="0" aria-label="Hammer Time vs Izzet Murktide: 41.4 percent winrate, 121 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">41<i>▼</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:0.95px" data-i="7" data-j="1" aria-label="Hammer Time vs Rakdos Scam: 50.5 percent winrate, 104 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">51<i>·</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.16px" data-i="7" data-j="2" aria-label="Hammer Time vs Amulet Titan: 47.2 percent winrate, 93 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">47<i>·</i></span></td>
+            <td class="cell unf" tabindex="0" role="button" style="--r:2.43px" data-i="7" data-j="3" aria-label="Hammer Time vs Yawgmoth: 33.8 percent winrate, 71 matches"><span class="ht"></span><span class="tint" style="--c:var(--pink)"></span><span class="pap"></span><span class="val">34<i>▼</i></span></td>
+            <td class="cell even" tabindex="0" role="button" style="--r:1.20px" data-i="7" data-j="4" aria-label="Hammer Time vs Living End: 53.2 percent winrate, 55 matches"><span class="ht"></span><span class="tint" style="--c:var(--gray)"></span><span class="pap"></span><span class="val">53<i>·</i></span></td>
+            <td class="cell fav lown" tabindex="0" role="button" style="--r:1.40px" data-i="7" data-j="5" aria-label="Hammer Time vs Burn: 55.3 percent winrate, 41 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="noise"></span><span class="val">55<i class="lo">~</i><i>▲</i></span></td>
+            <td class="cell fav lown" tabindex="0" role="button" style="--r:1.85px" data-i="7" data-j="6" aria-label="Hammer Time vs Mono-Green Tron: 60.1 percent winrate, 26 matches, low sample"><span class="ht"></span><span class="tint" style="--c:var(--teal)"></span><span class="pap"></span><span class="noise"></span><span class="val">60<i class="lo">~</i><i>▲</i></span></td>
+            <td class="diag" aria-hidden="true"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="matrix-foot">Dot size = edge over 50%, in either direction. Teal = favored (≥55), pink = dog (≤45), gray = even. <span class="noisy-chip" aria-hidden="true"></span> grain + a <b>~</b> after the number = n&lt;50, treat as rumor. Numbers carry ▲▼· so ink color is never the only channel. Tap any cell for the full line.</p>
+
+    <div class="codekey" id="codekey"><span><span class="k">IZM</span>Izzet Murktide</span><span><span class="k">RKS</span>Rakdos Scam</span><span><span class="k">AMT</span>Amulet Titan</span><span><span class="k">YWG</span>Yawgmoth</span><span><span class="k">LVE</span>Living End</span><span><span class="k">BRN</span>Burn</span><span><span class="k">TRN</span>Mono-Green Tron</span><span><span class="k">HMR</span>Hammer Time</span></div>
+
+    <!-- ============ tapped cell drawer ============ -->
+    <section class="drawer" id="drawer" aria-live="polite">
+      <div class="drawer-head">
+        <span class="thumbs" aria-hidden="true">
+          <span class="thumb" id="thumbYou"><canvas width="28" height="38"></canvas></span>
+          <span class="thumb" id="thumbOpp"><canvas width="28" height="38"></canvas></span>
+        </span>
+        <span class="pair" id="dPair">IZM <span class="vs">×</span> RKS</span>
+        <span class="sk chip d7 win">7D WINDOW</span>
+        <span class="names" id="dNames">Izzet Murktide vs Rakdos Scam</span>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <span class="lab sk">WINRATE</span>
+          <span class="num" id="dWr">57.4%</span>
+          <span class="sub" id="dWrGlyph">▲ favored</span>
+        </div>
+        <div class="stat">
+          <span class="lab sk">SAMPLE</span>
+          <span class="num" id="dN">213</span>
+          <span class="sub">matches logged</span>
+        </div>
+        <div class="stat">
+          <span class="lab sk">95% CI</span>
+          <span class="num" id="dCi" style="font-size:14px">50.8–64.0</span>
+          <div class="ci-track" aria-hidden="true"><span class="mid"></span><span class="fill" id="dCiFill"></span></div>
+        </div>
+        <div class="stat">
+          <span class="lab sk">TREND 7D</span>
+          <span class="num" id="dTrend">↗ +2.1</span>
+          <span class="sub">vs prior week</span>
+        </div>
+      </div>
+      <p class="drawer-note serif" id="dNote">Placeholder commentary line — analyst note prints here in the full build.</p>
+      <div class="drawer-cta">
+        <span class="chip pro">PRO</span>
+        <span style="font-size:10px">Historical evolution, per-event splits &amp; sideboard-game deltas live below the fold.</span>
+      </div>
+    </section>
+
+    <!-- ============ historical evolution (premium-gated) ============ -->
+    <div class="evo-bar">
+      <div class="seg" role="group" aria-label="Matrix time mode">
+        <button id="btnSnap" aria-pressed="true">SNAPSHOT</button>
+        <button id="btnEvo" class="gated" aria-pressed="false">EVOLUTION <span class="chip pro">PRO</span></button>
+      </div>
+    </div>
+
+    <section class="ghost-panel" id="evoPanel" hidden>
+      <div class="ghost-head">
+        <span id="evoTitle">MATCHUP EVOLUTION — IZM × RKS — 12 WK</span>
+        <span class="chip pro">PRO</span>
+      </div>
+      <div class="ghost-body">
+        <canvas id="ghostc" width="360" height="170" aria-label="Locked preview of matchup evolution chart, rendered at draft resolution"></canvas>
+        <div class="unlock">
+          <span class="chip unlock-chip">UNLOCK FULL RESOLUTION</span>
+          <p>Free tier prints at draft quality. You can see the shape of the swing — the press run has the numbers.</p>
+          <span class="price serif">Go PRO — $6/mo</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true"></div>
+    <footer>
+      <span class="sk">METASURF PRESS</span> · printed in two inks on recycled pixels · winrates are placeholder specimen data · matchup matrix updates hourly on event ingest
+    </footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* ---------- specimen data (clearly placeholder) ---------- */
+  /* t = specimen spot-ink tint for the drawer thumbnails (placeholder color identity) */
+  var A=[
+    {c:"IZM",n:"Izzet Murktide",t:"#00838A"},
+    {c:"RKS",n:"Rakdos Scam",t:"#FF48B0"},
+    {c:"AMT",n:"Amulet Titan",t:"#5c2a52"},
+    {c:"YWG",n:"Yawgmoth",t:"#00838A"},
+    {c:"LVE",n:"Living End",t:"#FF48B0"},
+    {c:"BRN",n:"Burn",t:"#5c2a52"},
+    {c:"TRN",n:"Mono-Green Tron",t:"#00838A"},
+    {c:"HMR",n:"Hammer Time",t:"#FF48B0"}
+  ];
+  /* upper-triangle winrate (row i vs col j), sample n, 7-day delta */
+  var P={
+    "0,1":[57.4,213, 2.1],"0,2":[44.1,188,-1.4],"0,3":[51.2, 96, 0.6],"0,4":[61.9,142, 1.9],
+    "0,5":[48.3, 77,-0.8],"0,6":[55.0, 64, 3.0],"0,7":[58.6,121, 0.4],
+    "1,2":[47.9,154,-2.2],"1,3":[42.5, 88,-0.9],"1,4":[53.1,117, 1.2],"1,5":[52.2, 61, 0.3],
+    "1,6":[60.4, 73, 1.7],"1,7":[49.5,104,-1.1],
+    "2,3":[55.8, 69, 2.4],"2,4":[38.7, 58,-3.1],"2,5":[45.2, 49, 0.9],"2,6":[63.5, 81, 6.8],
+    "2,7":[52.8, 93, 0.2],
+    "3,4":[49.1, 44,-0.5],"3,5":[41.0, 39,-2.6],"3,6":[57.7, 52, 1.3],"3,7":[66.2, 71, 2.9],
+    "4,5":[43.4, 28,-1.8],"4,6":[54.9, 47, 0.7],"4,7":[46.8, 55,-2.0],
+    "5,6":[62.1, 33, 3.4],"5,7":[44.7, 41,-0.6],
+    "6,7":[39.9, 26,-4.2]
+  };
+  function cellData(i,j){
+    if(i===j) return null;
+    if(P[i+","+j]){ var p=P[i+","+j]; return {wr:p[0],n:p[1],d7:p[2]}; }
+    var q=P[j+","+i]; return {wr:+(100-q[0]).toFixed(1), n:q[1], d7:+(-q[2]).toFixed(1)};
+  }
+
+  /* ---------- hydrate static matrix ----------
+     the rows, halftone layers and code key ship as static HTML above (the
+     halftone is pure CSS, so the press sheet is fully legible pre-hydration);
+     JS only wires interaction. cell encoding, mirrored in the static markup:
+       dot radius r = 0.9 + (min(|wr-50|,18)/18)*1.7  on a 5.5px lattice
+       ink: teal if wr>=55, pink if wr<=45, gray otherwise (matches the legend)
+       glyph: ▲ / ▼ / · on the same cutoffs; ~ appended when n<50 */
+  var tbody=document.querySelector("#matrix tbody");
+  var sel=null, selKey="0,1";
+  Array.prototype.forEach.call(tbody.querySelectorAll("td.cell"), function(td){
+    td.addEventListener("click", function(){ select(td, true); });
+    td.addEventListener("keydown", function(e){
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); select(td, true); }
+    });
+  });
+
+  /* ---------- signature effect #2: dithered archetype thumbnails ----------
+     mockup stand-in for the build-time pipeline (real card art -> node
+     canvas-dither Atkinson -> PNG-8). here: procedural specimen art at 28x38,
+     Atkinson error diffusion on luminance computed in LINEAR light, 1-bit
+     output, multiplied over the archetype spot color by the CSS stack. */
+  function srgbToLin(v){ v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }
+  function drawThumb(el, idx){
+    var cv=el.querySelector("canvas"), w=28, h=38;
+    cv.width=w; cv.height=h;
+    var g=cv.getContext("2d");
+    /* keep the specimen art bright: linear-space thresholding renders sRGB
+       midtones as mostly ink, so the source stays in the top tonal third */
+    var s=idx+3;
+    var grd=g.createLinearGradient(0,0,w,h);
+    grd.addColorStop(0,"#ffffff"); grd.addColorStop(1,"#b8b8b8");
+    g.fillStyle=grd; g.fillRect(0,0,w,h);
+    for(var k=0;k<3;k++){
+      var cx=(s*37+k*61)%w, cy=(s*53+k*29)%h, rr=6+((s+k*7)%9);
+      var rg=g.createRadialGradient(cx,cy,1,cx,cy,rr);
+      rg.addColorStop(0, k%2 ? "#ffffff" : "#404040");
+      rg.addColorStop(1,"rgba(200,200,200,0)");
+      g.fillStyle=rg; g.beginPath(); g.arc(cx,cy,rr,0,7); g.fill();
+    }
+    g.save(); g.translate(w/2,h/2); g.rotate((s%7)/7*Math.PI);
+    g.fillStyle="rgba(60,60,60,.5)"; g.fillRect(-w,-3,w*2,6); g.restore();
+    var id=g.getImageData(0,0,w,h), d=id.data;
+    var lum=new Float32Array(w*h);
+    for(var p=0;p<w*h;p++){
+      lum[p]=0.2126*srgbToLin(d[p*4])+0.7152*srgbToLin(d[p*4+1])+0.0722*srgbToLin(d[p*4+2]);
+    }
+    /* Atkinson: 6 neighbours, 1/8 of the error each (2/8 intentionally lost) */
+    for(var y=0;y<h;y++){
+      for(var x=0;x<w;x++){
+        var q=y*w+x, nv=lum[q]>=0.5?1:0, err=(lum[q]-nv)/8;
+        lum[q]=nv;
+        if(x+1<w) lum[q+1]+=err;
+        if(x+2<w) lum[q+2]+=err;
+        if(y+1<h){
+          if(x>0) lum[q+w-1]+=err;
+          lum[q+w]+=err;
+          if(x+1<w) lum[q+w+1]+=err;
+        }
+        if(y+2<h) lum[q+2*w]+=err;
+        var v=nv?255:0;
+        d[q*4]=v; d[q*4+1]=v; d[q*4+2]=v; d[q*4+3]=255;
+      }
+    }
+    g.putImageData(id,0,0);
+    el.style.setProperty("--tc", A[idx].t);
+  }
+
+  /* ---------- drawer ---------- */
+  function ci95(wr,n){
+    var p=wr/100, se=1.96*Math.sqrt(p*(1-p)/n)*100;
+    return [Math.max(0,wr-se), Math.min(100,wr+se)];
+  }
+  var evoPanel=document.getElementById("evoPanel");
+  var btnSnap=document.getElementById("btnSnap");
+  var btnEvo=document.getElementById("btnEvo");
+  var notes={
+    "0,1":"Tempo line holds: the row deck keeps the play-pattern edge post-board in this specimen sample.",
+    "2,6":"The week’s loudest cell — highlighted above. Verify against next ingest before you trust it.",
+    "6,7":"Twenty-six matches is a rumor, not a matchup. The grain overlay is doing its job."
+  };
+  function select(td, userTap){
+    if(sel) sel.classList.remove("sel");
+    sel=td; td.classList.add("sel");
+    var i=+td.dataset.i, j=+td.dataset.j;
+    selKey=i+","+j;
+    var d=cellData(i,j), ci=ci95(d.wr,d.n);
+    /* same cutoffs as the matrix ink + legend: >=55 favored, <=45 dog */
+    var up=d.wr>=55, dn=d.wr<=45;
+    document.getElementById("dPair").innerHTML=A[i].c+' <span class="vs">×</span> '+A[j].c;
+    document.getElementById("dNames").textContent=A[i].n+" vs "+A[j].n;
+    var wrEl=document.getElementById("dWr");
+    wrEl.textContent=d.wr.toFixed(1)+"%";
+    wrEl.className="num"+(up?" up":dn?" dn":"");
+    document.getElementById("dWrGlyph").textContent = up?"▲ favored":dn?"▼ dog":"— even";
+    var nEl=document.getElementById("dN");
+    nEl.textContent=d.n; nEl.className="num";
+    document.getElementById("dCi").textContent=ci[0].toFixed(1)+"–"+ci[1].toFixed(1);
+    var fill=document.getElementById("dCiFill");
+    fill.style.left=ci[0]+"%"; fill.style.width=(ci[1]-ci[0])+"%";
+    fill.className="fill"+(dn?" dn":"");
+    /* trend uses ↗↘ so it can never be misread as the matrix's favored/dog ▲▼ */
+    var tEl=document.getElementById("dTrend");
+    tEl.textContent=(d.d7>=0?"↗ +":"↘ ")+d.d7.toFixed(1);
+    tEl.className="num"+(d.d7>=0?" up":" dn");
+    document.getElementById("dNote").textContent =
+      notes[selKey] || (d.n<50
+        ? "Sample below the print threshold — the noisy overlay on this cell is the honest read."
+        : "Placeholder commentary line — analyst note prints here in the full build.");
+    document.getElementById("evoTitle").textContent =
+      "MATCHUP EVOLUTION — "+A[i].c+" × "+A[j].c+" — 12 WK";
+    drawThumb(document.getElementById("thumbYou"), i);
+    drawThumb(document.getElementById("thumbOpp"), j);
+    if(!evoPanel.hidden) drawGhost(i,j);
+    /* on a phone the drawer sits below the fold — bring it to the tap */
+    if(userTap){
+      document.getElementById("drawer").scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "nearest"
+      });
+    }
+  }
+  /* default tapped state: IZM vs RKS (no scroll on load) */
+  select(tbody.querySelector('td[data-i="0"][data-j="1"]'), false);
+
+  /* ---------- evolution toggle + premium ghost (signature effect #3) ----------
+     free users get the true SHAPE of the series, printed at 1/8 resolution and
+     2x2 Bayer-dithered to the four press inks — no readable numbers survive. */
+  btnEvo.addEventListener("click", function(){
+    btnEvo.setAttribute("aria-pressed","true");
+    btnSnap.setAttribute("aria-pressed","false");
+    evoPanel.hidden=false;
+    var ij=selKey.split(","); drawGhost(+ij[0],+ij[1]);
+    if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
+      evoPanel.scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
+  });
+  btnSnap.addEventListener("click", function(){
+    btnSnap.setAttribute("aria-pressed","true");
+    btnEvo.setAttribute("aria-pressed","false");
+    evoPanel.hidden=true;
+  });
+
+  var PAL=[[245,241,232],[0,131,138],[255,72,176],[31,28,26]]; /* paper, teal, pink, ink */
+  var BAYER=[[0,2],[3,1]];
+  function drawGhost(i,j){
+    var c=document.getElementById("ghostc");
+    var w=c.parentNode.clientWidth||360, h=170;
+    c.width=w; c.height=h;
+    var S=8, lw=Math.max(24,Math.floor(w/S)), lh=Math.floor(h/S);
+    var oc=document.createElement("canvas");
+    oc.width=lw; oc.height=lh;
+    var g=oc.getContext("2d");
+    g.fillStyle="#ffffff"; g.fillRect(0,0,lw,lh);
+    /* deterministic pseudo-series seeded off the pair so each cell has its own shape */
+    var seed=(i*8+j+1);
+    function s1(x){ return Math.sin(x*0.55+seed)*0.5 + Math.sin(x*0.21+seed*2.3)*0.35 + Math.sin(x*1.3+seed*0.7)*0.15; }
+    var base=cellData(i,j).wr;
+    for(var x=0;x<lw;x++){
+      var wr=base + s1(x)*9;                       /* winrate series (teal) */
+      var nn=0.35 + 0.3*Math.sin(x*0.4+seed*1.7);  /* volume band (pink)   */
+      var y=Math.round(lh - ((wr-25)/50)*lh);
+      g.fillStyle="rgb(0,131,138)";
+      g.fillRect(x, Math.max(0,y-1), 1, 2);
+      g.fillStyle="rgb(255,72,176)";
+      g.fillRect(x, lh-Math.round(nn*lh*0.4), 1, Math.round(nn*lh*0.4));
+    }
+    /* 50% reference rule in ink */
+    g.fillStyle="rgb(31,28,26)";
+    g.fillRect(0, Math.round(lh-((50-25)/50)*lh), lw, 1);
+    /* 2x2 ordered dither in LUMINANCE, then map to a press ink: the pixel's
+       hue picks WHICH ink (teal/pink/ink), but the Bayer threshold against
+       luminance decides ink-vs-paper — so even fully saturated series pixels
+       break into a visible dot screen instead of flat pixelation. */
+    var id=g.getImageData(0,0,lw,lh), d=id.data;
+    for(var yy=0;yy<lh;yy++){
+      for(var xx=0;xx<lw;xx++){
+        var k=(yy*lw+xx)*4;
+        var lum=(0.2126*d[k]+0.7152*d[k+1]+0.0722*d[k+2])/255;
+        var t=(BAYER[yy%2][xx%2]+0.5)/4;          /* thresholds .125 .375 .625 .875 */
+        var best=1,bd=1e9;
+        for(var p=1;p<4;p++){
+          var dr=d[k]-PAL[p][0], dg=d[k+1]-PAL[p][1], db=d[k+2]-PAL[p][2];
+          var dist=dr*dr+dg*dg+db*db;
+          if(dist<bd){bd=dist;best=p;}
+        }
+        var pick = lum < t ? best : 0;
+        d[k]=PAL[pick][0]; d[k+1]=PAL[pick][1]; d[k+2]=PAL[pick][2];
+      }
+    }
+    g.putImageData(id,0,0);
+    var ctx=c.getContext("2d");
+    ctx.imageSmoothingEnabled=false;
+    ctx.clearRect(0,0,w,h);
+    ctx.drawImage(oc,0,0,lw,lh,0,0,w,h);
+  }
+  window.addEventListener("resize", function(){
+    if(!evoPanel.hidden){ var ij=selKey.split(","); drawGhost(+ij[0],+ij[1]); }
+  });
+})();
+</script>
+</body>
+</html>
