@@ -81,14 +81,29 @@ def _rule_truth(
     return truth
 
 
-def run_v11(conn: psycopg.Connection) -> dict[str, Any]:
+def run_v11(
+    conn: psycopg.Connection,
+    start: dt.date = HOLDOUT_START,
+    end: dt.date = HOLDOUT_END,
+    card_features: dict[int, Any] | None = None,
+    feature_weight: float = 0.0,
+) -> dict[str, Any]:
+    """Defaults reproduce the committed M1 holdout run exactly. `start`/`end`
+    exist so the beta sweep can run on the disjoint TUNING month without
+    touching the holdout; `card_features`/`feature_weight` drive the semantic
+    channel ablation (docs/notes/card-semantics-integration.md)."""
     defs, load_report = load_definitions(conn)
-    decks = load_decks(conn, HOLDOUT_START, HOLDOUT_END)
+    decks = load_decks(conn, start, end)
     classifications = rules_label(decks, defs)
     truth = _rule_truth(decks, classifications)
 
     exclude = basic_land_ids(conn)
-    vectors = vectorize([(d.deck_id, d.deck.main) for d in decks], exclude)
+    vectors = vectorize(
+        [(d.deck_id, d.deck.main) for d in decks],
+        exclude,
+        card_features=card_features,
+        feature_weight=feature_weight,
+    )
     labels = cluster_and_attach(vectors.matrix)
 
     by_label = Counter(truth.values())
@@ -157,7 +172,13 @@ def run_v11(conn: psycopg.Connection) -> dict[str, Any]:
     }
 
 
-def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
+def run_v12(
+    conn: psycopg.Connection,
+    card_features: dict[int, Any] | None = None,
+    feature_weight: float = 0.0,
+) -> list[dict[str, Any]]:
+    """Defaults reproduce the committed M1 emergence run exactly; the feature
+    arguments drive the semantic-channel ablation."""
     results: list[dict[str, Any]] = []
     full_defs, _ = load_definitions(conn)
     exclude = basic_land_ids(conn)
@@ -202,7 +223,12 @@ def run_v12(conn: psycopg.Connection) -> list[dict[str, Any]]:
         while day <= deadline:
             window = [d for d in remainder if d.event_date <= day]
             if len(window) >= EMERGENCE_MIN_APPEARANCES:
-                vectors = vectorize([(d.deck_id, d.deck.main) for d in window], exclude)
+                vectors = vectorize(
+                    [(d.deck_id, d.deck.main) for d in window],
+                    exclude,
+                    card_features=card_features,
+                    feature_weight=feature_weight,
+                )
                 labels = cluster_and_attach(vectors.matrix)
                 members: dict[int, list[int]] = defaultdict(list)
                 for deck_id, cl in zip(vectors.deck_ids, labels, strict=True):
