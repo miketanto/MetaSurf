@@ -1,0 +1,7417 @@
+{
+ "archetypes": [
+  {
+   "archetype": "Energy",
+   "decks": 824,
+   "meta_share": 0.1797164667393675,
+   "representative": {
+    "event_date": "2025-05-25",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Ajani, Nacatl Pariah // Ajani, Nacatl Avenger",
+      4
+     ],
+     [
+      "Arena of Glory",
+      3
+     ],
+     [
+      "Arid Mesa",
+      4
+     ],
+     [
+      "Elegant Parlor",
+      2
+     ],
+     [
+      "Fable of the Mirror-Breaker // Reflection of Kiki-Jiki",
+      2
+     ],
+     [
+      "Flooded Strand",
+      4
+     ],
+     [
+      "Galvanic Discharge",
+      4
+     ],
+     [
+      "Goblin Bombardment",
+      3
+     ],
+     [
+      "Guide of Souls",
+      4
+     ],
+     [
+      "Marsh Flats",
+      3
+     ],
+     [
+      "Mountain",
+      1
+     ],
+     [
+      "Ocelot Pride",
+      4
+     ],
+     [
+      "Phlage, Titan of Fire's Fury",
+      4
+     ],
+     [
+      "Plains",
+      2
+     ],
+     [
+      "Ragavan, Nimble Pilferer",
+      3
+     ],
+     [
+      "Sacred Foundry",
+      3
+     ],
+     [
+      "Seasoned Pyromancer",
+      3
+     ],
+     [
+      "Static Prison",
+      2
+     ],
+     [
+      "Thraben Charm",
+      2
+     ],
+     [
+      "Voice of Victory",
+      2
+     ],
+     [
+      "Windswept Heath",
+      1
+     ]
+    ],
+    "player": "ttdawg",
+    "sideboard": [
+     [
+      "Blood Moon",
+      1
+     ],
+     [
+      "Celestial Purge",
+      1
+     ],
+     [
+      "Clarion Conqueror",
+      1
+     ],
+     [
+      "Deafening Silence",
+      2
+     ],
+     [
+      "Fable of the Mirror-Breaker // Reflection of Kiki-Jiki",
+      1
+     ],
+     [
+      "Ghost Vacuum",
+      1
+     ],
+     [
+      "Molten Rain",
+      3
+     ],
+     [
+      "Obsidian Charmaw",
+      1
+     ],
+     [
+      "Orim's Chant",
+      2
+     ],
+     [
+      "Wear // Tear",
+      1
+     ],
+     [
+      "Wrath of the Skies",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 447892,
+   "representative_similarity": 0.9967114103628596
+  },
+  {
+   "archetype": "Eldrazi",
+   "decks": 579,
+   "meta_share": 0.1262813522355507,
+   "representative": {
+    "event_date": "2025-05-29",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Ancient Stirrings",
+      3
+     ],
+     [
+      "Bojuka Bog",
+      1
+     ],
+     [
+      "Boseiju, Who Endures",
+      1
+     ],
+     [
+      "Cavern of Souls",
+      1
+     ],
+     [
+      "Commercial District",
+      1
+     ],
+     [
+      "Devourer of Destiny",
+      3
+     ],
+     [
+      "Eldrazi Temple",
+      4
+     ],
+     [
+      "Emrakul, the Promised End",
+      3
+     ],
+     [
+      "Forest",
+      4
+     ],
+     [
+      "Ghost Quarter",
+      1
+     ],
+     [
+      "Kozilek's Command",
+      4
+     ],
+     [
+      "Kozilek's Return",
+      3
+     ],
+     [
+      "Malevolent Rumble",
+      4
+     ],
+     [
+      "Sanctum of Ugin",
+      1
+     ],
+     [
+      "Sire of Seven Deaths",
+      1
+     ],
+     [
+      "Sowing Mycospawn",
+      4
+     ],
+     [
+      "Stomping Ground",
+      1
+     ],
+     [
+      "Talisman of Impulse",
+      4
+     ],
+     [
+      "Ugin's Labyrinth",
+      4
+     ],
+     [
+      "Utopia Sprawl",
+      4
+     ],
+     [
+      "Wooded Foothills",
+      3
+     ],
+     [
+      "World Breaker",
+      2
+     ],
+     [
+      "Writhing Chrysalis",
+      3
+     ]
+    ],
+    "player": "GabbaAndrewTeam",
+    "sideboard": [
+     [
+      "Disruptor Flute",
+      2
+     ],
+     [
+      "Force of Vigor",
+      2
+     ],
+     [
+      "Kozilek's Return",
+      1
+     ],
+     [
+      "Lightning Bolt",
+      2
+     ],
+     [
+      "Stone Rain",
+      4
+     ],
+     [
+      "Trinisphere",
+      4
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 448388,
+   "representative_similarity": 0.8240349395200284
+  },
+  {
+   "archetype": "Aggro",
+   "decks": 441,
+   "meta_share": 0.09618320610687023,
+   "representative": {
+    "event_date": "2025-05-08",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Arid Mesa",
+      2
+     ],
+     [
+      "Bloodstained Mire",
+      3
+     ],
+     [
+      "Cori-Steel Cutter",
+      4
+     ],
+     [
+      "Dragon's Rage Channeler",
+      4
+     ],
+     [
+      "Expressive Iteration",
+      4
+     ],
+     [
+      "Fiery Islet",
+      1
+     ],
+     [
+      "Lava Dart",
+      4
+     ],
+     [
+      "Lightning Bolt",
+      4
+     ],
+     [
+      "Mishra's Bauble",
+      4
+     ],
+     [
+      "Monastery Swiftspear",
+      4
+     ],
+     [
+      "Mountain",
+      3
+     ],
+     [
+      "Mutagenic Growth",
+      4
+     ],
+     [
+      "Preordain",
+      4
+     ],
+     [
+      "Scalding Tarn",
+      3
+     ],
+     [
+      "Slickshot Show-Off",
+      4
+     ],
+     [
+      "Steam Vents",
+      3
+     ],
+     [
+      "Thundering Falls",
+      1
+     ],
+     [
+      "Violent Urge",
+      2
+     ],
+     [
+      "Wooded Foothills",
+      2
+     ]
+    ],
+    "player": "txouzo",
+    "sideboard": [
+     [
+      "Alpine Moon",
+      1
+     ],
+     [
+      "Consign to Memory",
+      4
+     ],
+     [
+      "Into the Flood Maw",
+      2
+     ],
+     [
+      "Meltdown",
+      1
+     ],
+     [
+      "Surgical Extraction",
+      2
+     ],
+     [
+      "Unholy Heat",
+      4
+     ],
+     [
+      "Violent Urge",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 445897,
+   "representative_similarity": 0.9941816339712787
+  },
+  {
+   "archetype": "Frog",
+   "decks": 343,
+   "meta_share": 0.07480916030534351,
+   "representative": {
+    "event_date": "2025-05-10",
+    "event_type": "challenge-64",
+    "finish_rank": 27,
+    "mainboard": [
+     [
+      "Cling to Dust",
+      1
+     ],
+     [
+      "Consider",
+      2
+     ],
+     [
+      "Counterspell",
+      4
+     ],
+     [
+      "Darkslick Shores",
+      2
+     ],
+     [
+      "Dismember",
+      1
+     ],
+     [
+      "Fatal Push",
+      4
+     ],
+     [
+      "Flooded Strand",
+      4
+     ],
+     [
+      "Force of Negation",
+      2
+     ],
+     [
+      "Island",
+      2
+     ],
+     [
+      "Kaito, Bane of Nightmares",
+      2
+     ],
+     [
+      "Murktide Regent",
+      3
+     ],
+     [
+      "Orcish Bowmasters",
+      4
+     ],
+     [
+      "Polluted Delta",
+      4
+     ],
+     [
+      "Preordain",
+      2
+     ],
+     [
+      "Psychic Frog",
+      4
+     ],
+     [
+      "Sauron's Ransom",
+      1
+     ],
+     [
+      "Scalding Tarn",
+      1
+     ],
+     [
+      "Sink into Stupor // Soporific Springs",
+      2
+     ],
+     [
+      "Spell Snare",
+      3
+     ],
+     [
+      "Subtlety",
+      2
+     ],
+     [
+      "Swamp",
+      1
+     ],
+     [
+      "Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar",
+      2
+     ],
+     [
+      "Thoughtseize",
+      3
+     ],
+     [
+      "Undercity Sewers",
+      2
+     ],
+     [
+      "Watery Grave",
+      2
+     ]
+    ],
+    "player": "F4SE",
+    "sideboard": [
+     [
+      "Break the Ice",
+      1
+     ],
+     [
+      "Consign to Memory",
+      4
+     ],
+     [
+      "Engineered Explosives",
+      1
+     ],
+     [
+      "Harbinger of the Seas",
+      2
+     ],
+     [
+      "Jace, the Mind Sculptor",
+      1
+     ],
+     [
+      "Mystical Dispute",
+      1
+     ],
+     [
+      "Nihil Spellbomb",
+      2
+     ],
+     [
+      "Sheoldred's Edict",
+      1
+     ],
+     [
+      "Stern Scolding",
+      1
+     ],
+     [
+      "Toxic Deluge",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 446098,
+   "representative_similarity": 0.8947251690658165
+  },
+  {
+   "archetype": "Blink",
+   "decks": 291,
+   "meta_share": 0.06346782988004362,
+   "representative": {
+    "event_date": "2025-06-02",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Arid Mesa",
+      2
+     ],
+     [
+      "Bleachbone Verge",
+      2
+     ],
+     [
+      "Boggart Trawler // Boggart Bog",
+      2
+     ],
+     [
+      "Concealed Courtyard",
+      1
+     ],
+     [
+      "Emperor of Bones",
+      4
+     ],
+     [
+      "Ephemerate",
+      3
+     ],
+     [
+      "Fatal Push",
+      4
+     ],
+     [
+      "Flickerwisp",
+      4
+     ],
+     [
+      "Flooded Strand",
+      1
+     ],
+     [
+      "Godless Shrine",
+      2
+     ],
+     [
+      "Ketramose, the New Dawn",
+      2
+     ],
+     [
+      "Marsh Flats",
+      4
+     ],
+     [
+      "Orcish Bowmasters",
+      3
+     ],
+     [
+      "Overlord of the Balemurk",
+      4
+     ],
+     [
+      "Phelia, Exuberant Shepherd",
+      4
+     ],
+     [
+      "Plains",
+      2
+     ],
+     [
+      "Relic of Progenitus",
+      2
+     ],
+     [
+      "Shadowy Backstreet",
+      2
+     ],
+     [
+      "Solitude",
+      4
+     ],
+     [
+      "Swamp",
+      1
+     ],
+     [
+      "Thoughtseize",
+      4
+     ],
+     [
+      "Witch Enchanter // Witch-Blessed Meadow",
+      3
+     ]
+    ],
+    "player": "neb12r",
+    "sideboard": [
+     [
+      "Ashiok, Dream Render",
+      1
+     ],
+     [
+      "Celestial Purge",
+      2
+     ],
+     [
+      "High Noon",
+      1
+     ],
+     [
+      "Shatter Assumptions",
+      2
+     ],
+     [
+      "Vindicate",
+      2
+     ],
+     [
+      "White Orchid Phantom",
+      4
+     ],
+     [
+      "Wrath of the Skies",
+      3
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 448907,
+   "representative_similarity": 0.9560231343610935
+  },
+  {
+   "archetype": "DomainZoo",
+   "decks": 258,
+   "meta_share": 0.056270447110141765,
+   "representative": {
+    "event_date": "2025-06-06",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Arena of Glory",
+      2
+     ],
+     [
+      "Arid Mesa",
+      4
+     ],
+     [
+      "Blood Crypt",
+      1
+     ],
+     [
+      "Fable of the Mirror-Breaker // Reflection of Kiki-Jiki",
+      2
+     ],
+     [
+      "Flooded Strand",
+      3
+     ],
+     [
+      "Indatha Triome",
+      1
+     ],
+     [
+      "Leyline Binding",
+      4
+     ],
+     [
+      "Leyline of the Guildpact",
+      4
+     ],
+     [
+      "Lightning Bolt",
+      4
+     ],
+     [
+      "Lush Portico",
+      1
+     ],
+     [
+      "Mountain",
+      1
+     ],
+     [
+      "Phlage, Titan of Fire's Fury",
+      4
+     ],
+     [
+      "Plains",
+      1
+     ],
+     [
+      "Ragavan, Nimble Pilferer",
+      4
+     ],
+     [
+      "Sacred Foundry",
+      1
+     ],
+     [
+      "Scion of Draco",
+      4
+     ],
+     [
+      "Steam Vents",
+      1
+     ],
+     [
+      "Stubborn Denial",
+      3
+     ],
+     [
+      "Temple Garden",
+      1
+     ],
+     [
+      "Territorial Kavu",
+      4
+     ],
+     [
+      "Thundering Falls",
+      1
+     ],
+     [
+      "Tribal Flames",
+      3
+     ],
+     [
+      "Wild Nacatl",
+      2
+     ],
+     [
+      "Wooded Foothills",
+      4
+     ]
+    ],
+    "player": "japo_foil",
+    "sideboard": [
+     [
+      "Doorkeeper Thrull",
+      2
+     ],
+     [
+      "High Noon",
+      2
+     ],
+     [
+      "Molten Rain",
+      2
+     ],
+     [
+      "Pyroclasm",
+      2
+     ],
+     [
+      "Sudden Edict",
+      2
+     ],
+     [
+      "Surgical Extraction",
+      2
+     ],
+     [
+      "Teferi, Time Raveler",
+      1
+     ],
+     [
+      "Wear // Tear",
+      2
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 449340,
+   "representative_similarity": 0.9790085933229715
+  },
+  {
+   "archetype": "Belcher",
+   "decks": 206,
+   "meta_share": 0.044929116684841876,
+   "representative": {
+    "event_date": "2025-06-05",
+    "event_type": "challenge-64",
+    "finish_rank": 23,
+    "mainboard": [
+     [
+      "Beyeen Veil // Beyeen Coast",
+      2
+     ],
+     [
+      "Disrupting Shoal",
+      4
+     ],
+     [
+      "Fallaji Archaeologist",
+      4
+     ],
+     [
+      "Flare of Denial",
+      3
+     ],
+     [
+      "Goblin Charbelcher",
+      4
+     ],
+     [
+      "Hydroelectric Specimen // Hydroelectric Laboratory",
+      4
+     ],
+     [
+      "Into the Flood Maw",
+      1
+     ],
+     [
+      "Jwari Disruption // Jwari Ruins",
+      3
+     ],
+     [
+      "Lotus Bloom",
+      4
+     ],
+     [
+      "Razorgrass Ambush // Razorgrass Field",
+      1
+     ],
+     [
+      "Sea Gate Restoration // Sea Gate, Reborn",
+      4
+     ],
+     [
+      "Sink into Stupor // Soporific Springs",
+      4
+     ],
+     [
+      "Snapback",
+      1
+     ],
+     [
+      "Spell Snare",
+      2
+     ],
+     [
+      "Stern Scolding",
+      2
+     ],
+     [
+      "Suppression Ray // Orderly Plaza",
+      4
+     ],
+     [
+      "Tameshi, Reality Architect",
+      4
+     ],
+     [
+      "Thundertrap Trainer",
+      4
+     ],
+     [
+      "Waterlogged Teachings // Inundated Archive",
+      1
+     ],
+     [
+      "Whir of Invention",
+      4
+     ]
+    ],
+    "player": "LordAbyss",
+    "sideboard": [
+     [
+      "Consign to Memory",
+      3
+     ],
+     [
+      "Flusterstorm",
+      1
+     ],
+     [
+      "Force of Negation",
+      1
+     ],
+     [
+      "Harbinger of the Seas",
+      3
+     ],
+     [
+      "Into the Flood Maw",
+      1
+     ],
+     [
+      "Mountain",
+      1
+     ],
+     [
+      "Portable Hole",
+      1
+     ],
+     [
+      "Snapback",
+      1
+     ],
+     [
+      "Stern Scolding",
+      1
+     ],
+     [
+      "Tezzeret the Seeker",
+      1
+     ],
+     [
+      "Tormod's Crypt",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 449177,
+   "representative_similarity": 0.9502199263164096
+  },
+  {
+   "archetype": "Titan",
+   "decks": 173,
+   "meta_share": 0.03773173391494002,
+   "representative": {
+    "event_date": "2025-06-06",
+    "event_type": "challenge-64",
+    "finish_rank": 3,
+    "mainboard": [
+     [
+      "Aftermath Analyst",
+      1
+     ],
+     [
+      "Amulet of Vigor",
+      4
+     ],
+     [
+      "Arboreal Grazer",
+      4
+     ],
+     [
+      "Boseiju, Who Endures",
+      3
+     ],
+     [
+      "Crumbling Vestige",
+      4
+     ],
+     [
+      "Cultivator Colossus",
+      1
+     ],
+     [
+      "Echoing Deeps",
+      1
+     ],
+     [
+      "Explore",
+      3
+     ],
+     [
+      "Forest",
+      2
+     ],
+     [
+      "Green Sun's Zenith",
+      1
+     ],
+     [
+      "Gruul Turf",
+      4
+     ],
+     [
+      "Hanweir Battlements",
+      1
+     ],
+     [
+      "Lotus Field",
+      2
+     ],
+     [
+      "Mirrorpool",
+      1
+     ],
+     [
+      "Otawara, Soaring City",
+      1
+     ],
+     [
+      "Primeval Titan",
+      4
+     ],
+     [
+      "Scapeshift",
+      4
+     ],
+     [
+      "Shifting Woodland",
+      1
+     ],
+     [
+      "Simic Growth Chamber",
+      3
+     ],
+     [
+      "Spelunking",
+      4
+     ],
+     [
+      "Summoner's Pact",
+      2
+     ],
+     [
+      "The Mycosynth Gardens",
+      2
+     ],
+     [
+      "Tolaria West",
+      1
+     ],
+     [
+      "Urza's Cave",
+      1
+     ],
+     [
+      "Urza's Saga",
+      4
+     ],
+     [
+      "Vesuva",
+      1
+     ]
+    ],
+    "player": "kanister",
+    "sideboard": [
+     [
+      "Bojuka Bog",
+      1
+     ],
+     [
+      "Collector Ouphe",
+      1
+     ],
+     [
+      "Dismember",
+      3
+     ],
+     [
+      "Firespout",
+      1
+     ],
+     [
+      "Force of Vigor",
+      1
+     ],
+     [
+      "Forest",
+      1
+     ],
+     [
+      "Green Sun's Zenith",
+      2
+     ],
+     [
+      "Otawara, Soaring City",
+      1
+     ],
+     [
+      "Pyroclasm",
+      1
+     ],
+     [
+      "Six",
+      1
+     ],
+     [
+      "Vampires' Vengeance",
+      1
+     ],
+     [
+      "Vexing Bauble",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 449267,
+   "representative_similarity": 0.9919004259402273
+  },
+  {
+   "archetype": "GenericTron",
+   "decks": 171,
+   "meta_share": 0.037295528898582335,
+   "representative": {
+    "event_date": "2025-06-04",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "All Is Dust",
+      1
+     ],
+     [
+      "Boseiju, Who Endures",
+      1
+     ],
+     [
+      "Cavern of Souls",
+      1
+     ],
+     [
+      "Chalice of the Void",
+      2
+     ],
+     [
+      "Devourer of Destiny",
+      4
+     ],
+     [
+      "Dismember",
+      2
+     ],
+     [
+      "Eldrazi Temple",
+      4
+     ],
+     [
+      "Expedition Map",
+      4
+     ],
+     [
+      "Forest",
+      1
+     ],
+     [
+      "Karn, the Great Creator",
+      4
+     ],
+     [
+      "Kozilek's Command",
+      4
+     ],
+     [
+      "Sire of Seven Deaths",
+      2
+     ],
+     [
+      "Sowing Mycospawn",
+      4
+     ],
+     [
+      "Talisman of Resilience",
+      3
+     ],
+     [
+      "Thought-Knot Seer",
+      3
+     ],
+     [
+      "Ugin's Labyrinth",
+      4
+     ],
+     [
+      "Ugin, Eye of the Storms",
+      3
+     ],
+     [
+      "Urza's Mine",
+      4
+     ],
+     [
+      "Urza's Power Plant",
+      4
+     ],
+     [
+      "Urza's Tower",
+      4
+     ],
+     [
+      "Warping Wail",
+      1
+     ]
+    ],
+    "player": "Odin2015",
+    "sideboard": [
+     [
+      "Chalice of the Void",
+      1
+     ],
+     [
+      "Cityscape Leveler",
+      1
+     ],
+     [
+      "Disruptor Flute",
+      1
+     ],
+     [
+      "Engineered Explosives",
+      1
+     ],
+     [
+      "Ensnaring Bridge",
+      1
+     ],
+     [
+      "Haywire Mite",
+      1
+     ],
+     [
+      "Liquimetal Coating",
+      1
+     ],
+     [
+      "Relic of Progenitus",
+      1
+     ],
+     [
+      "The Stone Brain",
+      2
+     ],
+     [
+      "Tormod's Crypt",
+      1
+     ],
+     [
+      "Torpor Orb",
+      1
+     ],
+     [
+      "Trinisphere",
+      1
+     ],
+     [
+      "Walking Ballista",
+      1
+     ],
+     [
+      "Wurmcoil Engine",
+      1
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 449131,
+   "representative_similarity": 0.9606424876882128
+  },
+  {
+   "archetype": "Affinity",
+   "decks": 161,
+   "meta_share": 0.035114503816793895,
+   "representative": {
+    "event_date": "2025-05-03",
+    "event_type": "league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Aether Spellbomb",
+      1
+     ],
+     [
+      "Darksteel Citadel",
+      2
+     ],
+     [
+      "Emry, Lurker of the Loch",
+      4
+     ],
+     [
+      "Hallowed Fountain",
+      1
+     ],
+     [
+      "Haywire Mite",
+      1
+     ],
+     [
+      "Island",
+      1
+     ],
+     [
+      "Kappa Cannoneer",
+      4
+     ],
+     [
+      "Lavaspur Boots",
+      1
+     ],
+     [
+      "Metallic Rebuke",
+      3
+     ],
+     [
+      "Mishra's Bauble",
+      4
+     ],
+     [
+      "Mox Amber",
+      2
+     ],
+     [
+      "Mox Opal",
+      4
+     ],
+     [
+      "Otawara, Soaring City",
+      1
+     ],
+     [
+      "Pithing Needle",
+      1
+     ],
+     [
+      "Portable Hole",
+      4
+     ],
+     [
+      "Razortide Bridge",
+      3
+     ],
+     [
+      "Seachrome Coast",
+      1
+     ],
+     [
+      "Shadowspear",
+      1
+     ],
+     [
+      "Soul-Guide Lantern",
+      1
+     ],
+     [
+      "Spire of Industry",
+      4
+     ],
+     [
+      "Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar",
+      4
+     ],
+     [
+      "Thought Monitor",
+      3
+     ],
+     [
+      "Thoughtcast",
+      4
+     ],
+     [
+      "Tormod's Crypt",
+      1
+     ],
+     [
+      "Urza's Saga",
+      4
+     ]
+    ],
+    "player": "WhiteHatMan",
+    "sideboard": [
+     [
+      "Consign to Memory",
+      4
+     ],
+     [
+      "Damping Sphere",
+      2
+     ],
+     [
+      "Dispatch",
+      2
+     ],
+     [
+      "Force of Negation",
+      3
+     ],
+     [
+      "Wear // Tear",
+      2
+     ],
+     [
+      "Whipflare",
+      2
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 445400,
+   "representative_similarity": 0.9912388683053667
+  },
+  {
+   "archetype": "Neobrand",
+   "decks": 152,
+   "meta_share": 0.0331515812431843,
+   "representative": {
+    "event_date": "2025-05-27",
+    "event_type": "gold-league",
+    "finish_rank": null,
+    "mainboard": [
+     [
+      "Allosaurus Rider",
+      4
+     ],
+     [
+      "Atraxa, Grand Unifier",
+      1
+     ],
+     [
+      "Birthing Ritual",
+      3
+     ],
+     [
+      "Boseiju, Who Endures",
+      2
+     ],
+     [
+      "Breeding Pool",
+      1
+     ],
+     [
+      "Consign to Memory",
+      2
+     ],
+     [
+      "Disciple of Freyalise // Garden of Freyalise",
+      4
+     ],
+     [
+      "Eladamri's Call",
+      4
+     ],
+     [
+      "Eldritch Evolution",
+      4
+     ],
+     [
+      "Forest",
+      1
+     ],
+     [
+      "Gemstone Mine",
+      3
+     ],
+     [
+      "Ghalta, Stampede Tyrant",
+      3
+     ],
+     [
+      "Griselbrand",
+      1
+     ],
+     [
+      "Hallowed Fountain",
+      1
+     ],
+     [
+      "Hedge Maze",
+      1
+     ],
+     [
+      "Meticulous Archive",
+      1
+     ],
+     [
+      "Misty Rainforest",
+      4
+     ],
+     [
+      "Neoform",
+      4
+     ],
+     [
+      "Pact of Negation",
+      2
+     ],
+     [
+      "Planar Genesis",
+      3
+     ],
+     [
+      "Summoner's Pact",
+      4
+     ],
+     [
+      "Terastodon",
+      1
+     ],
+     [
+      "Ureni, the Song Unending",
+      1
+     ],
+     [
+      "Windswept Heath",
+      4
+     ],
+     [
+      "Xenagos, God of Revels",
+      1
+     ]
+    ],
+    "player": "KingCapivara",
+    "sideboard": [
+     [
+      "Boseiju, Who Endures",
+      1
+     ],
+     [
+      "Consign to Memory",
+      1
+     ],
+     [
+      "Endurance",
+      2
+     ],
+     [
+      "Force of Vigor",
+      1
+     ],
+     [
+      "Hooting Mandrills",
+      2
+     ],
+     [
+      "Into the Flood Maw",
+      2
+     ],
+     [
+      "Orim's Chant",
+      2
+     ],
+     [
+      "Veil of Summer",
+      2
+     ],
+     [
+      "Voice of Victory",
+      2
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 448109,
+   "representative_similarity": 0.9607168180914673
+  },
+  {
+   "archetype": "RubyStorm",
+   "decks": 122,
+   "meta_share": 0.026608505997818974,
+   "representative": {
+    "event_date": "2025-05-02",
+    "event_type": "challenge-64",
+    "finish_rank": 20,
+    "mainboard": [
+     [
+      "Arid Mesa",
+      3
+     ],
+     [
+      "Artist's Talent",
+      2
+     ],
+     [
+      "Bloodstained Mire",
+      2
+     ],
+     [
+      "Desperate Ritual",
+      4
+     ],
+     [
+      "Elegant Parlor",
+      2
+     ],
+     [
+      "Gemstone Caverns",
+      1
+     ],
+     [
+      "Glimpse the Impossible",
+      2
+     ],
+     [
+      "Grapeshot",
+      1
+     ],
+     [
+      "Manamorphose",
+      4
+     ],
+     [
+      "Mountain",
+      4
+     ],
+     [
+      "Past in Flames",
+      3
+     ],
+     [
+      "Pyretic Ritual",
+      4
+     ],
+     [
+      "Ral, Monsoon Mage // Ral, Leyline Prodigy",
+      4
+     ],
+     [
+      "Reckless Impulse",
+      4
+     ],
+     [
+      "Ruby Medallion",
+      4
+     ],
+     [
+      "Sacred Foundry",
+      1
+     ],
+     [
+      "Scalding Tarn",
+      2
+     ],
+     [
+      "Strike It Rich",
+      2
+     ],
+     [
+      "Sunbaked Canyon",
+      1
+     ],
+     [
+      "Valakut Awakening // Valakut Stoneforge",
+      2
+     ],
+     [
+      "Wish",
+      2
+     ],
+     [
+      "Wooded Foothills",
+      2
+     ],
+     [
+      "Wrenn's Resolve",
+      4
+     ]
+    ],
+    "player": "peter780108",
+    "sideboard": [
+     [
+      "Abrade",
+      2
+     ],
+     [
+      "Brotherhood's End",
+      2
+     ],
+     [
+      "Empty the Warrens",
+      1
+     ],
+     [
+      "Grapeshot",
+      1
+     ],
+     [
+      "Orim's Chant",
+      4
+     ],
+     [
+      "Past in Flames",
+      1
+     ],
+     [
+      "Prismatic Ending",
+      4
+     ]
+    ],
+    "source": "mtgo.com_limited_data"
+   },
+   "representative_deck_id": 445188,
+   "representative_similarity": 0.9955323315767315
+  }
+ ],
+ "classifier_version": "rules-99668739d46e",
+ "format": "modern",
+ "labelled_decks": 4566,
+ "play_rate_min_decks": 3,
+ "play_rates": {
+  "Abhorrent Oculus": {
+   "deck_share": 0.050817884405670664,
+   "decks": 233,
+   "main_copies": 612,
+   "side_copies": 138
+  },
+  "Abrade": {
+   "deck_share": 0.008942202835332607,
+   "decks": 41,
+   "main_copies": 0,
+   "side_copies": 77
+  },
+  "Abrupt Decay": {
+   "deck_share": 0.010468920392584515,
+   "decks": 48,
+   "main_copies": 25,
+   "side_copies": 35
+  },
+  "Abstergo Entertainment": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Abundant Harvest": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Academy Manufactor": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Aether Gust": {
+   "deck_share": 0.0063249727371864775,
+   "decks": 29,
+   "main_copies": 0,
+   "side_copies": 34
+  },
+  "Aether Hub": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Aether Spellbomb": {
+   "deck_share": 0.04558342420937841,
+   "decks": 209,
+   "main_copies": 198,
+   "side_copies": 13
+  },
+  "Aether Vial": {
+   "deck_share": 0.011123227917121047,
+   "decks": 51,
+   "main_copies": 198,
+   "side_copies": 0
+  },
+  "Aetherflux Reservoir": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 0,
+   "side_copies": 15
+  },
+  "Aftermath Analyst": {
+   "deck_share": 0.03685932388222465,
+   "decks": 169,
+   "main_copies": 169,
+   "side_copies": 0
+  },
+  "Agatha's Soul Cauldron": {
+   "deck_share": 0.03467829880043621,
+   "decks": 159,
+   "main_copies": 383,
+   "side_copies": 1
+  },
+  "Ajani, Nacatl Pariah // Ajani, Nacatl Avenger": {
+   "deck_share": 0.17404580152671756,
+   "decks": 798,
+   "main_copies": 3189,
+   "side_copies": 0
+  },
+  "Alchemist's Gambit": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "All Is Dust": {
+   "deck_share": 0.05605234460196292,
+   "decks": 257,
+   "main_copies": 286,
+   "side_copies": 161
+  },
+  "Allosaurus Rider": {
+   "deck_share": 0.0331515812431843,
+   "decks": 152,
+   "main_copies": 608,
+   "side_copies": 0
+  },
+  "Alpha Authority": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Alpine Moon": {
+   "deck_share": 0.027262813522355506,
+   "decks": 125,
+   "main_copies": 0,
+   "side_copies": 140
+  },
+  "Amulet of Vigor": {
+   "deck_share": 0.03773173391494002,
+   "decks": 173,
+   "main_copies": 692,
+   "side_copies": 0
+  },
+  "Analyze the Pollen": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Ancient Grudge": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 31
+  },
+  "Ancient Stirrings": {
+   "deck_share": 0.08004362050163577,
+   "decks": 367,
+   "main_copies": 1295,
+   "side_copies": 0
+  },
+  "Ancient Ziggurat": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Angel's Grace": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Anoint with Affliction": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 1,
+   "side_copies": 7
+  },
+  "Arbor Elf": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Arboreal Grazer": {
+   "deck_share": 0.03882224645583424,
+   "decks": 178,
+   "main_copies": 706,
+   "side_copies": 0
+  },
+  "Arcbound Ravager": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 52,
+   "side_copies": 0
+  },
+  "Archetype of Endurance": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 4
+  },
+  "Archive Trap": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 108,
+   "side_copies": 0
+  },
+  "Archmage's Charm": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Archon of Cruelty": {
+   "deck_share": 0.01025081788440567,
+   "decks": 47,
+   "main_copies": 167,
+   "side_copies": 2
+  },
+  "Archon of Emeria": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 9,
+   "side_copies": 2
+  },
+  "Ardent Plea": {
+   "deck_share": 0.020065430752453654,
+   "decks": 92,
+   "main_copies": 368,
+   "side_copies": 0
+  },
+  "Arena of Glory": {
+   "deck_share": 0.2569247546346783,
+   "decks": 1178,
+   "main_copies": 2955,
+   "side_copies": 1
+  },
+  "Arid Mesa": {
+   "deck_share": 0.3816793893129771,
+   "decks": 1750,
+   "main_copies": 6264,
+   "side_copies": 0
+  },
+  "Artist's Talent": {
+   "deck_share": 0.02420937840785169,
+   "decks": 111,
+   "main_copies": 205,
+   "side_copies": 2
+  },
+  "Ashiok, Dream Render": {
+   "deck_share": 0.060632497273718645,
+   "decks": 278,
+   "main_copies": 6,
+   "side_copies": 397
+  },
+  "Asmoranomardicadaistinaculdacar": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 23,
+   "side_copies": 0
+  },
+  "Assault Strobe": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 9,
+   "side_copies": 2
+  },
+  "Astral Cornucopia": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 68,
+   "side_copies": 0
+  },
+  "Atraxa, Grand Unifier": {
+   "deck_share": 0.05212649945474373,
+   "decks": 239,
+   "main_copies": 745,
+   "side_copies": 0
+  },
+  "Audacity": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Authority of the Consuls": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 14
+  },
+  "Autochthon Wurm": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 42,
+   "side_copies": 0
+  },
+  "Aven Interrupter": {
+   "deck_share": 0.036205016357688115,
+   "decks": 166,
+   "main_copies": 122,
+   "side_copies": 160
+  },
+  "Aven Mindcensor": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 2,
+   "side_copies": 5
+  },
+  "Awaken the Honored Dead": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 0,
+   "side_copies": 12
+  },
+  "Azusa, Lost but Seeking": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Baleful Mastery": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 1,
+   "side_copies": 20
+  },
+  "Barbarian Ring": {
+   "deck_share": 0.006543075245365322,
+   "decks": 30,
+   "main_copies": 93,
+   "side_copies": 0
+  },
+  "Basilisk Collar": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 4
+  },
+  "Basim Ibn Ishaq": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Basking Broodscale": {
+   "deck_share": 0.040567066521264995,
+   "decks": 186,
+   "main_copies": 744,
+   "side_copies": 0
+  },
+  "Batterskull": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "Battlefield Improvisation": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Beyeen Veil // Beyeen Coast": {
+   "deck_share": 0.03358778625954199,
+   "decks": 154,
+   "main_copies": 374,
+   "side_copies": 0
+  },
+  "Beza, the Bounding Spring": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 3,
+   "side_copies": 15
+  },
+  "Birds of Paradise": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Birthing Ritual": {
+   "deck_share": 0.021374045801526718,
+   "decks": 98,
+   "main_copies": 352,
+   "side_copies": 11
+  },
+  "Bitter Reunion": {
+   "deck_share": 0.011341330425299891,
+   "decks": 52,
+   "main_copies": 187,
+   "side_copies": 0
+  },
+  "Bitter Triumph": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 31,
+   "side_copies": 6
+  },
+  "Blackcleave Cliffs": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 67,
+   "side_copies": 0
+  },
+  "Blacksmith's Skill": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 8,
+   "side_copies": 2
+  },
+  "Blacksmith's Talent": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Blade of the Bloodchief": {
+   "deck_share": 0.04122137404580153,
+   "decks": 189,
+   "main_copies": 743,
+   "side_copies": 0
+  },
+  "Blast Zone": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 33,
+   "side_copies": 0
+  },
+  "Blazemire Verge": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Blazing Rootwalla": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 88,
+   "side_copies": 0
+  },
+  "Bleachbone Verge": {
+   "deck_share": 0.0569247546346783,
+   "decks": 261,
+   "main_copies": 425,
+   "side_copies": 0
+  },
+  "Blood Artist": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Blood Crypt": {
+   "deck_share": 0.07415485278080698,
+   "decks": 340,
+   "main_copies": 441,
+   "side_copies": 1
+  },
+  "Blood Moon": {
+   "deck_share": 0.11428571428571428,
+   "decks": 524,
+   "main_copies": 256,
+   "side_copies": 686
+  },
+  "Bloodchief's Thirst": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 12,
+   "side_copies": 10
+  },
+  "Bloodghast": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Bloodstained Mire": {
+   "deck_share": 0.17317339149400218,
+   "decks": 794,
+   "main_copies": 2097,
+   "side_copies": 0
+  },
+  "Blooming Marsh": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Blue Sun's Twilight": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 8
+  },
+  "Boggart Trawler // Boggart Bog": {
+   "deck_share": 0.06608505997818975,
+   "decks": 303,
+   "main_copies": 472,
+   "side_copies": 0
+  },
+  "Bojuka Bog": {
+   "deck_share": 0.07938931297709924,
+   "decks": 364,
+   "main_copies": 232,
+   "side_copies": 132
+  },
+  "Boltwave": {
+   "deck_share": 0.00697928026172301,
+   "decks": 32,
+   "main_copies": 128,
+   "side_copies": 0
+  },
+  "Bone Shards": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 15,
+   "side_copies": 0
+  },
+  "Bonecrusher Giant // Stomp": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 7,
+   "side_copies": 0
+  },
+  "Boom // Bust": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 6
+  },
+  "Borborygmos Enraged": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Boros Charm": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 45,
+   "side_copies": 0
+  },
+  "Boseiju, Who Endures": {
+   "deck_share": 0.20218102508178845,
+   "decks": 927,
+   "main_copies": 1636,
+   "side_copies": 288
+  },
+  "Boseiju, Who Shelters All": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 2,
+   "side_copies": 2
+  },
+  "Botanical Sanctum": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 38,
+   "side_copies": 0
+  },
+  "Brainsurge": {
+   "deck_share": 0.009596510359869139,
+   "decks": 44,
+   "main_copies": 131,
+   "side_copies": 0
+  },
+  "Branchloft Pathway // Boulderloft Pathway": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Brazen Borrower // Petty Theft": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 29,
+   "side_copies": 24
+  },
+  "Break the Ice": {
+   "deck_share": 0.017448200654307525,
+   "decks": 80,
+   "main_copies": 0,
+   "side_copies": 160
+  },
+  "Breeding Pool": {
+   "deck_share": 0.10010905125408942,
+   "decks": 459,
+   "main_copies": 486,
+   "side_copies": 1
+  },
+  "Bribery": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 0,
+   "side_copies": 12
+  },
+  "Brightglass Gearhulk": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Brotherhood's End": {
+   "deck_share": 0.030970556161395855,
+   "decks": 142,
+   "main_copies": 7,
+   "side_copies": 243
+  },
+  "Brushland": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Bump in the Night": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 100,
+   "side_copies": 0
+  },
+  "Burning Inquiry": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 132,
+   "side_copies": 0
+  },
+  "Candy Trail": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Carrion Feeder": {
+   "deck_share": 0.004362050163576881,
+   "decks": 20,
+   "main_copies": 29,
+   "side_copies": 0
+  },
+  "Cartouche of Solidarity": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Castle Ardenvale": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 50,
+   "side_copies": 0
+  },
+  "Castle Garenbrig": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 3,
+   "side_copies": 3
+  },
+  "Castle Locthwain": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Castle Vantress": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 2,
+   "side_copies": 1
+  },
+  "Cathar Commando": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 1,
+   "side_copies": 4
+  },
+  "Cathartic Reunion": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Cauldron Familiar": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 92,
+   "side_copies": 0
+  },
+  "Cavern of Souls": {
+   "deck_share": 0.12955288985823338,
+   "decks": 594,
+   "main_copies": 1003,
+   "side_copies": 101
+  },
+  "Celestial Colonnade": {
+   "deck_share": 0.004362050163576881,
+   "decks": 20,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Celestial Purge": {
+   "deck_share": 0.2089422028353326,
+   "decks": 958,
+   "main_copies": 1,
+   "side_copies": 1386
+  },
+  "Cephalid Coliseum": {
+   "deck_share": 0.004362050163576881,
+   "decks": 20,
+   "main_copies": 30,
+   "side_copies": 0
+  },
+  "Ceremonious Rejection": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 0,
+   "side_copies": 20
+  },
+  "Cerulean Drake": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 0,
+   "side_copies": 24
+  },
+  "Chained to the Rocks": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 0,
+   "side_copies": 18
+  },
+  "Chainsaw": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 2,
+   "side_copies": 2
+  },
+  "Chalice of the Void": {
+   "deck_share": 0.06652126499454744,
+   "decks": 305,
+   "main_copies": 671,
+   "side_copies": 205
+  },
+  "Chancellor of the Annex": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Chancellor of the Dross": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 36,
+   "side_copies": 0
+  },
+  "Chancellor of the Tangle": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 168,
+   "side_copies": 0
+  },
+  "Chandra's Defeat": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 0,
+   "side_copies": 27
+  },
+  "Chandra's Incinerator": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 19,
+   "side_copies": 0
+  },
+  "Chandra, Torch of Defiance": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 10,
+   "side_copies": 1
+  },
+  "Chord of Calling": {
+   "deck_share": 0.010687022900763359,
+   "decks": 49,
+   "main_copies": 148,
+   "side_copies": 0
+  },
+  "Chromatic Sphere": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Chromatic Star": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Chthonian Nightmare": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Cityscape Leveler": {
+   "deck_share": 0.0386041439476554,
+   "decks": 177,
+   "main_copies": 0,
+   "side_copies": 177
+  },
+  "Clarion Conqueror": {
+   "deck_share": 0.1520174482006543,
+   "decks": 697,
+   "main_copies": 6,
+   "side_copies": 1172
+  },
+  "Cleansing Wildfire": {
+   "deck_share": 0.010032715376226827,
+   "decks": 46,
+   "main_copies": 4,
+   "side_copies": 157
+  },
+  "Cling to Dust": {
+   "deck_share": 0.027044711014176662,
+   "decks": 124,
+   "main_copies": 168,
+   "side_copies": 0
+  },
+  "Codex Shredder": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Coiling Oracle": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Collected Company": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 29,
+   "side_copies": 5
+  },
+  "Collective Brutality": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Collector Ouphe": {
+   "deck_share": 0.03424209378407852,
+   "decks": 157,
+   "main_copies": 0,
+   "side_copies": 191
+  },
+  "Colossal Skyturtle": {
+   "deck_share": 0.03162486368593239,
+   "decks": 145,
+   "main_copies": 108,
+   "side_copies": 54
+  },
+  "Colossus Hammer": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 96,
+   "side_copies": 0
+  },
+  "Commandeer": {
+   "deck_share": 0.021374045801526718,
+   "decks": 98,
+   "main_copies": 79,
+   "side_copies": 98
+  },
+  "Commercial District": {
+   "deck_share": 0.0663031624863686,
+   "decks": 304,
+   "main_copies": 311,
+   "side_copies": 0
+  },
+  "Concealed Courtyard": {
+   "deck_share": 0.018974918211559434,
+   "decks": 87,
+   "main_copies": 127,
+   "side_copies": 0
+  },
+  "Concerted Defense": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Condescend": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Conflagrate": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Conjurer's Bauble": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Consider": {
+   "deck_share": 0.030970556161395855,
+   "decks": 142,
+   "main_copies": 420,
+   "side_copies": 0
+  },
+  "Consign to Memory": {
+   "deck_share": 0.45408942202835334,
+   "decks": 2082,
+   "main_copies": 642,
+   "side_copies": 7069
+  },
+  "Containment Priest": {
+   "deck_share": 0.009378407851690295,
+   "decks": 43,
+   "main_copies": 5,
+   "side_copies": 58
+  },
+  "Coretapper": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 76,
+   "side_copies": 0
+  },
+  "Cori Mountain Monastery": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Cori-Steel Cutter": {
+   "deck_share": 0.11712104689203925,
+   "decks": 537,
+   "main_copies": 2119,
+   "side_copies": 8
+  },
+  "Corrupted Conviction": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Cosmic Rebirth": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Counterspell": {
+   "deck_share": 0.1025081788440567,
+   "decks": 470,
+   "main_copies": 1818,
+   "side_copies": 9
+  },
+  "Crackling Drake": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Cranial Plating": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Crashing Footfalls": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 28,
+   "side_copies": 0
+  },
+  "Creeping Chill": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Crucible of Worlds": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 19,
+   "side_copies": 20
+  },
+  "Crumbling Vestige": {
+   "deck_share": 0.03751363140676118,
+   "decks": 172,
+   "main_copies": 661,
+   "side_copies": 0
+  },
+  "Cry of the Carnarium": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 3
+  },
+  "Crypt Incursion": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 11,
+   "side_copies": 42
+  },
+  "Cryptic Coat": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Cryptic Command": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Crystal Barricade": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 3,
+   "side_copies": 51
+  },
+  "Culling Ritual": {
+   "deck_share": 0.008287895310796075,
+   "decks": 38,
+   "main_copies": 0,
+   "side_copies": 55
+  },
+  "Cultivator Colossus": {
+   "deck_share": 0.026608505997818974,
+   "decks": 122,
+   "main_copies": 115,
+   "side_copies": 7
+  },
+  "Curator of Mysteries": {
+   "deck_share": 0.021374045801526718,
+   "decks": 98,
+   "main_copies": 381,
+   "side_copies": 0
+  },
+  "Cursed Totem": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 0,
+   "side_copies": 28
+  },
+  "Cut Down": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 11,
+   "side_copies": 1
+  },
+  "Dalkovan Encampment": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 7,
+   "side_copies": 0
+  },
+  "Damnation": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 11
+  },
+  "Damping Sphere": {
+   "deck_share": 0.12410032715376226,
+   "decks": 569,
+   "main_copies": 0,
+   "side_copies": 1119
+  },
+  "Darkblast": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 26,
+   "side_copies": 0
+  },
+  "Darkslick Shores": {
+   "deck_share": 0.05866957470010905,
+   "decks": 269,
+   "main_copies": 467,
+   "side_copies": 0
+  },
+  "Darksteel Citadel": {
+   "deck_share": 0.032933478735005454,
+   "decks": 151,
+   "main_copies": 332,
+   "side_copies": 0
+  },
+  "Dauthi Voidwalker": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 19,
+   "side_copies": 47
+  },
+  "Day's Undoing": {
+   "deck_share": 0.01613958560523446,
+   "decks": 74,
+   "main_copies": 125,
+   "side_copies": 17
+  },
+  "Daybreak Coronet": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Dead // Gone": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Deafening Silence": {
+   "deck_share": 0.183206106870229,
+   "decks": 840,
+   "main_copies": 0,
+   "side_copies": 1422
+  },
+  "Death's Shadow": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Deep Analysis": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Defense Grid": {
+   "deck_share": 0.025736095965103598,
+   "decks": 118,
+   "main_copies": 0,
+   "side_copies": 284
+  },
+  "Deflecting Palm": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 0,
+   "side_copies": 19
+  },
+  "Delighted Halfling": {
+   "deck_share": 0.034023991275899675,
+   "decks": 156,
+   "main_copies": 579,
+   "side_copies": 0
+  },
+  "Demolition Field": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 104,
+   "side_copies": 0
+  },
+  "Deserted Temple": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Desperate Ritual": {
+   "deck_share": 0.0386041439476554,
+   "decks": 177,
+   "main_copies": 708,
+   "side_copies": 0
+  },
+  "Destructive Revelry": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 0,
+   "side_copies": 42
+  },
+  "Detective's Phoenix": {
+   "deck_share": 0.007633587786259542,
+   "decks": 35,
+   "main_copies": 128,
+   "side_copies": 0
+  },
+  "Devourer of Destiny": {
+   "deck_share": 0.10534351145038168,
+   "decks": 483,
+   "main_copies": 1603,
+   "side_copies": 0
+  },
+  "Dewdrop Cure": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 7,
+   "side_copies": 2
+  },
+  "Disciple of Freyalise // Garden of Freyalise": {
+   "deck_share": 0.03358778625954199,
+   "decks": 154,
+   "main_copies": 589,
+   "side_copies": 0
+  },
+  "Dismember": {
+   "deck_share": 0.20981461286804798,
+   "decks": 962,
+   "main_copies": 494,
+   "side_copies": 1518
+  },
+  "Dispatch": {
+   "deck_share": 0.03598691384950927,
+   "decks": 165,
+   "main_copies": 48,
+   "side_copies": 342
+  },
+  "Displacement Wave": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 0,
+   "side_copies": 28
+  },
+  "Disrupting Shoal": {
+   "deck_share": 0.03358778625954199,
+   "decks": 154,
+   "main_copies": 615,
+   "side_copies": 0
+  },
+  "Disruptor Flute": {
+   "deck_share": 0.05539803707742639,
+   "decks": 254,
+   "main_copies": 0,
+   "side_copies": 467
+  },
+  "Distorting Lens": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 4
+  },
+  "Doorkeeper Thrull": {
+   "deck_share": 0.020719738276990186,
+   "decks": 95,
+   "main_copies": 113,
+   "side_copies": 114
+  },
+  "Dovin's Veto": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 1,
+   "side_copies": 6
+  },
+  "Dragon's Rage Channeler": {
+   "deck_share": 0.09269356597600872,
+   "decks": 425,
+   "main_copies": 1690,
+   "side_copies": 0
+  },
+  "Dragonfire Blade": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 27,
+   "side_copies": 0
+  },
+  "Drannith Magistrate": {
+   "deck_share": 0.016793893129770993,
+   "decks": 77,
+   "main_copies": 0,
+   "side_copies": 100
+  },
+  "Dream's Grip": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Dreams of Steel and Oil": {
+   "deck_share": 0.02529989094874591,
+   "decks": 116,
+   "main_copies": 93,
+   "side_copies": 76
+  },
+  "Dredger's Insight": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 95,
+   "side_copies": 0
+  },
+  "Dress Down": {
+   "deck_share": 0.01766630316248637,
+   "decks": 81,
+   "main_copies": 104,
+   "side_copies": 68
+  },
+  "Drown in the Loch": {
+   "deck_share": 0.0063249727371864775,
+   "decks": 29,
+   "main_copies": 79,
+   "side_copies": 1
+  },
+  "Dryad Arbor": {
+   "deck_share": 0.016357688113413305,
+   "decks": 75,
+   "main_copies": 71,
+   "side_copies": 4
+  },
+  "Dryad of the Ilysian Grove": {
+   "deck_share": 0.012431842966194111,
+   "decks": 57,
+   "main_copies": 65,
+   "side_copies": 11
+  },
+  "Duress": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 18
+  },
+  "Duty Beyond Death": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 2,
+   "side_copies": 2
+  },
+  "Dwarven Mine": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 53,
+   "side_copies": 0
+  },
+  "Eagles of the North": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Echoing Deeps": {
+   "deck_share": 0.03707742639040349,
+   "decks": 170,
+   "main_copies": 170,
+   "side_copies": 0
+  },
+  "Echoing Truth": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 0,
+   "side_copies": 29
+  },
+  "Eidolon of Rhetoric": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 8
+  },
+  "Eidolon of the Great Revel": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 18,
+   "side_copies": 13
+  },
+  "Eiganjo, Seat of the Empire": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Eladamri's Call": {
+   "deck_share": 0.028135223555070882,
+   "decks": 129,
+   "main_copies": 409,
+   "side_copies": 32
+  },
+  "Eldrazi Linebreaker": {
+   "deck_share": 0.022464558342420938,
+   "decks": 103,
+   "main_copies": 406,
+   "side_copies": 4
+  },
+  "Eldrazi Obligator": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 0,
+   "side_copies": 52
+  },
+  "Eldrazi Skyspawner": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 28,
+   "side_copies": 0
+  },
+  "Eldrazi Temple": {
+   "deck_share": 0.16510359869138494,
+   "decks": 757,
+   "main_copies": 3014,
+   "side_copies": 0
+  },
+  "Eldritch Evolution": {
+   "deck_share": 0.03336968375136314,
+   "decks": 153,
+   "main_copies": 601,
+   "side_copies": 0
+  },
+  "Elegant Parlor": {
+   "deck_share": 0.22071973827699018,
+   "decks": 1012,
+   "main_copies": 1855,
+   "side_copies": 0
+  },
+  "Elesh Norn, Grand Cenobite": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 1,
+   "side_copies": 15
+  },
+  "Elesh Norn, Mother of Machines": {
+   "deck_share": 0.013304252998909487,
+   "decks": 61,
+   "main_copies": 18,
+   "side_copies": 54
+  },
+  "Elven Farsight": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 19,
+   "side_copies": 0
+  },
+  "Elvish Reclaimer": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 2,
+   "side_copies": 12
+  },
+  "Emperor of Bones": {
+   "deck_share": 0.09880043620501636,
+   "decks": 453,
+   "main_copies": 1313,
+   "side_copies": 5
+  },
+  "Empty the Warrens": {
+   "deck_share": 0.021155943293347874,
+   "decks": 97,
+   "main_copies": 0,
+   "side_copies": 97
+  },
+  "Emrakul, the Aeons Torn": {
+   "deck_share": 0.01984732824427481,
+   "decks": 91,
+   "main_copies": 79,
+   "side_copies": 61
+  },
+  "Emrakul, the Promised End": {
+   "deck_share": 0.09880043620501636,
+   "decks": 453,
+   "main_copies": 1000,
+   "side_copies": 5
+  },
+  "Emry, Lurker of the Loch": {
+   "deck_share": 0.058451472191930205,
+   "decks": 268,
+   "main_copies": 1047,
+   "side_copies": 0
+  },
+  "Endurance": {
+   "deck_share": 0.07393675027262814,
+   "decks": 339,
+   "main_copies": 484,
+   "side_copies": 279
+  },
+  "Enduring Innocence": {
+   "deck_share": 0.010905125408942203,
+   "decks": 50,
+   "main_copies": 52,
+   "side_copies": 8
+  },
+  "Engineered Explosives": {
+   "deck_share": 0.07546346782988005,
+   "decks": 346,
+   "main_copies": 40,
+   "side_copies": 415
+  },
+  "Ensnaring Bridge": {
+   "deck_share": 0.05234460196292257,
+   "decks": 240,
+   "main_copies": 19,
+   "side_copies": 260
+  },
+  "Ephemerate": {
+   "deck_share": 0.08658669574700109,
+   "decks": 397,
+   "main_copies": 1237,
+   "side_copies": 5
+  },
+  "Esper Sentinel": {
+   "deck_share": 0.008942202835332607,
+   "decks": 41,
+   "main_copies": 155,
+   "side_copies": 0
+  },
+  "Eternal Witness": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 15,
+   "side_copies": 2
+  },
+  "Ethereal Armor": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 24,
+   "side_copies": 0
+  },
+  "Ethersworn Canonist": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 3,
+   "side_copies": 12
+  },
+  "Everflowing Chalice": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 79,
+   "side_copies": 0
+  },
+  "Exorcise": {
+   "deck_share": 0.00806979280261723,
+   "decks": 37,
+   "main_copies": 0,
+   "side_copies": 43
+  },
+  "Expedition Map": {
+   "deck_share": 0.04252998909487459,
+   "decks": 195,
+   "main_copies": 702,
+   "side_copies": 0
+  },
+  "Explore": {
+   "deck_share": 0.02791712104689204,
+   "decks": 128,
+   "main_copies": 489,
+   "side_copies": 0
+  },
+  "Expressive Iteration": {
+   "deck_share": 0.09029443838604144,
+   "decks": 414,
+   "main_copies": 1545,
+   "side_copies": 31
+  },
+  "Exquisite Firecraft": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 1,
+   "side_copies": 31
+  },
+  "Extirpate": {
+   "deck_share": 0.008724100327153763,
+   "decks": 40,
+   "main_copies": 2,
+   "side_copies": 81
+  },
+  "Extraction Specialist": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 37,
+   "side_copies": 2
+  },
+  "Fable of the Mirror-Breaker // Reflection of Kiki-Jiki": {
+   "deck_share": 0.1766630316248637,
+   "decks": 810,
+   "main_copies": 1808,
+   "side_copies": 6
+  },
+  "Faerie Macabre": {
+   "deck_share": 0.008505997818974919,
+   "decks": 39,
+   "main_copies": 1,
+   "side_copies": 39
+  },
+  "Faithful Mending": {
+   "deck_share": 0.009378407851690295,
+   "decks": 43,
+   "main_copies": 75,
+   "side_copies": 0
+  },
+  "Faithless Looting": {
+   "deck_share": 0.01941112322791712,
+   "decks": 89,
+   "main_copies": 345,
+   "side_copies": 0
+  },
+  "Fallaji Archaeologist": {
+   "deck_share": 0.04732824427480916,
+   "decks": 217,
+   "main_copies": 835,
+   "side_copies": 0
+  },
+  "Fatal Push": {
+   "deck_share": 0.20021810250817884,
+   "decks": 918,
+   "main_copies": 3013,
+   "side_copies": 258
+  },
+  "Fblthp, the Lost": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Fear of Missing Out": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 45,
+   "side_copies": 0
+  },
+  "Fear, Fire, Foes!": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "Feed the Cycle": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 11
+  },
+  "Feed the Swarm": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 15
+  },
+  "Fell the Profane // Fell Mire": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 55,
+   "side_copies": 0
+  },
+  "Fetid Heath": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 8,
+   "side_copies": 0
+  },
+  "Field of Ruin": {
+   "deck_share": 0.01657579062159215,
+   "decks": 76,
+   "main_copies": 246,
+   "side_copies": 1
+  },
+  "Fiery Islet": {
+   "deck_share": 0.06412213740458016,
+   "decks": 294,
+   "main_copies": 431,
+   "side_copies": 0
+  },
+  "Fire // Ice": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 79,
+   "side_copies": 0
+  },
+  "Firespout": {
+   "deck_share": 0.023991275899672846,
+   "decks": 110,
+   "main_copies": 0,
+   "side_copies": 189
+  },
+  "Flagstones of Trokair": {
+   "deck_share": 0.004362050163576881,
+   "decks": 20,
+   "main_copies": 52,
+   "side_copies": 0
+  },
+  "Flame of Anor": {
+   "deck_share": 0.03904034896401309,
+   "decks": 179,
+   "main_copies": 381,
+   "side_copies": 99
+  },
+  "Flameblade Adept": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 47,
+   "side_copies": 0
+  },
+  "Flare of Cultivation": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 21,
+   "side_copies": 0
+  },
+  "Flare of Denial": {
+   "deck_share": 0.05103598691384951,
+   "decks": 234,
+   "main_copies": 684,
+   "side_copies": 10
+  },
+  "Flare of Fortitude": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 0,
+   "side_copies": 33
+  },
+  "Flare of Malice": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 36,
+   "side_copies": 0
+  },
+  "Flashfires": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 3
+  },
+  "Flayer Husk": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Flickerwisp": {
+   "deck_share": 0.06346782988004362,
+   "decks": 291,
+   "main_copies": 931,
+   "side_copies": 0
+  },
+  "Flooded Strand": {
+   "deck_share": 0.40458015267175573,
+   "decks": 1855,
+   "main_copies": 6220,
+   "side_copies": 0
+  },
+  "Floodfarm Verge": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Floodpits Drowner": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Flusterstorm": {
+   "deck_share": 0.03227917121046892,
+   "decks": 148,
+   "main_copies": 0,
+   "side_copies": 262
+  },
+  "Fomori Vault": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Force of Despair": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 2,
+   "side_copies": 42
+  },
+  "Force of Negation": {
+   "deck_share": 0.22529989094874592,
+   "decks": 1033,
+   "main_copies": 1968,
+   "side_copies": 722
+  },
+  "Force of Vigor": {
+   "deck_share": 0.11799345692475463,
+   "decks": 541,
+   "main_copies": 6,
+   "side_copies": 1066
+  },
+  "Forest": {
+   "deck_share": 0.264340239912759,
+   "decks": 1212,
+   "main_copies": 2519,
+   "side_copies": 120
+  },
+  "Forge Anew": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Forsaken Monument": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 0,
+   "side_copies": 31
+  },
+  "Foundation Breaker": {
+   "deck_share": 0.02420937840785169,
+   "decks": 111,
+   "main_copies": 0,
+   "side_copies": 164
+  },
+  "Fountainport": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Fracture": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 2,
+   "side_copies": 22
+  },
+  "Fractured Sanity": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 108,
+   "side_copies": 0
+  },
+  "Fuel the Flames": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 8
+  },
+  "Fulminator Mage": {
+   "deck_share": 0.01395856052344602,
+   "decks": 64,
+   "main_copies": 9,
+   "side_copies": 158
+  },
+  "Gaddock Teeg": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 0,
+   "side_copies": 19
+  },
+  "Galvanic Blast": {
+   "deck_share": 0.010687022900763359,
+   "decks": 49,
+   "main_copies": 102,
+   "side_copies": 21
+  },
+  "Galvanic Discharge": {
+   "deck_share": 0.19323882224645583,
+   "decks": 886,
+   "main_copies": 3518,
+   "side_copies": 0
+  },
+  "Galvanic Relay": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 0,
+   "side_copies": 42
+  },
+  "Geier Reach Sanitarium": {
+   "deck_share": 0.014612868047982551,
+   "decks": 67,
+   "main_copies": 67,
+   "side_copies": 0
+  },
+  "Gemstone Caverns": {
+   "deck_share": 0.07437295528898583,
+   "decks": 341,
+   "main_copies": 248,
+   "side_copies": 119
+  },
+  "Gemstone Mine": {
+   "deck_share": 0.028135223555070882,
+   "decks": 129,
+   "main_copies": 378,
+   "side_copies": 0
+  },
+  "Generous Ent": {
+   "deck_share": 0.025081788440567066,
+   "decks": 115,
+   "main_copies": 436,
+   "side_copies": 1
+  },
+  "Get Lost": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 10,
+   "side_copies": 5
+  },
+  "Ghalta, Stampede Tyrant": {
+   "deck_share": 0.03162486368593239,
+   "decks": 145,
+   "main_copies": 410,
+   "side_copies": 0
+  },
+  "Ghost Quarter": {
+   "deck_share": 0.05016357688113413,
+   "decks": 230,
+   "main_copies": 286,
+   "side_copies": 37
+  },
+  "Ghost Vacuum": {
+   "deck_share": 0.14525627044711015,
+   "decks": 666,
+   "main_copies": 5,
+   "side_copies": 738
+  },
+  "Gilded Goose": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 92,
+   "side_copies": 0
+  },
+  "Gingerbrute": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Giver of Runes": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Gladecover Scout": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 23,
+   "side_copies": 0
+  },
+  "Glarb, Calamity's Augur": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Glaring Fleshraker": {
+   "deck_share": 0.08113413304252999,
+   "decks": 372,
+   "main_copies": 1440,
+   "side_copies": 20
+  },
+  "Glass Casket": {
+   "deck_share": 0.008724100327153763,
+   "decks": 40,
+   "main_copies": 62,
+   "side_copies": 0
+  },
+  "Glimmervoid": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 44,
+   "side_copies": 0
+  },
+  "Glimpse the Impossible": {
+   "deck_share": 0.02682660850599782,
+   "decks": 123,
+   "main_copies": 306,
+   "side_copies": 0
+  },
+  "Glimpse the Unthinkable": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 55,
+   "side_copies": 0
+  },
+  "Glittering Wish": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 168,
+   "side_copies": 0
+  },
+  "Gloomlake Verge": {
+   "deck_share": 0.011123227917121047,
+   "decks": 51,
+   "main_copies": 74,
+   "side_copies": 0
+  },
+  "Go for the Throat": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "Goblin Bombardment": {
+   "deck_share": 0.17295528898582332,
+   "decks": 793,
+   "main_copies": 2363,
+   "side_copies": 0
+  },
+  "Goblin Charbelcher": {
+   "deck_share": 0.044929116684841876,
+   "decks": 206,
+   "main_copies": 824,
+   "side_copies": 0
+  },
+  "Goblin Guide": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 91,
+   "side_copies": 0
+  },
+  "Goblin Lore": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 80,
+   "side_copies": 0
+  },
+  "God-Pharaoh's Gift": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 15,
+   "side_copies": 0
+  },
+  "Godless Shrine": {
+   "deck_share": 0.11821155943293347,
+   "decks": 542,
+   "main_copies": 885,
+   "side_copies": 1
+  },
+  "Golgari Rot Farm": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Golgari Thug": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Gonti's Machinations": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 36,
+   "side_copies": 0
+  },
+  "Goryo's Vengeance": {
+   "deck_share": 0.023991275899672846,
+   "decks": 110,
+   "main_copies": 440,
+   "side_copies": 0
+  },
+  "Grafdigger's Cage": {
+   "deck_share": 0.07982551799345693,
+   "decks": 366,
+   "main_copies": 9,
+   "side_copies": 432
+  },
+  "Grapeshot": {
+   "deck_share": 0.03009814612868048,
+   "decks": 138,
+   "main_copies": 115,
+   "side_copies": 127
+  },
+  "Gravecrawler": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Graveyard Trespasser // Graveyard Glutton": {
+   "deck_share": 0.026172300981461286,
+   "decks": 120,
+   "main_copies": 69,
+   "side_copies": 82
+  },
+  "Great Arashin City": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Green Sun's Zenith": {
+   "deck_share": 0.029443838604143947,
+   "decks": 135,
+   "main_copies": 221,
+   "side_copies": 86
+  },
+  "Griselbrand": {
+   "deck_share": 0.05605234460196292,
+   "decks": 257,
+   "main_copies": 375,
+   "side_copies": 1
+  },
+  "Grist, the Hunger Tide": {
+   "deck_share": 0.016357688113413305,
+   "decks": 75,
+   "main_copies": 117,
+   "side_copies": 17
+  },
+  "Grove of the Burnwillows": {
+   "deck_share": 0.04013086150490731,
+   "decks": 184,
+   "main_copies": 577,
+   "side_copies": 0
+  },
+  "Gruul Turf": {
+   "deck_share": 0.03751363140676118,
+   "decks": 172,
+   "main_copies": 606,
+   "side_copies": 0
+  },
+  "Gryff's Boon": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Guide of Souls": {
+   "deck_share": 0.1821155943293348,
+   "decks": 835,
+   "main_copies": 3339,
+   "side_copies": 0
+  },
+  "Gut Shot": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 21,
+   "side_copies": 3
+  },
+  "Guttural Response": {
+   "deck_share": 0.007633587786259542,
+   "decks": 35,
+   "main_copies": 0,
+   "side_copies": 37
+  },
+  "Hall of Storm Giants": {
+   "deck_share": 0.017011995637949837,
+   "decks": 78,
+   "main_copies": 78,
+   "side_copies": 0
+  },
+  "Hallowed Fountain": {
+   "deck_share": 0.20130861504907308,
+   "decks": 923,
+   "main_copies": 1173,
+   "side_copies": 0
+  },
+  "Hallowed Moonlight": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 4
+  },
+  "Halo Forager": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Hanweir Battlements": {
+   "deck_share": 0.037295528898582335,
+   "decks": 171,
+   "main_copies": 171,
+   "side_copies": 0
+  },
+  "Hapatra, Vizier of Poisons": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Harbinger of the Seas": {
+   "deck_share": 0.1138495092693566,
+   "decks": 522,
+   "main_copies": 214,
+   "side_copies": 1049
+  },
+  "Hardened Scales": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 48,
+   "side_copies": 0
+  },
+  "Harvester of Misery": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 6,
+   "side_copies": 52
+  },
+  "Haywire Mite": {
+   "deck_share": 0.11646673936750272,
+   "decks": 534,
+   "main_copies": 376,
+   "side_copies": 292
+  },
+  "Hedge Maze": {
+   "deck_share": 0.07480916030534351,
+   "decks": 343,
+   "main_copies": 380,
+   "side_copies": 0
+  },
+  "Hedron Archive": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 8,
+   "side_copies": 0
+  },
+  "Hedron Crab": {
+   "deck_share": 0.00697928026172301,
+   "decks": 32,
+   "main_copies": 126,
+   "side_copies": 0
+  },
+  "Helga, Skittish Seer": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 44,
+   "side_copies": 0
+  },
+  "Heliod, Sun-Crowned": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Herigast, Erupting Nullkite": {
+   "deck_share": 0.016793893129770993,
+   "decks": 77,
+   "main_copies": 254,
+   "side_copies": 0
+  },
+  "Heritage Reclamation": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 1,
+   "side_copies": 14
+  },
+  "Hexdrinker": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 0,
+   "side_copies": 25
+  },
+  "Hidetsugu Consumes All // Vessel of the All-Consuming": {
+   "deck_share": 0.006543075245365322,
+   "decks": 30,
+   "main_copies": 0,
+   "side_copies": 51
+  },
+  "High Noon": {
+   "deck_share": 0.10076335877862595,
+   "decks": 462,
+   "main_copies": 2,
+   "side_copies": 882
+  },
+  "Highway Robbery": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 23,
+   "side_copies": 0
+  },
+  "Hive of the Eye Tyrant": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Hollow One": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 132,
+   "side_copies": 0
+  },
+  "Hooting Mandrills": {
+   "deck_share": 0.01395856052344602,
+   "decks": 64,
+   "main_copies": 87,
+   "side_copies": 20
+  },
+  "Hope of Ghirapur": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 5
+  },
+  "Hope-Ender Coatl": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 20,
+   "side_copies": 18
+  },
+  "Horizon Canopy": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 47,
+   "side_copies": 0
+  },
+  "Horned Loch-Whale // Lagoon Breach": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 2
+  },
+  "Hurkyl's Recall": {
+   "deck_share": 0.011559432933478735,
+   "decks": 53,
+   "main_copies": 1,
+   "side_copies": 79
+  },
+  "Hydroelectric Specimen // Hydroelectric Laboratory": {
+   "deck_share": 0.034023991275899675,
+   "decks": 156,
+   "main_copies": 621,
+   "side_copies": 0
+  },
+  "Hyena Umbra": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Ice-Fang Coatl": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Ideas Unbound": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Idyllic Grange": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Ifnir Deadlands": {
+   "deck_share": 0.007851690294438387,
+   "decks": 36,
+   "main_copies": 142,
+   "side_copies": 0
+  },
+  "Ignoble Hierarch": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Illness in the Ranks": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 10
+  },
+  "Indatha Triome": {
+   "deck_share": 0.03751363140676118,
+   "decks": 172,
+   "main_copies": 172,
+   "side_copies": 0
+  },
+  "Indomitable Creativity": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 56,
+   "side_copies": 0
+  },
+  "Inevitable Betrayal": {
+   "deck_share": 0.02202835332606325,
+   "decks": 101,
+   "main_copies": 0,
+   "side_copies": 207
+  },
+  "Ingenious Smith": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 38,
+   "side_copies": 0
+  },
+  "Inkmoth Nexus": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 84,
+   "side_copies": 0
+  },
+  "Inquisition of Kozilek": {
+   "deck_share": 0.02857142857142857,
+   "decks": 131,
+   "main_copies": 219,
+   "side_copies": 15
+  },
+  "Insidious Fungus": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 3,
+   "side_copies": 10
+  },
+  "Inspiring Vantage": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 74,
+   "side_copies": 0
+  },
+  "Inti, Seneschal of the Sun": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 8,
+   "side_copies": 0
+  },
+  "Into the Flood Maw": {
+   "deck_share": 0.10272628135223555,
+   "decks": 471,
+   "main_copies": 96,
+   "side_copies": 783
+  },
+  "Inventors' Fair": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 8,
+   "side_copies": 0
+  },
+  "Invert Polarity": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 16,
+   "side_copies": 1
+  },
+  "Irencrag Feat": {
+   "deck_share": 0.011559432933478735,
+   "decks": 53,
+   "main_copies": 209,
+   "side_copies": 0
+  },
+  "Iridescent Vinelasher": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 44,
+   "side_copies": 0
+  },
+  "Island": {
+   "deck_share": 0.25866957470010904,
+   "decks": 1186,
+   "main_copies": 1746,
+   "side_copies": 92
+  },
+  "Isochron Scepter": {
+   "deck_share": 0.014830970556161395,
+   "decks": 68,
+   "main_copies": 46,
+   "side_copies": 67
+  },
+  "It That Heralds the End": {
+   "deck_share": 0.02050163576881134,
+   "decks": 94,
+   "main_copies": 311,
+   "side_copies": 0
+  },
+  "Jace, Vryn's Prodigy // Jace, Telepath Unbound": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 24,
+   "side_copies": 0
+  },
+  "Jace, Wielder of Mysteries": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 10,
+   "side_copies": 1
+  },
+  "Jace, the Mind Sculptor": {
+   "deck_share": 0.03794983642311887,
+   "decks": 174,
+   "main_copies": 54,
+   "side_copies": 149
+  },
+  "Jace, the Perfected Mind": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 19,
+   "side_copies": 0
+  },
+  "Jeskai Ascendancy": {
+   "deck_share": 0.014612868047982551,
+   "decks": 67,
+   "main_copies": 142,
+   "side_copies": 0
+  },
+  "Jolted Awake": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 31,
+   "side_copies": 0
+  },
+  "Jwari Disruption // Jwari Ruins": {
+   "deck_share": 0.03358778625954199,
+   "decks": 154,
+   "main_copies": 431,
+   "side_copies": 0
+  },
+  "Kaheera, the Orphanguard": {
+   "deck_share": 0.011559432933478735,
+   "decks": 53,
+   "main_copies": 0,
+   "side_copies": 53
+  },
+  "Kaito, Bane of Nightmares": {
+   "deck_share": 0.0440567066521265,
+   "decks": 202,
+   "main_copies": 265,
+   "side_copies": 92
+  },
+  "Kaldra Compleat": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 5,
+   "side_copies": 1
+  },
+  "Kappa Cannoneer": {
+   "deck_share": 0.03685932388222465,
+   "decks": 169,
+   "main_copies": 606,
+   "side_copies": 17
+  },
+  "Karn Liberated": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 1,
+   "side_copies": 13
+  },
+  "Karn, the Great Creator": {
+   "deck_share": 0.04798255179934569,
+   "decks": 220,
+   "main_copies": 823,
+   "side_copies": 2
+  },
+  "Karplusan Forest": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Kassandra, Eagle Bearer": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Kataki, War's Wage": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 0,
+   "side_copies": 22
+  },
+  "Kaya, Orzhov Usurper": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 30,
+   "side_copies": 5
+  },
+  "Keen-Eyed Curator": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 1,
+   "side_copies": 3
+  },
+  "Keruga, the Macrosage": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 0,
+   "side_copies": 16
+  },
+  "Ketramose, the New Dawn": {
+   "deck_share": 0.064340239912759,
+   "decks": 295,
+   "main_copies": 769,
+   "side_copies": 83
+  },
+  "Kin-Tree Severance": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 3
+  },
+  "Kiora, the Rising Tide": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Kira, Great Glass-Spinner": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Knight of Autumn": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Kolaghan's Command": {
+   "deck_share": 0.009378407851690295,
+   "decks": 43,
+   "main_copies": 24,
+   "side_copies": 45
+  },
+  "Koma, World-Eater": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 4,
+   "side_copies": 14
+  },
+  "Korvold, Fae-Cursed King": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Kozilek's Command": {
+   "deck_share": 0.16859323882224644,
+   "decks": 773,
+   "main_copies": 3088,
+   "side_copies": 0
+  },
+  "Kozilek's Return": {
+   "deck_share": 0.05932388222464558,
+   "decks": 272,
+   "main_copies": 710,
+   "side_copies": 222
+  },
+  "Kozilek, Butcher of Truth": {
+   "deck_share": 0.014176663031624863,
+   "decks": 65,
+   "main_copies": 0,
+   "side_copies": 65
+  },
+  "Lantern of Insight": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Late to Dinner": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 59,
+   "side_copies": 0
+  },
+  "Lava Dart": {
+   "deck_share": 0.08745910577971647,
+   "decks": 401,
+   "main_copies": 1590,
+   "side_copies": 1
+  },
+  "Lava Spike": {
+   "deck_share": 0.00697928026172301,
+   "decks": 32,
+   "main_copies": 128,
+   "side_copies": 0
+  },
+  "Lavaspur Boots": {
+   "deck_share": 0.040567066521264995,
+   "decks": 186,
+   "main_copies": 186,
+   "side_copies": 0
+  },
+  "Lavinia, Azorius Renegade": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 1,
+   "side_copies": 16
+  },
+  "Ledger Shredder": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 5,
+   "side_copies": 23
+  },
+  "Legion Leadership // Legion Stronghold": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 36,
+   "side_copies": 4
+  },
+  "Leonin Arbiter": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 17,
+   "side_copies": 5
+  },
+  "Leyline Binding": {
+   "deck_share": 0.07066521264994548,
+   "decks": 324,
+   "main_copies": 1276,
+   "side_copies": 0
+  },
+  "Leyline of Sanctity": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 0,
+   "side_copies": 45
+  },
+  "Leyline of the Guildpact": {
+   "deck_share": 0.06019629225736096,
+   "decks": 276,
+   "main_copies": 1104,
+   "side_copies": 0
+  },
+  "Leyline of the Void": {
+   "deck_share": 0.006543075245365322,
+   "decks": 30,
+   "main_copies": 0,
+   "side_copies": 110
+  },
+  "Light Up the Stage": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Light of Hope": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 1,
+   "side_copies": 8
+  },
+  "Light-Paws, Emperor's Voice": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Lightning Bolt": {
+   "deck_share": 0.2113413304252999,
+   "decks": 969,
+   "main_copies": 3300,
+   "side_copies": 199
+  },
+  "Lightning Helix": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 35,
+   "side_copies": 0
+  },
+  "Liliana of the Veil": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 10,
+   "side_copies": 2
+  },
+  "Liliana, the Last Hope": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Lion Sash": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 3,
+   "side_copies": 2
+  },
+  "Liquimetal Coating": {
+   "deck_share": 0.04558342420937841,
+   "decks": 209,
+   "main_copies": 0,
+   "side_copies": 209
+  },
+  "Lithomantic Barrage": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Living End": {
+   "deck_share": 0.021592148309705562,
+   "decks": 99,
+   "main_copies": 299,
+   "side_copies": 0
+  },
+  "Long Goodbye": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 11
+  },
+  "Lord of Atlantis": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Lotus Bloom": {
+   "deck_share": 0.03358778625954199,
+   "decks": 154,
+   "main_copies": 616,
+   "side_copies": 0
+  },
+  "Lotus Field": {
+   "deck_share": 0.03816793893129771,
+   "decks": 175,
+   "main_copies": 360,
+   "side_copies": 0
+  },
+  "Lumra, Bellow of the Woods": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 7,
+   "side_copies": 2
+  },
+  "Lush Portico": {
+   "deck_share": 0.0752453653217012,
+   "decks": 345,
+   "main_copies": 351,
+   "side_copies": 0
+  },
+  "L\u00f3rien Revealed": {
+   "deck_share": 0.0331515812431843,
+   "decks": 152,
+   "main_copies": 244,
+   "side_copies": 0
+  },
+  "Machine Over Matter": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 5
+  },
+  "Magda, Brazen Outlaw": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Magebane Lizard": {
+   "deck_share": 0.03227917121046892,
+   "decks": 148,
+   "main_copies": 0,
+   "side_copies": 312
+  },
+  "Magmatic Hellkite": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 21,
+   "side_copies": 0
+  },
+  "Magnetic Theft": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Magus of the Moon": {
+   "deck_share": 0.022464558342420938,
+   "decks": 103,
+   "main_copies": 18,
+   "side_copies": 182
+  },
+  "Malevolent Rumble": {
+   "deck_share": 0.1193020719738277,
+   "decks": 547,
+   "main_copies": 2121,
+   "side_copies": 0
+  },
+  "Mana Tithe": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 13,
+   "side_copies": 3
+  },
+  "Manamorphose": {
+   "deck_share": 0.03904034896401309,
+   "decks": 179,
+   "main_copies": 715,
+   "side_copies": 0
+  },
+  "Marauding Mako": {
+   "deck_share": 0.007415485278080698,
+   "decks": 34,
+   "main_copies": 136,
+   "side_copies": 0
+  },
+  "March of Otherworldly Light": {
+   "deck_share": 0.05561613958560523,
+   "decks": 255,
+   "main_copies": 311,
+   "side_copies": 136
+  },
+  "March of Reckless Joy": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 21,
+   "side_copies": 0
+  },
+  "March of Wretched Sorrow": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 52,
+   "side_copies": 0
+  },
+  "Marionette Apprentice": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 41,
+   "side_copies": 0
+  },
+  "Marsh Flats": {
+   "deck_share": 0.29422028353326063,
+   "decks": 1349,
+   "main_copies": 4588,
+   "side_copies": 0
+  },
+  "Master of the Pearl Trident": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Mazemind Tome": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Meddling Mage": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 9,
+   "side_copies": 6
+  },
+  "Meltdown": {
+   "deck_share": 0.0732824427480916,
+   "decks": 336,
+   "main_copies": 0,
+   "side_copies": 457
+  },
+  "Memnite": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 57,
+   "side_copies": 0
+  },
+  "Memory Deluge": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Memory Guardian": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Metallic Rebuke": {
+   "deck_share": 0.051472191930207196,
+   "decks": 236,
+   "main_copies": 685,
+   "side_copies": 54
+  },
+  "Meticulous Archive": {
+   "deck_share": 0.14896401308615048,
+   "decks": 683,
+   "main_copies": 789,
+   "side_copies": 0
+  },
+  "Michiko's Reign of Truth // Portrait of Michiko": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Mikokoro, Center of the Sea": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Mind Grind": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Mind Stone": {
+   "deck_share": 0.013086150490730643,
+   "decks": 60,
+   "main_copies": 189,
+   "side_copies": 7
+  },
+  "Mindspring Merfolk": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Mine Collapse": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 0,
+   "side_copies": 14
+  },
+  "Mirrorpool": {
+   "deck_share": 0.03751363140676118,
+   "decks": 172,
+   "main_copies": 172,
+   "side_copies": 0
+  },
+  "Mishra's Bauble": {
+   "deck_share": 0.1757906215921483,
+   "decks": 806,
+   "main_copies": 3174,
+   "side_copies": 0
+  },
+  "Mishra's Research Desk": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Mistrise Village": {
+   "deck_share": 0.01723009814612868,
+   "decks": 79,
+   "main_copies": 76,
+   "side_copies": 7
+  },
+  "Mistvault Bridge": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Misty Rainforest": {
+   "deck_share": 0.13827699018538714,
+   "decks": 634,
+   "main_copies": 1703,
+   "side_copies": 0
+  },
+  "Mockingbird": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Molten Collapse": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 7,
+   "side_copies": 7
+  },
+  "Molten Rain": {
+   "deck_share": 0.15114503816793892,
+   "decks": 693,
+   "main_copies": 0,
+   "side_copies": 2423
+  },
+  "Monastery Swiftspear": {
+   "deck_share": 0.09334787350054526,
+   "decks": 428,
+   "main_copies": 1707,
+   "side_copies": 0
+  },
+  "Monstrous Rage": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Monument to Endurance": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 15,
+   "side_copies": 0
+  },
+  "Monumental Henge": {
+   "deck_share": 0.013740458015267175,
+   "decks": 63,
+   "main_copies": 65,
+   "side_copies": 0
+  },
+  "Moonsnare Prototype": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 40,
+   "side_copies": 0
+  },
+  "Mothdust Changeling": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Mount Doom": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Mountain": {
+   "deck_share": 0.4451472191930207,
+   "decks": 2041,
+   "main_copies": 3028,
+   "side_copies": 171
+  },
+  "Mox Amber": {
+   "deck_share": 0.05714285714285714,
+   "decks": 262,
+   "main_copies": 674,
+   "side_copies": 0
+  },
+  "Mox Jasper": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Mox Opal": {
+   "deck_share": 0.07938931297709924,
+   "decks": 364,
+   "main_copies": 1413,
+   "side_copies": 1
+  },
+  "Murderous Cut": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 13,
+   "side_copies": 1
+  },
+  "Murktide Regent": {
+   "deck_share": 0.06673936750272629,
+   "decks": 306,
+   "main_copies": 757,
+   "side_copies": 14
+  },
+  "Mutagenic Growth": {
+   "deck_share": 0.08309705561613959,
+   "decks": 381,
+   "main_copies": 1464,
+   "side_copies": 2
+  },
+  "Mutavault": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Mystic Forge": {
+   "deck_share": 0.025081788440567066,
+   "decks": 115,
+   "main_copies": 92,
+   "side_copies": 103
+  },
+  "Mystic Gate": {
+   "deck_share": 0.027044711014176662,
+   "decks": 124,
+   "main_copies": 192,
+   "side_copies": 0
+  },
+  "Mystical Dispute": {
+   "deck_share": 0.17535441657579062,
+   "decks": 804,
+   "main_copies": 1,
+   "side_copies": 1547
+  },
+  "Narcomoeba": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Narset, Jeskai Waymaster": {
+   "deck_share": 0.013304252998909487,
+   "decks": 61,
+   "main_copies": 145,
+   "side_copies": 1
+  },
+  "Narset, Parter of Veils": {
+   "deck_share": 0.017448200654307525,
+   "decks": 80,
+   "main_copies": 272,
+   "side_copies": 9
+  },
+  "Natural State": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 9
+  },
+  "Nature's Chant": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 0,
+   "side_copies": 21
+  },
+  "Nature's Claim": {
+   "deck_share": 0.048636859323882224,
+   "decks": 223,
+   "main_copies": 0,
+   "side_copies": 436
+  },
+  "Necrodominance": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 92,
+   "side_copies": 0
+  },
+  "Necromentia": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 12
+  },
+  "Negate": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Neoform": {
+   "deck_share": 0.03336968375136314,
+   "decks": 153,
+   "main_copies": 570,
+   "side_copies": 42
+  },
+  "Nethergoyf": {
+   "deck_share": 0.014830970556161395,
+   "decks": 68,
+   "main_copies": 264,
+   "side_copies": 0
+  },
+  "Nihil Spellbomb": {
+   "deck_share": 0.11581243184296619,
+   "decks": 531,
+   "main_copies": 91,
+   "side_copies": 821
+  },
+  "Nishoba Brawler": {
+   "deck_share": 0.01984732824427481,
+   "decks": 91,
+   "main_copies": 199,
+   "side_copies": 0
+  },
+  "No More Lies": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 7,
+   "side_copies": 0
+  },
+  "Noble Hierarch": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Nourishing Shoal": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 75,
+   "side_copies": 0
+  },
+  "Noxious Revival": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 37,
+   "side_copies": 1
+  },
+  "Null Elemental Blast": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 0,
+   "side_copies": 20
+  },
+  "Nulldrifter": {
+   "deck_share": 0.028789531079607415,
+   "decks": 132,
+   "main_copies": 369,
+   "side_copies": 1
+  },
+  "Nurturing Peatland": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 21,
+   "side_copies": 0
+  },
+  "Ob Nixilis, the Adversary": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 8,
+   "side_copies": 3
+  },
+  "Oblivion Sower": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 21
+  },
+  "Oboro, Palace in the Clouds": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 28,
+   "side_copies": 0
+  },
+  "Obsidian Charmaw": {
+   "deck_share": 0.10926935659760087,
+   "decks": 501,
+   "main_copies": 2,
+   "side_copies": 972
+  },
+  "Ocelot Pride": {
+   "deck_share": 0.1812431842966194,
+   "decks": 831,
+   "main_copies": 3324,
+   "side_copies": 0
+  },
+  "Omnath, Locus of Creation": {
+   "deck_share": 0.008724100327153763,
+   "decks": 40,
+   "main_copies": 131,
+   "side_copies": 0
+  },
+  "On Thin Ice": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 4,
+   "side_copies": 6
+  },
+  "One with the Multiverse": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Orcish Bowmasters": {
+   "deck_share": 0.11254089422028353,
+   "decks": 516,
+   "main_copies": 1430,
+   "side_copies": 72
+  },
+  "Orim's Chant": {
+   "deck_share": 0.2510359869138495,
+   "decks": 1151,
+   "main_copies": 293,
+   "side_copies": 2239
+  },
+  "Ornithopter": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 101,
+   "side_copies": 1
+  },
+  "Otawara, Soaring City": {
+   "deck_share": 0.1515812431842966,
+   "decks": 695,
+   "main_copies": 704,
+   "side_copies": 109
+  },
+  "Otherworldly Gaze": {
+   "deck_share": 0.009378407851690295,
+   "decks": 43,
+   "main_copies": 113,
+   "side_copies": 0
+  },
+  "Outland Liberator // Frenzied Trapbreaker": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 7,
+   "side_copies": 19
+  },
+  "Ovalchase Daredevil": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Overgrown Tomb": {
+   "deck_share": 0.03467829880043621,
+   "decks": 159,
+   "main_copies": 239,
+   "side_copies": 0
+  },
+  "Overlord of the Balemurk": {
+   "deck_share": 0.07350054525627045,
+   "decks": 337,
+   "main_copies": 1308,
+   "side_copies": 0
+  },
+  "Ox of Agonas": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 25,
+   "side_copies": 0
+  },
+  "Pact of Negation": {
+   "deck_share": 0.02900763358778626,
+   "decks": 133,
+   "main_copies": 235,
+   "side_copies": 112
+  },
+  "Paradise Mantle": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Paradox Engine": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 1,
+   "side_copies": 19
+  },
+  "Past in Flames": {
+   "deck_share": 0.027699018538713194,
+   "decks": 127,
+   "main_copies": 372,
+   "side_copies": 125
+  },
+  "Patchwork Automaton": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 7,
+   "side_copies": 8
+  },
+  "Patchwork Beastie": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 18,
+   "side_copies": 0
+  },
+  "Path to Exile": {
+   "deck_share": 0.02093784078516903,
+   "decks": 96,
+   "main_copies": 189,
+   "side_copies": 73
+  },
+  "Pawpatch Formation": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 24,
+   "side_copies": 3
+  },
+  "Peer Through Depths": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Persist": {
+   "deck_share": 0.008505997818974919,
+   "decks": 39,
+   "main_copies": 153,
+   "side_copies": 0
+  },
+  "Pest Control": {
+   "deck_share": 0.042748091603053436,
+   "decks": 196,
+   "main_copies": 124,
+   "side_copies": 224
+  },
+  "Phelia, Exuberant Shepherd": {
+   "deck_share": 0.07110141766630317,
+   "decks": 326,
+   "main_copies": 1131,
+   "side_copies": 0
+  },
+  "Phlage, Titan of Fire's Fury": {
+   "deck_share": 0.2791712104689204,
+   "decks": 1280,
+   "main_copies": 4379,
+   "side_copies": 202
+  },
+  "Phyrexian Metamorph": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 3,
+   "side_copies": 6
+  },
+  "Phyrexian Tower": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Pick Your Poison": {
+   "deck_share": 0.013522355507088331,
+   "decks": 62,
+   "main_copies": 0,
+   "side_copies": 128
+  },
+  "Picklock Prankster // Free the Fae": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Pillage": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 7,
+   "side_copies": 13
+  },
+  "Pinnacle Monk // Mystic Peak": {
+   "deck_share": 0.011341330425299891,
+   "decks": 52,
+   "main_copies": 208,
+   "side_copies": 0
+  },
+  "Pithing Needle": {
+   "deck_share": 0.13544165757906215,
+   "decks": 621,
+   "main_copies": 220,
+   "side_copies": 484
+  },
+  "Plague Engineer": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 8
+  },
+  "Plains": {
+   "deck_share": 0.386041439476554,
+   "decks": 1770,
+   "main_copies": 3273,
+   "side_copies": 2
+  },
+  "Planar Genesis": {
+   "deck_share": 0.022682660850599782,
+   "decks": 104,
+   "main_copies": 335,
+   "side_copies": 0
+  },
+  "Plaza of Heroes": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Polluted Delta": {
+   "deck_share": 0.1474372955288986,
+   "decks": 676,
+   "main_copies": 2374,
+   "side_copies": 0
+  },
+  "Portable Hole": {
+   "deck_share": 0.07808069792802617,
+   "decks": 358,
+   "main_copies": 891,
+   "side_copies": 150
+  },
+  "Portent of Calamity": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 108,
+   "side_copies": 0
+  },
+  "Power Conduit": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 8,
+   "side_copies": 4
+  },
+  "Preordain": {
+   "deck_share": 0.14482006543075246,
+   "decks": 664,
+   "main_copies": 2405,
+   "side_copies": 0
+  },
+  "Press the Enemy": {
+   "deck_share": 0.01723009814612868,
+   "decks": 79,
+   "main_copies": 79,
+   "side_copies": 0
+  },
+  "Primeval Titan": {
+   "deck_share": 0.03816793893129771,
+   "decks": 175,
+   "main_copies": 698,
+   "side_copies": 1
+  },
+  "Prismatic Ending": {
+   "deck_share": 0.13195201744820065,
+   "decks": 605,
+   "main_copies": 988,
+   "side_copies": 587
+  },
+  "Prismatic Vista": {
+   "deck_share": 0.03446019629225736,
+   "decks": 158,
+   "main_copies": 582,
+   "side_copies": 0
+  },
+  "Prized Amalgam": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Profane Tutor": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 29,
+   "side_copies": 0
+  },
+  "Propaganda": {
+   "deck_share": 0.012213740458015267,
+   "decks": 56,
+   "main_copies": 3,
+   "side_copies": 71
+  },
+  "Prosperous Innkeeper": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 25,
+   "side_copies": 0
+  },
+  "Psychic Frog": {
+   "deck_share": 0.12104689203925845,
+   "decks": 555,
+   "main_copies": 2196,
+   "side_copies": 0
+  },
+  "Psychic Puppetry": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Puresteel Paladin": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 100,
+   "side_copies": 0
+  },
+  "Pyretic Ritual": {
+   "deck_share": 0.0386041439476554,
+   "decks": 177,
+   "main_copies": 702,
+   "side_copies": 0
+  },
+  "Pyrite Spellbomb": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 7,
+   "side_copies": 3
+  },
+  "Pyroclasm": {
+   "deck_share": 0.12497273718647764,
+   "decks": 573,
+   "main_copies": 0,
+   "side_copies": 1070
+  },
+  "Pyxis of Pandemonium": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Questing Druid // Seek the Beast": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 34,
+   "side_copies": 2
+  },
+  "Radiant Fountain": {
+   "deck_share": 0.010687022900763359,
+   "decks": 49,
+   "main_copies": 0,
+   "side_copies": 49
+  },
+  "Raffine's Tower": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Ragavan, Nimble Pilferer": {
+   "deck_share": 0.24143947655398038,
+   "decks": 1107,
+   "main_copies": 3610,
+   "side_copies": 38
+  },
+  "Rain of Gore": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 0,
+   "side_copies": 35
+  },
+  "Rakdos Charm": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 4,
+   "side_copies": 36
+  },
+  "Rakshasa's Bargain": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 50,
+   "side_copies": 0
+  },
+  "Ral, Crackling Wit": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 0,
+   "side_copies": 13
+  },
+  "Ral, Monsoon Mage // Ral, Leyline Prodigy": {
+   "deck_share": 0.02682660850599782,
+   "decks": 123,
+   "main_copies": 492,
+   "side_copies": 0
+  },
+  "Rancor": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Ranger-Captain of Eos": {
+   "deck_share": 0.013740458015267175,
+   "decks": 63,
+   "main_copies": 134,
+   "side_copies": 0
+  },
+  "Ratchet Bomb": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 2,
+   "side_copies": 14
+  },
+  "Raucous Theater": {
+   "deck_share": 0.030534351145038167,
+   "decks": 140,
+   "main_copies": 148,
+   "side_copies": 0
+  },
+  "Raugrin Triome": {
+   "deck_share": 0.006543075245365322,
+   "decks": 30,
+   "main_copies": 30,
+   "side_copies": 0
+  },
+  "Ray of Enfeeblement": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 3
+  },
+  "Razorgrass Ambush // Razorgrass Field": {
+   "deck_share": 0.021592148309705562,
+   "decks": 99,
+   "main_copies": 99,
+   "side_copies": 0
+  },
+  "Razortide Bridge": {
+   "deck_share": 0.03271537622682661,
+   "decks": 150,
+   "main_copies": 466,
+   "side_copies": 0
+  },
+  "Razorverge Thicket": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Reach Through Mists": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Rebel Salvo": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 10
+  },
+  "Reckless Impulse": {
+   "deck_share": 0.026608505997818974,
+   "decks": 122,
+   "main_copies": 488,
+   "side_copies": 0
+  },
+  "Reclamation Sage": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "Recruiter of the Guard": {
+   "deck_share": 0.025517993456924754,
+   "decks": 117,
+   "main_copies": 256,
+   "side_copies": 0
+  },
+  "Rediscover the Way": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 14,
+   "side_copies": 10
+  },
+  "Relic of Progenitus": {
+   "deck_share": 0.07284623773173392,
+   "decks": 334,
+   "main_copies": 584,
+   "side_copies": 132
+  },
+  "Renegade Rallier": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 29,
+   "side_copies": 1
+  },
+  "Repeal": {
+   "deck_share": 0.018102508178844057,
+   "decks": 83,
+   "main_copies": 299,
+   "side_copies": 3
+  },
+  "Reprieve": {
+   "deck_share": 0.008942202835332607,
+   "decks": 41,
+   "main_copies": 124,
+   "side_copies": 17
+  },
+  "Repudiate // Replicate": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 18,
+   "side_copies": 3
+  },
+  "Rest in Peace": {
+   "deck_share": 0.021592148309705562,
+   "decks": 99,
+   "main_copies": 0,
+   "side_copies": 168
+  },
+  "Return the Favor": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 11
+  },
+  "Revitalizing Repast // Old-Growth Grove": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Rift Bolt": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 100,
+   "side_copies": 0
+  },
+  "Rip Apart": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Risen Reef": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Riverpyre Verge": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 15,
+   "side_copies": 0
+  },
+  "Roiling Vortex": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 3,
+   "side_copies": 16
+  },
+  "Rough // Tumble": {
+   "deck_share": 0.01766630316248637,
+   "decks": 81,
+   "main_copies": 6,
+   "side_copies": 160
+  },
+  "Roxanne, Starfall Savant": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Ruby Medallion": {
+   "deck_share": 0.03773173391494002,
+   "decks": 173,
+   "main_copies": 692,
+   "side_copies": 0
+  },
+  "Ruin Crab": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 108,
+   "side_copies": 0
+  },
+  "Rule of Law": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Sacred Foundry": {
+   "deck_share": 0.3179934569247546,
+   "decks": 1458,
+   "main_copies": 3106,
+   "side_copies": 2
+  },
+  "Samwise Gamgee": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 88,
+   "side_copies": 0
+  },
+  "Sanctifier en-Vec": {
+   "deck_share": 0.017884405670665213,
+   "decks": 82,
+   "main_copies": 4,
+   "side_copies": 158
+  },
+  "Sanctum Prelate": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 10
+  },
+  "Sanctum of Ugin": {
+   "deck_share": 0.05256270447110142,
+   "decks": 241,
+   "main_copies": 293,
+   "side_copies": 0
+  },
+  "Sauron's Ransom": {
+   "deck_share": 0.01941112322791712,
+   "decks": 89,
+   "main_copies": 97,
+   "side_copies": 3
+  },
+  "Savai Triome": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Scalding Tarn": {
+   "deck_share": 0.20959651035986915,
+   "decks": 961,
+   "main_copies": 2609,
+   "side_copies": 0
+  },
+  "Scale Up": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Scapeshift": {
+   "deck_share": 0.03707742639040349,
+   "decks": 170,
+   "main_copies": 643,
+   "side_copies": 0
+  },
+  "Scavenging Ooze": {
+   "deck_share": 0.015267175572519083,
+   "decks": 70,
+   "main_copies": 6,
+   "side_copies": 65
+  },
+  "Scion of Draco": {
+   "deck_share": 0.0604143947655398,
+   "decks": 277,
+   "main_copies": 1108,
+   "side_copies": 0
+  },
+  "Sea Gate Restoration // Sea Gate, Reborn": {
+   "deck_share": 0.03598691384950927,
+   "decks": 165,
+   "main_copies": 639,
+   "side_copies": 0
+  },
+  "Seachrome Coast": {
+   "deck_share": 0.014612868047982551,
+   "decks": 67,
+   "main_copies": 142,
+   "side_copies": 0
+  },
+  "Seal of Fire": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 24,
+   "side_copies": 0
+  },
+  "Seal of Removal": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 4,
+   "side_copies": 32
+  },
+  "Searing Blaze": {
+   "deck_share": 0.0063249727371864775,
+   "decks": 29,
+   "main_copies": 102,
+   "side_copies": 4
+  },
+  "Searing Blood": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 15
+  },
+  "Seasoned Pyromancer": {
+   "deck_share": 0.16510359869138494,
+   "decks": 757,
+   "main_copies": 2118,
+   "side_copies": 1
+  },
+  "Secluded Courtyard": {
+   "deck_share": 0.020719738276990186,
+   "decks": 95,
+   "main_copies": 247,
+   "side_copies": 0
+  },
+  "Selesnya Sanctuary": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Sentinel's Eyes": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Serra Paragon": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Severance Priest": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 11,
+   "side_copies": 3
+  },
+  "Sevinne's Reclamation": {
+   "deck_share": 0.007415485278080698,
+   "decks": 34,
+   "main_copies": 34,
+   "side_copies": 0
+  },
+  "Shadow of Doubt": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 2,
+   "side_copies": 2
+  },
+  "Shadowspear": {
+   "deck_share": 0.07502726281352236,
+   "decks": 344,
+   "main_copies": 294,
+   "side_copies": 50
+  },
+  "Shadowy Backstreet": {
+   "deck_share": 0.09443838604143948,
+   "decks": 433,
+   "main_copies": 660,
+   "side_copies": 0
+  },
+  "Shardless Agent": {
+   "deck_share": 0.024427480916030534,
+   "decks": 112,
+   "main_copies": 448,
+   "side_copies": 0
+  },
+  "Shardmage's Rescue": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Shatter Assumptions": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 0,
+   "side_copies": 61
+  },
+  "Shattering Spree": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 0,
+   "side_copies": 71
+  },
+  "Shatterskull Smashing // Shatterskull, the Hammer Pass": {
+   "deck_share": 0.011777535441657579,
+   "decks": 54,
+   "main_copies": 208,
+   "side_copies": 0
+  },
+  "Shelldock Isle": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 24,
+   "side_copies": 0
+  },
+  "Sheltered by Ghosts": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 24,
+   "side_copies": 0
+  },
+  "Sheoldred's Edict": {
+   "deck_share": 0.025517993456924754,
+   "decks": 117,
+   "main_copies": 95,
+   "side_copies": 69
+  },
+  "Sheoldred, the Apocalypse": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 42,
+   "side_copies": 3
+  },
+  "Shifting Woodland": {
+   "deck_share": 0.05714285714285714,
+   "decks": 262,
+   "main_copies": 301,
+   "side_copies": 0
+  },
+  "Shivan Reef": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Shizo, Death's Storehouse": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Shoot the Sheriff": {
+   "deck_share": 0.02857142857142857,
+   "decks": 131,
+   "main_copies": 75,
+   "side_copies": 67
+  },
+  "Showdown of the Skalds": {
+   "deck_share": 0.13544165757906215,
+   "decks": 621,
+   "main_copies": 25,
+   "side_copies": 953
+  },
+  "Shriekmaw": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Sigarda's Aid": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 96,
+   "side_copies": 0
+  },
+  "Silence": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 4,
+   "side_copies": 52
+  },
+  "Silverbluff Bridge": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Silvergill Adept": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Silversmote Ghoul": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 14,
+   "side_copies": 0
+  },
+  "Simic Growth Chamber": {
+   "deck_share": 0.03773173391494002,
+   "decks": 173,
+   "main_copies": 582,
+   "side_copies": 0
+  },
+  "Sink into Stupor // Soporific Springs": {
+   "deck_share": 0.15114503816793892,
+   "decks": 693,
+   "main_copies": 1562,
+   "side_copies": 0
+  },
+  "Sire of Seven Deaths": {
+   "deck_share": 0.06085059978189749,
+   "decks": 279,
+   "main_copies": 654,
+   "side_copies": 10
+  },
+  "Six": {
+   "deck_share": 0.0331515812431843,
+   "decks": 152,
+   "main_copies": 10,
+   "side_copies": 190
+  },
+  "Skewer the Critics": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 117,
+   "side_copies": 0
+  },
+  "Skullcrack": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 78,
+   "side_copies": 11
+  },
+  "Skyclave Apparition": {
+   "deck_share": 0.022682660850599782,
+   "decks": 104,
+   "main_copies": 210,
+   "side_copies": 5
+  },
+  "Skyfisher Spider": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 1,
+   "side_copies": 10
+  },
+  "Skysovereign, Consul Flagship": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 0,
+   "side_copies": 17
+  },
+  "Sleeper Agent": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Slickshot Show-Off": {
+   "deck_share": 0.08353326063249727,
+   "decks": 383,
+   "main_copies": 1508,
+   "side_copies": 0
+  },
+  "Slippery Bogle": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 23,
+   "side_copies": 0
+  },
+  "Smash to Smithereens": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 0,
+   "side_copies": 41
+  },
+  "Snapback": {
+   "deck_share": 0.025081788440567066,
+   "decks": 115,
+   "main_copies": 86,
+   "side_copies": 110
+  },
+  "Snapcaster Mage": {
+   "deck_share": 0.021155943293347874,
+   "decks": 97,
+   "main_copies": 266,
+   "side_copies": 9
+  },
+  "Snow-Covered Forest": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 13,
+   "side_copies": 2
+  },
+  "Snow-Covered Island": {
+   "deck_share": 0.004362050163576881,
+   "decks": 20,
+   "main_copies": 37,
+   "side_copies": 0
+  },
+  "Snow-Covered Mountain": {
+   "deck_share": 0.0056706652126499455,
+   "decks": 26,
+   "main_copies": 28,
+   "side_copies": 2
+  },
+  "Snow-Covered Plains": {
+   "deck_share": 0.0061068702290076335,
+   "decks": 28,
+   "main_copies": 65,
+   "side_copies": 0
+  },
+  "Snow-Covered Swamp": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Snow-Covered Wastes": {
+   "deck_share": 0.01395856052344602,
+   "decks": 64,
+   "main_copies": 64,
+   "side_copies": 0
+  },
+  "Solitude": {
+   "deck_share": 0.14089422028353327,
+   "decks": 646,
+   "main_copies": 2334,
+   "side_copies": 71
+  },
+  "Song of Creation": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 60,
+   "side_copies": 0
+  },
+  "Sorin of House Markov // Sorin, Ravenous Neonate": {
+   "deck_share": 0.0063249727371864775,
+   "decks": 29,
+   "main_copies": 67,
+   "side_copies": 0
+  },
+  "Soul Spike": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 92,
+   "side_copies": 0
+  },
+  "Soul-Guide Lantern": {
+   "deck_share": 0.14133042529989095,
+   "decks": 648,
+   "main_copies": 246,
+   "side_copies": 598
+  },
+  "Soul-Scar Mage": {
+   "deck_share": 0.003707742639040349,
+   "decks": 17,
+   "main_copies": 56,
+   "side_copies": 0
+  },
+  "Soulless Jailer": {
+   "deck_share": 0.06935659760087241,
+   "decks": 318,
+   "main_copies": 1,
+   "side_copies": 502
+  },
+  "Sovereign's Bite": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Sowing Mycospawn": {
+   "deck_share": 0.08702290076335878,
+   "decks": 399,
+   "main_copies": 1593,
+   "side_copies": 0
+  },
+  "Spara's Headquarters": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Spatial Contortion": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 0,
+   "side_copies": 16
+  },
+  "Spectral Denial": {
+   "deck_share": 0.01613958560523446,
+   "decks": 74,
+   "main_copies": 153,
+   "side_copies": 2
+  },
+  "Spell Pierce": {
+   "deck_share": 0.0935659760087241,
+   "decks": 429,
+   "main_copies": 69,
+   "side_copies": 821
+  },
+  "Spell Snare": {
+   "deck_share": 0.17448200654307525,
+   "decks": 800,
+   "main_copies": 1663,
+   "side_copies": 172
+  },
+  "Spellskite": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 8,
+   "side_copies": 17
+  },
+  "Spelunking": {
+   "deck_share": 0.03751363140676118,
+   "decks": 172,
+   "main_copies": 679,
+   "side_copies": 0
+  },
+  "Spike Feeder": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Spikefield Hazard // Spikefield Cave": {
+   "deck_share": 0.007851690294438387,
+   "decks": 36,
+   "main_copies": 135,
+   "side_copies": 0
+  },
+  "Spire of Industry": {
+   "deck_share": 0.03533260632497274,
+   "decks": 162,
+   "main_copies": 626,
+   "side_copies": 0
+  },
+  "Spirebluff Canal": {
+   "deck_share": 0.03489640130861505,
+   "decks": 160,
+   "main_copies": 271,
+   "side_copies": 0
+  },
+  "Spirit Mantle": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Split Up": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 7
+  },
+  "Spreading Seas": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 4,
+   "side_copies": 26
+  },
+  "Springleaf Drum": {
+   "deck_share": 0.04798255179934569,
+   "decks": 220,
+   "main_copies": 261,
+   "side_copies": 0
+  },
+  "Spymaster's Vault": {
+   "deck_share": 0.00806979280261723,
+   "decks": 37,
+   "main_copies": 72,
+   "side_copies": 0
+  },
+  "Static Prison": {
+   "deck_share": 0.16902944383860413,
+   "decks": 775,
+   "main_copies": 1558,
+   "side_copies": 28
+  },
+  "Steam Vents": {
+   "deck_share": 0.22399127589967285,
+   "decks": 1027,
+   "main_copies": 1992,
+   "side_copies": 0
+  },
+  "Steamcore Scholar": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 50,
+   "side_copies": 0
+  },
+  "Steelshaper's Gift": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 38,
+   "side_copies": 0
+  },
+  "Stern Scolding": {
+   "deck_share": 0.11297709923664122,
+   "decks": 518,
+   "main_copies": 381,
+   "side_copies": 751
+  },
+  "Stillmoon Cavalier": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Stinkweed Imp": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Stitcher's Supplier": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 49,
+   "side_copies": 0
+  },
+  "Stock Up": {
+   "deck_share": 0.04798255179934569,
+   "decks": 220,
+   "main_copies": 414,
+   "side_copies": 99
+  },
+  "Stomping Ground": {
+   "deck_share": 0.09312977099236641,
+   "decks": 427,
+   "main_copies": 611,
+   "side_copies": 0
+  },
+  "Stone Rain": {
+   "deck_share": 0.03969465648854962,
+   "decks": 182,
+   "main_copies": 12,
+   "side_copies": 626
+  },
+  "Stone of Erech": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 0,
+   "side_copies": 12
+  },
+  "Stoneforge Mystic": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 89,
+   "side_copies": 0
+  },
+  "Stony Silence": {
+   "deck_share": 0.07153762268266085,
+   "decks": 328,
+   "main_copies": 0,
+   "side_copies": 458
+  },
+  "Stormchaser's Talent": {
+   "deck_share": 0.007633587786259542,
+   "decks": 35,
+   "main_copies": 87,
+   "side_copies": 0
+  },
+  "Stormscale Scion": {
+   "deck_share": 0.01657579062159215,
+   "decks": 76,
+   "main_copies": 216,
+   "side_copies": 31
+  },
+  "Strangleroot Geist": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 6,
+   "side_copies": 0
+  },
+  "Strategic Betrayal": {
+   "deck_share": 0.01875681570338059,
+   "decks": 86,
+   "main_copies": 2,
+   "side_copies": 109
+  },
+  "Street Wraith": {
+   "deck_share": 0.02966194111232279,
+   "decks": 136,
+   "main_copies": 544,
+   "side_copies": 0
+  },
+  "Strike It Rich": {
+   "deck_share": 0.03075245365321701,
+   "decks": 141,
+   "main_copies": 376,
+   "side_copies": 2
+  },
+  "Striped Riverwinder": {
+   "deck_share": 0.011777535441657579,
+   "decks": 54,
+   "main_copies": 142,
+   "side_copies": 0
+  },
+  "Strix Serenade": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 0,
+   "side_copies": 13
+  },
+  "Stubborn Denial": {
+   "deck_share": 0.06150490730643402,
+   "decks": 282,
+   "main_copies": 635,
+   "side_copies": 155
+  },
+  "Subtlety": {
+   "deck_share": 0.1083969465648855,
+   "decks": 497,
+   "main_copies": 965,
+   "side_copies": 274
+  },
+  "Sudden Edict": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 5
+  },
+  "Sudden Shock": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 11
+  },
+  "Summary Dismissal": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 0,
+   "side_copies": 19
+  },
+  "Summoner's Pact": {
+   "deck_share": 0.0678298800436205,
+   "decks": 311,
+   "main_copies": 976,
+   "side_copies": 4
+  },
+  "Sunbaked Canyon": {
+   "deck_share": 0.02682660850599782,
+   "decks": 123,
+   "main_copies": 207,
+   "side_copies": 0
+  },
+  "Suncleanser": {
+   "deck_share": 0.0054525627044711015,
+   "decks": 25,
+   "main_copies": 0,
+   "side_copies": 42
+  },
+  "Sundering Eruption // Volcanic Fissure": {
+   "deck_share": 0.011777535441657579,
+   "decks": 54,
+   "main_copies": 211,
+   "side_copies": 0
+  },
+  "Sundering Titan": {
+   "deck_share": 0.01875681570338059,
+   "decks": 86,
+   "main_copies": 0,
+   "side_copies": 86
+  },
+  "Sunken Citadel": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 64,
+   "side_copies": 0
+  },
+  "Sunset Revelry": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 2,
+   "side_copies": 10
+  },
+  "Suppression Ray // Orderly Plaza": {
+   "deck_share": 0.03446019629225736,
+   "decks": 158,
+   "main_copies": 626,
+   "side_copies": 0
+  },
+  "Supreme Verdict": {
+   "deck_share": 0.018538713195201745,
+   "decks": 85,
+   "main_copies": 74,
+   "side_copies": 45
+  },
+  "Surge Node": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 45,
+   "side_copies": 0
+  },
+  "Surge of Salvation": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 15,
+   "side_copies": 15
+  },
+  "Surgical Extraction": {
+   "deck_share": 0.14329334787350054,
+   "decks": 657,
+   "main_copies": 95,
+   "side_copies": 852
+  },
+  "Svyelun of Sea and Sky": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 7,
+   "side_copies": 0
+  },
+  "Swamp": {
+   "deck_share": 0.2159214830970556,
+   "decks": 990,
+   "main_copies": 1294,
+   "side_copies": 0
+  },
+  "Swan Song": {
+   "deck_share": 0.00916030534351145,
+   "decks": 42,
+   "main_copies": 0,
+   "side_copies": 57
+  },
+  "Sylvan Safekeeper": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 23,
+   "side_copies": 1
+  },
+  "Sylvan Scrying": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Tainted Indulgence": {
+   "deck_share": 0.023336968375136314,
+   "decks": 107,
+   "main_copies": 380,
+   "side_copies": 0
+  },
+  "Takenuma, Abandoned Mire": {
+   "deck_share": 0.0023991275899672847,
+   "decks": 11,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Talisman of Creativity": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 66,
+   "side_copies": 0
+  },
+  "Talisman of Curiosity": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 61,
+   "side_copies": 0
+  },
+  "Talisman of Dominance": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 34,
+   "side_copies": 0
+  },
+  "Talisman of Impulse": {
+   "deck_share": 0.05387131952017448,
+   "decks": 247,
+   "main_copies": 900,
+   "side_copies": 0
+  },
+  "Talisman of Resilience": {
+   "deck_share": 0.020065430752453654,
+   "decks": 92,
+   "main_copies": 318,
+   "side_copies": 0
+  },
+  "Tameshi, Reality Architect": {
+   "deck_share": 0.03380588876772083,
+   "decks": 155,
+   "main_copies": 616,
+   "side_copies": 0
+  },
+  "Tamiyo's Safekeeping": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 10
+  },
+  "Tamiyo, Inquisitive Student // Tamiyo, Seasoned Scholar": {
+   "deck_share": 0.10207197382769902,
+   "decks": 468,
+   "main_copies": 1525,
+   "side_copies": 22
+  },
+  "Tanglepool Bridge": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 29,
+   "side_copies": 0
+  },
+  "Tarfire": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Tarmogoyf": {
+   "deck_share": 0.004143947655398037,
+   "decks": 19,
+   "main_copies": 46,
+   "side_copies": 0
+  },
+  "Tasha's Hideous Laughter": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 108,
+   "side_copies": 0
+  },
+  "Teferi, Hero of Dominaria": {
+   "deck_share": 0.021155943293347874,
+   "decks": 97,
+   "main_copies": 142,
+   "side_copies": 0
+  },
+  "Teferi, Temporal Pilgrim": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 3
+  },
+  "Teferi, Time Raveler": {
+   "deck_share": 0.07655398037077427,
+   "decks": 351,
+   "main_copies": 340,
+   "side_copies": 354
+  },
+  "Temple Garden": {
+   "deck_share": 0.10141766630316248,
+   "decks": 465,
+   "main_copies": 520,
+   "side_copies": 0
+  },
+  "Temporary Lockdown": {
+   "deck_share": 0.009814612868047983,
+   "decks": 45,
+   "main_copies": 12,
+   "side_copies": 77
+  },
+  "Terastodon": {
+   "deck_share": 0.028135223555070882,
+   "decks": 129,
+   "main_copies": 94,
+   "side_copies": 48
+  },
+  "Terminus": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 83,
+   "side_copies": 0
+  },
+  "Territorial Kavu": {
+   "deck_share": 0.05648854961832061,
+   "decks": 259,
+   "main_copies": 1034,
+   "side_copies": 0
+  },
+  "Tersa Lightshatter": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Tezzeret the Seeker": {
+   "deck_share": 0.013304252998909487,
+   "decks": 61,
+   "main_copies": 14,
+   "side_copies": 47
+  },
+  "Thalia, Guardian of Thraben": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 1,
+   "side_copies": 6
+  },
+  "Thassa's Oracle": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 5,
+   "side_copies": 13
+  },
+  "The Filigree Sylex": {
+   "deck_share": 0.007851690294438387,
+   "decks": 36,
+   "main_copies": 0,
+   "side_copies": 37
+  },
+  "The Meathook Massacre": {
+   "deck_share": 0.030316248636859323,
+   "decks": 139,
+   "main_copies": 3,
+   "side_copies": 147
+  },
+  "The Mycosynth Gardens": {
+   "deck_share": 0.03162486368593239,
+   "decks": 145,
+   "main_copies": 212,
+   "side_copies": 0
+  },
+  "The Ozolith": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "The Spear of Leonidas": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "The Stone Brain": {
+   "deck_share": 0.0440567066521265,
+   "decks": 202,
+   "main_copies": 20,
+   "side_copies": 286
+  },
+  "The Underworld Cookbook": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 30,
+   "side_copies": 2
+  },
+  "The Wandering Emperor": {
+   "deck_share": 0.0030534351145038168,
+   "decks": 14,
+   "main_copies": 8,
+   "side_copies": 6
+  },
+  "Thief of Existence": {
+   "deck_share": 0.04013086150490731,
+   "decks": 184,
+   "main_copies": 6,
+   "side_copies": 471
+  },
+  "Thought Monitor": {
+   "deck_share": 0.03380588876772083,
+   "decks": 155,
+   "main_copies": 443,
+   "side_copies": 0
+  },
+  "Thought Scour": {
+   "deck_share": 0.029443838604143947,
+   "decks": 135,
+   "main_copies": 490,
+   "side_copies": 0
+  },
+  "Thought-Knot Seer": {
+   "deck_share": 0.08505997818974918,
+   "decks": 390,
+   "main_copies": 1089,
+   "side_copies": 276
+  },
+  "Thoughtcast": {
+   "deck_share": 0.03533260632497274,
+   "decks": 162,
+   "main_copies": 620,
+   "side_copies": 0
+  },
+  "Thoughtseize": {
+   "deck_share": 0.19912758996728464,
+   "decks": 913,
+   "main_copies": 2197,
+   "side_copies": 842
+  },
+  "Thraben Charm": {
+   "deck_share": 0.16815703380588876,
+   "decks": 771,
+   "main_copies": 1435,
+   "side_copies": 30
+  },
+  "Through the Breach": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 48,
+   "side_copies": 0
+  },
+  "Thundering Falls": {
+   "deck_share": 0.18887677208287895,
+   "decks": 866,
+   "main_copies": 906,
+   "side_copies": 0
+  },
+  "Thundertrap Trainer": {
+   "deck_share": 0.041657579062159215,
+   "decks": 191,
+   "main_copies": 724,
+   "side_copies": 0
+  },
+  "Tide Shaper": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 16,
+   "side_copies": 0
+  },
+  "Tidehollow Sculler": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 5,
+   "side_copies": 0
+  },
+  "Time Warp": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Timeless Dragon": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 0
+  },
+  "Tireless Tracker": {
+   "deck_share": 0.008942202835332607,
+   "decks": 41,
+   "main_copies": 0,
+   "side_copies": 72
+  },
+  "Tishana's Tidebinder": {
+   "deck_share": 0.003925845147219193,
+   "decks": 18,
+   "main_copies": 34,
+   "side_copies": 10
+  },
+  "Tolaria West": {
+   "deck_share": 0.03773173391494002,
+   "decks": 173,
+   "main_copies": 176,
+   "side_copies": 0
+  },
+  "Tormod's Crypt": {
+   "deck_share": 0.13893129770992366,
+   "decks": 637,
+   "main_copies": 180,
+   "side_copies": 520
+  },
+  "Torpor Orb": {
+   "deck_share": 0.05714285714285714,
+   "decks": 262,
+   "main_copies": 0,
+   "side_copies": 334
+  },
+  "Tourach, Dread Cantor": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 9
+  },
+  "Toxic Deluge": {
+   "deck_share": 0.034023991275899675,
+   "decks": 156,
+   "main_copies": 3,
+   "side_copies": 232
+  },
+  "Traverse the Ulvenwald": {
+   "deck_share": 0.017011995637949837,
+   "decks": 78,
+   "main_copies": 81,
+   "side_copies": 0
+  },
+  "Treasure Vault": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 7,
+   "side_copies": 4
+  },
+  "Trepanation Blade": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 4
+  },
+  "Tribal Flames": {
+   "deck_share": 0.05321701199563795,
+   "decks": 244,
+   "main_copies": 803,
+   "side_copies": 0
+  },
+  "Trinisphere": {
+   "deck_share": 0.10229007633587786,
+   "decks": 469,
+   "main_copies": 17,
+   "side_copies": 1186
+  },
+  "Troll of Khazad-d\u00fbm": {
+   "deck_share": 0.003271537622682661,
+   "decks": 15,
+   "main_copies": 26,
+   "side_copies": 0
+  },
+  "Tune the Narrative": {
+   "deck_share": 0.022464558342420938,
+   "decks": 103,
+   "main_copies": 305,
+   "side_copies": 0
+  },
+  "Tunnel Ignus": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 0,
+   "side_copies": 24
+  },
+  "Turntimber Symbiosis // Turntimber, Serpentine Wood": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 26,
+   "side_copies": 0
+  },
+  "Twiddle": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 20,
+   "side_copies": 0
+  },
+  "Ugin's Binding": {
+   "deck_share": 0.0019629225736095966,
+   "decks": 9,
+   "main_copies": 16,
+   "side_copies": 4
+  },
+  "Ugin's Labyrinth": {
+   "deck_share": 0.1173391494002181,
+   "decks": 538,
+   "main_copies": 2141,
+   "side_copies": 0
+  },
+  "Ugin, Eye of the Storms": {
+   "deck_share": 0.06739367502726282,
+   "decks": 309,
+   "main_copies": 723,
+   "side_copies": 1
+  },
+  "Ugin, the Spirit Dragon": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Ulamog, the Ceaseless Hunger": {
+   "deck_share": 0.018538713195201745,
+   "decks": 85,
+   "main_copies": 134,
+   "side_copies": 4
+  },
+  "Ulamog, the Defiler": {
+   "deck_share": 0.0063249727371864775,
+   "decks": 29,
+   "main_copies": 59,
+   "side_copies": 0
+  },
+  "Unable to Scream": {
+   "deck_share": 0.010032715376226827,
+   "decks": 46,
+   "main_copies": 6,
+   "side_copies": 84
+  },
+  "Unclaimed Territory": {
+   "deck_share": 0.021810250817884406,
+   "decks": 100,
+   "main_copies": 280,
+   "side_copies": 0
+  },
+  "Undercity Sewers": {
+   "deck_share": 0.11406761177753544,
+   "decks": 523,
+   "main_copies": 785,
+   "side_copies": 0
+  },
+  "Underground Mortuary": {
+   "deck_share": 0.025736095965103598,
+   "decks": 118,
+   "main_copies": 166,
+   "side_copies": 0
+  },
+  "Unearth": {
+   "deck_share": 0.032933478735005454,
+   "decks": 151,
+   "main_copies": 598,
+   "side_copies": 0
+  },
+  "Unholy Heat": {
+   "deck_share": 0.11581243184296619,
+   "decks": 531,
+   "main_copies": 214,
+   "side_copies": 1406
+  },
+  "Universal Automaton": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Unlicensed Hearse": {
+   "deck_share": 0.00697928026172301,
+   "decks": 32,
+   "main_copies": 0,
+   "side_copies": 45
+  },
+  "Unsettled Mariner": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Unstable Amulet": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 17,
+   "side_copies": 0
+  },
+  "Untimely Malfunction": {
+   "deck_share": 0.008724100327153763,
+   "decks": 40,
+   "main_copies": 1,
+   "side_copies": 76
+  },
+  "Urborg, Tomb of Yawgmoth": {
+   "deck_share": 0.008942202835332607,
+   "decks": 41,
+   "main_copies": 77,
+   "side_copies": 0
+  },
+  "Ureni, the Song Unending": {
+   "deck_share": 0.029443838604143947,
+   "decks": 135,
+   "main_copies": 121,
+   "side_copies": 14
+  },
+  "Urza's Cave": {
+   "deck_share": 0.02420937840785169,
+   "decks": 111,
+   "main_copies": 111,
+   "side_copies": 0
+  },
+  "Urza's Mine": {
+   "deck_share": 0.037295528898582335,
+   "decks": 171,
+   "main_copies": 683,
+   "side_copies": 0
+  },
+  "Urza's Power Plant": {
+   "deck_share": 0.037295528898582335,
+   "decks": 171,
+   "main_copies": 684,
+   "side_copies": 0
+  },
+  "Urza's Saga": {
+   "deck_share": 0.16706652126499455,
+   "decks": 766,
+   "main_copies": 2982,
+   "side_copies": 0
+  },
+  "Urza's Tower": {
+   "deck_share": 0.037295528898582335,
+   "decks": 171,
+   "main_copies": 684,
+   "side_copies": 0
+  },
+  "Urza, Lord High Artificer": {
+   "deck_share": 0.0026172300981461287,
+   "decks": 12,
+   "main_copies": 28,
+   "side_copies": 0
+  },
+  "Utopia Sprawl": {
+   "deck_share": 0.05430752453653217,
+   "decks": 249,
+   "main_copies": 988,
+   "side_copies": 0
+  },
+  "Valakut Awakening // Valakut Stoneforge": {
+   "deck_share": 0.0366412213740458,
+   "decks": 168,
+   "main_copies": 397,
+   "side_copies": 0
+  },
+  "Valakut, the Molten Pinnacle": {
+   "deck_share": 0.012431842966194111,
+   "decks": 57,
+   "main_copies": 64,
+   "side_copies": 3
+  },
+  "Valgavoth, Terror Eater": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Vampires' Vengeance": {
+   "deck_share": 0.027044711014176662,
+   "decks": 124,
+   "main_copies": 5,
+   "side_copies": 213
+  },
+  "Veil of Summer": {
+   "deck_share": 0.05910577971646674,
+   "decks": 271,
+   "main_copies": 1,
+   "side_copies": 639
+  },
+  "Vendilion Clique": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Vengevine": {
+   "deck_share": 0.004798255179934569,
+   "decks": 22,
+   "main_copies": 88,
+   "side_copies": 0
+  },
+  "Verdant Catacombs": {
+   "deck_share": 0.05801526717557252,
+   "decks": 266,
+   "main_copies": 621,
+   "side_copies": 0
+  },
+  "Vesuva": {
+   "deck_share": 0.03773173391494002,
+   "decks": 173,
+   "main_copies": 173,
+   "side_copies": 0
+  },
+  "Vexing Bauble": {
+   "deck_share": 0.1079607415485278,
+   "decks": 495,
+   "main_copies": 102,
+   "side_copies": 620
+  },
+  "Village Rites": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 11,
+   "side_copies": 0
+  },
+  "Vindicate": {
+   "deck_share": 0.049291166848418756,
+   "decks": 226,
+   "main_copies": 4,
+   "side_copies": 486
+  },
+  "Violent Urge": {
+   "deck_share": 0.07851690294438386,
+   "decks": 360,
+   "main_copies": 863,
+   "side_copies": 35
+  },
+  "Viscera Seer": {
+   "deck_share": 0.004580152671755725,
+   "decks": 21,
+   "main_copies": 63,
+   "side_copies": 0
+  },
+  "Visions of Beyond": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 70,
+   "side_copies": 0
+  },
+  "Vizier of Tumbling Sands": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 8,
+   "side_copies": 0
+  },
+  "Vodalian Hexcatcher": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 4,
+   "side_copies": 5
+  },
+  "Voice of Resurgence": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 12,
+   "side_copies": 0
+  },
+  "Voice of Victory": {
+   "deck_share": 0.17884405670665213,
+   "decks": 820,
+   "main_copies": 1489,
+   "side_copies": 143
+  },
+  "Volatile Fault": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 6,
+   "side_copies": 3
+  },
+  "Waker of Waves": {
+   "deck_share": 0.01875681570338059,
+   "decks": 86,
+   "main_copies": 251,
+   "side_copies": 0
+  },
+  "Walking Ballista": {
+   "deck_share": 0.0841875681570338,
+   "decks": 386,
+   "main_copies": 875,
+   "side_copies": 150
+  },
+  "Wall of Roots": {
+   "deck_share": 0.010032715376226827,
+   "decks": 46,
+   "main_copies": 109,
+   "side_copies": 0
+  },
+  "Warping Wail": {
+   "deck_share": 0.02529989094874591,
+   "decks": 116,
+   "main_copies": 114,
+   "side_copies": 107
+  },
+  "Warren Soultrader": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 22,
+   "side_copies": 0
+  },
+  "Wasteland Strangler": {
+   "deck_share": 0.006761177753544166,
+   "decks": 31,
+   "main_copies": 0,
+   "side_copies": 31
+  },
+  "Wastes": {
+   "deck_share": 0.050381679389312976,
+   "decks": 231,
+   "main_copies": 242,
+   "side_copies": 2
+  },
+  "Wastescape Battlemage": {
+   "deck_share": 0.024427480916030534,
+   "decks": 112,
+   "main_copies": 231,
+   "side_copies": 162
+  },
+  "Wastewood Verge": {
+   "deck_share": 0.006543075245365322,
+   "decks": 30,
+   "main_copies": 57,
+   "side_copies": 0
+  },
+  "Waterlogged Grove": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 13,
+   "side_copies": 0
+  },
+  "Waterlogged Teachings // Inundated Archive": {
+   "deck_share": 0.030970556161395855,
+   "decks": 142,
+   "main_copies": 226,
+   "side_copies": 0
+  },
+  "Watery Grave": {
+   "deck_share": 0.13740458015267176,
+   "decks": 630,
+   "main_copies": 1059,
+   "side_copies": 0
+  },
+  "Wear // Tear": {
+   "deck_share": 0.2732824427480916,
+   "decks": 1253,
+   "main_copies": 0,
+   "side_copies": 1931
+  },
+  "Weathered Runestone": {
+   "deck_share": 0.0013086150490730644,
+   "decks": 6,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Welding Jar": {
+   "deck_share": 0.007851690294438387,
+   "decks": 36,
+   "main_copies": 48,
+   "side_copies": 7
+  },
+  "Whipflare": {
+   "deck_share": 0.045365321701199564,
+   "decks": 208,
+   "main_copies": 0,
+   "side_copies": 473
+  },
+  "Whir of Invention": {
+   "deck_share": 0.034023991275899675,
+   "decks": 156,
+   "main_copies": 623,
+   "side_copies": 0
+  },
+  "Whirlwind Denial": {
+   "deck_share": 0.007197382769901854,
+   "decks": 33,
+   "main_copies": 3,
+   "side_copies": 59
+  },
+  "White Orchid Phantom": {
+   "deck_share": 0.07131952017448201,
+   "decks": 327,
+   "main_copies": 288,
+   "side_copies": 761
+  },
+  "Wild Cantor": {
+   "deck_share": 0.0017448200654307524,
+   "decks": 8,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Wild Nacatl": {
+   "deck_share": 0.021592148309705562,
+   "decks": 99,
+   "main_copies": 353,
+   "side_copies": 6
+  },
+  "Windcaller Aven": {
+   "deck_share": 0.008505997818974919,
+   "decks": 39,
+   "main_copies": 91,
+   "side_copies": 0
+  },
+  "Windswept Heath": {
+   "deck_share": 0.19389312977099238,
+   "decks": 889,
+   "main_copies": 2421,
+   "side_copies": 0
+  },
+  "Winternight Stories": {
+   "deck_share": 0.007415485278080698,
+   "decks": 34,
+   "main_copies": 85,
+   "side_copies": 1
+  },
+  "Wish": {
+   "deck_share": 0.027699018538713194,
+   "decks": 127,
+   "main_copies": 270,
+   "side_copies": 0
+  },
+  "Wispmare": {
+   "deck_share": 0.0010905125408942203,
+   "decks": 5,
+   "main_copies": 0,
+   "side_copies": 5
+  },
+  "Witch Enchanter // Witch-Blessed Meadow": {
+   "deck_share": 0.08549618320610687,
+   "decks": 392,
+   "main_copies": 1155,
+   "side_copies": 0
+  },
+  "Witherbloom Command": {
+   "deck_share": 0.005234460196292257,
+   "decks": 24,
+   "main_copies": 64,
+   "side_copies": 1
+  },
+  "Withering Torment": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 0,
+   "side_copies": 6
+  },
+  "Wonder": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 9,
+   "side_copies": 0
+  },
+  "Wooded Foothills": {
+   "deck_share": 0.2261723009814613,
+   "decks": 1037,
+   "main_copies": 3085,
+   "side_copies": 0
+  },
+  "World Breaker": {
+   "deck_share": 0.0495092693565976,
+   "decks": 227,
+   "main_copies": 380,
+   "side_copies": 6
+  },
+  "Worldspine Wurm": {
+   "deck_share": 0.0006543075245365322,
+   "decks": 3,
+   "main_copies": 3,
+   "side_copies": 0
+  },
+  "Wrath of God": {
+   "deck_share": 0.005016357688113413,
+   "decks": 23,
+   "main_copies": 25,
+   "side_copies": 19
+  },
+  "Wrath of the Skies": {
+   "deck_share": 0.3173391494002181,
+   "decks": 1455,
+   "main_copies": 546,
+   "side_copies": 2239
+  },
+  "Wrenn and Six": {
+   "deck_share": 0.011341330425299891,
+   "decks": 52,
+   "main_copies": 185,
+   "side_copies": 4
+  },
+  "Wrenn's Resolve": {
+   "deck_share": 0.02682660850599782,
+   "decks": 123,
+   "main_copies": 491,
+   "side_copies": 0
+  },
+  "Writhing Chrysalis": {
+   "deck_share": 0.06739367502726282,
+   "decks": 309,
+   "main_copies": 1001,
+   "side_copies": 4
+  },
+  "Wurmcoil Engine": {
+   "deck_share": 0.003489640130861505,
+   "decks": 16,
+   "main_copies": 0,
+   "side_copies": 16
+  },
+  "Xander's Lounge": {
+   "deck_share": 0.026608505997818974,
+   "decks": 122,
+   "main_copies": 122,
+   "side_copies": 0
+  },
+  "Xenagos, God of Revels": {
+   "deck_share": 0.02311886586695747,
+   "decks": 106,
+   "main_copies": 116,
+   "side_copies": 1
+  },
+  "Yawgmoth, Thran Physician": {
+   "deck_share": 0.008724100327153763,
+   "decks": 40,
+   "main_copies": 134,
+   "side_copies": 0
+  },
+  "Yggdrasil, Rebirth Engine": {
+   "deck_share": 0.0008724100327153762,
+   "decks": 4,
+   "main_copies": 10,
+   "side_copies": 2
+  },
+  "Young Wolf": {
+   "deck_share": 0.011123227917121047,
+   "decks": 51,
+   "main_copies": 173,
+   "side_copies": 0
+  },
+  "Zabaz, the Glimmerwasp": {
+   "deck_share": 0.0028353326063249727,
+   "decks": 13,
+   "main_copies": 51,
+   "side_copies": 0
+  },
+  "Zagoth Triome": {
+   "deck_share": 0.0021810250817884407,
+   "decks": 10,
+   "main_copies": 10,
+   "side_copies": 0
+  },
+  "Ziatora's Proving Ground": {
+   "deck_share": 0.0058887677208287895,
+   "decks": 27,
+   "main_copies": 27,
+   "side_copies": 0
+  },
+  "Zuran Orb": {
+   "deck_share": 0.0015267175572519084,
+   "decks": 7,
+   "main_copies": 6,
+   "side_copies": 1
+  }
+ },
+ "total_decks": 4585,
+ "window": {
+  "end": "2025-06-09",
+  "start": "2025-05-01"
+ }
+}
